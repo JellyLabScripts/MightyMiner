@@ -33,6 +33,7 @@ public class BlockUtils {
             Blocks.deadbush,
             Blocks.red_flower,
             Blocks.stone_slab,
+            Blocks.wooden_slab
     };
 
     public static int getUnitX() {

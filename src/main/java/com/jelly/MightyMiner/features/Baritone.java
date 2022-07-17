@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.features;
 
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
+import com.jelly.MightyMiner.structures.GridEnvironment;
 import com.jelly.MightyMiner.structures.Node;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
@@ -32,18 +33,18 @@ public class Baritone {
     // program coverts world coordinates to custom grid first
     // custom grid starts takes X as [0, y, 0]
     // player starts on K initially [maxX/2, y, maxZ/2]
-
+    GridEnvironment<Node> gridEnvironment = new GridEnvironment<>();
 
     Minecraft mc = Minecraft.getMinecraft();
 
-    int maxX = 1000;
+    int maxX = 10000;
     int maxY = 256;
-    int maxZ = 1000;
+    int maxZ = 10000;
 
     int currentGridX;
     int currentGridY;
     int currentGridZ;
-    Node[][][] nodeGrid = new Node[maxX][maxY][maxZ];
+    //Node[][][] nodeGrid = new Node[maxX][maxY][maxZ];
 
     List<Node> checkedNodes = new ArrayList<>();
     List<Node> openNodes = new ArrayList<>();
@@ -55,6 +56,7 @@ public class Baritone {
     BlockPos endingBlock;
     boolean completed = false;
     public boolean walking = false;
+    public int step = 0;
 
     Rotation rotation = new Rotation();
 
@@ -62,40 +64,20 @@ public class Baritone {
         checkedNodes.clear();
         openNodes.clear();
         blockToWalk.clear();
+        gridEnvironment.clear();
+        step = 0;
         completed = false;
     }
 
     public void walkTo(BlockPos endingBlock){
         clearBlocksToWalk();
-        this.endingBlock = endingBlock;
-        walking = true;
-        new Thread(() -> {
-            try {
-                calculateBlocksToWalk(endingBlock);
-                System.out.println("hi");
-                rotation.easeTo((float) (Math.atan2(-(mc.thePlayer.posX - blockToWalk.get(blockToWalk.size() - 1).getX() - 0.5), mc.thePlayer.posZ - blockToWalk.get(blockToWalk.size() - 1).getZ() - 0.5) * 180 / Math.PI), 0,1);
-                Thread.sleep(1000);
-                while (Math.floor(mc.thePlayer.posX) != endingBlock.getX() || Math.floor(mc.thePlayer.posY) != endingBlock.getY() || Math.floor(mc.thePlayer.posZ) != endingBlock.getZ()) {
-                    Thread.sleep(1);
-                    System.out.println(rotation.rotating);
-                    if (rotation.rotating) {
-                        KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), false);
-                        continue;
-                    }
-
-                    rotation.lockAngle((float) (Math.atan2(-(mc.thePlayer.posX - blockToWalk.get(blockToWalk.size() - 1).getX() - 0.5), mc.thePlayer.posZ - blockToWalk.get(blockToWalk.size() - 1).getZ() - 0.5) * 180 / Math.PI), 0);
-                    KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), true);
-                }
-                walking = false;
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), false);
-            }catch (Exception ignored){}
-        }).start();
-
+        calculateBlocksToWalk(endingBlock);
     }
 
-    private void searchBlocks(BlockPos endingBlock){
+    private void searchBlocks(BlockPos endingBlock) throws Exception {
         Node goalNode = new Node(endingBlock);
         while(!completed){
+            step++;
             currentNode.checked = true;
             checkedNodes.add(currentNode);
             openNodes.remove(currentNode);
@@ -103,27 +85,27 @@ public class Baritone {
            // System.out.println(openNodes.size() + "open nodes");
             if(currentGridX > 0) {
                 instantiateNode(currentGridX - 1, currentGridY, currentGridZ);
-                openNode(nodeGrid[currentGridX - 1][currentGridY][currentGridZ]);
+                openNode(gridEnvironment.get(currentGridX - 1, currentGridY, currentGridZ));
             }
             if(currentGridX < maxX) {
                 instantiateNode(currentGridX + 1, currentGridY, currentGridZ);
-                openNode(nodeGrid[currentGridX + 1][currentGridY][currentGridZ]);
+                openNode(gridEnvironment.get(currentGridX + 1, currentGridY, currentGridZ));
             }
             if(currentGridZ > 0) {
                 instantiateNode(currentGridX, currentGridY, currentGridZ - 1);
-                openNode(nodeGrid[currentGridX][currentGridY][currentGridZ - 1]);
+                openNode(gridEnvironment.get(currentGridX , currentGridY, currentGridZ - 1));
             }
             if(currentGridZ < maxZ) {
                 instantiateNode(currentGridX, currentGridY, currentGridZ + 1);
-                openNode(nodeGrid[currentGridX][currentGridY][currentGridZ + 1]);
+                openNode(gridEnvironment.get(currentGridX , currentGridY, currentGridZ + 1));
             }
             if(currentGridY > 0) {
                 instantiateNode(currentGridX, currentGridY - 1, currentGridZ);
-                openNode(nodeGrid[currentGridX][currentGridY - 1][currentGridZ]);
+                openNode(gridEnvironment.get(currentGridX , currentGridY - 1 , currentGridZ));
             }
             if(currentGridY < maxY) {
                 instantiateNode(currentGridX, currentGridY + 1, currentGridZ);
-                openNode(nodeGrid[currentGridX][currentGridY + 1][currentGridZ]);
+                openNode(gridEnvironment.get(currentGridX , currentGridY + 1, currentGridZ));
             }
 
 
@@ -134,7 +116,6 @@ public class Baritone {
                     bestIndex = i;
                     minFcost = openNodes.get(i).fValue;
                 } else if(openNodes.get(i).fValue == minFcost){
-                    System.out.println("Same f cost");
                     if(openNodes.get(i).hValue < openNodes.get(bestIndex).hValue){
                         bestIndex = i;
                     }
@@ -142,14 +123,14 @@ public class Baritone {
             }
             int tempX, tempY, tempZ;
             tempX = currentGridX; tempY = currentGridY; tempZ = currentGridZ;
-            currentGridX += openNodes.get(bestIndex).blockPos.getX() - nodeGrid[tempX][tempY][tempZ].blockPos.getX();
-            currentGridY += openNodes.get(bestIndex).blockPos.getY() - nodeGrid[tempX][tempY][tempZ].blockPos.getY();
-            currentGridZ += openNodes.get(bestIndex).blockPos.getZ() - nodeGrid[tempX][tempY][tempZ].blockPos.getZ();
+            currentGridX += openNodes.get(bestIndex).blockPos.getX() - gridEnvironment.get(tempX, tempY, tempZ).blockPos.getX();
+            currentGridY += openNodes.get(bestIndex).blockPos.getY() - gridEnvironment.get(tempX, tempY, tempZ).blockPos.getY();
+            currentGridZ += openNodes.get(bestIndex).blockPos.getZ() - gridEnvironment.get(tempX, tempY, tempZ).blockPos.getZ();
 
             currentNode = openNodes.get(bestIndex);
-           // System.out.println(currentNode.blockPos + " current node");
 
             if(goalNode.blockPos.equals(currentNode.blockPos)){
+                mc.thePlayer.addChatMessage(new ChatComponentText("Block count : " + openNodes.size()));
                 completed = true;
             }
         }
@@ -173,33 +154,36 @@ public class Baritone {
 
 
 
+
     private void calculateBlocksToWalk(BlockPos endingBlock){
         BlockRenderer.renderMap.clear();
         BlockRenderer.renderMap.put(endingBlock, Color.RED);
 
         try {
-            nodeGrid = new Node[maxX][maxY][maxZ];
             currentGridX = maxX / 2;
             currentGridY = (int) mc.thePlayer.posY;
             currentGridZ = maxZ / 2;
-            nodeGrid[currentGridX][currentGridY][currentGridZ] = new Node(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ));
-            currentNode = nodeGrid[currentGridX][currentGridY][currentGridZ];
+            instantiateNode(currentGridX, currentGridY, currentGridZ, new Node(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)));
+            currentNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
             startNode = currentNode;
+            this.endingBlock = endingBlock;
             searchBlocks(endingBlock);
 
-        }catch (NullPointerException nullPointerException){
+        }catch (Exception e){
             mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Can't find path" ));
+            e.printStackTrace();
         }
 
 
     }
     private void instantiateNode(int gridX, int gridY, int gridZ){
-        if(nodeGrid[gridX][gridY][gridZ] == null)
-        nodeGrid[gridX][gridY][gridZ] = new Node(startNode.blockPos.add(gridX - maxX/2, gridY - startNode.blockPos.getY(), gridZ -  maxZ/2));
-
-        if(nodeGrid[gridX][gridY][gridZ].blockPos.equals(currentNode.blockPos))
-        System.out.println(nodeGrid[gridX][gridY][gridZ].blockPos + "BUGGED");
+        instantiateNode(gridX, gridY, gridZ, new Node(startNode.blockPos.add(gridX - maxX/2, gridY - startNode.blockPos.getY(), gridZ -  maxZ/2)));
     }
+    private void instantiateNode(int gridX, int gridY, int gridZ, Node node){
+        if(gridEnvironment.get(gridX, gridY, gridZ) == null)
+            gridEnvironment.set(gridX, gridY, gridZ, node);
+    }
+
     private void calculateCost(Node node){
         node.hValue = MathUtils.getDistanceBetweenTwoBlock(node.blockPos, endingBlock);
         node.gValue = MathUtils.getDistanceBetweenTwoBlock(node.blockPos, startNode.blockPos);

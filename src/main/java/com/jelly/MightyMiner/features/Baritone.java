@@ -130,7 +130,6 @@ public class Baritone {
             currentNode = openNodes.get(bestIndex);
 
             if(goalNode.blockPos.equals(currentNode.blockPos)){
-                mc.thePlayer.addChatMessage(new ChatComponentText("Block count : " + openNodes.size()));
                 completed = true;
             }
         }
@@ -194,6 +193,7 @@ public class Baritone {
             blockToWalk.add(startingGoalNode.lastNode.blockPos);
             startingGoalNode = startingGoalNode.lastNode;
         }
+        mc.thePlayer.addChatMessage(new ChatComponentText("Block count : " + blockToWalk.size()));
 
     }
 

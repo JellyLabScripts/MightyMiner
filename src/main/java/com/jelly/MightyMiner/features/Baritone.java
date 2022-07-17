@@ -1,19 +1,15 @@
 package com.jelly.MightyMiner.features;
 
-import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.structures.GridEnvironment;
 import com.jelly.MightyMiner.structures.Node;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 
-import javax.lang.model.type.NullType;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,160 +37,159 @@ public class Baritone {
     int maxY = 256;
     int maxZ = 10000;
 
-    int currentGridX;
-    int currentGridY;
-    int currentGridZ;
-    //Node[][][] nodeGrid = new Node[maxX][maxY][maxZ];
-
     List<Node> checkedNodes = new ArrayList<>();
     List<Node> openNodes = new ArrayList<>();
-    List<BlockPos> blockToWalk = new ArrayList<>();
+    List<BlockPos> blocksToWalk = new ArrayList<>();
 
-    Node currentNode;
-    Node startNode;
-
-    BlockPos endingBlock;
     boolean completed = false;
-    public boolean walking = false;
     public int step = 0;
 
-    Rotation rotation = new Rotation();
-
     public void clearBlocksToWalk(){
-        checkedNodes.clear();
         openNodes.clear();
-        blockToWalk.clear();
+        checkedNodes.clear();
+        blocksToWalk.clear();
         gridEnvironment.clear();
+        BlockRenderer.renderMap.clear();
         step = 0;
         completed = false;
     }
 
     public void walkTo(BlockPos endingBlock){
-        clearBlocksToWalk();
-        calculateBlocksToWalk(endingBlock);
+
+        new Thread(() -> {
+            clearBlocksToWalk();
+            BlockRenderer.renderMap.put(endingBlock, Color.RED);
+            try {
+                blocksToWalk = calculatePath(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), endingBlock);
+            }catch (Exception e){
+                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Can't find path" ));
+                e.printStackTrace();
+            }
+            for(BlockPos blockPos : blocksToWalk){
+                BlockRenderer.renderMap.put(blockPos, Color.ORANGE);
+            }
+        }).start();
+
     }
 
-    private void searchBlocks(BlockPos endingBlock) throws Exception {
+    private List<BlockPos> calculatePath(BlockPos startingPos, BlockPos endingBlock) throws Exception {
+
+
+        Node startNode;
+        Node currentNode;
         Node goalNode = new Node(endingBlock);
-        while(!completed){
+
+        int currentGridX = maxX / 2;
+        int currentGridY = (int) mc.thePlayer.posY;
+        int currentGridZ = maxZ / 2;
+
+        instantiateAnyNode(currentGridX, currentGridY, currentGridZ, new Node(startingPos));
+        currentNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
+        startNode = currentNode;
+
+        while (!completed) {
+            Thread.sleep(10);
             step++;
             currentNode.checked = true;
             checkedNodes.add(currentNode);
             openNodes.remove(currentNode);
 
-           // System.out.println(openNodes.size() + "open nodes");
-            if(currentGridX > 0) {
-                instantiateNode(currentGridX - 1, currentGridY, currentGridZ);
-                openNode(gridEnvironment.get(currentGridX - 1, currentGridY, currentGridZ));
+            if (currentGridX > 0) {
+                instantiateNode(currentGridX - 1, currentGridY, currentGridZ, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX - 1, currentGridY, currentGridZ), currentNode, endingBlock);
             }
-            if(currentGridX < maxX) {
-                instantiateNode(currentGridX + 1, currentGridY, currentGridZ);
-                openNode(gridEnvironment.get(currentGridX + 1, currentGridY, currentGridZ));
+            if (currentGridX < maxX) {
+                instantiateNode(currentGridX + 1, currentGridY, currentGridZ, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX + 1, currentGridY, currentGridZ), currentNode, endingBlock);
             }
-            if(currentGridZ > 0) {
-                instantiateNode(currentGridX, currentGridY, currentGridZ - 1);
-                openNode(gridEnvironment.get(currentGridX , currentGridY, currentGridZ - 1));
+            if (currentGridZ > 0) {
+                instantiateNode(currentGridX, currentGridY, currentGridZ - 1, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY, currentGridZ - 1), currentNode, endingBlock);
             }
-            if(currentGridZ < maxZ) {
-                instantiateNode(currentGridX, currentGridY, currentGridZ + 1);
-                openNode(gridEnvironment.get(currentGridX , currentGridY, currentGridZ + 1));
+            if (currentGridZ < maxZ) {
+                instantiateNode(currentGridX, currentGridY, currentGridZ + 1, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY, currentGridZ + 1), currentNode, endingBlock);
             }
-            if(currentGridY > 0) {
-                instantiateNode(currentGridX, currentGridY - 1, currentGridZ);
-                openNode(gridEnvironment.get(currentGridX , currentGridY - 1 , currentGridZ));
+            if (currentGridY > 0) {
+                instantiateNode(currentGridX, currentGridY - 1, currentGridZ, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ), currentNode, endingBlock);
             }
-            if(currentGridY < maxY) {
-                instantiateNode(currentGridX, currentGridY + 1, currentGridZ);
-                openNode(gridEnvironment.get(currentGridX , currentGridY + 1, currentGridZ));
+            if (currentGridY < maxY) {
+                instantiateNode(currentGridX, currentGridY + 1, currentGridZ, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ), currentNode, endingBlock);
             }
 
 
             int bestIndex = 0;
             double minFcost = 9999;
-            for (int i = 0; i < openNodes.size(); i++){
-                if(openNodes.get(i).fValue < minFcost) {
+
+            for (int i = 0; i < openNodes.size(); i++) {
+                if (openNodes.get(i).fValue < minFcost) {
                     bestIndex = i;
                     minFcost = openNodes.get(i).fValue;
-                } else if(openNodes.get(i).fValue == minFcost){
-                    if(openNodes.get(i).hValue < openNodes.get(bestIndex).hValue){
-                        bestIndex = i;
-                    }
                 }
             }
+
             int tempX, tempY, tempZ;
-            tempX = currentGridX; tempY = currentGridY; tempZ = currentGridZ;
+            tempX = currentGridX;
+            tempY = currentGridY;
+            tempZ = currentGridZ;
             currentGridX += openNodes.get(bestIndex).blockPos.getX() - gridEnvironment.get(tempX, tempY, tempZ).blockPos.getX();
             currentGridY += openNodes.get(bestIndex).blockPos.getY() - gridEnvironment.get(tempX, tempY, tempZ).blockPos.getY();
             currentGridZ += openNodes.get(bestIndex).blockPos.getZ() - gridEnvironment.get(tempX, tempY, tempZ).blockPos.getZ();
 
             currentNode = openNodes.get(bestIndex);
-
-            if(goalNode.blockPos.equals(currentNode.blockPos)){
+            if (goalNode.blockPos.equals(currentNode.blockPos)) {
                 completed = true;
             }
         }
-        trackBackPath(currentNode);
-        for(BlockPos blockPos : blockToWalk){
-            BlockRenderer.renderMap.put(blockPos, Color.ORANGE);
-        }
+        return trackBackPath(currentNode, startNode);
+
+
 
     }
-    private void openNode(Node searchNode){
-        if(!searchNode.checked && !searchNode.opened
-                && BlockUtils.isWalkable(mc.theWorld.getBlockState(searchNode.blockPos).getBlock())
-                && BlockUtils.isWalkable(mc.theWorld.getBlockState(searchNode.blockPos.up()).getBlock())
-                && (!BlockUtils.isWalkable(mc.theWorld.getBlockState(searchNode.blockPos.down(1)).getBlock()) || !BlockUtils.isWalkable(mc.theWorld.getBlockState(searchNode.blockPos.down(2)).getBlock()))){
+    private void openNodeAndCalculateCost(Node searchNode, Node currentNode, BlockPos endingBlockPos){
+        if (!searchNode.checked && !searchNode.opened && BlockUtils.isWalkable(mc.theWorld.getBlockState(searchNode.blockPos).getBlock())
+                && (BlockUtils.canWalkOn(searchNode.blockPos.down()) //walkable by itself
+                || (!BlockUtils.isWalkable(mc.theWorld.getBlockState(searchNode.blockPos.down(2)).getBlock())
+                    && (BlockUtils.canWalkOn(searchNode.blockPos.add(-1, -1, 0)) || BlockUtils.canWalkOn(searchNode.blockPos.add(1, -1, 0))
+                        || BlockUtils.canWalkOn(searchNode.blockPos.add(0, -1, 1)) || BlockUtils.canWalkOn(searchNode.blockPos.add(0, -1, -1)))))){
             searchNode.opened = true;
-            calculateCost(searchNode);
             searchNode.lastNode = currentNode;
             openNodes.add(searchNode);
-        }
-    }
+            calculateCost(searchNode, endingBlockPos);
+            BlockRenderer.renderMap.put(searchNode.blockPos, Color.GREEN);
 
-
-
-
-    private void calculateBlocksToWalk(BlockPos endingBlock){
-        BlockRenderer.renderMap.clear();
-        BlockRenderer.renderMap.put(endingBlock, Color.RED);
-
-        try {
-            currentGridX = maxX / 2;
-            currentGridY = (int) mc.thePlayer.posY;
-            currentGridZ = maxZ / 2;
-            instantiateNode(currentGridX, currentGridY, currentGridZ, new Node(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)));
-            currentNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
-            startNode = currentNode;
-            this.endingBlock = endingBlock;
-            searchBlocks(endingBlock);
-
-        }catch (Exception e){
-            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Can't find path" ));
-            e.printStackTrace();
         }
 
+    }
 
+    private void instantiateNode(int gridX, int gridY, int gridZ, Node startNode){
+        instantiateAnyNode(gridX, gridY, gridZ, new Node(startNode.blockPos.add(gridX - maxX/2, gridY - startNode.blockPos.getY(), gridZ -  maxZ/2)));
     }
-    private void instantiateNode(int gridX, int gridY, int gridZ){
-        instantiateNode(gridX, gridY, gridZ, new Node(startNode.blockPos.add(gridX - maxX/2, gridY - startNode.blockPos.getY(), gridZ -  maxZ/2)));
-    }
-    private void instantiateNode(int gridX, int gridY, int gridZ, Node node){
+    private void instantiateAnyNode(int gridX, int gridY, int gridZ, Node node){
         if(gridEnvironment.get(gridX, gridY, gridZ) == null)
             gridEnvironment.set(gridX, gridY, gridZ, node);
     }
 
-    private void calculateCost(Node node){
-        node.hValue = MathUtils.getDistanceBetweenTwoBlock(node.blockPos, endingBlock);
-        node.gValue = MathUtils.getDistanceBetweenTwoBlock(node.blockPos, startNode.blockPos);
+    private void calculateCost(Node node, BlockPos endingBlock){
+        node.hValue = MathUtils.getHeuristicCostBetweenTwoBlock(node.blockPos, endingBlock);
+
+        if(node.lastNode != null)
+            node.gValue = node.lastNode.gValue + 1f;
+        else
+            node.gValue = 1f;
         node.fValue = node.gValue + node.hValue;
     }
-    private void trackBackPath(Node startingGoalNode){
-        while(!startNode.equals(startingGoalNode) && startingGoalNode.lastNode != null){
-            blockToWalk.add(startingGoalNode.lastNode.blockPos);
-            startingGoalNode = startingGoalNode.lastNode;
-        }
-        mc.thePlayer.addChatMessage(new ChatComponentText("Block count : " + blockToWalk.size()));
 
+    private List<BlockPos> trackBackPath(Node goalNode, Node startNode){
+        List<BlockPos> blocksToWalk = new ArrayList<>();
+        while(!startNode.equals(goalNode) && goalNode.lastNode != null){
+            blocksToWalk.add(goalNode.lastNode.blockPos);
+            goalNode = goalNode.lastNode;
+        }
+        mc.thePlayer.addChatMessage(new ChatComponentText("Block count : " + blocksToWalk.size()));
+        return blocksToWalk;
     }
 
 }

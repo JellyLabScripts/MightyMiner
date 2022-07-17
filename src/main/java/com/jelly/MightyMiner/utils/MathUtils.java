@@ -14,6 +14,11 @@ public class MathUtils {
                 + Math.abs((b1.getY() - b2.getY()))
                 + Math.abs((b1.getZ() - b2.getZ()));
     }
+    public static double getHeuristicCostBetweenTwoBlock(BlockPos b1, BlockPos b2){
+        return  (Math.sqrt(((b1.getX() - b2.getX()) * (b1.getX() - b2.getX())) * 1d
+                + ((b1.getY() - b2.getY()) * (b1.getY() - b2.getY())) * 1d
+                + ((b1.getZ() - b2.getZ()) * (b1.getZ() - b2.getZ())) * 1d ));
+    }
 
 
 

@@ -27,13 +27,29 @@ public class BlockUtils {
             Blocks.spruce_fence_gate,
             Blocks.wall_sign,
             Blocks.reeds,
-            Blocks.grass,
             Blocks.tallgrass,
             Blocks.yellow_flower,
             Blocks.deadbush,
             Blocks.red_flower,
             Blocks.stone_slab,
-            Blocks.wooden_slab
+            Blocks.wooden_slab,
+            Blocks.sandstone_stairs,
+            Blocks.acacia_stairs,
+            Blocks.spruce_stairs,
+            Blocks.stone_stairs,
+            Blocks.stone_brick_stairs,
+            Blocks.birch_stairs,
+            Blocks.brick_stairs,
+            Blocks.dark_oak_stairs,
+            Blocks.jungle_stairs,
+            Blocks.nether_brick_stairs,
+            Blocks.oak_stairs,
+            Blocks.quartz_stairs,
+            Blocks.red_sandstone_stairs,
+            Blocks.rail,
+            Blocks.activator_rail,
+            Blocks.detector_rail,
+            Blocks.golden_rail
     };
 
     public static int getUnitX() {
@@ -95,5 +111,10 @@ public class BlockUtils {
 
     public static boolean isWalkable(Block block) {
         return Arrays.asList(walkables).contains(block);
+    }
+    public static boolean canWalkOn(BlockPos groundBlock) {
+        return !isWalkable(mc.theWorld.getBlockState(groundBlock).getBlock())
+                && isWalkable(mc.theWorld.getBlockState(groundBlock.up()).getBlock())
+                  && isWalkable(mc.theWorld.getBlockState(groundBlock.up(2)).getBlock());
     }
 }

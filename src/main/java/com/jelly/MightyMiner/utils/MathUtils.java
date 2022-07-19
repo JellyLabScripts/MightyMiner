@@ -19,9 +19,9 @@ public class MathUtils {
     }
     public static double getHeuristicCostBetweenTwoBlock(BlockPos b1, BlockPos b2){
         return  (Math.sqrt(
-                square(b1.getX() - b2.getX()) * 1d
-                + square( b1.getY() - b2.getY()) * (Minecraft.getMinecraft().theWorld.getBlockState(b1) instanceof BlockSlab ? 0.25 : 1.5) * (Minecraft.getMinecraft().theWorld.getBlockState(b2) instanceof BlockSlab ? 0.25 : 1.5)
-                + square(b1.getZ() - b2.getZ()) * 1d));
+                square(b1.getX() - b2.getX()) * 0.5d
+                + square( b1.getY() - b2.getY()) * (Minecraft.getMinecraft().theWorld.getBlockState(b1) instanceof BlockSlab ? 0.5 : 2) * (Minecraft.getMinecraft().theWorld.getBlockState(b2) instanceof BlockSlab ? 0.5 : 2)
+                + square(b1.getZ() - b2.getZ()) * 0.5d));
     }
     public static double square(double d){
         return d * d;

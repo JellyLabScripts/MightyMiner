@@ -1,14 +1,9 @@
 package com.jelly.MightyMiner.utils;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockCarpet;
-import net.minecraft.block.BlockFlower;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.Vec3i;
 
 import java.util.Arrays;
 
@@ -17,14 +12,6 @@ public class BlockUtils {
     private static Minecraft mc = Minecraft.getMinecraft();
     private static final Block[] walkables = {
             Blocks.air,
-            Blocks.water,
-            Blocks.flowing_water,
-            Blocks.dark_oak_fence_gate,
-            Blocks.acacia_fence_gate,
-            Blocks.birch_fence_gate,
-            Blocks.oak_fence_gate,
-            Blocks.jungle_fence_gate,
-            Blocks.spruce_fence_gate,
             Blocks.wall_sign,
             Blocks.reeds,
             Blocks.tallgrass,
@@ -33,23 +20,24 @@ public class BlockUtils {
             Blocks.red_flower,
             Blocks.stone_slab,
             Blocks.wooden_slab,
-            Blocks.sandstone_stairs,
-            Blocks.acacia_stairs,
-            Blocks.spruce_stairs,
-            Blocks.stone_stairs,
-            Blocks.stone_brick_stairs,
-            Blocks.birch_stairs,
-            Blocks.brick_stairs,
-            Blocks.dark_oak_stairs,
-            Blocks.jungle_stairs,
-            Blocks.nether_brick_stairs,
-            Blocks.oak_stairs,
-            Blocks.quartz_stairs,
-            Blocks.red_sandstone_stairs,
             Blocks.rail,
             Blocks.activator_rail,
             Blocks.detector_rail,
-            Blocks.golden_rail
+            Blocks.golden_rail,
+            Blocks.carpet
+    };
+    private static final Block[] cannotWalkOn = { // cannot be treated as full block
+            Blocks.air,
+            Blocks.water,
+            Blocks.flowing_water,
+            Blocks.lava,
+            Blocks.flowing_lava,
+            Blocks.rail,
+            Blocks.activator_rail,
+            Blocks.detector_rail,
+            Blocks.golden_rail,
+            Blocks.carpet,
+            Blocks.slime_block
     };
 
     public static int getUnitX() {
@@ -112,9 +100,12 @@ public class BlockUtils {
     public static boolean isWalkable(Block block) {
         return Arrays.asList(walkables).contains(block);
     }
-    public static boolean canWalkOn(BlockPos groundBlock) {
-        return !isWalkable(mc.theWorld.getBlockState(groundBlock).getBlock())
+    public static boolean canWalkOn(Block groundBlock) {
+        return !Arrays.asList(cannotWalkOn).contains(groundBlock);
+    }
+    public static boolean fitsPlayer(BlockPos groundBlock) {
+        return canWalkOn(mc.theWorld.getBlockState(groundBlock).getBlock())
                 && isWalkable(mc.theWorld.getBlockState(groundBlock.up()).getBlock())
-                  && isWalkable(mc.theWorld.getBlockState(groundBlock.up(2)).getBlock());
+                && isWalkable(mc.theWorld.getBlockState(groundBlock.up(2)).getBlock());
     }
 }

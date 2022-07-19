@@ -1,8 +1,11 @@
 package com.jelly.MightyMiner.utils;
 
+import net.minecraft.block.BlockSlab;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 
 public class MathUtils {
+
 
     public static double getDistanceBetweenTwoBlock(BlockPos b1, BlockPos b2){
         return Math.sqrt((b1.getX() - b2.getX()) * (b1.getX() - b2.getX())
@@ -15,9 +18,13 @@ public class MathUtils {
                 + Math.abs((b1.getZ() - b2.getZ()));
     }
     public static double getHeuristicCostBetweenTwoBlock(BlockPos b1, BlockPos b2){
-        return  (Math.sqrt(((b1.getX() - b2.getX()) * (b1.getX() - b2.getX())) * 1d
-                + ((b1.getY() - b2.getY()) * (b1.getY() - b2.getY())) * 1d
-                + ((b1.getZ() - b2.getZ()) * (b1.getZ() - b2.getZ())) * 1d ));
+        return  (Math.sqrt(
+                square(b1.getX() - b2.getX()) * 1d
+                + square( b1.getY() - b2.getY()) * (Minecraft.getMinecraft().theWorld.getBlockState(b1) instanceof BlockSlab ? 0.25 : 1.5) * (Minecraft.getMinecraft().theWorld.getBlockState(b2) instanceof BlockSlab ? 0.25 : 1.5)
+                + square(b1.getZ() - b2.getZ()) * 1d));
+    }
+    public static double square(double d){
+        return d * d;
     }
 
 

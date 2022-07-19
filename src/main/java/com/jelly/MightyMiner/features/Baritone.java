@@ -88,7 +88,6 @@ public class Baritone {
         startNode = currentNode;
 
         while (!completed) {
-            Thread.sleep(10);
             step++;
             currentNode.checked = true;
             checkedNodes.add(currentNode);
@@ -108,16 +107,43 @@ public class Baritone {
             }
             if (currentGridZ < maxZ) {
                 instantiateNode(currentGridX, currentGridY, currentGridZ + 1, startNode);
-                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY, currentGridZ + 1), currentNode, endingBlock);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX,  currentGridY, currentGridZ + 1), currentNode, endingBlock);
             }
-            if (currentGridY > 0) {
-                instantiateNode(currentGridX, currentGridY - 1, currentGridZ, startNode);
-                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ), currentNode, endingBlock);
+
+            if (currentGridY > 0 && currentGridX > 0) {
+                instantiateNode(currentGridX - 1, currentGridY - 1, currentGridZ, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX - 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
             }
-            if (currentGridY < maxY) {
-                instantiateNode(currentGridX, currentGridY + 1, currentGridZ, startNode);
-                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ), currentNode, endingBlock);
+            if (currentGridY > 0 && currentGridX < maxX) {
+                instantiateNode(currentGridX + 1, currentGridY - 1, currentGridZ, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX + 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
             }
+            if (currentGridY > 0 && currentGridZ > 0) {
+                instantiateNode(currentGridX, currentGridY - 1, currentGridZ - 1, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ - 1), currentNode, endingBlock);
+            }
+            if (currentGridY > 0 && currentGridZ < maxZ) {
+                instantiateNode(currentGridX, currentGridY - 1, currentGridZ + 1, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ + 1), currentNode, endingBlock);
+            }
+
+            if (currentGridY < maxY && currentGridX > 0) {
+                instantiateNode(currentGridX - 1, currentGridY + 1, currentGridZ, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX - 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
+            }
+            if (currentGridY < maxY && currentGridX < maxX) {
+                instantiateNode(currentGridX + 1, currentGridY + 1, currentGridZ, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX + 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
+            }
+            if (currentGridY < maxY && currentGridZ > 0) {
+                instantiateNode(currentGridX, currentGridY + 1, currentGridZ - 1, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ - 1), currentNode, endingBlock);
+            }
+            if (currentGridY < maxY && currentGridZ < maxZ) {
+                instantiateNode(currentGridX, currentGridY + 1, currentGridZ + 1, startNode);
+                openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ + 1), currentNode, endingBlock);
+            }
+
 
 
             int bestIndex = 0;
@@ -149,16 +175,19 @@ public class Baritone {
 
     }
     private void openNodeAndCalculateCost(Node searchNode, Node currentNode, BlockPos endingBlockPos){
-        if (!searchNode.checked && !searchNode.opened && BlockUtils.isWalkable(mc.theWorld.getBlockState(searchNode.blockPos).getBlock())
-                && (BlockUtils.canWalkOn(searchNode.blockPos.down()) //walkable by itself
-                || (!BlockUtils.isWalkable(mc.theWorld.getBlockState(searchNode.blockPos.down(2)).getBlock())
-                    && (BlockUtils.canWalkOn(searchNode.blockPos.add(-1, -1, 0)) || BlockUtils.canWalkOn(searchNode.blockPos.add(1, -1, 0))
-                        || BlockUtils.canWalkOn(searchNode.blockPos.add(0, -1, 1)) || BlockUtils.canWalkOn(searchNode.blockPos.add(0, -1, -1)))))){
+        if (!searchNode.checked
+                && !searchNode.opened
+                && BlockUtils.fitsPlayer(searchNode.blockPos.down())){
+            if (searchNode.blockPos.getY() != currentNode.blockPos.getY()){
+                if(!BlockUtils.isWalkable(mc.theWorld.getBlockState(currentNode.blockPos.up(2)).getBlock())){
+                    return;
+                }
+            }
             searchNode.opened = true;
             searchNode.lastNode = currentNode;
             openNodes.add(searchNode);
             calculateCost(searchNode, endingBlockPos);
-            BlockRenderer.renderMap.put(searchNode.blockPos, Color.GREEN);
+        //    BlockRenderer.renderMap.put(searchNode.blockPos, Color.GREEN);
 
         }
 
@@ -175,8 +204,13 @@ public class Baritone {
     private void calculateCost(Node node, BlockPos endingBlock){
         node.hValue = MathUtils.getHeuristicCostBetweenTwoBlock(node.blockPos, endingBlock);
 
-        if(node.lastNode != null)
-            node.gValue = node.lastNode.gValue + 1f;
+        if(node.lastNode != null) {
+            if(node.lastNode.blockPos.getY() != node.blockPos.getY()) {
+                node.gValue = node.lastNode.gValue + 2;
+            } else {
+                node.gValue = node.lastNode.gValue + 1;
+            }
+        }
         else
             node.gValue = 1f;
         node.fValue = node.gValue + node.hValue;

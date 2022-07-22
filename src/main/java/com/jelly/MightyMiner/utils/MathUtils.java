@@ -12,6 +12,9 @@ public class MathUtils {
                 + (b1.getY() - b2.getY()) * (b1.getY() - b2.getY())
                 + (b1.getZ() - b2.getZ()) * (b1.getZ() - b2.getZ()));
     }
+    public static double getDistanceBetweenTwoPoints(double x1, double y1, double z1, double x2, double y2, double z2){
+        return Math.sqrt(square(x1 - x2) + square(y1 - y2) + square(z1 - z2));
+    }
     public static int getBlockDistanceBetweenTwoBlock(BlockPos b1, BlockPos b2){
         return Math.abs(b1.getX() - b2.getX())
                 + Math.abs((b1.getY() - b2.getY()))

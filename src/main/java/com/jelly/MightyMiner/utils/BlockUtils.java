@@ -81,8 +81,18 @@ public class BlockUtils {
                 mc.thePlayer.posZ + (getUnitZ() * z) + (getUnitX() * x)
         );
     }
+    public static BlockPos getRelativeBlockPos(float x, float z) {
+        return getRelativeBlockPos(x, 0, z);
+    }
 
 
+    public static boolean isAStraightLine(BlockPos b1, BlockPos b2, BlockPos b3){
+        if((b1.getX() - b2.getX()) == 0 || (b2.getX() - b3.getX()) == 0 || (b1.getX() - b3.getX()) == 0)
+            return (b1.getX() - b2.getX()) == 0 && (b2.getX() - b3.getX()) == 0 && (b1.getX() - b3.getX()) == 0 && b1.getY() == b2.getY() && b2.getY()== b3.getY();
+        return ((b1.getZ() - b2.getZ())/(b1.getX() - b2.getX()) == (b2.getZ() - b3.getZ())/(b2.getX() - b3.getX()) &&
+                (b1.getZ() - b2.getZ())/(b1.getX() - b2.getX()) == (b1.getZ() - b3.getZ())/(b1.getX() - b3.getX())) && b1.getY() == b2.getY() && b2.getY()== b3.getY();
+
+    }
 
     public static Block getLeftBlock(){
         return getRelativeBlock(-1, 0, 0);

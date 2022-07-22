@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.utils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.BlockPos;
 
 public class AngleUtils {
     private static final Minecraft mc = Minecraft.getMinecraft();
@@ -46,5 +47,35 @@ public class AngleUtils {
         } else {
             return 270f;
         }
+    }
+    public static double getRequiredYaw(BlockPos blockLookingAt) {
+        double deltaX = blockLookingAt.getX() + 0.5d -  mc.thePlayer.posX;
+        double deltaZ = blockLookingAt.getZ() + 0.5d - mc.thePlayer.posZ ;
+        return  (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) +
+                ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
+    }
+    public static double getRequiredPitch(BlockPos blockLookingAt) {
+        double deltaY = (blockLookingAt.getY() + 0.5d) - (mc.thePlayer.posY + 1.62d);
+        double deltaDis = MathUtils.getDistanceBetweenTwoPoints(
+                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ,
+                blockLookingAt.getX() + 0.5d, blockLookingAt.getY() + 0.5d, blockLookingAt.getZ() + 0.5d);
+        return  -(Math.asin(deltaY / deltaDis) * 180 / Math.PI);
+    }
+    public static int getRelativeYawFromBlockPos(BlockPos facingBlockPos) {
+        if (onTheSameXZ(BlockUtils.getRelativeBlockPos(1, 0), facingBlockPos)) {
+            return 90;
+        } else if (onTheSameXZ(BlockUtils.getRelativeBlockPos(-1, 0), facingBlockPos)) {
+            return -90;
+        } else if (onTheSameXZ(BlockUtils.getRelativeBlockPos(0, 1), facingBlockPos)) {
+            return 0;
+        } else if (onTheSameXZ(BlockUtils.getRelativeBlockPos(0, -1), facingBlockPos)) {
+            return 180;
+        }
+        return -1;
+
+    }
+    public static boolean onTheSameXZ (BlockPos b1, BlockPos b2) {
+        return b1.getX() == b2.getX() && b1.getZ() == b2.getZ();
+
     }
 }

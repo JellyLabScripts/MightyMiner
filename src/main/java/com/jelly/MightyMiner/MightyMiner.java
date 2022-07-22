@@ -1,9 +1,9 @@
 package com.jelly.MightyMiner;
 
-import com.jelly.MightyMiner.features.Baritone;
-import com.jelly.MightyMiner.macros.MacroHandler;
+import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.handlers.MacroHandler;
+import com.jelly.MightyMiner.macros.macros.GemstoneMacro;
 import com.jelly.MightyMiner.render.BlockRenderer;
-import net.minecraft.init.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -16,9 +16,13 @@ public class MightyMiner {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
-        MinecraftForge.EVENT_BUS.register(new Baritone());
+
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
+        MinecraftForge.EVENT_BUS.register(new KeybindHandler());
+        MinecraftForge.EVENT_BUS.register(new GemstoneMacro());
         MinecraftForge.EVENT_BUS.register(new BlockRenderer());
+        KeybindHandler.initializeCustomKeybindings();
+        MacroHandler.initializeMacro();
     }
 
 

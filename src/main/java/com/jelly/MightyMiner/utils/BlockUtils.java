@@ -66,23 +66,23 @@ public class BlockUtils {
         }
     }
 
-    public static Block getRelativeBlock(float x, float y, float z) {
+    public static Block getRelativeBlock(float rightOffset, float upOffset, float frontOffset) {
         return (mc.theWorld.getBlockState(
                 new BlockPos(
-                        mc.thePlayer.posX + (getUnitX() * z) + (getUnitZ() * -1 * x),
-                        mc.thePlayer.posY + y,
-                        mc.thePlayer.posZ + (getUnitZ() * z) + (getUnitX() * x)
+                        mc.thePlayer.posX + (getUnitX() * frontOffset) + (getUnitZ() * -1 * rightOffset),
+                        mc.thePlayer.posY + upOffset,
+                        mc.thePlayer.posZ + (getUnitZ() * frontOffset) + (getUnitX() * frontOffset)
                 )).getBlock());
     }
-    public static BlockPos getRelativeBlockPos(float x, float y, float z) {
+    public static BlockPos getRelativeBlockPos(float rightOffset, float upOffset, float frontOffset) {
         return new BlockPos(
-                mc.thePlayer.posX + (getUnitX() * z) + (getUnitZ() * -1 * x),
-                mc.thePlayer.posY + y,
-                mc.thePlayer.posZ + (getUnitZ() * z) + (getUnitX() * x)
+                mc.thePlayer.posX + (getUnitX() * frontOffset) + (getUnitZ() * -1 * rightOffset),
+                mc.thePlayer.posY + upOffset,
+                mc.thePlayer.posZ + (getUnitZ() * frontOffset) + (getUnitX() * rightOffset)
         );
     }
-    public static BlockPos getRelativeBlockPos(float x, float z) {
-        return getRelativeBlockPos(x, 0, z);
+    public static BlockPos getRelativeBlockPos(float rightOffset, float frontOffset) {
+        return getRelativeBlockPos(rightOffset, 0, frontOffset);
     }
 
 
@@ -107,15 +107,17 @@ public class BlockUtils {
         return getRelativeBlock(0, 0, 1);
     }
 
-    public static boolean isWalkable(Block block) {
+    public static boolean isPassable(Block block) {
         return Arrays.asList(walkables).contains(block);
     }
+    public static boolean isPassable(BlockPos block) {return isPassable(mc.theWorld.getBlockState(block).getBlock());}
     public static boolean canWalkOn(Block groundBlock) {
         return !Arrays.asList(cannotWalkOn).contains(groundBlock);
     }
+    public static boolean canWalkOn(BlockPos groundBlock) {return canWalkOn(mc.theWorld.getBlockState(groundBlock).getBlock());}
     public static boolean fitsPlayer(BlockPos groundBlock) {
         return canWalkOn(mc.theWorld.getBlockState(groundBlock).getBlock())
-                && isWalkable(mc.theWorld.getBlockState(groundBlock.up()).getBlock())
-                && isWalkable(mc.theWorld.getBlockState(groundBlock.up(2)).getBlock());
+                && isPassable(mc.theWorld.getBlockState(groundBlock.up()).getBlock())
+                && isPassable(mc.theWorld.getBlockState(groundBlock.up(2)).getBlock());
     }
 }

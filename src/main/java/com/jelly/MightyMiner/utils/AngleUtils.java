@@ -48,18 +48,18 @@ public class AngleUtils {
             return 270f;
         }
     }
-    public static double getRequiredYaw(BlockPos blockLookingAt) {
+    public static float getRequiredYaw(BlockPos blockLookingAt) {
         double deltaX = blockLookingAt.getX() + 0.5d -  mc.thePlayer.posX;
         double deltaZ = blockLookingAt.getZ() + 0.5d - mc.thePlayer.posZ ;
-        return  (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) +
+        return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) +
                 ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
     }
-    public static double getRequiredPitch(BlockPos blockLookingAt) {
+    public static float getRequiredPitch(BlockPos blockLookingAt) {
         double deltaY = (blockLookingAt.getY() + 0.5d) - (mc.thePlayer.posY + 1.62d);
         double deltaDis = MathUtils.getDistanceBetweenTwoPoints(
                 mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ,
                 blockLookingAt.getX() + 0.5d, blockLookingAt.getY() + 0.5d, blockLookingAt.getZ() + 0.5d);
-        return  -(Math.asin(deltaY / deltaDis) * 180 / Math.PI);
+        return  (float) -(Math.asin(deltaY / deltaDis) * 180 / Math.PI);
     }
     public static int getRelativeYawFromBlockPos(BlockPos facingBlockPos) {
         if (onTheSameXZ(BlockUtils.getRelativeBlockPos(1, 0), facingBlockPos)) {

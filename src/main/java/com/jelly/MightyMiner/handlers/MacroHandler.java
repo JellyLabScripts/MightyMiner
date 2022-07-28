@@ -30,12 +30,12 @@ public class MacroHandler {
 
     @SubscribeEvent
     public void onTickPlayer(TickEvent.ClientTickEvent tickEvent) {
-        if (!enabled || mc.thePlayer == null || mc.theWorld == null || tickEvent.phase != TickEvent.Phase.START)
+        if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
 
         for (Macro process : macros) {
             if (process.isEnabled()) {
-                process.onTick();
+                process.onTick(tickEvent.phase);
             }
         }
     }
@@ -65,12 +65,18 @@ public class MacroHandler {
     }
 
     public static void disableScript() {
+
+       boolean flag = false;
        for(Macro macro : macros){
-           if(macro.isEnabled())
+           if(macro.isEnabled()) {
                macro.toggle();
+               flag = true;
+           }
        }
+
        enabled = false;
-       LogUtils.addMessage("disabled script");
+       if(flag)
+           LogUtils.addMessage("disabled script");
 
     }
 

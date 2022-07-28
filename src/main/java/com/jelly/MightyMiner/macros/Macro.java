@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.macros;
 
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public abstract class Macro {
     protected Minecraft mc = Minecraft.getMinecraft();
@@ -19,7 +20,7 @@ public abstract class Macro {
 
     protected abstract void onDisable();
 
-    public void onTick() {}
+    public void onTick(TickEvent.Phase phase) {}
 
     public void onLastRender() {}
 

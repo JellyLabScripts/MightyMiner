@@ -12,6 +12,7 @@ import com.jelly.MightyMiner.utils.MathUtils;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -90,7 +91,10 @@ public class WalkBaritone extends Baritone {
     }
 
     @Override
-    public void onTickEvent(){
+    public void onTickEvent(TickEvent.Phase phase){
+
+        if(phase != TickEvent.Phase.START)
+            return;
 
         if(walking) {
             if (!rotation.completed) {

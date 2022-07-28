@@ -11,4 +11,9 @@ public class LogUtils {
                 EnumChatFormatting.BLUE + "" + EnumChatFormatting.BOLD + "MightyMiner " + EnumChatFormatting.RESET + EnumChatFormatting.DARK_GRAY + "» " + EnumChatFormatting.AQUA + EnumChatFormatting.BOLD + message
         ));
     }
+    public static void debugLog(String log) {
+        mc.thePlayer.addChatMessage(new ChatComponentText(
+                EnumChatFormatting.GREEN + "[log] : " + EnumChatFormatting.RESET + log
+        ));
+    }
 }

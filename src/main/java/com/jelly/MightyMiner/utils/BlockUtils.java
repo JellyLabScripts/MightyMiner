@@ -1,11 +1,15 @@
 package com.jelly.MightyMiner.utils;
 
+import com.jelly.MightyMiner.render.BlockRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.*;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class BlockUtils {
 
@@ -40,6 +44,15 @@ public class BlockUtils {
             Blocks.slime_block
     };
 
+    public enum BlockSides {
+        up,
+        down,
+        posX,
+        posZ,
+        negX,
+        negZ,
+    }
+
     public static int getUnitX() {
         double modYaw = (mc.thePlayer.rotationYaw % 360 + 360) % 360;
         if (modYaw < 45 || modYaw > 315) {
@@ -65,14 +78,53 @@ public class BlockUtils {
             return 0;
         }
     }
+    public static Block getBlock(BlockPos blockPos) {
+        return mc.theWorld.getBlockState(blockPos).getBlock();
+    }
+    public static BlockPos findBlock(int range, Block... requiredBlock) {
+
+        List<Block> requiredBlocks = Arrays.asList(requiredBlock);
+        List<BlockPos> foundBlocks = new ArrayList<>();
+
+        for (int i = 0; i < range; i++) {
+            for (int j = 0; j < range; j++) {
+                for (int k = 0; k < range; k++) {
+
+                    if (requiredBlocks.contains(getBlock(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))) {
+                        foundBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2));
+                    }
+
+                }
+            }
+        }
+        BlockPos temp;
+        if(foundBlocks.size() > 0){
+            for (int i = 0; i < foundBlocks.size(); i++)
+            {
+                for (int j = i + 1; j < foundBlocks.size(); j++)
+                {
+                    if (MathUtils.getDistanceBetweenTwoPoints(foundBlocks.get(i).getX(), foundBlocks.get(i).getY(), foundBlocks.get(i).getZ(), mc.thePlayer.posX, mc.thePlayer.posY + 1.62f, mc.thePlayer.posZ)
+                            > MathUtils.getDistanceBetweenTwoPoints(foundBlocks.get(j).getX(), foundBlocks.get(j).getY(), foundBlocks.get(j).getZ(), mc.thePlayer.posX, mc.thePlayer.posY + 1.62f, mc.thePlayer.posZ)
+                    ) {
+                        temp = foundBlocks.get(i);
+                        foundBlocks.set(i, foundBlocks.get(j));
+                        foundBlocks.set(j, temp);
+                    }
+                }
+            }
+            return foundBlocks.get(0);
+        }
+        return null;
+    }
+
 
     public static Block getRelativeBlock(float rightOffset, float upOffset, float frontOffset) {
-        return (mc.theWorld.getBlockState(
+        return (getBlock(
                 new BlockPos(
                         mc.thePlayer.posX + (getUnitX() * frontOffset) + (getUnitZ() * -1 * rightOffset),
                         mc.thePlayer.posY + upOffset,
                         mc.thePlayer.posZ + (getUnitZ() * frontOffset) + (getUnitX() * frontOffset)
-                )).getBlock());
+                )));
     }
     public static BlockPos getRelativeBlockPos(float rightOffset, float upOffset, float frontOffset) {
         return new BlockPos(
@@ -83,6 +135,9 @@ public class BlockUtils {
     }
     public static BlockPos getRelativeBlockPos(float rightOffset, float frontOffset) {
         return getRelativeBlockPos(rightOffset, 0, frontOffset);
+    }
+    public static BlockPos getPlayerLoc() {
+        return getRelativeBlockPos(0, 0);
     }
 
 
@@ -116,8 +171,53 @@ public class BlockUtils {
     }
     public static boolean canWalkOn(BlockPos groundBlock) {return canWalkOn(mc.theWorld.getBlockState(groundBlock).getBlock());}
     public static boolean fitsPlayer(BlockPos groundBlock) {
-        return canWalkOn(mc.theWorld.getBlockState(groundBlock).getBlock())
-                && isPassable(mc.theWorld.getBlockState(groundBlock.up()).getBlock())
-                && isPassable(mc.theWorld.getBlockState(groundBlock.up(2)).getBlock());
+        return canWalkOn(getBlock(groundBlock))
+                && isPassable(getBlock(groundBlock.up()))
+                && isPassable(getBlock(groundBlock.up(2)));
     }
+    public static boolean onTheSameXZ (BlockPos b1, BlockPos b2) {
+        return b1.getX() == b2.getX() && b1.getZ() == b2.getZ();
+
+    }
+
+    public static boolean canSeeBlock(BlockPos blockChecked) {
+
+        Vec3 vec3 = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + (double)mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
+        Vec3 vec31 = MathUtils.getVectorForRotation(AngleUtils.getRequiredPitch(blockChecked), AngleUtils.getRequiredYaw(blockChecked));
+        Vec3 vec32 = vec3.addVector(vec31.xCoord * 4.5f, vec31.yCoord * 4.5f, vec31.zCoord * 4.5f);
+        MovingObjectPosition objectPosition = mc.theWorld.rayTraceBlocks(vec3, vec32, false, false, true);
+        return objectPosition.getBlockPos().equals(blockChecked);
+    }
+    public static boolean canSeeBlock(BlockPos blockFrom, BlockPos blockChecked) {
+
+        Vec3 vec3 = new Vec3(blockFrom.getX() + 0.5d, blockFrom.getY() + 0.5d, blockFrom.getZ() + 0.5d);
+        Vec3 vec31 = MathUtils.getVectorForRotation(AngleUtils.getRequiredPitch(blockFrom, blockChecked), AngleUtils.getRequiredYaw(blockFrom, blockChecked));
+        Vec3 vec32 = vec3.addVector(vec31.xCoord * 4.5f, vec31.yCoord * 4.5f, vec31.zCoord * 4.5f);
+        MovingObjectPosition objectPosition = mc.theWorld.rayTraceBlocks(vec3, vec32, false, false, true);
+        return objectPosition.getBlockPos().equals(blockChecked);
+    }
+    public static boolean canReachBlock(BlockPos blockChecked) {
+        return MathUtils.getDistanceBetweenTwoPoints(
+                mc.thePlayer.posX, mc.thePlayer.posY + 1.62f, mc.thePlayer.posZ, blockChecked.getX(), blockChecked.getY(), blockChecked.getZ()) < 4.5f;
+    }
+
+
+    public static ArrayList<BlockSides> getAdjBlocksNotCovered(BlockPos blockToSearch) {
+        ArrayList<BlockSides> blockSidesNotCovered = new ArrayList<>();
+        if(isPassable(blockToSearch.up()))
+            blockSidesNotCovered.add(BlockSides.up);
+        if(isPassable(blockToSearch.down()))
+            blockSidesNotCovered.add(BlockSides.down);
+        if(isPassable(blockToSearch.add(1, 0, 0)))
+            blockSidesNotCovered.add(BlockSides.posX);
+        if(isPassable(blockToSearch.add(-1, 0, 0)))
+            blockSidesNotCovered.add(BlockSides.negX);
+        if(isPassable(blockToSearch.add(0, 0, 1)))
+            blockSidesNotCovered.add(BlockSides.posZ);
+        if(isPassable(blockToSearch.add(0, 0, -1)))
+            blockSidesNotCovered.add(BlockSides.negZ);
+
+        return blockSidesNotCovered;
+    }
+
 }

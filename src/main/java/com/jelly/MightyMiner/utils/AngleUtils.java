@@ -1,9 +1,23 @@
 package com.jelly.MightyMiner.utils;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AngleUtils {
+
+    static final List<Block> lookAtCenterBlocks = new ArrayList<Block>(){
+        {
+            add(Blocks.stained_glass_pane);
+        }
+    };
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public static float get360RotationYaw(float yaw) {
@@ -48,34 +62,283 @@ public class AngleUtils {
             return 270f;
         }
     }
-    public static float getRequiredYaw(BlockPos blockLookingAt) {
-        double deltaX = blockLookingAt.getX() + 0.5d -  mc.thePlayer.posX;
-        double deltaZ = blockLookingAt.getZ() + 0.5d - mc.thePlayer.posZ ;
+    public static float getRequiredYaw(BlockPos blockFrom, BlockPos blockLookingAt) {
+
+        double deltaX = blockLookingAt.getX() - blockFrom.getX();
+        double deltaZ = blockLookingAt.getZ() - blockFrom.getZ();
+
+        ArrayList<BlockUtils.BlockSides> blockSidesNotCovered = BlockUtils.getAdjBlocksNotCovered(blockLookingAt);
+        BlockUtils.BlockSides blockSideToMine;
+        if(blockSidesNotCovered.size() > 0 && !lookAtCenterBlocks.contains(BlockUtils.getBlock(blockLookingAt))){
+            double lowestCost = 9999;
+            blockSideToMine = blockSidesNotCovered.get(0);
+
+            for(BlockUtils.BlockSides blockSide : blockSidesNotCovered){
+                double tempCost = 0;
+                switch (blockSide){
+                    case posX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getX(), blockFrom.getZ(), blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                        break;
+                    case negX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getY(), blockFrom.getZ(), blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                        break;
+                    case posZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getY(),blockFrom.getZ(), blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
+                        break;
+                    case negZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getY(), blockFrom.getZ(), blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
+                        break;
+                }
+                if(tempCost < lowestCost) {
+                    lowestCost = tempCost;
+                    blockSideToMine = blockSide;
+                }
+            }
+            switch (blockSideToMine){
+                case posX:
+                    deltaX += 0.5d;
+                    break;
+                case negX:
+                    deltaX -= 0.5d;
+                    break;
+                case posZ:
+                    deltaZ += 0.5d;
+                    break;
+                case negZ:
+                    deltaZ -= 0.5d;
+                    break;
+            }
+
+        }
         return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) +
                 ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
     }
-    public static float getRequiredPitch(BlockPos blockLookingAt) {
-        double deltaY = (blockLookingAt.getY() + 0.5d) - (mc.thePlayer.posY + 1.62d);
-        double deltaDis = MathUtils.getDistanceBetweenTwoPoints(
-                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ,
-                blockLookingAt.getX() + 0.5d, blockLookingAt.getY() + 0.5d, blockLookingAt.getZ() + 0.5d);
-        return  (float) -(Math.asin(deltaY / deltaDis) * 180 / Math.PI);
-    }
-    public static int getRelativeYawFromBlockPos(BlockPos facingBlockPos) {
-        if (onTheSameXZ(BlockUtils.getRelativeBlockPos(1, 0), facingBlockPos)) {
-            return 90;
-        } else if (onTheSameXZ(BlockUtils.getRelativeBlockPos(-1, 0), facingBlockPos)) {
-            return -90;
-        } else if (onTheSameXZ(BlockUtils.getRelativeBlockPos(0, 1), facingBlockPos)) {
+    public static float getRequiredPitch(BlockPos blockFrom, BlockPos blockLookingAt) {
+        double deltaX = blockLookingAt.getX() - blockFrom.getX();
+        double deltaZ = blockLookingAt.getZ() - blockFrom.getZ();
+        double deltaY = blockLookingAt.getY() - blockFrom.getY();
+
+        ArrayList<BlockUtils.BlockSides> blockSidesNotCovered = BlockUtils.getAdjBlocksNotCovered(blockLookingAt);
+        BlockUtils.BlockSides blockSideToMine;
+        if(blockSidesNotCovered.size() > 0 && !lookAtCenterBlocks.contains(BlockUtils.getBlock(blockLookingAt))){
+            double lowestCost = 9999;
+            blockSideToMine = blockSidesNotCovered.get(0);
+
+            for(BlockUtils.BlockSides blockSide : blockSidesNotCovered){
+                double tempCost = 0;
+                switch (blockSide){
+                    case posX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getX(), blockFrom.getZ(), blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                        break;
+                    case negX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getX(), blockFrom.getZ(), blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                        break;
+                    case posZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getX(), blockFrom.getZ(), blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
+                        break;
+                    case negZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getX(), blockFrom.getZ(), blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
+                        break;
+                    case up:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getX(), blockFrom.getZ(), blockLookingAt.getX(), blockLookingAt.getY() + 0.5d, blockLookingAt.getZ());
+                        break;
+                    case down:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                blockFrom.getX(), blockFrom.getX(), blockFrom.getZ(), blockLookingAt.getX(), blockLookingAt.getY() - 0.5d, blockLookingAt.getZ());
+                        break;
+                }
+                if(tempCost < lowestCost) {
+                    lowestCost = tempCost;
+                    blockSideToMine = blockSide;
+                }
+            }
+            switch (blockSideToMine){
+                case posX:
+                    deltaX += 0.5d;
+                    break;
+                case negX:
+                    deltaX -= 0.5d;
+                    break;
+                case posZ:
+                    deltaZ += 0.5d;
+                    break;
+                case negZ:
+                    deltaZ -= 0.5d;
+                    break;
+                case up:
+                    deltaY += 0.5d;
+                    break;
+                case down:
+                    deltaY -= 0.5d;
+                    break;
+            }
+
+        }
+
+        double deltaDis = MathUtils.getDistanceBetweenTwoPoints(deltaX, deltaZ);
+        double pitch = -(Math.atan(deltaY / deltaDis) * 180 / Math.PI);
+
+        if( (float) pitch > 90 ||  (float) pitch < -90){
+            System.out.println(pitch + " " + deltaX + " " + deltaZ);
             return 0;
-        } else if (onTheSameXZ(BlockUtils.getRelativeBlockPos(0, -1), facingBlockPos)) {
+        }
+        return  (float) pitch;
+    }
+
+    public static float getRequiredYaw(BlockPos blockLookingAt) {
+
+        double deltaX = blockLookingAt.getX() - mc.thePlayer.posX + 0.5d;
+        double deltaZ = blockLookingAt.getZ() - mc.thePlayer.posZ + 0.5d;
+
+        ArrayList<BlockUtils.BlockSides> blockSidesNotCovered = BlockUtils.getAdjBlocksNotCovered(blockLookingAt);
+        BlockUtils.BlockSides blockSideToMine;
+        if(blockSidesNotCovered.size() > 0 &&  !lookAtCenterBlocks.contains(BlockUtils.getBlock(blockLookingAt))){
+            double lowestCost = 9999;
+            blockSideToMine = blockSidesNotCovered.get(0);
+
+            for(BlockUtils.BlockSides blockSide : blockSidesNotCovered){
+                double tempCost = 0;
+                switch (blockSide){
+                    case posX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                        break;
+                    case negX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                        break;
+                    case posZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
+                        break;
+                    case negZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
+                        break;
+                }
+                if(tempCost < lowestCost) {
+                    lowestCost = tempCost;
+                    blockSideToMine = blockSide;
+                }
+            }
+            switch (blockSideToMine){
+                case posX:
+                    deltaX += 0.5d;
+                    break;
+                case negX:
+                    deltaX -= 0.5d;
+                    break;
+                case posZ:
+                    deltaZ += 0.5d;
+                    break;
+                case negZ:
+                    deltaZ -= 0.5d;
+                    break;
+            }
+
+        }
+        return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) +
+                ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
+    }
+
+    public static float getRequiredPitch(BlockPos blockLookingAt) {
+        double deltaX = blockLookingAt.getX() - mc.thePlayer.posX + 0.5d;
+        double deltaZ = blockLookingAt.getZ() - mc.thePlayer.posZ + 0.5d;
+        double deltaY = (blockLookingAt.getY() + 0.5d) - (mc.thePlayer.posY + 1.62d);
+
+        ArrayList<BlockUtils.BlockSides> blockSidesNotCovered = BlockUtils.getAdjBlocksNotCovered(blockLookingAt);
+        BlockUtils.BlockSides blockSideToMine;
+        if(blockSidesNotCovered.size() > 0 && !lookAtCenterBlocks.contains(BlockUtils.getBlock(blockLookingAt))){
+            double lowestCost = 9999;
+            blockSideToMine = blockSidesNotCovered.get(0);
+
+            for(BlockUtils.BlockSides blockSide : blockSidesNotCovered){
+                double tempCost = 0;
+                switch (blockSide){
+                    case posX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                        break;
+                    case negX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                        break;
+                    case posZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
+                        break;
+                    case negZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
+                        break;
+                    case up:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY() + 0.5d, blockLookingAt.getZ());
+                        break;
+                    case down:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY() - 0.5d, blockLookingAt.getZ());
+                        break;
+                }
+                if(tempCost < lowestCost) {
+                    lowestCost = tempCost;
+                    blockSideToMine = blockSide;
+                }
+            }
+            switch (blockSideToMine){
+                case posX:
+                    deltaX += 0.5d;
+                    break;
+                case negX:
+                    deltaX -= 0.5d;
+                    break;
+                case posZ:
+                    deltaZ += 0.5d;
+                    break;
+                case negZ:
+                    deltaZ -= 0.5d;
+                    break;
+                case up:
+                    deltaY += 0.5d;
+                    break;
+                case down:
+                    deltaY -= 0.5d;
+                    break;
+            }
+
+        }
+
+        double deltaDis = MathUtils.getDistanceBetweenTwoPoints(deltaX, deltaZ);
+        double pitch = -(Math.atan(deltaY / deltaDis) * 180 / Math.PI);
+
+        if( (float) pitch > 90 ||  (float) pitch < -90){
+            System.out.println(pitch + " " + deltaX + " " + deltaZ);
+            return 0;
+        }
+        return  (float) pitch;
+    }
+
+    public static int getRelativeYawFromBlockPos(BlockPos facingBlockPos) {
+        if (BlockUtils.onTheSameXZ(BlockUtils.getRelativeBlockPos(1, 0), facingBlockPos)) {
+            return 90;
+        } else if (BlockUtils.onTheSameXZ(BlockUtils.getRelativeBlockPos(-1, 0), facingBlockPos)) {
+            return -90;
+        } else if (BlockUtils.onTheSameXZ(BlockUtils.getRelativeBlockPos(0, 1), facingBlockPos)) {
+            return 0;
+        } else if (BlockUtils.onTheSameXZ(BlockUtils.getRelativeBlockPos(0, -1), facingBlockPos)) {
             return 180;
         }
         return -1;
 
     }
-    public static boolean onTheSameXZ (BlockPos b1, BlockPos b2) {
-        return b1.getX() == b2.getX() && b1.getZ() == b2.getZ();
 
-    }
 }

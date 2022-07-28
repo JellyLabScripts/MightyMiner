@@ -2,20 +2,46 @@ package com.jelly.MightyMiner.macros.macros;
 
 import com.jelly.MightyMiner.baritone.Baritone;
 import com.jelly.MightyMiner.baritone.baritones.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.baritones.WalkBaritone;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
-import com.jelly.MightyMiner.player.Rotation;
-import com.jelly.MightyMiner.utils.LogUtils;
-import jdk.nashorn.internal.ir.Block;
+import com.jelly.MightyMiner.utils.BlockUtils;
+import gnu.trove.iterator.TAdvancingIterator;
+import net.minecraft.block.Block;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.Vec3;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.lwjgl.input.Keyboard;
+import tv.twitch.chat.Chat;
 
-import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class GemstoneMacro extends Macro {
-    Baritone baritone = new AutoMineBaritone();
+
+
+    final List<Block> blocksAllowedToMine = new ArrayList<Block>(){
+        {
+            add(Blocks.stone);
+            add(Blocks.stained_glass_pane);
+            add(Blocks.stained_glass);
+        }
+    };
+    final List<Block> blocksForbiddenToMine = new ArrayList<Block>(){
+        {
+            add(Blocks.dirt);
+        }
+    };
+    Baritone baritone = new AutoMineBaritone(blocksForbiddenToMine, blocksAllowedToMine);
+    boolean minedNearbyGemstones;
+
+
     @Override
     public void onEnable() {
-        baritone.enableBaritone(new BlockPos(17, 53, -15));
+        minedNearbyGemstones = false;
     }
 
     @Override
@@ -24,12 +50,28 @@ public class GemstoneMacro extends Macro {
     }
 
     @Override
-    public void onTick() {
-        baritone.onTickEvent();
+    public void onTick(TickEvent.Phase phase) {
+        baritone.onTickEvent(phase);
+
+        if(phase != TickEvent.Phase.START)
+            return;
+
+        if(!baritone.isEnabled() && !minedNearbyGemstones){
+            if(BlockUtils.findBlock(30, Blocks.stained_glass_pane, Blocks.stained_glass) != null) {
+                baritone.enableBaritone(BlockUtils.findBlock(30, Blocks.stained_glass_pane, Blocks.stained_glass));
+            } else {
+                mc.thePlayer.addChatMessage(new ChatComponentText("Can't find any gemstones nearby, maybe try again?"));
+                minedNearbyGemstones = true;
+                MacroHandler.disableScript();
+            }
+        }
     }
 
     @Override
     public void onLastRender() {
         baritone.onRenderEvent();
     }
+
+
+
 }

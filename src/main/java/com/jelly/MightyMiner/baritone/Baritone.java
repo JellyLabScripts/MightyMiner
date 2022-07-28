@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.baritone;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public abstract class Baritone{
@@ -27,4 +28,5 @@ public abstract class Baritone{
 
     public void onTickEvent(TickEvent.Phase phase){}
     public void onRenderEvent(){}
+    public void onOverlayRenderEvent(RenderGameOverlayEvent event){}
 }

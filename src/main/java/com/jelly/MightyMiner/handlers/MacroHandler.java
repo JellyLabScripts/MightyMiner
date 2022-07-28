@@ -9,6 +9,7 @@ import com.jelly.MightyMiner.utils.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -48,6 +49,18 @@ public class MacroHandler {
         for (Macro process : macros) {
             if (process.isEnabled()) {
                 process.onLastRender();
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onRenderOverlay(RenderGameOverlayEvent event) {
+        if (!enabled || mc.thePlayer == null || mc.theWorld == null)
+            return;
+
+        for (Macro process : macros) {
+            if (process.isEnabled()) {
+                process.onOverlayRenderEvent(event);
             }
         }
     }

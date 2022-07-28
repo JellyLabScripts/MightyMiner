@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.macros;
 
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public abstract class Macro {
@@ -23,6 +24,8 @@ public abstract class Macro {
     public void onTick(TickEvent.Phase phase) {}
 
     public void onLastRender() {}
+
+    public void onOverlayRenderEvent(RenderGameOverlayEvent event) {}
 
     public boolean isEnabled(){
         return enabled;

@@ -12,10 +12,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 import tv.twitch.chat.Chat;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,6 +72,11 @@ public class GemstoneMacro extends Macro {
     @Override
     public void onLastRender() {
         baritone.onRenderEvent();
+    }
+
+    @Override
+    public void onOverlayRenderEvent(RenderGameOverlayEvent event){
+        baritone.onOverlayRenderEvent(event);
     }
 
 

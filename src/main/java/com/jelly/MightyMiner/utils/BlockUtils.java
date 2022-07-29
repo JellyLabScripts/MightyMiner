@@ -82,6 +82,9 @@ public class BlockUtils {
         return mc.theWorld.getBlockState(blockPos).getBlock();
     }
     public static BlockPos findBlock(int range, Block... requiredBlock) {
+        return findBlock(range, null, requiredBlock);
+    }
+    public static BlockPos findBlock(int range, ArrayList<BlockPos> forbiddenBlockPos, Block... requiredBlock) {
 
         List<Block> requiredBlocks = Arrays.asList(requiredBlock);
         List<BlockPos> foundBlocks = new ArrayList<>();
@@ -89,8 +92,9 @@ public class BlockUtils {
         for (int i = 0; i < range; i++) {
             for (int j = 0; j < range; j++) {
                 for (int k = 0; k < range; k++) {
-
                     if (requiredBlocks.contains(getBlock(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))) {
+                        if(forbiddenBlockPos != null && forbiddenBlockPos.contains(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))
+                              continue;
                         foundBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2));
                     }
 

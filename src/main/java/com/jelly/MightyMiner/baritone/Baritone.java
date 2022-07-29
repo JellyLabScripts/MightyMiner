@@ -9,11 +9,11 @@ public abstract class Baritone{
     protected Minecraft mc = Minecraft.getMinecraft();
     protected boolean enabled = false;
 
-    protected abstract void onEnable(BlockPos destinationBlock);
+    protected abstract void onEnable(BlockPos destinationBlock) throws Exception;
 
     protected abstract void onDisable();
 
-    public final void enableBaritone(BlockPos destinationBlock){
+    public final void enableBaritone(BlockPos destinationBlock) throws Exception{
         onEnable(destinationBlock);
         enabled = true;
     }

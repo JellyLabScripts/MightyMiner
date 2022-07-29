@@ -62,6 +62,12 @@ public class AngleUtils {
             return 270f;
         }
     }
+    public static boolean shouldLookAtCenter(BlockPos blockPos){
+        return shouldLookAtCenter(BlockUtils.getBlock(blockPos));
+    }
+    public static boolean shouldLookAtCenter(Block block){
+        return lookAtCenterBlocks.contains(block);
+    }
     public static float getRequiredYaw(BlockPos blockFrom, BlockPos blockLookingAt) {
 
         double deltaX = blockLookingAt.getX() - blockFrom.getX();

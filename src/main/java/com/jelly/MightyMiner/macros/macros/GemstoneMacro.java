@@ -5,6 +5,7 @@ import com.jelly.MightyMiner.baritone.baritones.AutoMineBaritone;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.BlockUtils;
+import com.jelly.MightyMiner.utils.LogUtils;
 import gnu.trove.iterator.TAdvancingIterator;
 import net.minecraft.block.Block;
 import net.minecraft.client.settings.KeyBinding;
@@ -28,6 +29,11 @@ public class GemstoneMacro extends Macro {
     final List<Block> blocksAllowedToMine = new ArrayList<Block>(){
         {
             add(Blocks.stone);
+            add(Blocks.gold_ore);
+            add(Blocks.emerald_ore);
+            add(Blocks.redstone_ore);
+            add(Blocks.iron_ore);
+            add(Blocks.coal_ore);
             add(Blocks.stained_glass_pane);
             add(Blocks.stained_glass);
         }
@@ -37,6 +43,9 @@ public class GemstoneMacro extends Macro {
             add(Blocks.dirt);
         }
     };
+
+
+    ArrayList<BlockPos> blacklistedPos = new ArrayList<>();
     Baritone baritone = new AutoMineBaritone(blocksForbiddenToMine, blocksAllowedToMine);
     boolean minedNearbyGemstones;
 
@@ -51,20 +60,31 @@ public class GemstoneMacro extends Macro {
         baritone.disableBaritone();
     }
 
+    BlockPos targetBlockPos;
     @Override
-    public void onTick(TickEvent.Phase phase) {
+    public void onTick(TickEvent.Phase phase){
         baritone.onTickEvent(phase);
 
         if(phase != TickEvent.Phase.START)
             return;
 
         if(!baritone.isEnabled() && !minedNearbyGemstones){
-            if(BlockUtils.findBlock(30, Blocks.stained_glass_pane, Blocks.stained_glass) != null) {
-                baritone.enableBaritone(BlockUtils.findBlock(30, Blocks.stained_glass_pane, Blocks.stained_glass));
+
+            targetBlockPos = BlockUtils.findBlock(30, blacklistedPos, Blocks.stained_glass_pane, Blocks.stained_glass);
+            if(targetBlockPos != null) {
+                new Thread(() -> {
+                    try {
+                        baritone.enableBaritone(targetBlockPos);
+                    }catch (Exception e){
+                        LogUtils.debugLog("Can't find path to the block. Trying again!");
+                        blacklistedPos.add(targetBlockPos);
+                    }
+                }).start();
+
             } else {
                 mc.thePlayer.addChatMessage(new ChatComponentText("Can't find any gemstones nearby, maybe try again?"));
                 minedNearbyGemstones = true;
-                MacroHandler.disableScript();
+                MacroHandler.disableScript(); //later change to warp hub
             }
         }
     }

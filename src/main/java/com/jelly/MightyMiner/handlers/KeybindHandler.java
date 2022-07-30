@@ -77,6 +77,21 @@ public class KeybindHandler {
         KeyBinding.setKeyBindState(keyBindShift, shiftBool);
     }
 
+    public static void updateKeys(boolean wBool, boolean sBool, boolean aBool, boolean dBool, boolean atkBool, boolean useBool, boolean shiftBool, boolean jumpBool) {
+        if (mc.currentScreen != null) {
+            resetKeybindState();
+            return;
+        }
+        KeyBinding.setKeyBindState(keybindW, wBool);
+        KeyBinding.setKeyBindState(keybindS, sBool);
+        KeyBinding.setKeyBindState(keybindA, aBool);
+        KeyBinding.setKeyBindState(keybindD, dBool);
+        KeyBinding.setKeyBindState(keybindAttack, atkBool);
+        KeyBinding.setKeyBindState(keybindUseItem, useBool);
+        KeyBinding.setKeyBindState(keyBindShift, shiftBool);
+        KeyBinding.setKeyBindState(keyBindJump, jumpBool);
+    }
+
     public static void updateKeys(boolean wBool, boolean sBool, boolean aBool, boolean dBool, boolean atkBool) {
         if (mc.currentScreen != null) {
             resetKeybindState();

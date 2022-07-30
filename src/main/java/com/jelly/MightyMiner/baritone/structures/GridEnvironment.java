@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.structures;
+package com.jelly.MightyMiner.baritone.structures;
 
 
 import org.apache.commons.collections4.map.LinkedMap;

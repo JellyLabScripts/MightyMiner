@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner.utils;
 
+import com.jelly.MightyMiner.baritone.structures.BlockType;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -223,5 +224,6 @@ public class BlockUtils {
 
         return blockSidesNotCovered;
     }
+
 
 }

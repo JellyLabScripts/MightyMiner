@@ -7,7 +7,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
-import java.util.Vector;
+import java.util.*;
 
 public class MathUtils {
 
@@ -31,9 +31,10 @@ public class MathUtils {
     public static double getHeuristicCostBetweenTwoBlock(BlockPos b1, BlockPos b2){
         return  (Math.sqrt(
                 square(b1.getX() - b2.getX()) * 0.5d
-                + square( b1.getY() - b2.getY()) * (Minecraft.getMinecraft().theWorld.getBlockState(b1) instanceof BlockSlab ? 0.5 : 2) * (Minecraft.getMinecraft().theWorld.getBlockState(b2) instanceof BlockSlab ? 0.5 : 2)
+                + square( b1.getY() - b2.getY()) * (BlockUtils.getBlock(b1) instanceof BlockSlab ? 0.5 : 2) * (BlockUtils.getBlock(b2) instanceof BlockSlab ? 0.5 : 2)
                 + square(b1.getZ() - b2.getZ()) * 0.5d));
     }
+
     public static double square(double d){
         return d * d;
     }
@@ -45,6 +46,23 @@ public class MathUtils {
         float f2 = -MathHelper.cos(-pitch * 0.017453292F);
         float f3 = MathHelper.sin(-pitch * 0.017453292F);
         return new Vec3((double)(f1 * f2), (double)f3, (double)(f * f2));
+    }
+
+    public static HashMap<List<BlockPos>, Integer> sortByValue(HashMap<List<BlockPos>, Integer> hm)
+    {
+        // Create a list from elements of HashMap
+        List<Map.Entry<List<BlockPos>, Integer> > list =
+                new LinkedList<>(hm.entrySet());
+
+        // Sort the list
+        list.sort(Map.Entry.comparingByValue());
+
+        // put data from sorted list to hashmap
+        HashMap<List<BlockPos>, Integer> temp = new LinkedHashMap<>();
+        for (Map.Entry<List<BlockPos>, Integer> aa : list) {
+            temp.put(aa.getKey(), aa.getValue());
+        }
+        return temp;
     }
 
 

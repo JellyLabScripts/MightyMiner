@@ -8,8 +8,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.*;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
 
 public class BlockUtils {
@@ -82,10 +81,10 @@ public class BlockUtils {
     public static Block getBlock(BlockPos blockPos) {
         return mc.theWorld.getBlockState(blockPos).getBlock();
     }
-    public static BlockPos findBlock(int range, Block... requiredBlock) {
+    public static List<BlockPos>  findBlock(int range, Block... requiredBlock) {
         return findBlock(range, null, requiredBlock);
     }
-    public static BlockPos findBlock(int range, ArrayList<BlockPos> forbiddenBlockPos, Block... requiredBlock) {
+    public static List<BlockPos> findBlock(int range, ArrayList<BlockPos> forbiddenBlockPos, Block... requiredBlock) {
 
         List<Block> requiredBlocks = Arrays.asList(requiredBlock);
         List<BlockPos> foundBlocks = new ArrayList<>();
@@ -95,31 +94,15 @@ public class BlockUtils {
                 for (int k = 0; k < range; k++) {
                     if (requiredBlocks.contains(getBlock(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))) {
                         if(forbiddenBlockPos != null && forbiddenBlockPos.contains(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))
-                              continue;
+                            continue;
                         foundBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2));
                     }
 
                 }
             }
         }
-        BlockPos temp;
-        if(foundBlocks.size() > 0){
-            for (int i = 0; i < foundBlocks.size(); i++)
-            {
-                for (int j = i + 1; j < foundBlocks.size(); j++)
-                {
-                    if (MathUtils.getDistanceBetweenTwoPoints(foundBlocks.get(i).getX(), foundBlocks.get(i).getY(), foundBlocks.get(i).getZ(), mc.thePlayer.posX, mc.thePlayer.posY + 1.62f, mc.thePlayer.posZ)
-                            > MathUtils.getDistanceBetweenTwoPoints(foundBlocks.get(j).getX(), foundBlocks.get(j).getY(), foundBlocks.get(j).getZ(), mc.thePlayer.posX, mc.thePlayer.posY + 1.62f, mc.thePlayer.posZ)
-                    ) {
-                        temp = foundBlocks.get(i);
-                        foundBlocks.set(i, foundBlocks.get(j));
-                        foundBlocks.set(j, temp);
-                    }
-                }
-            }
-            return foundBlocks.get(0);
-        }
-        return null;
+        foundBlocks.sort(Comparator.comparingDouble(b -> MathUtils.getDistanceBetweenTwoBlock(b, BlockUtils.getPlayerLoc().add(0, 1.62d, 0))));
+        return foundBlocks;
     }
 
 

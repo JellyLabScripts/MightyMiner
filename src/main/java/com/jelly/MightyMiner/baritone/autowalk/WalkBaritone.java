@@ -1,6 +1,5 @@
-package com.jelly.MightyMiner.baritone.baritones;
+package com.jelly.MightyMiner.baritone.autowalk;
 
-import com.jelly.MightyMiner.baritone.Baritone;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
@@ -9,6 +8,7 @@ import com.jelly.MightyMiner.baritone.structures.Node;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -18,7 +18,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WalkBaritone extends Baritone {
+public class WalkBaritone{
 //Custom grid example
 
     //Xxxxxxxxxxxxxx |
@@ -34,6 +34,7 @@ public class WalkBaritone extends Baritone {
     // custom grid starts takes X as [0, y, 0]
     // player starts on K initially [maxX/2, y, maxZ/2]
     GridEnvironment<Node> gridEnvironment = new GridEnvironment<>();
+    Minecraft mc= Minecraft.getMinecraft();
 
     int maxX = 10000;
     int maxY = 256;
@@ -61,8 +62,6 @@ public class WalkBaritone extends Baritone {
     }
 
 
-
-    @Override
     protected void onEnable(BlockPos destinationBlock) {
 
 
@@ -84,13 +83,11 @@ public class WalkBaritone extends Baritone {
     }
 
 
-    @Override
-    public void onDisable() {
+    public void disableBaritone() {
         walking = false;
         clearBlocksToWalk();
     }
 
-    @Override
     public void onTickEvent(TickEvent.Phase phase){
 
         if(phase != TickEvent.Phase.START)
@@ -132,7 +129,7 @@ public class WalkBaritone extends Baritone {
         }
 
     }
-    @Override
+
     public void onRenderEvent(){
         if(rotation.rotating)
             rotation.update();

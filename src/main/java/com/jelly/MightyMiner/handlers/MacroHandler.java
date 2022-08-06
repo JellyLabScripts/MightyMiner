@@ -1,20 +1,13 @@
 package com.jelly.MightyMiner.handlers;
 
-import com.jelly.MightyMiner.baritone.Baritone;
-import com.jelly.MightyMiner.baritone.baritones.WalkBaritone;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.GemstoneMacro;
-import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +82,7 @@ public class MacroHandler {
 
        enabled = false;
        if(flag)
-           LogUtils.addMessage("disabled script");
+           LogUtils.addMessage("Disabled script");
 
     }
 

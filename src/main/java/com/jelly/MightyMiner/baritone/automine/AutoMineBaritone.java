@@ -1,8 +1,6 @@
 package com.jelly.MightyMiner.baritone.automine;
 
-import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.baritone.automine.logging.Logger;
-import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoBlockException;
+import com.jelly.MightyMiner.baritone.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.pathing.AStarPathFinder;
 import com.jelly.MightyMiner.baritone.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.structures.BlockType;
@@ -10,7 +8,6 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.*;
-import lombok.SneakyThrows;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
@@ -19,13 +16,8 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class AutoMineBaritone{
 
@@ -150,14 +142,11 @@ public class AutoMineBaritone{
         if(phase != TickEvent.Phase.START)
             return;
 
-        Logger.log(inAction + " " + blocksToMine.isEmpty());
         if(!inAction)
             return;
 
         if(blocksToMine.isEmpty())
             return;
-
-
 
         if ( (blocksToMine.getLast().getBlockType() == BlockType.MINE && BlockUtils.isPassable(blocksToMine.getLast().getBlockPos()))
         || (blocksToMine.getLast().getBlockType() == BlockType.WALK &&

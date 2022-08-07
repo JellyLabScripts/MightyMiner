@@ -1,8 +1,8 @@
 package com.jelly.MightyMiner.baritone.automine.pathing;
 
-import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.logging.Logger;
+import com.jelly.MightyMiner.baritone.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoBlockException;
+import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.structures.BlockType;
 import com.jelly.MightyMiner.baritone.structures.GridEnvironment;
@@ -15,13 +15,10 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class AStarPathFinder {
     Minecraft mc = Minecraft.getMinecraft();
@@ -33,7 +30,7 @@ public class AStarPathFinder {
     List<Block> allowedMiningBlocks;
 
     List<Node> checkedNodes = new ArrayList<>();
-    List<Node> openNodes = new ArrayList<>();
+    PriorityQueue<Node> openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));
 
 
     public AStarPathFinder(List<Block> forbiddenMiningBlocks, List<Block> allowedMiningBlocks){
@@ -41,48 +38,38 @@ public class AStarPathFinder {
         this.allowedMiningBlocks = allowedMiningBlocks;
     }
 
-    public LinkedList<BlockNode> getPath(Block... blockType) throws Exception{
+    public LinkedList<BlockNode> getPath(Block... blockType) throws NoBlockException, NoPathException {
 
         List<BlockPos> foundBlocks = BlockUtils.findBlock(30, blockType);
-       /* for(BlockPos blockPos : foundBlocks) {
-            BlockRenderer.renderMap.put(blockPos, Color.LIGHT_GRAY);
-        }*/
+        Logger.playerLog("Found gemstones : " + foundBlocks.size());
 
-        if(foundBlocks.isEmpty()){
+        long pastTime = System.currentTimeMillis();
+
+        if(foundBlocks.isEmpty())
             throw new NoBlockException();
-        }
 
-        LinkedList<BlockNode> lowestCostPath = new LinkedList<>();
-        int prevCost = 9999;
-        Logger.playerLog("Found blocks : " + foundBlocks.size());
-        for(int i = 0; i < (Math.min(foundBlocks.size(), 15)); i++){
-            LinkedList<BlockNode> currentPath;
-            try {
-                currentPath = calculatePath(BlockUtils.getPlayerLoc(), foundBlocks.get(i));
-            } catch (Exception ignored){
-                continue;
-            }
-            Logger.playerLog("Possible path index : " + i);
-            if(!currentPath.isEmpty()) {
-                int currentCost = calculatePathCost(currentPath);
-                BlockRenderer.renderMap.put(currentPath.getFirst().getBlockPos(), Color.GREEN);
-
-                if (currentCost < prevCost) {
-                    Logger.playerLog("Better path detected : index : " + i);
-                    lowestCostPath = currentPath;
-                    prevCost = currentCost;
-                }
-                if (currentCost <= 3) {
-                    return lowestCostPath;
-                }
-
+        LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
+        for(int i = 0; i < (Math.min(foundBlocks.size(), 20)); i++){
+            LinkedList<BlockNode> path = calculatePath(BlockUtils.getPlayerLoc(), foundBlocks.get(i));
+            if(!path.isEmpty()){
+                possiblePaths.add(path);
+                BlockRenderer.renderMap.put(possiblePaths.getLast().getFirst().getBlockPos(), Color.GREEN);
+                if(possiblePaths.getLast().size() == 1)
+                    return possiblePaths.getLast();
             }
         }
-        return lowestCostPath;
+
+        if(possiblePaths.isEmpty())
+            throw new NoPathException();
+
+        Logger.playerLog("Total time | Time per path : " + (System.currentTimeMillis() - pastTime) + " ms | " + (System.currentTimeMillis() - pastTime) * 1.0d / possiblePaths.size() + " ms");
+
+        possiblePaths.sort(Comparator.comparingInt(this::calculatePathCost));
+        return possiblePaths.getFirst();
     }
 
 
-    private LinkedList<BlockNode> calculatePath(BlockPos startingPos, BlockPos endingBlock) throws Exception {
+    private LinkedList<BlockNode> calculatePath(BlockPos startingPos, BlockPos endingBlock) {
 
         gridEnvironment.clear();
         checkedNodes.clear();
@@ -92,115 +79,89 @@ public class AStarPathFinder {
             return new LinkedList<BlockNode>(){{add(new BlockNode(endingBlock, getBlockType(endingBlock)));}};
         }
 
-        boolean completedPathfind = false;
         Node startNode;
         Node currentNode;
-        Node goalNode = new Node(endingBlock);
 
         int currentGridX = 0;
         int currentGridY = (int) mc.thePlayer.posY;
         int currentGridZ = 0;
 
         instantiateAnyNode(currentGridX, currentGridY, currentGridZ, new Node(startingPos));
-        currentNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
-        startNode = currentNode;
+        startNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
         step = 0;
 
+        openNodes.add(startNode);
+        while (!openNodes.isEmpty()) {
+            currentNode = openNodes.poll();
+            if(currentNode.lastNode != null) {
+                currentGridX = currentNode.blockPos.getX() - startNode.blockPos.getX();
+                currentGridY = currentNode.blockPos.getY();
+                currentGridZ = currentNode.blockPos.getZ() - startNode.blockPos.getZ();
+            }
 
-        while (!completedPathfind) {
-            step++;
-            currentNode.checked = true;
             checkedNodes.add(currentNode);
-            openNodes.remove(currentNode);
+            step++;
+
+            if(step > 300) break;
 
             instantiateNode(currentGridX - 1, currentGridY, currentGridZ, startNode);
-            openNodeAndCalculateCost(gridEnvironment.get(currentGridX - 1, currentGridY, currentGridZ), currentNode, endingBlock);
+            checkNode(gridEnvironment.get(currentGridX - 1, currentGridY, currentGridZ), currentNode, endingBlock);
 
-             instantiateNode(currentGridX + 1, currentGridY, currentGridZ, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX + 1, currentGridY, currentGridZ), currentNode, endingBlock);
-
-
-             instantiateNode(currentGridX, currentGridY, currentGridZ - 1, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY, currentGridZ - 1), currentNode, endingBlock);
-
-             instantiateNode(currentGridX, currentGridY, currentGridZ + 1, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX,  currentGridY, currentGridZ + 1), currentNode, endingBlock);
+            instantiateNode(currentGridX + 1, currentGridY, currentGridZ, startNode);
+            checkNode(gridEnvironment.get(currentGridX + 1, currentGridY, currentGridZ), currentNode, endingBlock);
 
 
-             instantiateNode(currentGridX - 1, currentGridY - 1, currentGridZ, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX - 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
+            instantiateNode(currentGridX, currentGridY, currentGridZ - 1, startNode);
+            checkNode(gridEnvironment.get(currentGridX, currentGridY, currentGridZ - 1), currentNode, endingBlock);
+
+            instantiateNode(currentGridX, currentGridY, currentGridZ + 1, startNode);
+            checkNode(gridEnvironment.get(currentGridX,  currentGridY, currentGridZ + 1), currentNode, endingBlock);
 
 
-             instantiateNode(currentGridX + 1, currentGridY - 1, currentGridZ, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX + 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
+            instantiateNode(currentGridX - 1, currentGridY - 1, currentGridZ, startNode);
+            checkNode(gridEnvironment.get(currentGridX - 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
 
 
-             instantiateNode(currentGridX, currentGridY - 1, currentGridZ - 1, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ - 1), currentNode, endingBlock);
+            instantiateNode(currentGridX + 1, currentGridY - 1, currentGridZ, startNode);
+            checkNode(gridEnvironment.get(currentGridX + 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
 
 
-             instantiateNode(currentGridX, currentGridY - 1, currentGridZ + 1, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ + 1), currentNode, endingBlock);
-
-             instantiateNode(currentGridX - 1, currentGridY + 1, currentGridZ, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX - 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
-
-             instantiateNode(currentGridX + 1, currentGridY + 1, currentGridZ, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX + 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
-
-             instantiateNode(currentGridX, currentGridY + 1, currentGridZ - 1, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ - 1), currentNode, endingBlock);
-
-             instantiateNode(currentGridX, currentGridY + 1, currentGridZ + 1, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ + 1), currentNode, endingBlock);
-
-             instantiateNode(currentGridX, currentGridY - 1, currentGridZ, startNode);
-             openNodeAndCalculateCost(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ), currentNode, endingBlock);
+            instantiateNode(currentGridX, currentGridY - 1, currentGridZ - 1, startNode);
+            checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ - 1), currentNode, endingBlock);
 
 
+            instantiateNode(currentGridX, currentGridY - 1, currentGridZ + 1, startNode);
+            checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ + 1), currentNode, endingBlock);
 
-            int bestIndex = 0;
-            double minFcost = 9999;
+            instantiateNode(currentGridX - 1, currentGridY + 1, currentGridZ, startNode);
+            checkNode(gridEnvironment.get(currentGridX - 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
 
-            for (int i = 0; i < openNodes.size(); i++) {
-                if(openNodes.get(i).hValue == 0){
-                    bestIndex = i;
-                    break;
-                }
-                if (openNodes.get(i).fValue < minFcost) {
-                    bestIndex = i;
-                    minFcost = openNodes.get(i).fValue;
-                }
+            instantiateNode(currentGridX + 1, currentGridY + 1, currentGridZ, startNode);
+            checkNode(gridEnvironment.get(currentGridX + 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
+
+            instantiateNode(currentGridX, currentGridY + 1, currentGridZ - 1, startNode);
+            checkNode(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ - 1), currentNode, endingBlock);
+
+            instantiateNode(currentGridX, currentGridY + 1, currentGridZ + 1, startNode);
+            checkNode(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ + 1), currentNode, endingBlock);
+
+            instantiateNode(currentGridX, currentGridY - 1, currentGridZ, startNode);
+            checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ), currentNode, endingBlock);
+
+
+
+            if(currentNode.blockPos.equals(endingBlock)) {
+                return trackBackPath(currentNode, startNode);
             }
 
-            int tempX, tempY, tempZ;
-            tempX = currentGridX;
-            tempY = currentGridY;
-            tempZ = currentGridZ;
-            currentGridX += openNodes.get(bestIndex).blockPos.getX() - gridEnvironment.get(tempX, tempY, tempZ).blockPos.getX();
-            currentGridY += openNodes.get(bestIndex).blockPos.getY() - gridEnvironment.get(tempX, tempY, tempZ).blockPos.getY();
-            currentGridZ += openNodes.get(bestIndex).blockPos.getZ() - gridEnvironment.get(tempX, tempY, tempZ).blockPos.getZ();
 
-            currentNode = openNodes.get(bestIndex);
-            if (goalNode.blockPos.equals(currentNode.blockPos)) {
-                completedPathfind = true;
-            }
-            if(step > 30000)
-            {
-                Logger.playerLog("Steps exceeded");
-                throw new Exception();
-            }
         }
-        return trackBackPath(currentNode, startNode);
-
-
-
+        return new LinkedList<>();
     }
-    private void openNodeAndCalculateCost(Node searchNode, Node currentNode, BlockPos endingBlockPos){
+    private void checkNode(Node searchNode, Node currentNode, BlockPos endingBlockPos){
 
-        if ( (!searchNode.checked
-                && !searchNode.opened
-                && BlockUtils.canWalkOn(searchNode.blockPos.down()))){
+
+        if (!checkedNodes.contains(searchNode) && BlockUtils.canWalkOn(searchNode.blockPos.down())){
 
             if(!searchNode.blockPos.equals(endingBlockPos)) {
                 if (forbiddenMiningBlocks != null && forbiddenMiningBlocks.contains(BlockUtils.getBlock(searchNode.blockPos))  && !BlockUtils.getBlock(searchNode.blockPos).equals(Blocks.air))
@@ -209,12 +170,22 @@ public class AStarPathFinder {
                 if (allowedMiningBlocks != null && !allowedMiningBlocks.contains(BlockUtils.getBlock(searchNode.blockPos)) && !BlockUtils.getBlock(searchNode.blockPos).equals(Blocks.air))
                     return;
             }
-            BlockRenderer.renderMap.put(searchNode.blockPos, Color.cyan);
+            if(!openNodes.contains(searchNode)){
+                calculateCost(searchNode, endingBlockPos);
+                searchNode.lastNode = currentNode;
+                openNodes.add(searchNode);
 
-            searchNode.opened = true;
-            searchNode.lastNode = currentNode;
-            openNodes.add(searchNode);
-            calculateCost(searchNode, endingBlockPos);
+            } else {
+                if(currentNode.gValue + (Math.abs(searchNode.blockPos.getY() - currentNode.blockPos.getY()) > 0 ? 2 : 1) < searchNode.gValue){
+                    Logger.log("Found better path");
+                    searchNode.lastNode = currentNode;
+                    calculateCost(searchNode, endingBlockPos);
+                    openNodes.remove(searchNode);
+                    openNodes.add(searchNode);
+                }
+            }
+
+
         }
 
     }
@@ -306,23 +277,16 @@ public class AStarPathFinder {
     private void calculateCost(Node node, BlockPos endingBlock){
         node.hValue = getHeuristic(node.blockPos, endingBlock);
 
-        if(node.lastNode != null) {
-            if(node.lastNode.blockPos.getY() != node.blockPos.getY()) {
-                node.gValue = node.lastNode.gValue + 2;
-            } else {
-                node.gValue = node.lastNode.gValue + 1;
-            }
-        }
+        if(node.lastNode != null)
+            node.gValue = node.lastNode.gValue + ((node.lastNode.blockPos.getY() != node.blockPos.getY()) ? 2 : 1) * ((BlockUtils.isPassable(node.blockPos)) ? 0.5f : 2);
         else
             node.gValue = 1f;
-
-    //    node.gValue *= BlockUtils.isPassable(node.blockPos) ? 0.5f : 2f;
         node.fValue = node.gValue + node.hValue;
     }
     private int calculatePathCost(List<BlockNode> nodes){
         int cost = 0;
         for(BlockNode node : nodes){
-            cost += (node.getBlockType() == BlockType.WALK) ? 2 : 1;
+            cost += (node.getBlockType() == BlockType.WALK) ? 2 : 1; //avoid open areas
         }
         return cost;
     }

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WalkBaritone{
-//Custom grid example
+/*//Custom grid example
 
     //Xxxxxxxxxxxxxx |
     //xxxxxxxxxxxxxx |
@@ -290,6 +290,6 @@ public class WalkBaritone{
         mc.thePlayer.addChatMessage(new ChatComponentText("Block count : " + blocksToWalk.size()));
         return blocksToWalk;
     }
-
+*/
 
 }

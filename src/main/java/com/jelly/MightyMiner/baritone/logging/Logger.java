@@ -1,9 +1,8 @@
-package com.jelly.MightyMiner.baritone.automine.logging;
+package com.jelly.MightyMiner.baritone.logging;
 
 import com.jelly.MightyMiner.MightyMiner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
-import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 
 public class Logger {

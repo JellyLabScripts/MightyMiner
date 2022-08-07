@@ -185,8 +185,9 @@ public class AStarPathFinder {
             if (goalNode.blockPos.equals(currentNode.blockPos)) {
                 completedPathfind = true;
             }
-            if(step > 3000)
+            if(step > 30000)
             {
+                Logger.playerLog("Steps exceeded");
                 throw new Exception();
             }
         }
@@ -208,6 +209,7 @@ public class AStarPathFinder {
                 if (allowedMiningBlocks != null && !allowedMiningBlocks.contains(BlockUtils.getBlock(searchNode.blockPos)) && !BlockUtils.getBlock(searchNode.blockPos).equals(Blocks.air))
                     return;
             }
+            BlockRenderer.renderMap.put(searchNode.blockPos, Color.cyan);
 
             searchNode.opened = true;
             searchNode.lastNode = currentNode;
@@ -314,13 +316,13 @@ public class AStarPathFinder {
         else
             node.gValue = 1f;
 
-        node.gValue *= BlockUtils.isPassable(node.blockPos) ? 0.5f : 2f;
+    //    node.gValue *= BlockUtils.isPassable(node.blockPos) ? 0.5f : 2f;
         node.fValue = node.gValue + node.hValue;
     }
     private int calculatePathCost(List<BlockNode> nodes){
         int cost = 0;
         for(BlockNode node : nodes){
-            cost += (node.getBlockType() == BlockType.WALK) ? 1 : 2;
+            cost += (node.getBlockType() == BlockType.WALK) ? 2 : 1;
         }
         return cost;
     }
@@ -330,6 +332,6 @@ public class AStarPathFinder {
     }
 
     double getHeuristic(BlockPos start, BlockPos goal){
-        return MathUtils.getDistanceBetweenTwoBlock(start, goal) * (BlockUtils.isPassable(goal) ? 0.5f : 2f);
+        return MathUtils.getDistanceBetweenTwoBlock(start, goal);
     }
 }

@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner;
 
+import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.macros.GemstoneMacro;
@@ -14,11 +15,17 @@ public class MightyMiner {
     public static final String MODID = "mightyminer";
     public static final String VERSION = "1.0";
 
+    public static Config config;
+
+    //thx pizza for fixing this
+    public static void onStartGame(){
+        config = new Config();
+    }
+
+
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
     {
-
-
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new GemstoneMacro());

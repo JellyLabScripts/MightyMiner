@@ -1,15 +1,13 @@
 package com.jelly.MightyMiner.macros.macros;
 
+import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.handlers.MacroHandler;
+import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
+import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.macros.Macro;
-import com.jelly.MightyMiner.utils.BlockUtils;
-import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -38,12 +36,14 @@ public class GemstoneMacro extends Macro {
         }
     };
 
-    AutoMineBaritone baritone = new AutoMineBaritone(blocksForbiddenToMine, blocksAllowedToMine);
+
+    AutoMineBaritone baritone;
     boolean minedNearbyGemstones;
 
 
     @Override
     public void onEnable() {
+        baritone = new AutoMineBaritone(getPathBehaviour(), getMineBehaviour());
         minedNearbyGemstones = false;
     }
 
@@ -72,6 +72,21 @@ public class GemstoneMacro extends Macro {
     @Override
     public void onOverlayRenderEvent(RenderGameOverlayEvent event){
         baritone.onOverlayRenderEvent(event);
+    }
+
+    private PathBehaviour getPathBehaviour(){
+        return new PathBehaviour(
+                blocksForbiddenToMine,
+                blocksAllowedToMine,
+                MightyMiner.config.gemMaxY,
+                MightyMiner.config.gemMinY
+        );
+    }
+    private MineBehaviour getMineBehaviour(){
+        return new MineBehaviour(
+                false,
+                MightyMiner.config.gemRotationTime
+        );
     }
 
 

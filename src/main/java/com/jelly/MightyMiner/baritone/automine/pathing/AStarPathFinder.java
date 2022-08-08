@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner.baritone.automine.pathing;
 
+import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.baritone.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoBlockException;
 import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoPathException;
@@ -25,17 +26,15 @@ public class AStarPathFinder {
     GridEnvironment<Node> gridEnvironment = new GridEnvironment<>();
 
     int step;
-
-    List<Block> forbiddenMiningBlocks;
-    List<Block> allowedMiningBlocks;
+    PathBehaviour pathBehaviour;
 
     List<Node> checkedNodes = new ArrayList<>();
     PriorityQueue<Node> openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));
 
 
-    public AStarPathFinder(List<Block> forbiddenMiningBlocks, List<Block> allowedMiningBlocks){
-        this.forbiddenMiningBlocks = forbiddenMiningBlocks;
-        this.allowedMiningBlocks = allowedMiningBlocks;
+
+    public AStarPathFinder(PathBehaviour options){
+        this.pathBehaviour = options;
     }
 
     public LinkedList<BlockNode> getPath(Block... blockType) throws NoBlockException, NoPathException {
@@ -110,45 +109,42 @@ public class AStarPathFinder {
             instantiateNode(currentGridX + 1, currentGridY, currentGridZ, startNode);
             checkNode(gridEnvironment.get(currentGridX + 1, currentGridY, currentGridZ), currentNode, endingBlock);
 
-
             instantiateNode(currentGridX, currentGridY, currentGridZ - 1, startNode);
             checkNode(gridEnvironment.get(currentGridX, currentGridY, currentGridZ - 1), currentNode, endingBlock);
 
             instantiateNode(currentGridX, currentGridY, currentGridZ + 1, startNode);
             checkNode(gridEnvironment.get(currentGridX,  currentGridY, currentGridZ + 1), currentNode, endingBlock);
 
+            if(currentGridY > pathBehaviour.getMinY()) {
+                instantiateNode(currentGridX - 1, currentGridY - 1, currentGridZ, startNode);
+                checkNode(gridEnvironment.get(currentGridX - 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
 
-            instantiateNode(currentGridX - 1, currentGridY - 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX - 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
+                instantiateNode(currentGridX + 1, currentGridY - 1, currentGridZ, startNode);
+                checkNode(gridEnvironment.get(currentGridX + 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
 
+                instantiateNode(currentGridX, currentGridY - 1, currentGridZ - 1, startNode);
+                checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ - 1), currentNode, endingBlock);
 
-            instantiateNode(currentGridX + 1, currentGridY - 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX + 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
+                instantiateNode(currentGridX, currentGridY - 1, currentGridZ + 1, startNode);
+                checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ + 1), currentNode, endingBlock);
 
+                instantiateNode(currentGridX, currentGridY - 1, currentGridZ, startNode);
+                checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ), currentNode, endingBlock);
+            }
 
-            instantiateNode(currentGridX, currentGridY - 1, currentGridZ - 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ - 1), currentNode, endingBlock);
+            if(currentGridY < pathBehaviour.getMaxY()) {
+                instantiateNode(currentGridX - 1, currentGridY + 1, currentGridZ, startNode);
+                checkNode(gridEnvironment.get(currentGridX - 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
 
+                instantiateNode(currentGridX + 1, currentGridY + 1, currentGridZ, startNode);
+                checkNode(gridEnvironment.get(currentGridX + 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
 
-            instantiateNode(currentGridX, currentGridY - 1, currentGridZ + 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ + 1), currentNode, endingBlock);
+                instantiateNode(currentGridX, currentGridY + 1, currentGridZ - 1, startNode);
+                checkNode(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ - 1), currentNode, endingBlock);
 
-            instantiateNode(currentGridX - 1, currentGridY + 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX - 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
-
-            instantiateNode(currentGridX + 1, currentGridY + 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX + 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY + 1, currentGridZ - 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ - 1), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY + 1, currentGridZ + 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ + 1), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY - 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ), currentNode, endingBlock);
-
-
+                instantiateNode(currentGridX, currentGridY + 1, currentGridZ + 1, startNode);
+                checkNode(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ + 1), currentNode, endingBlock);
+            }
 
             if(currentNode.blockPos.equals(endingBlock)) {
                 return trackBackPath(currentNode, startNode);
@@ -164,17 +160,21 @@ public class AStarPathFinder {
         if (!checkedNodes.contains(searchNode) && BlockUtils.canWalkOn(searchNode.blockPos.down())){
 
             if(!searchNode.blockPos.equals(endingBlockPos)) {
-                if (forbiddenMiningBlocks != null && forbiddenMiningBlocks.contains(BlockUtils.getBlock(searchNode.blockPos))  && !BlockUtils.getBlock(searchNode.blockPos).equals(Blocks.air))
-                    return;
-
-                if (allowedMiningBlocks != null && !allowedMiningBlocks.contains(BlockUtils.getBlock(searchNode.blockPos)) && !BlockUtils.getBlock(searchNode.blockPos).equals(Blocks.air))
-                    return;
+                if(pathBehaviour.getForbiddenMiningBlocks() != null){
+                    if ((pathBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.blockPos))  && !BlockUtils.getBlock(searchNode.blockPos).equals(Blocks.air)) ||
+                            (pathBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.blockPos.up()))  && !BlockUtils.getBlock(searchNode.blockPos.up()).equals(Blocks.air)))
+                        return;
+                }
+                if(pathBehaviour.getAllowedMiningBlocks() != null){
+                    if((!pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.blockPos)) && !BlockUtils.getBlock(searchNode.blockPos).equals(Blocks.air)) ||
+                            (!pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.blockPos.up())) && !BlockUtils.getBlock(searchNode.blockPos.up()).equals(Blocks.air)))
+                        return;
+                }
             }
             if(!openNodes.contains(searchNode)){
                 calculateCost(searchNode, endingBlockPos);
                 searchNode.lastNode = currentNode;
                 openNodes.add(searchNode);
-
             } else {
                 if(currentNode.gValue + (Math.abs(searchNode.blockPos.getY() - currentNode.blockPos.getY()) > 0 ? 2 : 1) < searchNode.gValue){
                     Logger.log("Found better path");
@@ -242,23 +242,10 @@ public class AStarPathFinder {
 
                     blocksToMine.add(new BlockNode(currentTrackNode.blockPos, getBlockType(currentTrackNode.blockPos)));
                 } else {
+                    blocksToMine.add(new BlockNode(currentTrackNode.blockPos, getBlockType(currentTrackNode.blockPos)));
+                    if (!BlockUtils.isPassable(currentTrackNode.blockPos.up()))
+                        blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(), getBlockType(currentTrackNode.blockPos.up())));
 
-                    if((AngleUtils.shouldLookAtCenter(currentTrackNode.blockPos.up()) && !AngleUtils.shouldLookAtCenter(currentTrackNode.blockPos))) {
-
-
-                        if (!BlockUtils.isPassable(currentTrackNode.blockPos.up()))
-                            blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(), getBlockType(currentTrackNode.blockPos.up())));
-
-                        blocksToMine.add(new BlockNode(currentTrackNode.blockPos, getBlockType(currentTrackNode.blockPos)));
-
-                    } else {
-
-                        blocksToMine.add(new BlockNode(currentTrackNode.blockPos, getBlockType(currentTrackNode.blockPos)));
-
-                        if (!BlockUtils.isPassable(currentTrackNode.blockPos.up()))
-                            blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(), getBlockType(currentTrackNode.blockPos.up())));
-
-                    }
                 }
                 formerNode = currentTrackNode;
                 currentTrackNode = currentTrackNode.lastNode;

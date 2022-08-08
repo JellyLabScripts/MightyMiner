@@ -1,5 +1,7 @@
 package com.jelly.MightyMiner.handlers;
 
+import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -22,17 +24,14 @@ public class KeybindHandler {
 
 
 
-    static KeyBinding[] macroKeybinds = new KeyBinding[1];
-    static KeyBinding[] otherKeybinds = new KeyBinding[2];
+    static KeyBinding[] macroKeybinds = new KeyBinding[4];
 
     public static void initializeCustomKeybindings() {
-        macroKeybinds[0] = new KeyBinding("Gemstone macro", Keyboard.KEY_F, "MightyMiner");
-        otherKeybinds[0] = new KeyBinding("Disable script", Keyboard.KEY_Z, "MightyMiner");
-        otherKeybinds[1] = new KeyBinding("Debug", Keyboard.KEY_H, "MightyMiner");
+        macroKeybinds[0] = new KeyBinding("Start macro", Keyboard.KEY_F, "MightyMiner");
+        macroKeybinds[1] = new KeyBinding("Disable macro", Keyboard.KEY_Z, "MightyMiner");
+        macroKeybinds[2] = new KeyBinding("Debug", Keyboard.KEY_H, "MightyMiner");
+        macroKeybinds[3] = new KeyBinding("Open GUI", Keyboard.KEY_RSHIFT, "MightyMiner");
         for (KeyBinding customKeyBind : macroKeybinds) {
-            ClientRegistry.registerKeyBinding(customKeyBind);
-        }
-        for (KeyBinding customKeyBind : otherKeybinds) {
             ClientRegistry.registerKeyBinding(customKeyBind);
         }
     }
@@ -40,18 +39,17 @@ public class KeybindHandler {
     @SubscribeEvent
     public void onKeyPress(InputEvent.KeyInputEvent event) {
 
-        for(int i = 0; i < macroKeybinds.length; i++){
-            if(macroKeybinds[i].isKeyDown()){
-                MacroHandler.startScript(i);
-            }
+        if(macroKeybinds[0].isKeyDown()){
+            MacroHandler.startScript(MightyMiner.config.macroType);
         }
-        if(otherKeybinds[0].isKeyDown()){
+        if(macroKeybinds[1].isKeyDown()){
             MacroHandler.disableScript();
+        }
+        if(macroKeybinds[3].isKeyDown()){
+            mc.displayGuiScreen(MightyMiner.config.gui());
         }
 
     }
-
-
 
     public static void setKeyBindState(int keyCode, boolean pressed) {
         if (pressed) {

@@ -28,12 +28,9 @@ public class Rotation {
         getDifference();
     }
 
-    public void lockAngle(float yaw, float pitch) {
-        if (mc.thePlayer.rotationYaw != yaw || mc.thePlayer.rotationPitch != pitch && !rotating)
-            easeTo(yaw, pitch, 1000);
-    }
     public void intLockAngle(float yaw, float pitch, int time) {
-        if (Math.floor(mc.thePlayer.rotationYaw) != Math.floor(yaw) || Math.floor(mc.thePlayer.rotationPitch) != Math.floor(pitch) && !rotating)
+        if ((AngleUtils.get360RotationYaw((float) Math.floor(mc.thePlayer.rotationYaw)) != AngleUtils.get360RotationYaw((float) Math.floor(yaw))
+                ||AngleUtils.get360RotationYaw((float) Math.floor(mc.thePlayer.rotationPitch)) != AngleUtils.get360RotationYaw((float) Math.floor(pitch))) && !rotating)
             easeTo(yaw, pitch, time);
     }
 

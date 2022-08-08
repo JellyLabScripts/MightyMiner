@@ -3,5 +3,8 @@
   "compatibilityLevel": "JAVA_8",
   "package": "com.jelly.MightyMiner.mixins",
   "refmap": "mixins.mightyminer.refmap.json",
-  "mixins": []
+  "mixins": [],
+  "client": [
+    "MixinMinecraft"
+  ]
 }

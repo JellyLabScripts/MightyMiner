@@ -89,6 +89,7 @@ public class BlockUtils {
         List<Block> requiredBlocks = Arrays.asList(requiredBlock);
         List<BlockPos> foundBlocks = new ArrayList<>();
 
+
         for (int i = 0; i < range; i++) {
             for (int j = 0; j < range; j++) {
                 for (int k = 0; k < range; k++) {

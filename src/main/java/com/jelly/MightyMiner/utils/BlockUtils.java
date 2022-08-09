@@ -94,7 +94,7 @@ public class BlockUtils {
             for (int j = 0; j < range; j++) {
                 for (int k = 0; k < range; k++) {
                     if (requiredBlocks.contains(getBlock(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))) {
-                        if(forbiddenBlockPos != null && forbiddenBlockPos.contains(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))
+                        if(forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))
                             continue;
                         foundBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2));
                     }

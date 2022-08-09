@@ -12,7 +12,7 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Macro", category = "Core",
             subcategory = "Macro",
-            options = { "Gemstone macro"}
+            options = { "Gemstone macro", "Powder macro"}
     )
     public int macroType = 0;
 
@@ -43,6 +43,13 @@ public class Config extends Vigilant {
     )
     public int gemMinY = 0;
 
+    @Property(type = PropertyType.SWITCH,
+            name = "Auto open chest",
+            category = "Gemstone macro",
+            subcategory = "Miscellaneous"
+    )
+    public boolean gemOpenChest = false;
+
     @Property(type = PropertyType.SLIDER,
             name = "Rotation time (milliseconds)",
             description = "Time the macro takes for each rotation",
@@ -52,6 +59,15 @@ public class Config extends Vigilant {
             min = 50
     )
     public int gemRotationTime = 300;
+
+    @Property(type = PropertyType.SWITCH,
+            name = "Mine gemstones",
+            category = "Powder macro",
+            subcategory = "Miscellaneous"
+    )
+    public boolean powMineGemstone = true;
+
+
 
 
 

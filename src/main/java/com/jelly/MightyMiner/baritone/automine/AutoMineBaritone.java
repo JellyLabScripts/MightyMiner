@@ -20,7 +20,10 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 public class AutoMineBaritone{
 
@@ -41,6 +44,7 @@ public class AutoMineBaritone{
         NONE
     }
     PlayerState currentState;
+    Block[] targetBlockType;
     boolean enabled;
 
     AStarPathFinder pathFinder;
@@ -61,6 +65,7 @@ public class AutoMineBaritone{
     public void enableBaritone(Block... blockType){
         enabled = true;
         mc.thePlayer.addChatMessage(new ChatComponentText("Starting automine"));
+        targetBlockType = blockType;
 
         clearBlocksToWalk();
         KeybindHandler.resetKeybindState();
@@ -99,7 +104,10 @@ public class AutoMineBaritone{
         inAction = false;
         currentState = PlayerState.NONE;
         KeybindHandler.resetKeybindState();
+        if(!blocksToMine.isEmpty())
+            pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
         clearBlocksToWalk();
+
     }
     public boolean isEnabled(){
         return enabled;
@@ -138,7 +146,7 @@ public class AutoMineBaritone{
         } else {
             //stuck handling
             stuckTickCount++;
-            if(stuckTickCount > 20 * MightyMiner.config.gemRestartTimeThreshold){
+            if(stuckTickCount > 20 * mineBehaviour.getRestartTimeThreshold()){
                 new Thread(restartBaritone).start();
                 return;
             }
@@ -192,14 +200,14 @@ public class AutoMineBaritone{
                 break;
 
             case MINING:
-                mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Pick", "Drill");
+                mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Pick", "Drill", "Gauntlet");
                 KeybindHandler.updateKeys(
                         false,
                         false,
                         false,
                         false,
                         mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null &&
-                                mc.objectMouseOver.getBlockPos().equals(targetMineBlock),
+                                mc.objectMouseOver.getBlockPos().equals(targetMineBlock) && PlayerUtils.hasStoppedMoving(),
                         false,
                         mineBehaviour.isShiftWhenMine(),
                         false);
@@ -265,7 +273,7 @@ public class AutoMineBaritone{
             Thread.sleep(200);
             KeybindHandler.setKeyBindState(KeybindHandler.keybindS, true);
             Thread.sleep(100);
-            enableBaritone(Blocks.stained_glass, Blocks.stained_glass_pane);
+            enableBaritone(targetBlockType);
         } catch (InterruptedException ignored) {}
     };
 

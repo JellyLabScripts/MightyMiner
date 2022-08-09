@@ -31,15 +31,21 @@ public class AStarPathFinder {
     List<Node> checkedNodes = new ArrayList<>();
     PriorityQueue<Node> openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));
 
+    ArrayList<BlockPos> blackListedPos = new ArrayList<>();
+
 
 
     public AStarPathFinder(PathBehaviour options){
         this.pathBehaviour = options;
     }
 
+    public void addToBlackList(BlockPos... blackListedPos){
+        this.blackListedPos.addAll(Arrays.asList(blackListedPos));
+    }
+
     public LinkedList<BlockNode> getPath(Block... blockType) throws NoBlockException, NoPathException {
 
-        List<BlockPos> foundBlocks = BlockUtils.findBlock(30, blockType);
+        List<BlockPos> foundBlocks = BlockUtils.findBlock(30, blackListedPos, blockType);
         Logger.playerLog("Found gemstones : " + foundBlocks.size());
 
         long pastTime = System.currentTimeMillis();
@@ -170,6 +176,10 @@ public class AStarPathFinder {
                             (!pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.blockPos.up())) && !BlockUtils.getBlock(searchNode.blockPos.up()).equals(Blocks.air)))
                         return;
                 }
+            }
+            if(!blackListedPos.isEmpty()){
+                if(blackListedPos.contains(searchNode.blockPos) || blackListedPos.contains(searchNode.blockPos.up()))
+                    return;
             }
             if(!openNodes.contains(searchNode)){
                 calculateCost(searchNode, endingBlockPos);

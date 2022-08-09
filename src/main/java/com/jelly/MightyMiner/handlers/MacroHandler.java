@@ -2,12 +2,16 @@ package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.GemstoneMacro;
+import com.jelly.MightyMiner.macros.macros.PowderMacro;
 import com.jelly.MightyMiner.utils.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.Packet;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +24,7 @@ public class MacroHandler {
 
     public static void initializeMacro(){
        macros.add(new GemstoneMacro());
+       macros.add(new PowderMacro());
     }
 
     @SubscribeEvent
@@ -54,6 +59,29 @@ public class MacroHandler {
         for (Macro process : macros) {
             if (process.isEnabled()) {
                 process.onOverlayRenderEvent(event);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onMessageReceived(ClientChatReceivedEvent event) {
+        if (!enabled || mc.thePlayer == null || mc.theWorld == null)
+            return;
+
+        for (Macro process : macros) {
+            if (process.isEnabled()) {
+                process.onMessageReceived(event.message.getUnformattedText());
+            }
+        }
+    }
+
+    public static void onPacketReceive(Packet<?> packet) {
+        if (!enabled || mc.thePlayer == null || mc.theWorld == null)
+            return;
+
+        for (Macro process : macros) {
+            if (process.isEnabled()) {
+                process.onPacketReceived(packet);
             }
         }
     }

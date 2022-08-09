@@ -252,6 +252,9 @@ public class AngleUtils {
             }
 
         }
+        return  getRequiredYaw(deltaX, deltaZ);
+    }
+    public static float getRequiredYaw(double deltaX, double deltaZ) {
         return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) +
                 ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
     }
@@ -322,10 +325,11 @@ public class AngleUtils {
             }
 
         }
-
+        return  getRequiredPitch(deltaX, deltaY, deltaZ);
+    }
+    public static float getRequiredPitch(double deltaX, double deltaY, double deltaZ) {
         double deltaDis = MathUtils.getDistanceBetweenTwoPoints(deltaX, deltaZ);
         double pitch = -(Math.atan(deltaY / deltaDis) * 180 / Math.PI);
-
         if( (float) pitch > 90 ||  (float) pitch < -90){
             System.out.println(pitch + " " + deltaX + " " + deltaZ);
             return 0;

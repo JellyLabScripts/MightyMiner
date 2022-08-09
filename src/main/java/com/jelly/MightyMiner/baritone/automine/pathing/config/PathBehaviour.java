@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.baritone.automine.pathing.config;
 
 import net.minecraft.block.Block;
+import net.minecraft.util.BlockPos;
 
 import java.util.List;
 
@@ -32,4 +33,5 @@ public class PathBehaviour {
     public int getMinY() {
         return minY;
     }
+
 }

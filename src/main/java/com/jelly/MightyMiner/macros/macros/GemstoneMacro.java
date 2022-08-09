@@ -5,9 +5,17 @@ import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.player.Rotation;
+import com.jelly.MightyMiner.utils.AngleUtils;
+import com.jelly.MightyMiner.utils.BlockUtils;
+import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S2APacketParticles;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -30,15 +38,13 @@ public class GemstoneMacro extends Macro {
             add(Blocks.stained_glass);
         }
     };
-    final List<Block> blocksForbiddenToMine = new ArrayList<Block>(){
-        {
-            add(Blocks.dirt);
-        }
-    };
-
 
     AutoMineBaritone baritone;
     boolean minedNearbyGemstones;
+    boolean haveTreasureChest;
+    long treasureInitialTime;
+
+    Rotation rotation = new Rotation();
 
 
     @Override
@@ -59,7 +65,11 @@ public class GemstoneMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-        if(!baritone.isEnabled() && !minedNearbyGemstones && PlayerUtils.hasStoppedMoving()){
+        if(haveTreasureChest && System.currentTimeMillis() - treasureInitialTime > 7000) {
+            haveTreasureChest = false;
+        }
+
+        if(!baritone.isEnabled() && !minedNearbyGemstones && !haveTreasureChest && PlayerUtils.hasStoppedMoving()){
             baritone.enableBaritone(Blocks.stained_glass_pane, Blocks.stained_glass);
         }
     }
@@ -67,6 +77,7 @@ public class GemstoneMacro extends Macro {
     @Override
     public void onLastRender() {
         baritone.onRenderEvent();
+        rotation.update();
     }
 
     @Override
@@ -74,9 +85,40 @@ public class GemstoneMacro extends Macro {
         baritone.onOverlayRenderEvent(event);
     }
 
+    @Override
+    public void onMessageReceived(String message){
+        if(message.contains("You have successfully picked the lock on this chest")){
+            haveTreasureChest = false;
+        }
+        if(message.contains("You uncovered a treasure chest!") && MightyMiner.config.gemOpenChest){
+            LogUtils.debugLog("Found treasure chest!");
+            haveTreasureChest = true;
+            baritone.disableBaritone();
+            treasureInitialTime = System.currentTimeMillis();
+        }
+    }
+
+    @Override
+    public void onPacketReceived(Packet<?> packet){
+        if(haveTreasureChest && packet instanceof S2APacketParticles){
+            if(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT){
+                try {
+                    BlockPos closetChest = BlockUtils.findBlock(8, Blocks.chest, Blocks.trapped_chest).get(0);
+                    if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - closetChest.getX()) < 2 && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - closetChest.getY()) < 2 && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - closetChest.getZ()) < 2) {
+                        rotation.intLockAngle(
+                                AngleUtils.getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - closetChest.getX(), ((S2APacketParticles) packet).getZCoordinate() - closetChest.getZ()),
+                                AngleUtils.getRequiredPitch(((S2APacketParticles) packet).getXCoordinate() - closetChest.getX(), (((S2APacketParticles) packet).getYCoordinate()) - closetChest.getY(), ((S2APacketParticles) packet).getZCoordinate() - closetChest.getZ()),
+                                50);
+                    }
+                }catch (Exception ignored){}
+            }
+        }
+    }
+
+
     private PathBehaviour getPathBehaviour(){
         return new PathBehaviour(
-                blocksForbiddenToMine,
+                null,
                 blocksAllowedToMine,
                 MightyMiner.config.gemMaxY,
                 MightyMiner.config.gemMinY
@@ -85,7 +127,8 @@ public class GemstoneMacro extends Macro {
     private MineBehaviour getMineBehaviour(){
         return new MineBehaviour(
                 false,
-                MightyMiner.config.gemRotationTime
+                MightyMiner.config.gemRotationTime,
+                MightyMiner.config.gemRestartTimeThreshold
         );
     }
 

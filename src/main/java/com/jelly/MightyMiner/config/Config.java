@@ -67,6 +67,13 @@ public class Config extends Vigilant {
     )
     public boolean powMineGemstone = true;
 
+    @Property(type = PropertyType.SWITCH,
+            name = "RGA hardstone aura",
+            category = "Powder macro",
+            subcategory = "Miscellaneous"
+    )
+    public boolean powStoneAura = false;
+
 
 
 

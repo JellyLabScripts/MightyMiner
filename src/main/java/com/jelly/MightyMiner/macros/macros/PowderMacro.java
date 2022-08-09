@@ -15,6 +15,7 @@ import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import rosegoldaddons.Main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onEnable() {
+
         treasureInitialTime = System.currentTimeMillis();
         playerYaw = AngleUtils.getClosest();
         blocksAllowedToMine.clear();
@@ -53,10 +55,13 @@ public class PowderMacro extends Macro {
             blocksAllowedToMine.add(Blocks.stained_glass_pane);
             blocksAllowedToMine.add(Blocks.stained_glass);
         }
+
+
     }
 
     @Override
     public void onDisable() {
+        Main.autoHardStone = false;
         KeybindHandler.resetKeybindState();
     }
 
@@ -65,13 +70,23 @@ public class PowderMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
+        if(MightyMiner.config.powStoneAura)
+            Main.autoHardStone = !haveTreasureChest;
+
+        if(rotation.rotating){
+            KeybindHandler.resetKeybindState();
+            return;
+        }
+
+
+
         if(haveTreasureChest && System.currentTimeMillis() - treasureInitialTime > 7000) {
             LogUtils.debugLog("Completed treasure due to timeout");
             haveTreasureChest = false;
         }
 
         if(!haveTreasureChest){
-            rotation.intLockAngle(playerYaw, 42, 500);
+            rotation.intLockAngle(playerYaw, 60, 500);
             KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
             if(mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY)
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, true);
@@ -108,7 +123,7 @@ public class PowderMacro extends Macro {
             if(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT){
                 try {
                     LogUtils.debugLog("Found packet");
-                    BlockPos closetChest = BlockUtils.findBlock(12, Blocks.chest, Blocks.trapped_chest).get(0);
+                    BlockPos closetChest = BlockUtils.findBlock(16, Blocks.chest, Blocks.trapped_chest).get(0);
                     LogUtils.debugLog("Found chest");
                     if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - closetChest.getX()) < 2 && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - closetChest.getY()) < 2 && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - closetChest.getZ()) < 2) {
                         rotation.intLockAngle(

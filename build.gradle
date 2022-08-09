@@ -58,7 +58,14 @@ dependencies {
 
     include('org.apache.commons:commons-collections4:4.4')
     implementation('org.apache.commons:commons-collections4:4.4')
-    //implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.0'
+
+    include(fileTree(dir: 'libs', include: '*.jar'))
+    implementation(fileTree(dir: 'libs', include: '*.jar'))
+
+  //  fileTree(dir: 'libs', include: '*.jar')
+   // include(files('libs/RoseGoldAddons-2.8.9.jar'))
+  //  implementation(files("libs/RoseGoldAddons-2.8.9.jar"))
+
 }
 
 mixin {

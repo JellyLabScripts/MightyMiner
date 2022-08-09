@@ -82,9 +82,9 @@ public class BlockUtils {
         return mc.theWorld.getBlockState(blockPos).getBlock();
     }
     public static List<BlockPos>  findBlock(int range, Block... requiredBlock) {
-        return findBlock(range, null, requiredBlock);
+        return findBlock(range, null, 0, 256, requiredBlock);
     }
-    public static List<BlockPos> findBlock(int range, ArrayList<BlockPos> forbiddenBlockPos, Block... requiredBlock) {
+    public static List<BlockPos> findBlock(int range, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlock) {
 
         List<Block> requiredBlocks = Arrays.asList(requiredBlock);
         List<BlockPos> foundBlocks = new ArrayList<>();
@@ -93,8 +93,10 @@ public class BlockUtils {
         for (int i = 0; i < range; i++) {
             for (int j = 0; j < range; j++) {
                 for (int k = 0; k < range; k++) {
-                    if (requiredBlocks.contains(getBlock(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))) {
-                        if(forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2)))
+                    if (requiredBlocks.contains(getBlock(getPlayerLoc().add(i - range / 2, j - range / 2, k - range / 2)))) {
+                        if(forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(getPlayerLoc().add(i - range / 2, j - range / 2, k - range / 2)))
+                            continue;
+                        if((int)mc.thePlayer.posY + (j - range / 2) > maxY || (int)mc.thePlayer.posY + (j - range / 2) < minY)
                             continue;
                         foundBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2));
                     }

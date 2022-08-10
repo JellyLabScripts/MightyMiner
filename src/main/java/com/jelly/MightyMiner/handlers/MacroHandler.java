@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.GemstoneMacro;
+import com.jelly.MightyMiner.macros.macros.MithrilMacro;
 import com.jelly.MightyMiner.macros.macros.PowderMacro;
 import com.jelly.MightyMiner.utils.LogUtils;
 import net.minecraft.client.Minecraft;
@@ -11,7 +12,6 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +25,7 @@ public class MacroHandler {
     public static void initializeMacro(){
        macros.add(new GemstoneMacro());
        macros.add(new PowderMacro());
+       macros.add(new MithrilMacro());
     }
 
     @SubscribeEvent
@@ -89,7 +90,7 @@ public class MacroHandler {
 
     public static void startScript(Macro macro){
         if(!macro.isEnabled()) {
-            LogUtils.addMessage("enabled script");
+            LogUtils.addMessage("Enabled script");
             macro.toggle();
             enabled = true;
         }

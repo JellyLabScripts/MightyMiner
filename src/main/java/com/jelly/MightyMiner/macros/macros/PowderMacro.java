@@ -113,6 +113,7 @@ public class PowderMacro extends Macro {
         }
         if(message.contains("You uncovered a treasure chest!")){
             haveTreasureChest = true;
+            Main.autoHardStone = false;
             treasureInitialTime = System.currentTimeMillis();
         }
     }

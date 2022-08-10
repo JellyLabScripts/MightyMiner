@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.macros.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
+import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.macros.Macro;
@@ -49,7 +50,7 @@ public class GemstoneMacro extends Macro {
 
     @Override
     public void onEnable() {
-        baritone = new AutoMineBaritone(getPathBehaviour(), getMineBehaviour());
+        baritone = new AutoMineBaritone(getMineBehaviour());
         minedNearbyGemstones = false;
     }
 
@@ -115,20 +116,16 @@ public class GemstoneMacro extends Macro {
         }
     }
 
-
-    private PathBehaviour getPathBehaviour(){
-        return new PathBehaviour(
+    private MineBehaviour getMineBehaviour(){
+        return new MineBehaviour(
+                AutoMineType.DYNAMIC,
+                false,
+                MightyMiner.config.gemRotationTime,
+                MightyMiner.config.gemRestartTimeThreshold,
                 null,
                 blocksAllowedToMine,
                 MightyMiner.config.gemMaxY,
                 MightyMiner.config.gemMinY
-        );
-    }
-    private MineBehaviour getMineBehaviour(){
-        return new MineBehaviour(
-                false,
-                MightyMiner.config.gemRotationTime,
-                MightyMiner.config.gemRestartTimeThreshold
         );
     }
 

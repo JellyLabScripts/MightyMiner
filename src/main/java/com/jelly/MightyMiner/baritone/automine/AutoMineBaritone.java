@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.baritone.automine;
 
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.baritone.logging.Logger;
@@ -49,9 +50,10 @@ public class AutoMineBaritone{
 
     AStarPathFinder pathFinder;
 
-    public AutoMineBaritone(PathBehaviour pathBehaviour, MineBehaviour mineBehaviour){
-        pathFinder = new AStarPathFinder(pathBehaviour);
+    public AutoMineBaritone(MineBehaviour mineBehaviour){
         this.mineBehaviour = mineBehaviour;
+        pathFinder = new AStarPathFinder(getPathBehaviour());
+
     }
 
 
@@ -135,10 +137,8 @@ public class AutoMineBaritone{
         if(phase != TickEvent.Phase.START || !inAction || blocksToMine.isEmpty())
             return;
 
-        if ( (blocksToMine.getLast().getBlockType() == BlockType.MINE && BlockUtils.isPassable(blocksToMine.getLast().getBlockPos())) ||
-                (blocksToMine.getLast().getBlockType() == BlockType.WALK &&
-                (BlockUtils.onTheSameXZ(blocksToMine.getLast().getBlockPos(), BlockUtils.getPlayerLoc()) || !BlockUtils.fitsPlayer(blocksToMine.getLast().getBlockPos().down())) )
-        ){
+
+        if (shouldRemoveFromList(blocksToMine.getLast())) {
             stuckTickCount = 0;
             minedBlocks.add(blocksToMine.getLast());
             BlockRenderer.renderMap.remove(blocksToMine.getLast().getBlockPos());
@@ -231,6 +231,12 @@ public class AutoMineBaritone{
     }
 
     private void updateState(){
+
+        if(mineBehaviour.getMineType() == AutoMineType.STATIC) {
+            currentState = PlayerState.MINING;
+            return;
+        }
+
         if(blocksToMine.isEmpty())
             return;
 
@@ -276,6 +282,23 @@ public class AutoMineBaritone{
             enableBaritone(targetBlockType);
         } catch (InterruptedException ignored) {}
     };
+
+    private boolean shouldRemoveFromList(BlockNode lastBlockNode){
+        if(lastBlockNode.getBlockType() == BlockType.MINE)
+            return BlockUtils.isPassable(lastBlockNode.getBlockPos()) || BlockUtils.getBlock(lastBlockNode.getBlockPos()).equals(Blocks.bedrock);
+        else
+            return BlockUtils.onTheSameXZ(lastBlockNode.getBlockPos(), BlockUtils.getPlayerLoc()) || !BlockUtils.fitsPlayer(lastBlockNode.getBlockPos().down());
+    }
+
+    private PathBehaviour getPathBehaviour(){
+        return new PathBehaviour(
+                mineBehaviour.getForbiddenMiningBlocks() == null ? null : mineBehaviour.getForbiddenMiningBlocks(),
+                mineBehaviour.getAllowedMiningBlocks() == null ? null : mineBehaviour.getAllowedMiningBlocks(),
+                mineBehaviour.getMaxY(),
+                mineBehaviour.getMinY(),
+                mineBehaviour.getMineType() == AutoMineType.DYNAMIC ? 30 : 4
+        );
+    }
 
 
 }

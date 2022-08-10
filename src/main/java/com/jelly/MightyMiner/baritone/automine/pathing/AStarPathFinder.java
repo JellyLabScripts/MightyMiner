@@ -45,7 +45,7 @@ public class AStarPathFinder {
 
     public LinkedList<BlockNode> getPath(Block... blockType) throws NoBlockException, NoPathException {
 
-        List<BlockPos> foundBlocks = BlockUtils.findBlock(30, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType);
+        List<BlockPos> foundBlocks = BlockUtils.findBlock(pathBehaviour.getSearchRadius(), blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType);
         Logger.playerLog("Found gemstones : " + foundBlocks.size());
 
         long pastTime = System.currentTimeMillis();

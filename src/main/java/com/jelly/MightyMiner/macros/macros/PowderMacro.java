@@ -1,8 +1,8 @@
 package com.jelly.MightyMiner.macros.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.baritone.logging.Logger;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
@@ -23,6 +23,14 @@ import java.util.List;
 public class PowderMacro extends Macro {
 
     List<Block> blocksAllowedToMine = new ArrayList<>();
+    List<Block> mineSlowBlocks = new ArrayList<Block>(){
+        {
+            add(Blocks.prismarine);
+            add(Blocks.stained_glass_pane);
+            add(Blocks.stained_glass);
+            add(Blocks.wool);
+        }
+    };
     long treasureInitialTime;
 
     float playerYaw;
@@ -49,6 +57,7 @@ public class PowderMacro extends Macro {
     public void onEnable() {
 
         Main.configFile.hardIndex = MightyMiner.config.powAuraType;
+        Main.configFile.includeOres = true;
         currentState = State.NORMAL;
         turnState = 1;
         treasureInitialTime = System.currentTimeMillis();
@@ -62,6 +71,8 @@ public class PowderMacro extends Macro {
         blocksAllowedToMine.add(Blocks.emerald_ore);
         blocksAllowedToMine.add(Blocks.gold_ore);
         blocksAllowedToMine.add(Blocks.redstone_ore);
+        blocksAllowedToMine.add(Blocks.lapis_ore);
+        blocksAllowedToMine.add(Blocks.lit_redstone_ore);
         blocksAllowedToMine.add(Blocks.diamond_ore);
         blocksAllowedToMine.add(Blocks.prismarine);
         blocksAllowedToMine.add(Blocks.wool);
@@ -87,10 +98,19 @@ public class PowderMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
+        if(PlayerUtils.hasPlayerInsideRadius(MightyMiner.config.powPlayerRad)){
+            PlayerUtils.warpBackToIsland();
+            MacroHandler.disableScript();
+            Main.autoHardStone = false;
+            return;
+        }
+
         if(rotation.rotating){
             KeybindHandler.resetKeybindState();
             return;
         }
+
+
 
         updateState();
 
@@ -117,9 +137,12 @@ public class PowderMacro extends Macro {
                 break;
 
             case NORMAL: case UTurn:
-                if(MightyMiner.config.powStoneAura)
-                    Main.autoHardStone = true;
-                rotation.intLockAngle(playerYaw, MightyMiner.config.powStoneAura ? 0 : (shouldLookDown() ? 60 : 27), 200);
+                if(MightyMiner.config.powStoneAura) {
+                    Main.autoHardStone = !frontShouldMineSlow();
+                    rotation.intLockAngle(playerYaw, (shouldLookDown() ? 60 : (frontShouldMineSlow() ? 27 : 0)), 200);
+                } else
+                    rotation.intLockAngle(playerYaw, (shouldLookDown() ? 60 : 27), 200);
+
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
                 break;
@@ -172,7 +195,8 @@ public class PowderMacro extends Macro {
     @Override
     public void onMessageReceived(String message){
         if(message.contains("You have successfully picked the lock on this chest")){
-            currentState = treasureCacheState;
+            if(currentState != State.TREASURE)
+                currentState = treasureCacheState;
             LogUtils.debugLog("Completed treasure");
         }
         if(message.contains("You uncovered a treasure chest!")){
@@ -216,6 +240,10 @@ public class PowderMacro extends Macro {
     boolean shouldLookDown(){
         return (AngleUtils.shouldLookAtCenter(BlockUtils.getRelativeBlockPos(0, 0, 1)) && BlockUtils.isPassable(BlockUtils.getRelativeBlock(0, 1, 1)))
         || (AngleUtils.shouldLookAtCenter(BlockUtils.getRelativeBlockPos(0, 0, 0)) && BlockUtils.isPassable(BlockUtils.getRelativeBlock(0, 1, 0)));
+    }
+    boolean frontShouldMineSlow(){
+        return mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, 1))
+                || BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) ||  BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane) ;
     }
     boolean isInCenterOfBlock() {
         return (Math.round(AngleUtils.get360RotationYaw()) == 180 || Math.round(AngleUtils.get360RotationYaw()) == 0) ? Math.abs(Minecraft.getMinecraft().thePlayer.posZ) % 1 > 0.3f && Math.abs(Minecraft.getMinecraft().thePlayer.posZ) % 1 < 0.7f :

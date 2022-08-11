@@ -1,6 +1,8 @@
 package com.jelly.MightyMiner.utils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
@@ -27,6 +29,24 @@ public class PlayerUtils {
             }
         }
         return 0;
+    }
+
+    public static boolean hasPlayerInsideRadius(int radius){
+        for(Entity e :  mc.theWorld.getLoadedEntityList()){
+            if(!(e instanceof EntityPlayer))
+                continue;
+            if(e.isInvisible() || e.equals(mc.thePlayer))
+                continue;
+            if(e.getDistanceToEntity(mc.thePlayer) < radius)
+                return true;
+        }
+        return false;
+
+    }
+
+
+    public static void warpBackToIsland(){
+        mc.thePlayer.sendChatMessage("/warp home");
     }
 
     public static void centerToBlock() {

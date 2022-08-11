@@ -5,6 +5,7 @@ import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.AngleUtils;
@@ -65,6 +66,12 @@ public class GemstoneMacro extends Macro {
 
         if(phase != TickEvent.Phase.START)
             return;
+
+
+        if(PlayerUtils.hasPlayerInsideRadius(MightyMiner.config.gemPlayerRad)){
+            PlayerUtils.warpBackToIsland();
+            MacroHandler.disableScript();
+        }
 
         if(haveTreasureChest && System.currentTimeMillis() - treasureInitialTime > 7000) {
             haveTreasureChest = false;

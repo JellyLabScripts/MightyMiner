@@ -59,6 +59,16 @@ public class Config extends Vigilant {
     )
     public int gemRotationTime = 300;
 
+    @Property(type = PropertyType.SLIDER,
+            name = "Player detection radius",
+            description = "Warp back to island if there is player inside the given radius of player",
+            category = "Gemstone macro",
+            subcategory = "Miscellaneous",
+            max = 30,
+            min = 1
+    )
+    public int gemPlayerRad = 10;
+
     @Property(type = PropertyType.SWITCH,
             name = "Mine gemstones",
             category = "Powder macro",
@@ -92,6 +102,17 @@ public class Config extends Vigilant {
     public boolean powCenter = false;
 
 
+    @Property(type = PropertyType.SLIDER,
+            name = "Player detection radius",
+            description = "Warp back to island if there is player inside the given radius of player",
+            category = "Powder macro",
+            subcategory = "Miscellaneous",
+            max = 30,
+            min = 1
+    )
+    public int powPlayerRad = 10;
+
+
 
     @Property(type = PropertyType.SWITCH,
             name = "Shift when mining",
@@ -120,6 +141,17 @@ public class Config extends Vigilant {
             min = 2
     )
     public int mithRestartTimeThreshold = 5;
+
+
+    @Property(type = PropertyType.SLIDER,
+            name = "Player detection radius",
+            description = "Warp back to island if there is player inside the given radius of player",
+            category = "Mithril macro",
+            subcategory = "Miscellaneous",
+            max = 30,
+            min = 1
+    )
+    public int mithPlayerRad = 10;
 
 
 

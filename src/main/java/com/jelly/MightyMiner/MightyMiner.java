@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import rosegoldaddons.Main;
 
 @Mod(modid = MightyMiner.MODID, version = MightyMiner.VERSION)
 public class MightyMiner {
@@ -28,10 +29,10 @@ public class MightyMiner {
     {
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
-        MinecraftForge.EVENT_BUS.register(new GemstoneMacro());
         MinecraftForge.EVENT_BUS.register(new BlockRenderer());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
+
         Minecraft.getMinecraft().gameSettings.gammaSetting = 100;
     }
 

@@ -81,24 +81,24 @@ public class BlockUtils {
     public static Block getBlock(BlockPos blockPos) {
         return mc.theWorld.getBlockState(blockPos).getBlock();
     }
-    public static List<BlockPos>  findBlock(int range, Block... requiredBlock) {
-        return findBlock(range, null, 0, 256, requiredBlock);
+    public static List<BlockPos>  findBlock(int searchDiameter, Block... requiredBlock) {
+        return findBlock(searchDiameter, null, 0, 256, requiredBlock);
     }
-    public static List<BlockPos> findBlock(int range, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlock) {
+    public static List<BlockPos> findBlock(int searchDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlock) {
 
         List<Block> requiredBlocks = Arrays.asList(requiredBlock);
         List<BlockPos> foundBlocks = new ArrayList<>();
 
 
-        for (int i = 0; i < range; i++) {
-            for (int j = 0; j < range; j++) {
-                for (int k = 0; k < range; k++) {
-                    if (requiredBlocks.contains(getBlock(getPlayerLoc().add(i - range / 2, j - range / 2, k - range / 2)))) {
-                        if(forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(getPlayerLoc().add(i - range / 2, j - range / 2, k - range / 2)))
+        for (int i = 0; i < searchDiameter; i++) {
+            for (int j = 0; j < searchDiameter; j++) {
+                for (int k = 0; k < searchDiameter; k++) {
+                    if (requiredBlocks.contains(getBlock(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2)))) {
+                        if(forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2)))
                             continue;
-                        if((int)mc.thePlayer.posY + (j - range / 2) > maxY || (int)mc.thePlayer.posY + (j - range / 2) < minY)
+                        if((int)mc.thePlayer.posY + (j - searchDiameter / 2) > maxY || (int)mc.thePlayer.posY + (j - searchDiameter / 2) < minY)
                             continue;
-                        foundBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - range / 2, j - range / 2, k - range / 2));
+                        foundBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2));
                     }
 
                 }
@@ -114,7 +114,7 @@ public class BlockUtils {
                 new BlockPos(
                         mc.thePlayer.posX + (getUnitX() * frontOffset) + (getUnitZ() * -1 * rightOffset),
                         mc.thePlayer.posY + upOffset,
-                        mc.thePlayer.posZ + (getUnitZ() * frontOffset) + (getUnitX() * frontOffset)
+                        mc.thePlayer.posZ + (getUnitZ() * frontOffset) + (getUnitX() * rightOffset)
                 )));
     }
     public static BlockPos getRelativeBlockPos(float rightOffset, float upOffset, float frontOffset) {
@@ -177,6 +177,7 @@ public class BlockUtils {
         Vec3 vec31 = MathUtils.getVectorForRotation(AngleUtils.getRequiredPitch(blockChecked), AngleUtils.getRequiredYaw(blockChecked));
         Vec3 vec32 = vec3.addVector(vec31.xCoord * 4.5f, vec31.yCoord * 4.5f, vec31.zCoord * 4.5f);
         MovingObjectPosition objectPosition = mc.theWorld.rayTraceBlocks(vec3, vec32, false, false, true);
+        System.out.println(objectPosition.getBlockPos());
         return objectPosition.getBlockPos().equals(blockChecked);
     }
     public static boolean canSeeBlock(BlockPos blockFrom, BlockPos blockChecked) {
@@ -185,6 +186,7 @@ public class BlockUtils {
         Vec3 vec31 = MathUtils.getVectorForRotation(AngleUtils.getRequiredPitch(blockFrom, blockChecked), AngleUtils.getRequiredYaw(blockFrom, blockChecked));
         Vec3 vec32 = vec3.addVector(vec31.xCoord * 4.5f, vec31.yCoord * 4.5f, vec31.zCoord * 4.5f);
         MovingObjectPosition objectPosition = mc.theWorld.rayTraceBlocks(vec3, vec32, false, false, true);
+
         return objectPosition.getBlockPos().equals(blockChecked);
     }
     public static boolean canReachBlock(BlockPos blockChecked) {

@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.utils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
 
 import java.util.ArrayList;
@@ -26,5 +27,12 @@ public class PlayerUtils {
             }
         }
         return 0;
+    }
+
+    public static void centerToBlock() {
+        if (mc.thePlayer != null) {
+            BlockPos block = new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ);
+            mc.thePlayer.setPosition(block.getX() + 0.5, mc.thePlayer.posY, block.getZ() + 0.5);
+        }
     }
 }

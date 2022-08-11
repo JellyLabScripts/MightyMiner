@@ -12,16 +12,20 @@ public class PathBehaviour{
     int maxY;
     int minY;
     int searchRadius;
+    boolean staticMode;
 
-    public PathBehaviour(List<Block> forbiddenMiningBlocks, List<Block> allowedMiningBlocks, int maxY, int minY, int searchRadius) {
+    public PathBehaviour(List<Block> forbiddenMiningBlocks, List<Block> allowedMiningBlocks, int maxY, int minY, int searchRadius, boolean staticMode) {
         this.forbiddenMiningBlocks = forbiddenMiningBlocks;
         this.allowedMiningBlocks = allowedMiningBlocks;
         this.maxY = maxY;
         this.minY = minY;
         this.searchRadius = searchRadius;
+        this.staticMode = staticMode;
     }
 
-
+    public boolean isStaticMode() {
+        return staticMode;
+    }
 
     public List<Block> getForbiddenMiningBlocks() {
         return forbiddenMiningBlocks;

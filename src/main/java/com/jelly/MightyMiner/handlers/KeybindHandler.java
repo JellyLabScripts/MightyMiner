@@ -2,8 +2,10 @@ package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.config.Config;
+import com.jelly.MightyMiner.utils.BlockUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -44,6 +46,9 @@ public class KeybindHandler {
         }
         if(macroKeybinds[1].isKeyDown()){
             MacroHandler.disableScript();
+        }
+        if(macroKeybinds[2].isKeyDown()){
+            System.out.println(BlockUtils.canSeeBlock(new BlockPos(2, 250, 2)));
         }
         if(macroKeybinds[3].isKeyDown()){
             mc.displayGuiScreen(MightyMiner.config.gui());

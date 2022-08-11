@@ -70,7 +70,12 @@ public class AutoMineBaritone{
         targetBlockType = blockType;
 
         clearBlocksToWalk();
+
         KeybindHandler.resetKeybindState();
+
+        if(mineBehaviour.isShiftWhenMine())
+            KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
+
 
         new Thread(() -> {
             try{
@@ -79,8 +84,6 @@ public class AutoMineBaritone{
                 Logger.playerLog("Error when getting path!");
                 e.printStackTrace();
             }
-            Logger.playerLog("Checking if path is valid");
-
             if (!blocksToMine.isEmpty()) {
                 for (BlockNode blockNode : blocksToMine) {
                     BlockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
@@ -89,8 +92,7 @@ public class AutoMineBaritone{
             } else {
                 Logger.playerLog("blocks to mine EMPTY!");
             }
-            Logger.playerLog("Starting to mine");
-
+            Logger.log("Starting to mine");
             inAction = true;
             currentState = PlayerState.NONE;
             stuckTickCount = 0;
@@ -106,6 +108,10 @@ public class AutoMineBaritone{
         inAction = false;
         currentState = PlayerState.NONE;
         KeybindHandler.resetKeybindState();
+
+        if(mineBehaviour.isShiftWhenMine())
+            KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
+
         if(!blocksToMine.isEmpty())
             pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
         clearBlocksToWalk();
@@ -296,7 +302,8 @@ public class AutoMineBaritone{
                 mineBehaviour.getAllowedMiningBlocks() == null ? null : mineBehaviour.getAllowedMiningBlocks(),
                 mineBehaviour.getMaxY(),
                 mineBehaviour.getMinY(),
-                mineBehaviour.getMineType() == AutoMineType.DYNAMIC ? 30 : 4
+                mineBehaviour.getMineType() == AutoMineType.DYNAMIC ? 30 : 4,
+                mineBehaviour.getMineType() == AutoMineType.STATIC
         );
     }
 

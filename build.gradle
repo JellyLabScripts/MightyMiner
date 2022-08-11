@@ -62,9 +62,6 @@ dependencies {
     include(fileTree(dir: 'libs', include: '*.jar'))
     implementation(fileTree(dir: 'libs', include: '*.jar'))
 
-  //  fileTree(dir: 'libs', include: '*.jar')
-   // include(files('libs/RoseGoldAddons-2.8.9.jar'))
-  //  implementation(files("libs/RoseGoldAddons-2.8.9.jar"))
 
 }
 

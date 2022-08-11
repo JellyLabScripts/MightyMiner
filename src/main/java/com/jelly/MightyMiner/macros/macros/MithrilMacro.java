@@ -29,7 +29,7 @@ public class MithrilMacro extends Macro {
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
         if(!baritone.isEnabled()){
-            baritone.enableBaritone(Blocks.prismarine, Blocks.wool);
+            baritone.enableBaritone(Blocks.prismarine, Blocks.wool, Blocks.stained_hardened_clay);
         }
 
     }

@@ -68,10 +68,30 @@ public class Config extends Vigilant {
 
     @Property(type = PropertyType.SWITCH,
             name = "RGA hardstone aura",
+            description = "Mines hard stone around you. USE WITH Center to block",
             category = "Powder macro",
             subcategory = "Miscellaneous"
     )
     public boolean powStoneAura = false;
+
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Hardstone aura mode",
+            category = "Powder macro",
+            subcategory = "Miscellaneous",
+            options = { "Blocks around", "Facing axis"}
+    )
+    public int powAuraType = 1;
+
+    @Property(type = PropertyType.SWITCH,
+            name = "Center to block",
+            description = "Center to the middle of block like AOTE when necessary (Hasn't been fully tested out). However, please have this turned on if you are using RGA hardstone aura",
+            category = "Powder macro",
+            subcategory = "Miscellaneous"
+    )
+    public boolean powCenter = false;
+
+
 
     @Property(type = PropertyType.SWITCH,
             name = "Shift when mining",

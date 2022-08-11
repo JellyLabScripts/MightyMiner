@@ -216,19 +216,19 @@ public class AngleUtils {
                 switch (blockSide){
                     case posX:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
                         break;
                     case negX:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
                         break;
                     case posZ:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
                         break;
                     case negZ:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
                         break;
                 }
                 if(tempCost < lowestCost) {
@@ -275,27 +275,27 @@ public class AngleUtils {
                 switch (blockSide){
                     case posX:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
                         break;
                     case negX:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
                         break;
                     case posZ:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
                         break;
                     case negZ:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
                         break;
                     case up:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY() + 0.5d, blockLookingAt.getZ());
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY() + 0.5d, blockLookingAt.getZ());
                         break;
                     case down:
                         tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY() - 0.5d, blockLookingAt.getZ());
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY() - 0.5d, blockLookingAt.getZ());
                         break;
                 }
                 if(tempCost < lowestCost) {

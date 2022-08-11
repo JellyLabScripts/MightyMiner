@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.macros.macros.CommissionMacro;
 import com.jelly.MightyMiner.macros.macros.GemstoneMacro;
 import com.jelly.MightyMiner.macros.macros.MithrilMacro;
 import com.jelly.MightyMiner.macros.macros.PowderMacro;
@@ -26,6 +27,7 @@ public class MacroHandler {
        macros.add(new GemstoneMacro());
        macros.add(new PowderMacro());
        macros.add(new MithrilMacro());
+       macros.add(new CommissionMacro());
     }
 
     @SubscribeEvent

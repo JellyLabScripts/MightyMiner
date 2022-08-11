@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "mightyminer",
+  "name": "Mighty Miner",
+  "description": "Best miner!",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["JellyLab"],
+  "credits": "",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

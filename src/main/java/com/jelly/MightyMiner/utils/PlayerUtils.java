@@ -13,6 +13,20 @@ import java.util.List;
 
 public class PlayerUtils {
 
+    private static final List<String> npcList = new ArrayList<String>(){
+        {
+            add("Golden Goblin");
+            add("Eliza");
+            add("Fraiser");
+            add("Wilson");
+            add("Ceanna");
+            add("Carlton");
+            add("Treasure Hoarder");
+            add("Star Centry");
+
+        }
+    };
+
     private static Minecraft mc = Minecraft.getMinecraft();
     public static boolean hasStoppedMoving(){
         return mc.thePlayer.posX - mc.thePlayer.lastTickPosX == 0 &&
@@ -35,13 +49,12 @@ public class PlayerUtils {
         for(Entity e :  mc.theWorld.getLoadedEntityList()){
             if(!(e instanceof EntityPlayer))
                 continue;
-            if(e.isInvisible() || e.equals(mc.thePlayer))
+            if(e.isInvisible() || e.equals(mc.thePlayer) || npcList.contains(e.getDisplayName().getUnformattedText()))
                 continue;
             if(e.getDistanceToEntity(mc.thePlayer) < radius)
                 return true;
         }
         return false;
-
     }
 
 

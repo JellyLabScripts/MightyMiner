@@ -114,6 +114,33 @@ public class Config extends Vigilant {
 
 
 
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Mithril macro priority 1",
+            category = "Mithril macro",
+            subcategory = "Miscellaneous",
+            options = { "Clay", "Prismarine", "Wool"}
+    )
+    public int mithPriority1 = 1;
+
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Mithril macro priority 2",
+            category = "Mithril macro",
+            subcategory = "Miscellaneous",
+            options = { "Clay", "Prismarine", "Wool"}
+    )
+    public int mithPriority2 = 2;
+
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Mithril macro priority 3",
+            category = "Mithril macro",
+            subcategory = "Miscellaneous",
+            options = { "Clay", "Prismarine", "Wool"}
+    )
+    public int mithPriority3 = 0;
+
     @Property(type = PropertyType.SWITCH,
             name = "Shift when mining",
             category = "Mithril macro",

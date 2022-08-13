@@ -7,6 +7,6 @@
     "network.MixinNetworkManager"
   ],
   "client": [
-    "MixinMinecraft"
+    "client.MixinMinecraft"
   ]
 }

@@ -3,26 +3,58 @@ package com.jelly.MightyMiner.handlers;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.utils.BlockUtils;
+import com.jelly.MightyMiner.utils.ReflectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.input.Keyboard;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class KeybindHandler {
     static Minecraft mc = Minecraft.getMinecraft();
     static int setmode = 0;
-    public static int keybindA = mc.gameSettings.keyBindLeft.getKeyCode();
-    public static int keybindD = mc.gameSettings.keyBindRight.getKeyCode();
-    public static int keybindW = mc.gameSettings.keyBindForward.getKeyCode();
-    public static int keybindS = mc.gameSettings.keyBindBack.getKeyCode();
-    public static int keybindAttack = mc.gameSettings.keyBindAttack.getKeyCode();
-    public static int keybindUseItem = mc.gameSettings.keyBindUseItem.getKeyCode();
-    public static int keyBindSpace = mc.gameSettings.keyBindJump.getKeyCode();
-    public static int keyBindShift = mc.gameSettings.keyBindSneak.getKeyCode();
-    public static int keyBindJump = mc.gameSettings.keyBindJump.getKeyCode();
+    public static KeyBinding keybindA = mc.gameSettings.keyBindLeft;
+    public static KeyBinding keybindD =  mc.gameSettings.keyBindRight;
+    public static KeyBinding keybindW = mc.gameSettings.keyBindForward;
+    public static KeyBinding keybindS = mc.gameSettings.keyBindBack;
+    public static KeyBinding keybindAttack =  mc.gameSettings.keyBindAttack;
+    public static KeyBinding keybindUseItem = mc.gameSettings.keyBindUseItem;
+    public static KeyBinding keyBindShift = mc.gameSettings.keyBindSneak;
+    public static KeyBinding keyBindJump = mc.gameSettings.keyBindJump;
+
+    private static Field mcLeftClickCounter;
+
+    static {
+        mcLeftClickCounter = ReflectionHelper.findField(Minecraft.class, "field_71429_W", "leftClickCounter");
+        if (mcLeftClickCounter != null)
+            mcLeftClickCounter.setAccessible(true);
+
+    }
+
+    public static void rightClick() {
+        if (!ReflectionUtils.invoke(mc, "func_147121_ag")) {
+            ReflectionUtils.invoke(mc, "rightClickMouse");
+        }
+    }
+
+    public static void leftClick() {
+        if (!ReflectionUtils.invoke(mc, "func_147116_af")) {
+            ReflectionUtils.invoke(mc, "clickMouse");
+        }
+    }
+
+    public static void middleClick() {
+        if (!ReflectionUtils.invoke(mc, "func_147112_ai")) {
+            ReflectionUtils.invoke(mc, "middleClickMouse");
+        }
+    }
 
 
 
@@ -56,14 +88,27 @@ public class KeybindHandler {
 
     }
 
-    public static void setKeyBindState(int keyCode, boolean pressed) {
+    @SubscribeEvent
+    public void tickEvent(TickEvent.PlayerTickEvent event){
+        if(mcLeftClickCounter != null) {
+            if (mc.inGameHasFocus) {
+                try {
+                    mcLeftClickCounter.set(mc, 0);
+                } catch (IllegalAccessException | IndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static void setKeyBindState(KeyBinding key, boolean pressed) {
         if (pressed) {
             if (mc.currentScreen != null) {
-                KeyBinding.setKeyBindState(keyCode, false);
+                realSetKeyBindState(key, false);
                 return;
             }
         }
-        KeyBinding.setKeyBindState(keyCode, pressed);
+        realSetKeyBindState(key, pressed);
     }
 
     public static void updateKeys(boolean wBool, boolean sBool, boolean aBool, boolean dBool, boolean atkBool, boolean useBool, boolean shiftBool) {
@@ -71,13 +116,13 @@ public class KeybindHandler {
             resetKeybindState();
             return;
         }
-        KeyBinding.setKeyBindState(keybindW, wBool);
-        KeyBinding.setKeyBindState(keybindS, sBool);
-        KeyBinding.setKeyBindState(keybindA, aBool);
-        KeyBinding.setKeyBindState(keybindD, dBool);
-        KeyBinding.setKeyBindState(keybindAttack, atkBool);
-        KeyBinding.setKeyBindState(keybindUseItem, useBool);
-        KeyBinding.setKeyBindState(keyBindShift, shiftBool);
+        realSetKeyBindState(keybindW, wBool);
+        realSetKeyBindState(keybindS, sBool);
+        realSetKeyBindState(keybindA, aBool);
+        realSetKeyBindState(keybindD, dBool);
+        realSetKeyBindState(keybindAttack, atkBool);
+        realSetKeyBindState(keybindUseItem, useBool);
+        realSetKeyBindState(keyBindShift, shiftBool);
     }
 
     public static void updateKeys(boolean wBool, boolean sBool, boolean aBool, boolean dBool, boolean atkBool, boolean useBool, boolean shiftBool, boolean jumpBool) {
@@ -85,14 +130,14 @@ public class KeybindHandler {
             resetKeybindState();
             return;
         }
-        KeyBinding.setKeyBindState(keybindW, wBool);
-        KeyBinding.setKeyBindState(keybindS, sBool);
-        KeyBinding.setKeyBindState(keybindA, aBool);
-        KeyBinding.setKeyBindState(keybindD, dBool);
-        KeyBinding.setKeyBindState(keybindAttack, atkBool);
-        KeyBinding.setKeyBindState(keybindUseItem, useBool);
-        KeyBinding.setKeyBindState(keyBindShift, shiftBool);
-        KeyBinding.setKeyBindState(keyBindJump, jumpBool);
+        realSetKeyBindState(keybindW, wBool);
+        realSetKeyBindState(keybindS, sBool);
+        realSetKeyBindState(keybindA, aBool);
+        realSetKeyBindState(keybindD, dBool);
+        realSetKeyBindState(keybindAttack, atkBool);
+        realSetKeyBindState(keybindUseItem, useBool);
+        realSetKeyBindState(keyBindShift, shiftBool);
+        realSetKeyBindState(keyBindJump, jumpBool);
     }
 
     public static void updateKeys(boolean wBool, boolean sBool, boolean aBool, boolean dBool, boolean atkBool) {
@@ -100,21 +145,34 @@ public class KeybindHandler {
             resetKeybindState();
             return;
         }
-        KeyBinding.setKeyBindState(keybindW, wBool);
-        KeyBinding.setKeyBindState(keybindS, sBool);
-        KeyBinding.setKeyBindState(keybindA, aBool);
-        KeyBinding.setKeyBindState(keybindD, dBool);
-        KeyBinding.setKeyBindState(keybindAttack, atkBool);
+        realSetKeyBindState(keybindW, wBool);
+        realSetKeyBindState(keybindS, sBool);
+        realSetKeyBindState(keybindA, aBool);
+        realSetKeyBindState(keybindD, dBool);
+        realSetKeyBindState(keybindAttack, atkBool);
     }
 
     public static void resetKeybindState() {
-        KeyBinding.setKeyBindState(keybindA, false);
-        KeyBinding.setKeyBindState(keybindS, false);
-        KeyBinding.setKeyBindState(keybindW, false);
-        KeyBinding.setKeyBindState(keybindD, false);
-        KeyBinding.setKeyBindState(keyBindShift, false);
-        KeyBinding.setKeyBindState(keyBindJump, false);
-        KeyBinding.setKeyBindState(keybindAttack, false);
-        KeyBinding.setKeyBindState(keybindUseItem, false);
+        realSetKeyBindState(keybindA, false);
+        realSetKeyBindState(keybindS, false);
+        realSetKeyBindState(keybindW, false);
+        realSetKeyBindState(keybindD, false);
+        realSetKeyBindState(keyBindShift, false);
+        realSetKeyBindState(keyBindJump, false);
+        realSetKeyBindState(keybindAttack, false);
+        realSetKeyBindState(keybindUseItem, false);
+    }
+
+    private static void realSetKeyBindState(KeyBinding key, boolean pressed){
+        if(pressed){
+            if(!key.isKeyDown()){
+                KeyBinding.onTick(key.getKeyCode());
+            }
+            KeyBinding.setKeyBindState(key.getKeyCode(), true);
+
+        } else {
+            KeyBinding.setKeyBindState(key.getKeyCode(), false);
+        }
+
     }
 }

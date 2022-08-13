@@ -108,6 +108,26 @@ public class BlockUtils {
         return foundBlocks;
     }
 
+    public static List<BlockPos> findBlockWithPreference(int searchDiameter, Block... requiredBlock) {
+        List<BlockPos> foundBlocks = new ArrayList<>();
+        for(Block block : requiredBlock) {
+            List<BlockPos> foundCurrentBlocks = new ArrayList<>();
+            for (int i = 0; i < searchDiameter; i++) {
+                for (int j = 0; j < searchDiameter; j++) {
+                    for (int k = 0; k < searchDiameter; k++) {
+                        if ((getBlock(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2))).equals(block)) {
+                            foundCurrentBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2));
+                        }
+
+                    }
+                }
+            }
+            foundCurrentBlocks.sort(Comparator.comparingDouble(b -> MathUtils.getDistanceBetweenTwoPoints(b.getX() + 0.5d, b.getY() + 0.5d, b.getZ() + 0.5d, mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ)));
+            foundBlocks.addAll(foundCurrentBlocks);
+        }
+        return foundBlocks;
+    }
+
 
     public static Block getRelativeBlock(float rightOffset, float upOffset, float frontOffset) {
         return (getBlock(
@@ -177,7 +197,6 @@ public class BlockUtils {
         Vec3 vec31 = MathUtils.getVectorForRotation(AngleUtils.getRequiredPitch(blockChecked), AngleUtils.getRequiredYaw(blockChecked));
         Vec3 vec32 = vec3.addVector(vec31.xCoord * 4.5f, vec31.yCoord * 4.5f, vec31.zCoord * 4.5f);
         MovingObjectPosition objectPosition = mc.theWorld.rayTraceBlocks(vec3, vec32, false, false, true);
-        System.out.println(objectPosition.getBlockPos());
         return objectPosition.getBlockPos().equals(blockChecked);
     }
     public static boolean canSeeBlock(BlockPos blockFrom, BlockPos blockChecked) {

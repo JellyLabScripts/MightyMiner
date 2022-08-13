@@ -195,12 +195,12 @@ public class PowderMacro extends Macro {
     @Override
     public void onMessageReceived(String message){
         if(message.contains("You have successfully picked the lock on this chest")){
-            if(currentState != State.TREASURE)
-                currentState = treasureCacheState;
+            currentState = treasureCacheState;
             LogUtils.debugLog("Completed treasure");
         }
         if(message.contains("You uncovered a treasure chest!")){
-            treasureCacheState = currentState;
+            if(currentState != State.TREASURE)
+                treasureCacheState = currentState;
             currentState = State.TREASURE;
 
             KeybindHandler.resetKeybindState();

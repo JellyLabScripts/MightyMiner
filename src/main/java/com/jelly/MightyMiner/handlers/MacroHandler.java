@@ -21,6 +21,7 @@ public class MacroHandler {
     public static List<Macro> macros = new ArrayList<>();
     public static Minecraft mc = Minecraft.getMinecraft();
 
+
     static boolean enabled = false;
 
     public static void initializeMacro(){
@@ -74,6 +75,18 @@ public class MacroHandler {
         for (Macro process : macros) {
             if (process.isEnabled()) {
                 process.onMessageReceived(event.message.getUnformattedText());
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onKeybindTick(KeyBindTickEvent event) {
+        if (!enabled || mc.thePlayer == null || mc.theWorld == null)
+            return;
+
+        for (Macro process : macros) {
+            if (process.isEnabled()) {
+                process.onKeyBindTick();
             }
         }
     }

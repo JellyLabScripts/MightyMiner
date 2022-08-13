@@ -351,4 +351,26 @@ public class AngleUtils {
 
     }
 
+
+    public static float getActualYawFrom360(float yaw360) {
+        float currentYaw = yaw360;
+        if(mc.thePlayer.rotationYaw > yaw360){
+            while (mc.thePlayer.rotationYaw - currentYaw < 180 || mc.thePlayer.rotationYaw - currentYaw > 0){
+                if(Math.abs(currentYaw + 360 - mc.thePlayer.rotationYaw) < Math.abs(currentYaw - mc.thePlayer.rotationYaw))
+                    currentYaw = currentYaw + 360;
+                else  break;
+            }
+        }
+        if(mc.thePlayer.rotationYaw < yaw360){
+            while (currentYaw - mc.thePlayer.rotationYaw > 180 || mc.thePlayer.rotationYaw - currentYaw < 0){
+                if(Math.abs(currentYaw - 360 - mc.thePlayer.rotationYaw) < Math.abs(currentYaw - mc.thePlayer.rotationYaw))
+                    currentYaw = currentYaw - 360;
+                else  break;
+            }
+        }
+        return currentYaw;
+
+
+    }
+
 }

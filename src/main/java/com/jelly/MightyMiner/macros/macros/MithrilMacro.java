@@ -8,13 +8,25 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.PlayerUtils;
+import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MithrilMacro extends Macro {
 
     AutoMineBaritone baritone;
+
+    List<Block> priorityBlocks = new ArrayList<Block>(){
+        {
+            add(Blocks.stained_hardened_clay);
+            add(Blocks.prismarine);
+            add(Blocks.wool);
+        }
+    };
 
     @Override
     protected void onEnable() {
@@ -27,7 +39,6 @@ public class MithrilMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-
         if(PlayerUtils.hasPlayerInsideRadius(MightyMiner.config.mithPlayerRad)){
             PlayerUtils.warpBackToIsland();
             MacroHandler.disableScript();
@@ -37,7 +48,7 @@ public class MithrilMacro extends Macro {
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
         if(!baritone.isEnabled()){
-            baritone.enableBaritone(Blocks.prismarine, Blocks.wool, Blocks.stained_hardened_clay);
+            baritone.enableBaritone(priorityBlocks.get(MightyMiner.config.mithPriority1), priorityBlocks.get(MightyMiner.config.mithPriority2), priorityBlocks.get(MightyMiner.config.mithPriority3));
         }
 
     }
@@ -56,8 +67,8 @@ public class MithrilMacro extends Macro {
 
     @Override
     protected void onDisable() {
-        KeybindHandler.resetKeybindState();
         baritone.disableBaritone();
+        KeybindHandler.resetKeybindState();
     }
 
 
@@ -65,6 +76,7 @@ public class MithrilMacro extends Macro {
         return new MineBehaviour(
                 AutoMineType.STATIC,
                 MightyMiner.config.mithShiftWhenMine,
+                true,
                 MightyMiner.config.mithRotationTime,
                 MightyMiner.config.mithRestartTimeThreshold,
                 null,

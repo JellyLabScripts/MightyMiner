@@ -24,6 +24,8 @@ public abstract class Macro {
 
     public void onTick(TickEvent.Phase phase) {}
 
+    public void onKeyBindTick() {}
+
     public void onLastRender() {}
 
     public void onOverlayRenderEvent(RenderGameOverlayEvent event) {}

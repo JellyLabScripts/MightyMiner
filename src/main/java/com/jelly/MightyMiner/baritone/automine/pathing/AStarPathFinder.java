@@ -43,11 +43,37 @@ public class AStarPathFinder {
         this.blackListedPos.addAll(Arrays.asList(blackListedPos));
     }
 
+    public LinkedList<BlockNode> getPathWithPreference(Block... blockType) throws NoBlockException, NoPathException {
+
+        LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
+        if(BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType).isEmpty())
+            throw new NoBlockException();
+        for(Block block : blockType) {
+            List<BlockPos> foundBlocks = BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), block);
+            for (int i = 0; i < (Math.min(foundBlocks.size(), 20)); i++) {
+                LinkedList<BlockNode> path = calculatePath(BlockUtils.getPlayerLoc(), foundBlocks.get(i));
+                if (!path.isEmpty()) {
+                    if (pathBehaviour.isStaticMode() && path.size() > 1)
+                        continue;
+                    possiblePaths.add(path);
+                   // if (possiblePaths.getLast().size() == 1)
+                   //     return possiblePaths.getLast();
+                }
+            }
+            if(!possiblePaths.isEmpty()) {
+                possiblePaths.sort(Comparator.comparingInt(this::calculatePathCost));
+                return possiblePaths.getFirst();
+            }
+
+        }
+        throw new NoPathException();
+
+    }
+
     public LinkedList<BlockNode> getPath(Block... blockType) throws NoBlockException, NoPathException {
 
         List<BlockPos> foundBlocks = BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType);
         Logger.log("Found blocks : " + foundBlocks.size());
-
 
         long pastTime = System.currentTimeMillis();
 
@@ -63,8 +89,8 @@ public class AStarPathFinder {
 
                 possiblePaths.add(path);
                 BlockRenderer.renderMap.put(possiblePaths.getLast().getFirst().getBlockPos(), Color.GREEN);
-                if(possiblePaths.getLast().size() == 1)
-                    return possiblePaths.getLast();
+               // if(possiblePaths.getLast().size() == 1)
+               //     return possiblePaths.getLast();
             }
         }
 
@@ -286,8 +312,14 @@ public class AStarPathFinder {
     }
     private int calculatePathCost(List<BlockNode> nodes){
         int cost = 0;
-        for(BlockNode node : nodes){
-            cost += (node.getBlockType() == BlockType.WALK) ? 2 : 1; //avoid open areas
+        if(nodes.size() <= 2){
+            for (BlockNode node : nodes) {
+                cost += Math.abs(mc.thePlayer.rotationYaw - AngleUtils.getRequiredYaw(node.getBlockPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitch(node.getBlockPos()));
+            }
+        } else {
+            for (BlockNode node : nodes) {
+                cost += (node.getBlockType() == BlockType.WALK) ? 2 : 1; //avoid open areas
+            }
         }
         return cost;
     }

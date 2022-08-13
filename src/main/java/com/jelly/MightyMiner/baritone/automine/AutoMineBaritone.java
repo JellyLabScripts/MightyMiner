@@ -79,7 +79,10 @@ public class AutoMineBaritone{
 
         new Thread(() -> {
             try{
-                blocksToMine = pathFinder.getPath(blockType);
+                if(mineBehaviour.isMineWithPreference())
+                    blocksToMine = pathFinder.getPathWithPreference(blockType);
+                else
+                    blocksToMine = pathFinder.getPath(blockType);
             } catch (Throwable e){
                 Logger.playerLog("Error when getting path!");
                 e.printStackTrace();

@@ -4,7 +4,6 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
-import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
@@ -62,6 +61,7 @@ public class GemstoneMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase){
+
         baritone.onTickEvent(phase);
 
         if(phase != TickEvent.Phase.START)
@@ -126,6 +126,7 @@ public class GemstoneMacro extends Macro {
     private MineBehaviour getMineBehaviour(){
         return new MineBehaviour(
                 AutoMineType.DYNAMIC,
+                false,
                 false,
                 MightyMiner.config.gemRotationTime,
                 MightyMiner.config.gemRestartTimeThreshold,

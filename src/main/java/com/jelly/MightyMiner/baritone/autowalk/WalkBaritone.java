@@ -123,9 +123,7 @@ public class WalkBaritone{
             if (deltaJumpTick > 0) {
                 deltaJumpTick--;
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindJump, true);
-            } else KeybindHandler.setKeyBindState(KeybindHandler.keyBindJump, false);
-
-
+            } else   KeybindHandler.setKeyBindState(KeybindHandler.keyBindJump, false);
             KeybindHandler.setKeyBindState(KeybindHandler.keybindW, rotation.completed);
         }
 

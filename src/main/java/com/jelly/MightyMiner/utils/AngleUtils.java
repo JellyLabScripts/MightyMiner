@@ -32,6 +32,16 @@ public class AngleUtils {
         return get360RotationYaw(targetYaw360 - initialYaw360);
     }
 
+    public static float getActualRotationYaw() { //f3
+        return getActualRotationYaw(mc.thePlayer.rotationYaw);
+    }
+
+    public static float getActualRotationYaw(float yaw) { //f3
+        return yaw > 0 ?
+                (yaw % 360 > 180 ? -(180 - (yaw % 360 - 180)) : yaw % 360) :
+                (-yaw % 360 > 180 ? (180 - (-yaw % 360 - 180)) : -(-yaw % 360));
+    }
+
     public static float antiClockwiseDifference(float initialYaw360, float targetYaw360) {
         return get360RotationYaw(initialYaw360 - targetYaw360);
     }

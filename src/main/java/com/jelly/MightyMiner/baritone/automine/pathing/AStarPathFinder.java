@@ -61,7 +61,7 @@ public class AStarPathFinder {
                 }
             }
             if(!possiblePaths.isEmpty()) {
-                possiblePaths.sort(Comparator.comparingInt(this::calculatePathCost));
+                possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
                 return possiblePaths.getFirst();
             }
 
@@ -99,7 +99,7 @@ public class AStarPathFinder {
 
         Logger.playerLog("Total time | Time per path : " + (System.currentTimeMillis() - pastTime) + " ms | " + (System.currentTimeMillis() - pastTime) * 1.0d / possiblePaths.size() + " ms");
 
-        possiblePaths.sort(Comparator.comparingInt(this::calculatePathCost));
+        possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
         return possiblePaths.getFirst();
     }
 
@@ -310,15 +310,15 @@ public class AStarPathFinder {
             node.gValue = 1f;
         node.fValue = node.gValue + node.hValue;
     }
-    private int calculatePathCost(List<BlockNode> nodes){
-        int cost = 0;
+    private double calculatePathCost(List<BlockNode> nodes){
+        double cost = 0;
         if(nodes.size() <= 2){
             for (BlockNode node : nodes) {
-                cost += Math.abs(mc.thePlayer.rotationYaw - AngleUtils.getRequiredYaw(node.getBlockPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitch(node.getBlockPos()));
+                cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYaw(node.getBlockPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitch(node.getBlockPos()))) / 540.0d;
             }
         } else {
             for (BlockNode node : nodes) {
-                cost += (node.getBlockType() == BlockType.WALK) ? 2 : 1; //avoid open areas
+                cost += (node.getBlockType() == BlockType.WALK) ? 1.5d : 1d; //avoid open areas
             }
         }
         return cost;

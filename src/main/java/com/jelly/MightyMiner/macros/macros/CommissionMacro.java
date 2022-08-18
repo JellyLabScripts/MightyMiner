@@ -3,6 +3,7 @@ package com.jelly.MightyMiner.macros.macros;
 import com.jelly.MightyMiner.baritone.autowalk.WalkBaritone;
 import com.jelly.MightyMiner.macros.Macro;
 import net.minecraft.util.BlockPos;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class CommissionMacro extends Macro {
@@ -16,6 +17,11 @@ public class CommissionMacro extends Macro {
     @Override
     public void onTick(TickEvent.Phase phase) {
         baritone.onTickEvent(phase);
+    }
+
+    @Override
+    public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
+        baritone.onOverlayRenderEvent(event);
     }
 
     @Override

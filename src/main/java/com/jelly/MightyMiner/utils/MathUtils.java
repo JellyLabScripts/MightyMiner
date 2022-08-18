@@ -48,22 +48,7 @@ public class MathUtils {
         return new Vec3((double)(f1 * f2), (double)f3, (double)(f * f2));
     }
 
-    public static HashMap<List<BlockPos>, Integer> sortByValue(HashMap<List<BlockPos>, Integer> hm)
-    {
-        // Create a list from elements of HashMap
-        List<Map.Entry<List<BlockPos>, Integer> > list =
-                new LinkedList<>(hm.entrySet());
 
-        // Sort the list
-        list.sort(Map.Entry.comparingByValue());
-
-        // put data from sorted list to hashmap
-        HashMap<List<BlockPos>, Integer> temp = new LinkedHashMap<>();
-        for (Map.Entry<List<BlockPos>, Integer> aa : list) {
-            temp.put(aa.getKey(), aa.getValue());
-        }
-        return temp;
-    }
 
 
 

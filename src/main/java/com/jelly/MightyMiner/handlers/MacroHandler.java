@@ -79,18 +79,6 @@ public class MacroHandler {
         }
     }
 
-    @SubscribeEvent
-    public void onKeybindTick(KeyBindTickEvent event) {
-        if (!enabled || mc.thePlayer == null || mc.theWorld == null)
-            return;
-
-        for (Macro process : macros) {
-            if (process.isEnabled()) {
-                process.onKeyBindTick();
-            }
-        }
-    }
-
     public static void onPacketReceive(Packet<?> packet) {
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;

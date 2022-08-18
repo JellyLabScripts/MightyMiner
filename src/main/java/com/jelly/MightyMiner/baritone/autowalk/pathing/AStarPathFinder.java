@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 import java.awt.*;
 import java.util.*;
@@ -108,7 +109,7 @@ public class AStarPathFinder {
 
 
             if(currentNode.blockPos.equals(endingBlock)) {
-                return trackBackPath(currentNode, startNode);
+                return simplifyPath(trackBackPath(currentNode, startNode));
             }
 
 
@@ -153,6 +154,7 @@ public class AStarPathFinder {
             goalNode = goalNode.lastNode;
         }
         mc.thePlayer.addChatMessage(new ChatComponentText("Block count : " + blocksToWalk.size()));
+
         return blocksToWalk;
     }
 
@@ -168,6 +170,36 @@ public class AStarPathFinder {
 
     double getHeuristic(BlockPos start, BlockPos goal){
         return MathUtils.getDistanceBetweenTwoBlock(start, goal);
+    }
+
+    LinkedList<BlockPos> simplifyPath(LinkedList<BlockPos> path){
+        LinkedList<BlockPos> newPath = new LinkedList<>();
+
+        BlockPos startCalcPos = path.getLast();
+        newPath.add(startCalcPos);
+        for(int i = path.size() - 2; i > 0; i--) {
+            if (BlockUtils.hasBlockInterfere(startCalcPos, path.get(i)) || startCalcPos.getY() < path.get(i).getY()) {
+                startCalcPos = path.get(i + 1);
+                newPath.add(startCalcPos);
+            }
+        }
+        newPath.add(path.getFirst());
+        Collections.reverse(newPath);
+        return newPath;
+
+        /*LinkedList<BlockPos> newPath = new LinkedList<>();
+        BlockPos startCalcPos = path.getFirst();
+        newPath.add(startCalcPos);
+        for(int i = 1; i < path.size(); i++) {
+            if (BlockUtils.hasBlockInterfere(startCalcPos, path.get(i)) || startCalcPos.getY() < path.get(i).getY()) {
+                startCalcPos = path.get(i - 1);
+                newPath.add(startCalcPos);
+            }
+        }
+        newPath.add(path.getLast());
+
+        return newPath;*/
+
     }
 
 }

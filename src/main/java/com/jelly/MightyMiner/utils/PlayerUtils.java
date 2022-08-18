@@ -16,6 +16,9 @@ public class PlayerUtils {
     private static final List<String> npcList = new ArrayList<String>(){
         {
             add("Golden Goblin");
+            add("Goblin");
+            add("Executive Viper");
+            add("Grunt");
             add("Eliza");
             add("Fraiser");
             add("Wilson");

@@ -11,7 +11,7 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Macro", category = "Core",
             subcategory = "Macro",
-            options = { "Gemstone macro", "Powder macro", "Mithril macro"}
+            options = { "Gemstone macro", "Powder macro", "Mithril macro"/*,  "Commission macro"*/}
     )
     public int macroType = 0;
 

@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner;
 
+import com.jelly.MightyMiner.baritone.autowalk.movement.InputHandler;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
@@ -30,6 +31,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new BlockRenderer());
+        MinecraftForge.EVENT_BUS.register(new InputHandler());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 

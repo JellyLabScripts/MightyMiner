@@ -1,9 +1,11 @@
 package com.jelly.MightyMiner.baritone.autowalk.pathing;
 
+import com.jelly.MightyMiner.baritone.autowalk.movement.Moves;
 import com.jelly.MightyMiner.baritone.autowalk.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.baritone.logging.Logger;
 import com.jelly.MightyMiner.baritone.structures.GridEnvironment;
-import com.jelly.MightyMiner.baritone.structures.Node;
+import com.jelly.MightyMiner.baritone.autowalk.pathing.structures.Node;
+import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
 import net.minecraft.block.Block;
@@ -12,6 +14,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import org.apache.commons.collections4.map.LinkedMap;
 
 import java.awt.*;
 import java.util.*;
@@ -32,12 +35,12 @@ public class AStarPathFinder {
         this.pathBehaviour = options;
     }
 
-    public LinkedList<BlockPos> getPath(BlockPos targetBlockPos) {
+    public LinkedMap<BlockPos, Moves> getPath(BlockPos targetBlockPos) {
         return calculatePath(BlockUtils.getPlayerLoc(), targetBlockPos);
     }
 
 
-    private LinkedList<BlockPos> calculatePath(BlockPos startingPos, BlockPos endingBlock) {
+    private LinkedMap<BlockPos, Moves> calculatePath(BlockPos startingPos, BlockPos endingBlock) {
 
         gridEnvironment.clear();
         checkedNodes.clear();
@@ -56,7 +59,9 @@ public class AStarPathFinder {
 
         openNodes.add(startNode);
         while (!openNodes.isEmpty()) {
+
             currentNode = openNodes.poll();
+            assert currentNode != null;
             if(currentNode.lastNode != null) {
                 currentGridX = currentNode.blockPos.getX() - startNode.blockPos.getX();
                 currentGridY = currentNode.blockPos.getY();
@@ -68,73 +73,55 @@ public class AStarPathFinder {
 
             if(step > 300) break;
 
-            instantiateNode(currentGridX - 1, currentGridY, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX - 1, currentGridY, currentGridZ), currentNode, endingBlock);
-
-            instantiateNode(currentGridX + 1, currentGridY, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX + 1, currentGridY, currentGridZ), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY, currentGridZ - 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY, currentGridZ - 1), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY, currentGridZ + 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX,  currentGridY, currentGridZ + 1), currentNode, endingBlock);
-
-            instantiateNode(currentGridX - 1, currentGridY - 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX - 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
-
-            instantiateNode(currentGridX + 1, currentGridY - 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX + 1, currentGridY - 1, currentGridZ), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY - 1, currentGridZ - 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ - 1), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY - 1, currentGridZ + 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ + 1), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY - 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY - 1, currentGridZ), currentNode, endingBlock);
-
-            instantiateNode(currentGridX - 1, currentGridY + 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX - 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
-
-            instantiateNode(currentGridX + 1, currentGridY + 1, currentGridZ, startNode);
-            checkNode(gridEnvironment.get(currentGridX + 1, currentGridY + 1, currentGridZ), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY + 1, currentGridZ - 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ - 1), currentNode, endingBlock);
-
-            instantiateNode(currentGridX, currentGridY + 1, currentGridZ + 1, startNode);
-            checkNode(gridEnvironment.get(currentGridX, currentGridY + 1, currentGridZ + 1), currentNode, endingBlock);
-
-
+            for(Moves move : Moves.values()){
+                instantiateNode(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz, startNode);
+                checkNode(move, gridEnvironment.get(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz), currentNode, endingBlock);
+            }
             if(currentNode.blockPos.equals(endingBlock)) {
-                return simplifyPath(trackBackPath(currentNode, startNode));
+                return trackBackPath(currentNode, startNode);
             }
 
 
         }
-        return new LinkedList<>();
+        return new LinkedMap<>();
     }
-    private void checkNode(Node searchNode, Node currentNode, BlockPos endingBlockPos){
+    private void checkNode(Moves move, Node searchNode, Node currentNode, BlockPos endingBlockPos){
 
-        if (!checkedNodes.contains(searchNode) && BlockUtils.fitsPlayer(searchNode.blockPos.down())){
-            if(!openNodes.contains(searchNode)){
-                calculateCost(searchNode, endingBlockPos);
-                searchNode.lastNode = currentNode;
-                openNodes.add(searchNode);
-            } else {
-                if(currentNode.gValue + (Math.abs(searchNode.blockPos.getY() - currentNode.blockPos.getY()) > 0 ? 2 : 1) < searchNode.gValue){
-                    Logger.log("Found better path");
-                    searchNode.lastNode = currentNode;
-                    calculateCost(searchNode, endingBlockPos);
-                    openNodes.remove(searchNode);
-                    openNodes.add(searchNode);
-                }
-            }
+        if(checkedNodes.contains(searchNode) || !BlockUtils.fitsPlayer(searchNode.blockPos.down()))
+            return;
 
-
+        switch (move){
+            case DIAGONAL_NORTHEAST: case DIAGONAL_NORTHWEST: case DIAGONAL_SOUTHEAST: case DIAGONAL_SOUTHWEST:
+                if(!BlockUtils.isPassable(new BlockPos(searchNode.blockPos.getX(), searchNode.blockPos.getY(), currentNode.blockPos.getZ())) || !BlockUtils.isPassable(new BlockPos(currentNode.blockPos.getX(), searchNode.blockPos.getY(), searchNode.blockPos.getZ())))
+                    return;
+                break;
+            case ASCEND_EAST: case ASCEND_NORTH: case ASCEND_SOUTH: case ASCEND_WEST:
+                if(!BlockUtils.isPassable(currentNode.blockPos.up(2)))
+                    return;
+                break;
+            case DESCEND_EAST: case DESCEND_NORTH: case DESCEND_SOUTH: case DESCEND_WEST:
+                if(!BlockUtils.isPassable(searchNode.blockPos.up(2)))
+                    return;
+                break;
         }
+
+        if(!openNodes.contains(searchNode)){
+            calculateCost(searchNode, endingBlockPos);
+            searchNode.lastNode = currentNode;
+           // searchNode.lastNode.move = move; //problematic
+            System.out.println(move);
+            openNodes.add(searchNode);
+        } else {
+            if(currentNode.gValue + move.cost < searchNode.gValue){
+                System.out.println("better path found");
+                searchNode.lastNode = currentNode;
+                calculateCost(searchNode, endingBlockPos);
+                //update open nodes
+                openNodes.remove(searchNode);
+                openNodes.add(searchNode);
+            }
+        }
+
 
     }
 
@@ -146,60 +133,33 @@ public class AStarPathFinder {
             gridEnvironment.set(gridX, gridY, gridZ, node);
     }
 
-    private LinkedList<BlockPos> trackBackPath(Node goalNode, Node startNode){
-        LinkedList<BlockPos> blocksToWalk = new LinkedList<>();
-        blocksToWalk.add(goalNode.blockPos);
+    private LinkedMap<BlockPos, Moves> trackBackPath(Node goalNode, Node startNode){
+        LinkedMap<BlockPos, Moves> blocksToWalk = new LinkedMap<>();
+        if(goalNode.lastNode!= null)
+            blocksToWalk.put(goalNode.blockPos, goalNode.lastNode.move);
         while(!startNode.equals(goalNode) && goalNode.lastNode != null){
-            blocksToWalk.add(goalNode.lastNode.blockPos);
+            blocksToWalk.put(goalNode.lastNode.blockPos,
+                    Moves.getMove(goalNode.blockPos.getX() - goalNode.lastNode.blockPos.getX(), goalNode.blockPos.getY() - goalNode.lastNode.blockPos.getY(), goalNode.blockPos.getZ() - goalNode.lastNode.blockPos.getZ()));
+            //NEED to optimize
             goalNode = goalNode.lastNode;
-        }
-        mc.thePlayer.addChatMessage(new ChatComponentText("Block count : " + blocksToWalk.size()));
 
+        }
+
+        mc.thePlayer.addChatMessage(new ChatComponentText("Block count : " + blocksToWalk.size()));
         return blocksToWalk;
     }
 
     private void calculateCost(Node node, BlockPos endingBlock){
         node.hValue = getHeuristic(node.blockPos, endingBlock);
-
         if(node.lastNode != null)
-            node.gValue = node.lastNode.gValue + ((node.lastNode.blockPos.getY() != node.blockPos.getY()) ? 2 : 1) * ((BlockUtils.isPassable(node.blockPos)) ? 0.5f : 2);
+            node.gValue = node.lastNode.gValue + node.lastNode.move.cost;
         else
-            node.gValue = 1f;
+            node.gValue = 1;
         node.fValue = node.gValue + node.hValue;
     }
 
     double getHeuristic(BlockPos start, BlockPos goal){
         return MathUtils.getDistanceBetweenTwoBlock(start, goal);
-    }
-
-    LinkedList<BlockPos> simplifyPath(LinkedList<BlockPos> path){
-        LinkedList<BlockPos> newPath = new LinkedList<>();
-
-        BlockPos startCalcPos = path.getLast();
-        newPath.add(startCalcPos);
-        for(int i = path.size() - 2; i > 0; i--) {
-            if (BlockUtils.hasBlockInterfere(startCalcPos, path.get(i)) || startCalcPos.getY() < path.get(i).getY()) {
-                startCalcPos = path.get(i + 1);
-                newPath.add(startCalcPos);
-            }
-        }
-        newPath.add(path.getFirst());
-        Collections.reverse(newPath);
-        return newPath;
-
-        /*LinkedList<BlockPos> newPath = new LinkedList<>();
-        BlockPos startCalcPos = path.getFirst();
-        newPath.add(startCalcPos);
-        for(int i = 1; i < path.size(); i++) {
-            if (BlockUtils.hasBlockInterfere(startCalcPos, path.get(i)) || startCalcPos.getY() < path.get(i).getY()) {
-                startCalcPos = path.get(i - 1);
-                newPath.add(startCalcPos);
-            }
-        }
-        newPath.add(path.getLast());
-
-        return newPath;*/
-
     }
 
 }

@@ -1,26 +1,22 @@
 package com.jelly.MightyMiner.baritone.autowalk;
 
+import com.jelly.MightyMiner.baritone.autowalk.movement.Input;
+import com.jelly.MightyMiner.baritone.autowalk.movement.InputHandler;
+import com.jelly.MightyMiner.baritone.autowalk.movement.Moves;
 import com.jelly.MightyMiner.baritone.autowalk.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.baritone.autowalk.pathing.AStarPathFinder;
 import com.jelly.MightyMiner.baritone.logging.Logger;
-import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
-import com.jelly.MightyMiner.baritone.structures.GridEnvironment;
-import com.jelly.MightyMiner.baritone.structures.Node;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.collections4.map.LinkedMap;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 public class WalkBaritone{
   //Custom grid example
@@ -39,14 +35,15 @@ public class WalkBaritone{
     // player starts on K initially [maxX/2, y, maxZ/2]
     Minecraft mc= Minecraft.getMinecraft();
 
-    LinkedList<BlockPos> blocksToWalk = new LinkedList<>();
+    LinkedMap<BlockPos, Moves>  blocksToWalk = new LinkedMap<>();
 
     boolean walking;
 
     Rotation rotation = new Rotation();
-    int deltaJumpTick = 0;
+
 
     AStarPathFinder pathFinder;
+
 
 
 
@@ -67,7 +64,7 @@ public class WalkBaritone{
                 Logger.playerLog("Can't find path!");
                 return;
             }
-            for(BlockPos blockPos : blocksToWalk){
+            for(BlockPos blockPos : blocksToWalk.keySet()){
                 BlockRenderer.renderMap.put(blockPos, Color.ORANGE);
             }
             walking = true;
@@ -78,7 +75,9 @@ public class WalkBaritone{
 
     public void disableBaritone() {
         walking = false;
+        InputHandler.clearAllKeys();
         clearBlocksToWalk();
+        Logger.playerLog("Baritone disabled");
     }
 
 
@@ -87,12 +86,16 @@ public class WalkBaritone{
             if(blocksToWalk != null){
                 if(!blocksToWalk.isEmpty()){
                     for(int i = 0; i < blocksToWalk.size(); i++){
-                        mc.fontRendererObj.drawString(blocksToWalk.get(i).toString() , 5, 5 + 10 * i, -1);
+                        if(blocksToWalk.get(blocksToWalk.get(i)) != null)
+                            mc.fontRendererObj.drawString(blocksToWalk.get(i) + " " + blocksToWalk.get(blocksToWalk.get(i)).toString(), 5, 5 + 10 * i, -1);
                     }
                 }
             }
         }
     }
+
+    Moves lastMove;
+    boolean jumpFlag;
 
     public void onTickEvent(TickEvent.Phase phase){
 
@@ -100,36 +103,34 @@ public class WalkBaritone{
             return;
 
         if(walking) {
-            if (rotation.rotating) {
-                KeybindHandler.resetKeybindState();
+
+            if(blocksToWalk.isEmpty()){
+                disableBaritone();
                 return;
             }
-          //  KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, blocksToWalk.size() <= 5 || !BlockUtils.isAStraightLine(blocksToWalk.get(blocksToWalk.size() - 1), blocksToWalk.get(blocksToWalk.size() - 3), blocksToWalk.get(blocksToWalk.size() - 5)));
-            if (BlockUtils.getPlayerLoc().equals(blocksToWalk.getLast())) {
-                BlockRenderer.renderMap.remove(blocksToWalk.getLast());
-                blocksToWalk.remove(blocksToWalk.size() - 1);
 
-                if (blocksToWalk.size() == 0) {
-                    mc.thePlayer.addChatMessage(new ChatComponentText("Finished baritone"));
-                    walking = false;
-                    KeybindHandler.resetKeybindState();
+
+            if(BlockUtils.onTheSameXZ(BlockUtils.getPlayerLoc(), blocksToWalk.lastKey())){
+                BlockRenderer.renderMap.remove(blocksToWalk.lastKey());
+                lastMove = blocksToWalk.remove(blocksToWalk.lastKey());
+
+                if(blocksToWalk.isEmpty() || BlockUtils.getPlayerLoc().equals(blocksToWalk.firstKey())) {
                     disableBaritone();
                     return;
                 }
             }
 
-            rotation.intLockAngle((AngleUtils.getRequiredYaw(blocksToWalk.getLast())), 0, 500);
-            if (blocksToWalk.getLast().getY() > (int) mc.thePlayer.posY) {
-                if (rotation.completed) {
-                    deltaJumpTick = 3;
-                }
-            }
-            if (deltaJumpTick > 0) {
-                deltaJumpTick--;
-                KeybindHandler.setKeyBindState(KeybindHandler.keyBindJump, true);
-            } else   KeybindHandler.setKeyBindState(KeybindHandler.keyBindJump, false);
 
-            KeybindHandler.setKeyBindState(KeybindHandler.keybindW, !rotation.rotating);
+            if(lastMove != null && lastMove.dy > 0 && !jumpFlag && mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0) {
+                jumpFlag = true;
+            }
+
+            rotation.intLockAngle(AngleUtils.getRequiredYaw(blocksToWalk.lastKey()), 0, 1);
+
+            InputHandler.setInputForceState(Input.JUMP, jumpFlag);
+            InputHandler.setInputForceState(Input.MOVE_FORWARD, !rotation.rotating);
+
+            jumpFlag = false;
         }
 
     }

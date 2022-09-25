@@ -1,6 +1,5 @@
 package com.jelly.MightyMiner.baritone.automine;
 
-import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
@@ -21,10 +20,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 public class AutoMineBaritone{
 
@@ -66,7 +62,6 @@ public class AutoMineBaritone{
 
     public void enableBaritone(Block... blockType){
         enabled = true;
-        mc.thePlayer.addChatMessage(new ChatComponentText("Starting automine"));
         targetBlockType = blockType;
 
         clearBlocksToWalk();
@@ -104,10 +99,10 @@ public class AutoMineBaritone{
 
 
     public void disableBaritone() {
-        pauseMacro();
+        pauseBaritone();
         enabled = false;
     }
-    private void pauseMacro() {
+    private void pauseBaritone() {
         inAction = false;
         currentState = PlayerState.NONE;
         KeybindHandler.resetKeybindState();
@@ -162,7 +157,6 @@ public class AutoMineBaritone{
         }
 
         if(blocksToMine.isEmpty() || BlockUtils.isPassable(blocksToMine.getFirst().getBlockPos())){
-            mc.thePlayer.addChatMessage(new ChatComponentText("Finished baritone"));
             disableBaritone();
             return;
         }
@@ -216,15 +210,22 @@ public class AutoMineBaritone{
                         false,
                         false,
                         mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null &&
-                                mc.objectMouseOver.getBlockPos().equals(targetMineBlock) && PlayerUtils.hasStoppedMoving(),
+                                mc.objectMouseOver.getBlockPos().equals(targetMineBlock),
                         false,
                         mineBehaviour.isShiftWhenMine(),
                         false);
 
 
                 if(mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null){
-                    if (!BlockUtils.isPassable(targetMineBlock) && !rotation.rotating)
+                    // special cases for optimization
+                    if((Math.abs(targetMineBlock.getX() - Math.floor(mc.thePlayer.posX)) == 1 || Math.abs(targetMineBlock.getZ() - Math.floor(mc.thePlayer.posZ)) == 1) &&
+                            (!AngleUtils.shouldLookAtCenter(targetMineBlock)) &&
+                            (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetMineBlock.up()).equals(Blocks.air) )||
+                                    targetMineBlock.getY() - mc.thePlayer.posY == 1)){
+                        rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), 28, mineBehaviour.getRotationTime());
+                    } else if (!BlockUtils.isPassable(targetMineBlock) && !rotation.rotating)
                         rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock), mineBehaviour.getRotationTime());
+
                 }
                 break;
         }
@@ -283,8 +284,8 @@ public class AutoMineBaritone{
 
     private final Runnable restartBaritone = () -> {
         try {
-            pauseMacro();
-            mc.thePlayer.addChatMessage(new ChatComponentText("Restarting baritone"));
+            pauseBaritone();
+            Logger.playerLog("Restarting baritone");
             Thread.sleep(200);
             KeybindHandler.setKeyBindState(KeybindHandler.keybindS, true);
             Thread.sleep(100);

@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner.utils;
 
+import com.jelly.MightyMiner.MightyMiner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -12,8 +13,9 @@ public class LogUtils {
         ));
     }
     public static void debugLog(String log) {
-        mc.thePlayer.addChatMessage(new ChatComponentText(
-                EnumChatFormatting.GREEN + "[log] : " + EnumChatFormatting.RESET + log
-        ));
+        if(MightyMiner.config.debugLogMode)
+            mc.thePlayer.addChatMessage(new ChatComponentText(
+                    EnumChatFormatting.GREEN + "[log] : " + EnumChatFormatting.RESET + log
+            ));
     }
 }

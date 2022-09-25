@@ -88,7 +88,6 @@ public class AStarPathFinder {
                     continue;
 
                 possiblePaths.add(path);
-                BlockRenderer.renderMap.put(possiblePaths.getLast().getFirst().getBlockPos(), Color.GREEN);
                // if(possiblePaths.getLast().size() == 1)
                //     return possiblePaths.getLast();
             }

@@ -11,9 +11,17 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Macro", category = "Core",
             subcategory = "Macro",
-            options = { "Gemstone macro", "Powder macro", "Mithril macro"/*,  "Commission macro"*/}
+            options = { "Gemstone macro", "Powder macro", "Mithril macro"}
     )
     public int macroType = 0;
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Debug mode",
+            category = "Core",
+            subcategory = "Macro",
+            description = "Shows logs"
+    )
+    public boolean debugLogMode = false;
 
     @Property(
             type = PropertyType.SLIDER,
@@ -64,8 +72,7 @@ public class Config extends Vigilant {
             description = "Warp back to island if there is player inside the given radius of player",
             category = "Gemstone macro",
             subcategory = "Miscellaneous",
-            max = 30,
-            min = 1
+            max = 30
     )
     public int gemPlayerRad = 10;
 
@@ -107,8 +114,7 @@ public class Config extends Vigilant {
             description = "Warp back to island if there is player inside the given radius of player",
             category = "Powder macro",
             subcategory = "Miscellaneous",
-            max = 30,
-            min = 1
+            max = 30
     )
     public int powPlayerRad = 10;
 
@@ -175,8 +181,7 @@ public class Config extends Vigilant {
             description = "Warp back to island if there is player inside the given radius of player",
             category = "Mithril macro",
             subcategory = "Miscellaneous",
-            max = 30,
-            min = 1
+            max = 30
     )
     public int mithPlayerRad = 10;
 

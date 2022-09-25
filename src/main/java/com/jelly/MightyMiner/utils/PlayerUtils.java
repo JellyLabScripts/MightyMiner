@@ -17,6 +17,8 @@ public class PlayerUtils {
         {
             add("Golden Goblin");
             add("Goblin");
+            add("Weakling");
+            add("Fireslinger");
             add("Executive Viper");
             add("Grunt");
             add("Eliza");
@@ -54,8 +56,15 @@ public class PlayerUtils {
                 continue;
             if(e.isInvisible() || e.equals(mc.thePlayer) || npcList.contains(e.getDisplayName().getUnformattedText()))
                 continue;
-            if(e.getDistanceToEntity(mc.thePlayer) < radius)
+            for(String s : npcList){
+                if(e.getDisplayName().getUnformattedText().contains(s)){
+                    return false;
+                }
+            }
+            if(e.getDistanceToEntity(mc.thePlayer) < radius) {
+                LogUtils.addMessage("Entity found: " + e.getDisplayName());
                 return true;
+            }
         }
         return false;
     }

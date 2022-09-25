@@ -11,7 +11,7 @@ public class CommissionMacro extends Macro {
 
     @Override
     protected void onEnable() {
-        baritone.onEnable(new BlockPos(2, 64, 2));
+        baritone.onEnable(new BlockPos(74, 56, -27));
     }
 
     @Override

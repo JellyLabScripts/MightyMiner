@@ -1,28 +1,45 @@
+buildscript {
+    ext.kotlin_version = "1.6.10"
 
-plugins {
-    id "net.minecraftforge.gradle.forge" version "8708bf3e0"
-    id "com.github.johnrengelman.shadow" version "6.1.0"
-    id "org.spongepowered.mixin" version "d5f9873"
-    id "java"
-}
-
-version = "v0.1"
-group = "com.jelly.MightyMiner"
-archivesBaseName = "MightyMiner"
-
-sourceCompatibility = targetCompatibility = 1.8
-compileJava.options.encoding = 'UTF-8'
-
-sourceSets {
-    main {
-        ext.refMap = "mixins.mightyminer.refmap.json"
-        output.resourcesDir = file("${buildDir}/classes/java/main")
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "https://files.minecraftforge.net/maven"
+        }
+        maven {
+            url "https://jitpack.io"
+        }
+        maven {
+            url "https://repo.spongepowered.org/repository/maven-public/"
+        }
+    }
+    dependencies {
+        classpath "com.github.debuggingss:ForgeGradle:FG_2.1-SNAPSHOT"
+        classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
+        classpath "com.github.debuggingss:MixinGradle:0.6-SNAPSHOT"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
+apply plugin: 'kotlin'
+apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: "org.spongepowered.mixin"
+
+
+version = 1.0
+
+
+group = "com.jelly.mightyminer"
+archivesBaseName = "MightyMiner"
+
+compileJava.options.encoding = 'UTF-8'
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
 minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
-    runDir = "run"
+    runDir = "farmhelper-mod/run"
     mappings = "stable_22"
     makeObfSourceJar = false
 
@@ -30,28 +47,35 @@ minecraft {
     clientRunArgs += '--tweakClass gg.essential.loader.stage0.EssentialSetupTweaker'
 }
 
+
 configurations {
     include
     implementation.extendsFrom(include)
 }
 
 repositories {
+    maven {
+        url = "https://repo.sk1er.club/repository/maven-public"
+    }
+    maven {
+        url = "https://jitpack.io/"
+    }
+    maven {
+        url = "https://repo.spongepowered.org/repository/maven-public/"
+    }
     mavenCentral()
-    maven { url = "https://repo.sk1er.club/repository/maven-public/" }
-    maven { url = "https://jitpack.io/" }
-    maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
-    maven{ url = "https://mvnrepository.com/artifact/org.apache.commons/commons-collections4"}
 }
 
 dependencies {
-    include('gg.essential:loader-launchwrapper:1.1.3')
-    implementation('gg.essential:essential-1.8.9-forge:1813')
+    compileOnly "gg.essential:essential-1.8.9-forge:1725"
+    include "gg.essential:loader-launchwrapper:1.1.3"
 
-    implementation('org.projectlombok:lombok:1.18.24')
-    annotationProcessor('org.projectlombok:lombok:1.18.22')
-
-    implementation('org.spongepowered:mixin:0.8.5-SNAPSHOT')
+    implementation('org.spongepowered:mixin:0.7.11-SNAPSHOT')
     annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+
+    include('com.github.RewisServer:brigadier:master-SNAPSHOT')
+    include('com.github.ronmamo:reflections:master-SNAPSHOT')
+    include("org.java-websocket:Java-WebSocket:1.5.3")
 
     include('com.googlecode.json-simple:json-simple:1.1.1')
     implementation('com.googlecode.json-simple:json-simple:1.1.1')
@@ -59,15 +83,14 @@ dependencies {
     include('org.apache.commons:commons-collections4:4.4')
     implementation('org.apache.commons:commons-collections4:4.4')
 
-    include(fileTree(dir: 'libs', include: '*.jar'))
-    implementation(fileTree(dir: 'libs', include: '*.jar'))
-
-
+    implementation('org.projectlombok:lombok:1.18.24')
+    annotationProcessor('org.projectlombok:lombok:1.18.24')
 }
 
 mixin {
     add sourceSets.main, "mixins.mightyminer.refmap.json"
     defaultObfuscationEnv searge
+
 }
 
 jar {
@@ -77,12 +100,15 @@ jar {
             "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker",
             "TweakOrder": "0",
             'MixinConfigs': "mixins.mightyminer.json",
+            "modversion": version,
+
     )
     enabled = false
 }
 
 sourceJar {
     enabled = false
+
 }
 
 shadowJar {
@@ -129,7 +155,4 @@ processResources {
                 "mcversion": project.minecraft.version
         )
     }
-    rename '(.+_at.cfg)', 'META-INF/$1'
 }
-//
-//

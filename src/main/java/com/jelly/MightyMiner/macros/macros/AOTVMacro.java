@@ -33,26 +33,22 @@ public class AOTVMacro extends Macro {
 
     State currentState = State.NONE;
 
-    List<BlockPos> coords = new ArrayList<>();
     BlockPos targetCoordinate;
     int currentCoordIndex;
     Rotation rotation = new Rotation();
 
     boolean rightClickFlag;
 
+    List<BlockPos> coords = MightyMiner.coords;
+
+
 
     @Override
     protected void onEnable() {
-        coords.clear();
         currentState = State.NONE;
 
 
-        coords.add(new BlockPos(774,47,595));
-        coords.add(new BlockPos(776,47,612));
-        coords.add(new BlockPos(775,47,621));
-
-
-
+        coords.forEach(System.out::println);
        currentCoordIndex = 0;
        targetCoordinate = coords.get(currentCoordIndex);
     }

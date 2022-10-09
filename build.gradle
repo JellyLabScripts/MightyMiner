@@ -63,6 +63,9 @@ repositories {
     maven {
         url = "https://repo.spongepowered.org/repository/maven-public/"
     }
+    maven {
+        url = "https://storehouse.okaeri.eu/repository/maven-public/"
+    }
     mavenCentral()
 }
 
@@ -85,6 +88,7 @@ dependencies {
 
     implementation('org.projectlombok:lombok:1.18.24')
     annotationProcessor('org.projectlombok:lombok:1.18.24')
+    implementation ('eu.okaeri:okaeri-configs-yaml-snakeyaml:4.0.6')
 
     include(fileTree(dir: 'libs', include: '*.jar'))
     implementation(fileTree(dir: 'libs', include: '*.jar'))

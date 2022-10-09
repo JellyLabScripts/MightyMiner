@@ -67,6 +67,7 @@ public class Config extends Vigilant {
     )
     public int gemRotationTime = 300;
 
+
     @Property(type = PropertyType.SLIDER,
             name = "Player detection radius",
             description = "Warp back to island if there is player inside the given radius of player",

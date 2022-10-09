@@ -1,6 +1,9 @@
 package com.jelly.MightyMiner.macros.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
+import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
+import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
@@ -31,6 +34,12 @@ public class PowderMacro extends Macro {
             add(Blocks.wool);
         }
     };
+    List<Block> forbiddenMiningBlocks = new ArrayList<Block>(){
+        {
+            add(Blocks.chest);
+            add(Blocks.trapped_chest);
+        }
+    };
     long treasureInitialTime;
 
     float playerYaw;
@@ -40,16 +49,29 @@ public class PowderMacro extends Macro {
 
     State currentState;
     State treasureCacheState;
+    TreasureState treasureState = TreasureState.NONE;
     int centerToBlockTick = 0;
 
     boolean centering = false;
-
     int turnState = 0;
+
+    AutoMineBaritone mineBaritone = new AutoMineBaritone(getAutomineConfig());
+    boolean chestInStraightLine;
+    BlockPos chest;
+    BlockPos returnBlockPos;
 
     enum State {
         NORMAL,
         TREASURE,
         UTurn
+    }
+
+    enum TreasureState {
+        NONE,
+        WALKING,
+        SOLVING,
+        RETURNING
+
     }
 
 
@@ -130,10 +152,29 @@ public class PowderMacro extends Macro {
             return;
         }
 
+
+
         switch (currentState){
             case TREASURE:
                 Main.autoHardStone = false;
-                KeybindHandler.resetKeybindState();
+                switch(treasureState){
+                    case NONE: case SOLVING:
+                        KeybindHandler.resetKeybindState();
+                        break;
+                    case WALKING:
+                        rotation.intLockAngle(AngleUtils.getRequiredYaw(chest), 0, 1);
+                        KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
+                        KeybindHandler.setKeyBindState(KeybindHandler.keyBindJump, true);
+                    case RETURNING:
+                        if(!mineBaritone.isEnabled() && !BlockUtils.getPlayerLoc().equals(returnBlockPos)) {
+                            mineBaritone.enableBaritone();
+                        } else if(!mineBaritone.isEnabled() && BlockUtils.getPlayerLoc().equals(returnBlockPos)){
+                            if (MightyMiner.config.powCenter)
+                                centering = true;
+                            currentState = treasureCacheState;
+                        }
+
+                }
                 break;
 
             case NORMAL: case UTurn:
@@ -161,26 +202,26 @@ public class PowderMacro extends Macro {
                     LogUtils.debugLog("Completed treasure due to timeout");
                     currentState = treasureCacheState;
                 }
+                if (treasureState == TreasureState.WALKING) {
+                    if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) > 4f)
+                        treasureState = TreasureState.SOLVING;
+                }
                 break;
             case NORMAL:
                 if(!blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(0, 0, 1)) || !blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(0, 1, 1))) {
-                    if(isInCenterOfBlock()) {
-                        turnState = 1 - turnState;
-                        playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
-                        uTurnCachePos = BlockUtils.getPlayerLoc();
-                        currentState = State.UTurn;
-                        KeybindHandler.resetKeybindState();
-                    }
+                    turnState = 1 - turnState;
+                    playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
+                    uTurnCachePos = BlockUtils.getPlayerLoc();
+                    currentState = State.UTurn;
+                    KeybindHandler.resetKeybindState();
                 }
                 break;
             case UTurn:
                 if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), uTurnCachePos) > 4) {
-                    if(isInCenterOfBlock()) {
-                        playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
-                        if (MightyMiner.config.powCenter)
-                            centering = true;
-                        currentState = State.NORMAL;
-                    }
+                    playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
+                    if (MightyMiner.config.powCenter)
+                        centering = true;
+                    currentState = State.NORMAL;
                 }
                 break;
         }
@@ -195,13 +236,35 @@ public class PowderMacro extends Macro {
     @Override
     public void onMessageReceived(String message){
         if(message.contains("You have successfully picked the lock on this chest")){
-            currentState = treasureCacheState;
+          //  currentState = treasureCacheState;
+            treasureState = TreasureState.RETURNING;
             LogUtils.debugLog("Completed treasure");
         }
         if(message.contains("You uncovered a treasure chest!")){
             if(currentState != State.TREASURE)
                 treasureCacheState = currentState;
             currentState = State.TREASURE;
+            treasureState = TreasureState.NONE;
+            returnBlockPos = BlockUtils.getPlayerLoc();
+            new Thread(() -> {
+                try{
+                    Thread.sleep(350); // Hypickle lag
+                    chest = BlockUtils.findBlock(16, Blocks.chest, Blocks.trapped_chest).get(0);
+                    treasureState = MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) > 4f ? TreasureState.WALKING : TreasureState.SOLVING;
+                    if(chest.getX() == Math.floor(mc.thePlayer.posX) || chest.getZ() == Math.floor(mc.thePlayer.posZ)){
+                        if(chest.getX() == Math.floor(mc.thePlayer.posX)){
+                            returnBlockPos = BlockUtils.getRelativeBlockPos(0, (float)mc.thePlayer.posY - chest.getY(), (float)Math.abs(chest.getZ() - Math.floor(mc.thePlayer.posZ)));
+                        } else if(chest.getZ() == Math.floor(mc.thePlayer.posZ)){
+                            returnBlockPos = BlockUtils.getRelativeBlockPos(0, (float)mc.thePlayer.posY - chest.getY(), (float)Math.abs(chest.getX() - Math.floor(mc.thePlayer.posX)));
+                        }
+                    }
+
+                }
+                catch (Exception ignored){}
+            }).start();
+
+
+
 
             KeybindHandler.resetKeybindState();
             treasureInitialTime = System.currentTimeMillis();
@@ -210,11 +273,10 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onPacketReceived(Packet<?> packet){
-        if(currentState == State.TREASURE && packet instanceof S2APacketParticles){
+        if(currentState == State.TREASURE && treasureState == TreasureState.SOLVING && treasureInitialTime > 200 && packet instanceof S2APacketParticles && chest != null){
             if(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT){
                 try {
-                    BlockPos closetChest = BlockUtils.findBlock(18, Blocks.chest, Blocks.trapped_chest).get(0);
-                    if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - closetChest.getX()) < 2 && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - closetChest.getY()) < 2 && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - closetChest.getZ()) < 2) {
+                    if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - chest.getX()) < 2 && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - chest.getY()) < 2 && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - chest.getZ()) < 2) {
                         rotation.intLockAngle(
                                 AngleUtils.getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
                                 AngleUtils.getRequiredPitch(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, (((S2APacketParticles) packet).getYCoordinate()) - (mc.thePlayer.posY + 1.62d), ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
@@ -248,5 +310,20 @@ public class PowderMacro extends Macro {
     boolean isInCenterOfBlock() {
         return (Math.round(AngleUtils.get360RotationYaw()) == 180 || Math.round(AngleUtils.get360RotationYaw()) == 0) ? Math.abs(Minecraft.getMinecraft().thePlayer.posZ) % 1 > 0.3f && Math.abs(Minecraft.getMinecraft().thePlayer.posZ) % 1 < 0.7f :
                 Math.abs(Minecraft.getMinecraft().thePlayer.posX) % 1 > 0.3f && Math.abs(Minecraft.getMinecraft().thePlayer.posX) % 1 < 0.7f;
+    }
+
+
+    MineBehaviour getAutomineConfig(){
+        return new MineBehaviour(
+                AutoMineType.DYNAMIC,
+                false,
+                false,
+                50,
+                8,
+                forbiddenMiningBlocks,
+                null,
+                256,
+                0
+        );
     }
 }

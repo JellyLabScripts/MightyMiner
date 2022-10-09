@@ -11,7 +11,7 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Macro", category = "Core",
             subcategory = "Macro",
-            options = { "Gemstone macro", "Powder macro", "Mithril macro"}
+            options = { "Gemstone macro", "Powder macro", "Mithril macro", "Commission macro", "AOTV Gemstone macro"}
     )
     public int macroType = 0;
     @Property(
@@ -184,6 +184,37 @@ public class Config extends Vigilant {
             max = 30
     )
     public int mithPlayerRad = 10;
+
+
+    @Property(type = PropertyType.SLIDER,
+            name = "Rotation time (milliseconds)",
+            description = "Time the pathfinding AI takes for each rotation",
+            category = "Commission macro",
+            subcategory = "Miscellaneous",
+            max = 5,
+            min = 1
+    )
+    public int comBarRotationTime = 1;
+
+    @Property(
+            type = PropertyType.SLIDER,
+            name = "Safewalk index",
+            description = "Stops walking when there is a large rotation. TURN THIS UP IF you are using high speed",
+            category = "Commission macro",
+            subcategory = "Miscellaneous",
+            max = 10
+    )
+    public int comBarSafeIndex = 5;
+
+   /* @Property(
+            type = PropertyType.SLIDER,
+            name = "Safewalk index",
+            description = "Stops walking when there is a large rotation. TURN THIS UP IF you are using high speed",
+            category = "Commission macro",
+            subcategory = "Miscellaneous",
+            max = 10
+    )
+    public int aotv = 5;*/
 
 
 

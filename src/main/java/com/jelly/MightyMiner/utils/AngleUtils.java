@@ -209,7 +209,6 @@ public class AngleUtils {
         }
         return  (float) pitch;
     }
-
     public static float getRequiredYaw(BlockPos blockLookingAt) {
 
         double deltaX = blockLookingAt.getX() - mc.thePlayer.posX + 0.5d;
@@ -267,6 +266,14 @@ public class AngleUtils {
     public static float getRequiredYaw(double deltaX, double deltaZ) {
         return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) +
                 ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
+    }
+
+    public static float getAngleDifference(float actualYaw1, float actualYaw2){
+        if(actualYaw1 - actualYaw2 > 180) {
+            return Math.abs(actualYaw1 - 360 - actualYaw2);
+        } else if(actualYaw1 - actualYaw2 < -180){
+            return Math.abs(actualYaw2 - 360 - actualYaw1);
+        } else return Math.abs(actualYaw1 - actualYaw2);
     }
 
     public static float getRequiredPitch(BlockPos blockLookingAt) {
@@ -336,6 +343,18 @@ public class AngleUtils {
 
         }
         return  getRequiredPitch(deltaX, deltaY, deltaZ);
+    }
+
+    public static float getRequiredPitchCenter(BlockPos blockLookingAt) {
+        double deltaX = blockLookingAt.getX() - mc.thePlayer.posX + 0.5d;
+        double deltaZ = blockLookingAt.getZ() - mc.thePlayer.posZ + 0.5d;
+        double deltaY = (blockLookingAt.getY() + 0.5d) - (mc.thePlayer.posY + 1.62d);
+        return  getRequiredPitch(deltaX, deltaY, deltaZ);
+    }
+    public static float getRequiredYawCenter(BlockPos blockLookingAt) {
+        double deltaX = blockLookingAt.getX() - mc.thePlayer.posX + 0.5d;
+        double deltaZ = blockLookingAt.getZ() - mc.thePlayer.posZ + 0.5d;
+        return  getRequiredYaw(deltaX, deltaZ);
     }
     public static float getRequiredPitch(double deltaX, double deltaY, double deltaZ) {
         double deltaDis = MathUtils.getDistanceBetweenTwoPoints(deltaX, deltaZ);

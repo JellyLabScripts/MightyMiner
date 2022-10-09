@@ -3,6 +3,7 @@ package com.jelly.MightyMiner.utils;
 import com.jelly.MightyMiner.baritone.structures.BlockType;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockStainedGlass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.*;
@@ -94,11 +95,12 @@ public class BlockUtils {
             for (int j = 0; j < searchDiameter; j++) {
                 for (int k = 0; k < searchDiameter; k++) {
                     if (requiredBlocks.contains(getBlock(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2)))) {
+
                         if(forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2)))
                             continue;
                         if((int)mc.thePlayer.posY + (j - searchDiameter / 2) > maxY || (int)mc.thePlayer.posY + (j - searchDiameter / 2) < minY)
                             continue;
-                        foundBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2));
+                        foundBlocks.add(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2));
                     }
 
                 }

@@ -1,15 +1,16 @@
 package com.jelly.MightyMiner.baritone.autowalk;
 
-import com.jelly.MightyMiner.baritone.autowalk.movement.Input;
-import com.jelly.MightyMiner.baritone.autowalk.movement.InputHandler;
+import com.jelly.MightyMiner.baritone.autowalk.config.AutowalkConfig;
 import com.jelly.MightyMiner.baritone.autowalk.movement.Moves;
 import com.jelly.MightyMiner.baritone.autowalk.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.baritone.autowalk.pathing.AStarPathFinder;
 import com.jelly.MightyMiner.baritone.logging.Logger;
+import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
+import com.jelly.MightyMiner.utils.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -43,7 +44,12 @@ public class WalkBaritone{
 
 
     AStarPathFinder pathFinder;
+    AutowalkConfig config;
 
+
+    public WalkBaritone(AutowalkConfig config){
+        this.config = config;
+    }
 
 
 
@@ -75,7 +81,7 @@ public class WalkBaritone{
 
     public void disableBaritone() {
         walking = false;
-        InputHandler.clearAllKeys();
+        KeybindHandler.resetKeybindState();
         clearBlocksToWalk();
         Logger.playerLog("Baritone disabled");
     }
@@ -96,6 +102,7 @@ public class WalkBaritone{
 
     Moves lastMove;
     boolean jumpFlag;
+    int jumpCooldown;
 
     public void onTickEvent(TickEvent.Phase phase){
 
@@ -104,40 +111,52 @@ public class WalkBaritone{
 
         if(walking) {
 
-            if(blocksToWalk.isEmpty()){
+            if(blocksToWalk.isEmpty()){ // walked to the goal
                 disableBaritone();
                 return;
             }
 
 
-            if(BlockUtils.onTheSameXZ(BlockUtils.getPlayerLoc(), blocksToWalk.lastKey())){
+            if(BlockUtils.onTheSameXZ(BlockUtils.getPlayerLoc(), blocksToWalk.lastKey())){ // check whether block is walked
                 BlockRenderer.renderMap.remove(blocksToWalk.lastKey());
                 lastMove = blocksToWalk.remove(blocksToWalk.lastKey());
-
                 if(blocksToWalk.isEmpty() || BlockUtils.getPlayerLoc().equals(blocksToWalk.firstKey())) {
                     disableBaritone();
                     return;
                 }
             }
-
-
-            if(lastMove != null && lastMove.dy > 0 && !jumpFlag && mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0) {
-                jumpFlag = true;
+            if(blocksToWalk.size() > 2){ // check better path
+                if(MathUtils.getDistanceBetweenTwoPoints(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blocksToWalk.get(blocksToWalk.size() - 2).getX() + 0.5d, blocksToWalk.get(blocksToWalk.size() - 2).getY(), blocksToWalk.get(blocksToWalk.size() - 2).getZ() + 0.5d) <
+                        MathUtils.getDistanceBetweenTwoPoints(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, blocksToWalk.lastKey().getX() + 0.5d, blocksToWalk.lastKey().getY(), blocksToWalk.lastKey().getZ() + 0.5d)){
+                    BlockRenderer.renderMap.remove(blocksToWalk.lastKey());
+                    lastMove = blocksToWalk.remove(blocksToWalk.lastKey());
+                }
             }
 
-            rotation.intLockAngle(AngleUtils.getRequiredYaw(blocksToWalk.lastKey()), 0, 1);
+            float reqYaw = AngleUtils.getRequiredYaw(blocksToWalk.lastKey());
+            if(walking && !blocksToWalk.isEmpty())
+                rotation.intLockAngle(reqYaw, 0, config.getRotationTime()); // camera angle
 
-            InputHandler.setInputForceState(Input.JUMP, jumpFlag);
-            InputHandler.setInputForceState(Input.MOVE_FORWARD, !rotation.rotating);
+
+            if(lastMove != null && lastMove.dy > 0 && !jumpFlag && mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0 && jumpCooldown == 0 && mc.thePlayer.onGround) {
+                jumpFlag = true;
+                jumpCooldown = 10;
+            }
+
+            KeybindHandler.setKeyBindState(KeybindHandler.keyBindJump, jumpFlag);
+            KeybindHandler.setKeyBindState(KeybindHandler.keybindW, AngleUtils.getAngleDifference(reqYaw, AngleUtils.getActualRotationYaw()) < -4 * config.getSafeIndex() + 45);
+            KeybindHandler.setKeyBindState(KeybindHandler.keybindS, AngleUtils.getAngleDifference(reqYaw, AngleUtils.getActualRotationYaw()) >= 45);
 
             jumpFlag = false;
+            if(jumpCooldown > 0) jumpCooldown --;
         }
 
     }
 
-    public void onRenderEvent(){
+    public void onLastRender(){
         if(rotation.rotating)
             rotation.update();
     }
+
 
 }

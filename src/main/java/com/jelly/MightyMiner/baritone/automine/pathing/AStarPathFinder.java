@@ -72,8 +72,12 @@ public class AStarPathFinder {
 
     public LinkedList<BlockNode> getPath(Block... blockType) throws NoBlockException, NoPathException {
 
+        for(Block block : blockType){
+            Logger.playerLog(block.toString());
+        }
+        Logger.playerLog(pathBehaviour.getSearchRadius() * 2 + " " + blackListedPos + " " + pathBehaviour.getMinY() + " " +  pathBehaviour.getMaxY() + " " + blockType);
         List<BlockPos> foundBlocks = BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType);
-        Logger.log("Found blocks : " + foundBlocks.size());
+        Logger.playerLog("Found blocks : " + foundBlocks.size());
 
         long pastTime = System.currentTimeMillis();
 
@@ -100,6 +104,14 @@ public class AStarPathFinder {
 
         possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
         return possiblePaths.getFirst();
+    }
+
+    public LinkedList<BlockNode> getPath(BlockPos blockPos) throws NoPathException {
+        LinkedList<BlockNode> path = calculatePath(BlockUtils.getPlayerLoc(), blockPos);
+        if(path.isEmpty())
+            throw new NoPathException();
+
+        return path;
     }
 
 

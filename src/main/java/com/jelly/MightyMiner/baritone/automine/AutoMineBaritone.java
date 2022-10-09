@@ -15,12 +15,12 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AutoMineBaritone{
 
@@ -59,8 +59,39 @@ public class AutoMineBaritone{
         minedBlocks.clear();
     }
 
+    public void enableBaritone(BlockPos blockPos){
+        enabled = true;
+        clearBlocksToWalk();
+        KeybindHandler.resetKeybindState();
 
-    public void enableBaritone(Block... blockType){
+        if(mineBehaviour.isShiftWhenMine())
+            KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
+
+
+        new Thread(() -> {
+            try{
+                blocksToMine = pathFinder.getPath(blockPos);
+            } catch (Throwable e){
+                Logger.playerLog("Error when getting path!");
+                e.printStackTrace();
+            }
+            if (!blocksToMine.isEmpty()) {
+                for (BlockNode blockNode : blocksToMine) {
+                    BlockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
+                }
+                BlockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
+            } else {
+                Logger.playerLog("blocks to mine EMPTY!");
+            }
+            Logger.log("Starting to mine");
+            inAction = true;
+            currentState = PlayerState.NONE;
+            stuckTickCount = 0;
+        }).start();
+    }
+
+
+    public void enableBaritone(Block... blockType) {
         enabled = true;
         targetBlockType = blockType;
 
@@ -96,6 +127,35 @@ public class AutoMineBaritone{
             stuckTickCount = 0;
         }).start();
     }
+    public void enableBaritoneInThread(Block... blockType) throws Exception{
+        enabled = true;
+        targetBlockType = blockType;
+
+        clearBlocksToWalk();
+
+        KeybindHandler.resetKeybindState();
+
+        if(mineBehaviour.isShiftWhenMine())
+            KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
+
+        if(mineBehaviour.isMineWithPreference())
+            blocksToMine = pathFinder.getPathWithPreference(blockType);
+        else
+            blocksToMine = pathFinder.getPath(blockType);
+
+        if (!blocksToMine.isEmpty()) {
+            for (BlockNode blockNode : blocksToMine) {
+                BlockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
+            }
+            BlockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
+        } else {
+            Logger.playerLog("blocks to mine EMPTY!");
+        }
+        Logger.log("Starting to mine");
+        inAction = true;
+        currentState = PlayerState.NONE;
+        stuckTickCount = 0;
+    }
 
 
     public void disableBaritone() {
@@ -110,8 +170,8 @@ public class AutoMineBaritone{
         if(mineBehaviour.isShiftWhenMine())
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
-        if(!blocksToMine.isEmpty())
-            pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
+        // if(!blocksToMine.isEmpty())
+        //    pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
         clearBlocksToWalk();
 
     }

@@ -1,14 +1,10 @@
 package com.jelly.MightyMiner.utils;
 
-import com.jelly.MightyMiner.baritone.structures.BlockType;
-import com.jelly.MightyMiner.render.BlockRenderer;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockStainedGlass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.*;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -191,6 +187,13 @@ public class BlockUtils {
     public static boolean onTheSameXZ (BlockPos b1, BlockPos b2) {
         return b1.getX() == b2.getX() && b1.getZ() == b2.getZ();
 
+    }
+    public static boolean onTheSameAxis (BlockPos b1, BlockPos b2) {
+        return b1.getX() == b2.getX() || b1.getZ() == b2.getZ();
+    }
+    public static boolean isAdjacentXZ(BlockPos b1, BlockPos b2) {
+        return (b1.getX() == b2.getX() && Math.abs(b1.getZ() - b2.getZ()) == 1) ||
+                (b1.getZ() == b2.getZ() && Math.abs(b1.getX() - b2.getX()) == 1);
     }
 
     public static boolean canSeeBlock(BlockPos blockChecked) {

@@ -20,7 +20,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
 import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AutoMineBaritone{
 
@@ -45,11 +44,11 @@ public class AutoMineBaritone{
     boolean enabled;
 
     AStarPathFinder pathFinder;
+    BlockPos playerFloorPos;
 
     public AutoMineBaritone(MineBehaviour mineBehaviour){
         this.mineBehaviour = mineBehaviour;
         pathFinder = new AStarPathFinder(getPathBehaviour());
-
     }
 
 
@@ -67,6 +66,14 @@ public class AutoMineBaritone{
         if(mineBehaviour.isShiftWhenMine())
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
+
+        if(!mineBehaviour.isMineFloor()) {
+            if(playerFloorPos != null)
+                pathFinder.removeFromBlackList(playerFloorPos);
+
+            playerFloorPos = BlockUtils.getPlayerLoc().down();
+            pathFinder.addToBlackList(playerFloorPos);
+        }
 
         new Thread(() -> {
             try{
@@ -102,6 +109,13 @@ public class AutoMineBaritone{
         if(mineBehaviour.isShiftWhenMine())
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
+        if(!mineBehaviour.isMineFloor()) {
+            if(playerFloorPos != null)
+                pathFinder.removeFromBlackList(playerFloorPos);
+
+            playerFloorPos = BlockUtils.getPlayerLoc().down();
+            pathFinder.addToBlackList(playerFloorPos);
+        }
 
         new Thread(() -> {
             try{
@@ -127,7 +141,8 @@ public class AutoMineBaritone{
             stuckTickCount = 0;
         }).start();
     }
-    public void enableBaritoneInThread(Block... blockType) throws Exception{
+
+    public void enableBaritoneSingleThread(Block... blockType) throws Exception{ // ONLY USABLE IN SHORT DISTANCE!!!!
         enabled = true;
         targetBlockType = blockType;
 
@@ -137,6 +152,14 @@ public class AutoMineBaritone{
 
         if(mineBehaviour.isShiftWhenMine())
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
+
+        if(!mineBehaviour.isMineFloor()) {
+            if(playerFloorPos != null)
+                pathFinder.removeFromBlackList(playerFloorPos);
+
+            playerFloorPos = BlockUtils.getPlayerLoc().down();
+            pathFinder.addToBlackList(playerFloorPos);
+        }
 
         if(mineBehaviour.isMineWithPreference())
             blocksToMine = pathFinder.getPathWithPreference(blockType);
@@ -170,8 +193,9 @@ public class AutoMineBaritone{
         if(mineBehaviour.isShiftWhenMine())
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
-        // if(!blocksToMine.isEmpty())
-        //    pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
+        if(!blocksToMine.isEmpty())
+            pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
+
         clearBlocksToWalk();
 
     }
@@ -278,10 +302,8 @@ public class AutoMineBaritone{
 
                 if(mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null){
                     // special cases for optimization
-                    if((Math.abs(targetMineBlock.getX() - Math.floor(mc.thePlayer.posX)) == 1 || Math.abs(targetMineBlock.getZ() - Math.floor(mc.thePlayer.posZ)) == 1) &&
-                            (!AngleUtils.shouldLookAtCenter(targetMineBlock)) &&
-                            (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetMineBlock.up()).equals(Blocks.air) )||
-                                    targetMineBlock.getY() - mc.thePlayer.posY == 1)){
+                    if(BlockUtils.isAdjacentXZ(targetMineBlock, BlockUtils.getPlayerLoc()) && !AngleUtils.shouldLookAtCenter(targetMineBlock) &&
+                            (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetMineBlock.up()).equals(Blocks.air) )|| targetMineBlock.getY() - mc.thePlayer.posY == 1)){
                         rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), 28, mineBehaviour.getRotationTime());
                     } else if (!BlockUtils.isPassable(targetMineBlock) && !rotation.rotating)
                         rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock), mineBehaviour.getRotationTime());

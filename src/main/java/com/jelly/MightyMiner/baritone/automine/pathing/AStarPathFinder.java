@@ -42,6 +42,9 @@ public class AStarPathFinder {
     public void addToBlackList(BlockPos... blackListedPos){
         this.blackListedPos.addAll(Arrays.asList(blackListedPos));
     }
+    public void removeFromBlackList(BlockPos blockPos){
+        this.blackListedPos.remove(blockPos);
+    }
 
     public LinkedList<BlockNode> getPathWithPreference(Block... blockType) throws NoBlockException, NoPathException {
 
@@ -56,8 +59,6 @@ public class AStarPathFinder {
                     if (pathBehaviour.isStaticMode() && path.size() > 1)
                         continue;
                     possiblePaths.add(path);
-                   // if (possiblePaths.getLast().size() == 1)
-                   //     return possiblePaths.getLast();
                 }
             }
             if(!possiblePaths.isEmpty()) {

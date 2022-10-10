@@ -317,6 +317,7 @@ public class PowderMacro extends Macro {
         return new MineBehaviour(
                 AutoMineType.DYNAMIC,
                 false,
+                true,
                 false,
                 50,
                 8,

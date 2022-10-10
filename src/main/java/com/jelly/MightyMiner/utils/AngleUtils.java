@@ -245,6 +245,7 @@ public class AngleUtils {
                     blockSideToMine = blockSide;
                 }
             }
+
             switch (blockSideToMine){
                 case posX:
                     deltaX += 0.5d;
@@ -320,6 +321,7 @@ public class AngleUtils {
                     blockSideToMine = blockSide;
                 }
             }
+            System.out.println(blockSideToMine);
             switch (blockSideToMine){
                 case posX:
                     deltaX += 0.5d;

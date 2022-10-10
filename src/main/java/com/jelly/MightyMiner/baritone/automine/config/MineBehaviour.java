@@ -13,6 +13,8 @@ public class MineBehaviour {
     @Getter
     boolean shiftWhenMine;
     @Getter
+    boolean mineFloor;
+    @Getter
     boolean mineWithPreference;
     @Getter
     int rotationTime;

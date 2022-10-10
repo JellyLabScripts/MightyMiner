@@ -31,7 +31,6 @@ public class AOTVMacro extends Macro {
 
     State currentState = State.NONE;
 
-    List<BlockPos> coords = new ArrayList<>();
     BlockPos targetCoordinate;
     int targetCoordIndex;
     int rightClickCD;
@@ -39,18 +38,18 @@ public class AOTVMacro extends Macro {
 
     boolean rightClickFlag;
 
+    List<BlockPos> coords = MightyMiner.coords;
+
+
 
 
     @Override
     protected void onEnable() {
-        coords.clear();
         currentState = State.NONE;
 
 
-        coords.add(new BlockPos(639, 73, 291));
-        coords.add(new BlockPos(641, 73, 287));
-        coords.add(new BlockPos(644, 71, 300));
-
+        coords.forEach(System.out::println);
+  
         targetCoordIndex = -1;
         for(int i = 0; i < coords.size(); i++){
             if(BlockUtils.getPlayerLoc().down().equals(coords.get(i))){

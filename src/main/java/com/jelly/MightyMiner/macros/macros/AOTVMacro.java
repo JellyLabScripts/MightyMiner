@@ -4,8 +4,6 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
-import com.jelly.MightyMiner.baritone.autowalk.WalkBaritone;
-import com.jelly.MightyMiner.baritone.autowalk.config.AutowalkConfig;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
@@ -13,6 +11,7 @@ import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -27,7 +26,6 @@ public class AOTVMacro extends Macro {
     enum State{
         NONE,
         Teleporting,
-      //  Waiting,
         Mining
     }
 
@@ -35,10 +33,12 @@ public class AOTVMacro extends Macro {
 
     List<BlockPos> coords = new ArrayList<>();
     BlockPos targetCoordinate;
-    int currentCoordIndex;
+    int targetCoordIndex;
+    int rightClickCD;
     Rotation rotation = new Rotation();
 
     boolean rightClickFlag;
+
 
 
     @Override
@@ -47,53 +47,65 @@ public class AOTVMacro extends Macro {
         currentState = State.NONE;
 
 
-        coords.add(new BlockPos(774,47,595));
-        coords.add(new BlockPos(776,47,612));
-        coords.add(new BlockPos(775,47,621));
+        coords.add(new BlockPos(639, 73, 291));
+        coords.add(new BlockPos(641, 73, 287));
+        coords.add(new BlockPos(644, 71, 300));
 
+        targetCoordIndex = -1;
+        for(int i = 0; i < coords.size(); i++){
+            if(BlockUtils.getPlayerLoc().down().equals(coords.get(i))){
+                if(i == coords.size() - 1)
+                    targetCoordIndex = 0;
+                  else
+                    targetCoordIndex = i + 1;
 
-
-       currentCoordIndex = 0;
-       targetCoordinate = coords.get(currentCoordIndex);
+            }
+        }
+        if(targetCoordIndex == -1){
+            LogUtils.addMessage("You must stand on one of the coordinates to start!");
+            onDisable();
+            return;
+        }
+        targetCoordinate = coords.get(targetCoordIndex);
     }
 
     @Override
-    public void onTick(TickEvent.Phase phase) { // assume start on first? ?!
+    public void onTick(TickEvent.Phase phase) {
 
         baritone.onTickEvent(phase);
-        if(rotation.rotating){
-            KeybindHandler.resetKeybindState();
-            return;
-        }
 
-        // temp
-        LogUtils.addMessage(currentState.toString());
+        if(targetCoordIndex == -1) return;
 
 
         switch(currentState) {
             case NONE:
                 break;
             case Teleporting:
+                rightClickCD--;
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
-                baritone.disableBaritone();
-                rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate), 20);
-                if(rightClickFlag && !rotation.rotating){
+                rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  200);
+                if(rightClickFlag && !rotation.rotating && rightClickCD == 0){
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void");
-                    KeybindHandler.rightClick();
-                    LogUtils.addMessage("I've right clicked!");
+                    KeybindHandler.onTick(KeybindHandler.keybindUseItem);
                     rightClickFlag = false;
                 }
                 break;
             case Mining:
-                if(!baritone.isEnabled()){
-                    new Thread(() -> {
-                        try {
-                            baritone.enableBaritoneInThread(Blocks.stained_glass, Blocks.stained_glass_pane);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                if(!baritone.isEnabled()) {
+                    try {
+                        baritone.enableBaritoneSingleThread(Blocks.stained_glass, Blocks.stained_glass_pane);
+                    } catch (Exception ignored) {
+                        currentState = State.NONE;
+                        baritone.disableBaritone();
+                        if(targetCoordIndex < coords.size() - 1) {
+                            targetCoordinate = coords.get(targetCoordIndex + 1);
+                            targetCoordIndex++;
                         }
-                    }).start();
-
+                        else {
+                            targetCoordinate = coords.get(0);
+                            targetCoordIndex = 0;
+                        }
+                    }
                 }
         }
         updateState();
@@ -103,25 +115,13 @@ public class AOTVMacro extends Macro {
         switch(currentState){
             case NONE:
                 currentState = State.Teleporting;
+                rightClickCD = 10;
                 rightClickFlag = true;
+                LogUtils.debugLog("Going to coordinates " + targetCoordinate.getX() + " " + targetCoordinate.getY() + " " + targetCoordinate.getZ());
                 return;
             case Teleporting:
-                if(BlockUtils.onTheSameXZ(BlockUtils.getPlayerLoc(), targetCoordinate))
+                if((BlockUtils.getPlayerLoc().down().equals(targetCoordinate)))
                     currentState = State.Mining;
-                return;
-            case Mining:
-                if((BlockUtils.findBlock(6, Blocks.stained_glass_pane, Blocks.stained_glass).isEmpty())){
-                    baritone.disableBaritone();
-                    currentState = State.NONE;
-                    if(currentCoordIndex < coords.size() - 1) {
-                        targetCoordinate = coords.get(currentCoordIndex + 1);
-                        currentCoordIndex ++;
-                    }
-                    else {
-                        targetCoordinate = coords.get(0);
-                        currentCoordIndex = 0;
-                    }
-                }
         }
     }
     @Override
@@ -148,8 +148,9 @@ public class AOTVMacro extends Macro {
                 AutoMineType.STATIC,
                 true,
                 false,
-                100,
-                8, //changed with config
+                false,
+                MightyMiner.config.aotvRotationTime,
+                MightyMiner.config.aotvRestartTimeThreshold, //changed with config
                 null,
                 null,
                 256,

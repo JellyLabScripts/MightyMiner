@@ -186,7 +186,7 @@ public class Config extends Vigilant {
     public int mithPlayerRad = 10;
 
 
-    @Property(type = PropertyType.SLIDER,
+    @Property( type = PropertyType.SLIDER,
             name = "Rotation time (milliseconds)",
             description = "Time the pathfinding AI takes for each rotation",
             category = "Commission macro",
@@ -205,6 +205,27 @@ public class Config extends Vigilant {
             max = 10
     )
     public int comBarSafeIndex = 5;
+
+    @Property(type = PropertyType.SLIDER,
+            name = "Rotation time (milliseconds)",
+            description = "Time the macro takes for each rotation",
+            category = "AOTV gemstone macro",
+            subcategory = "Miscellaneous",
+            max = 500,
+            min = 20
+    )
+    public int aotvRotationTime = 100;
+
+    @Property(
+            type = PropertyType.SLIDER,
+            name = "Stuck time threshold (seconds)",
+            description = "restarts macro when stuck time > threshold, depends on your mining speed",
+            category = "AOTV gemstone macro",
+            subcategory = "Miscellaneous",
+            max = 20,
+            min = 2
+    )
+    public int aotvRestartTimeThreshold = 5;
 
    /* @Property(
             type = PropertyType.SLIDER,

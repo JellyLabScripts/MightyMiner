@@ -111,6 +111,12 @@ public class KeybindHandler {
         realSetKeyBindState(key, pressed);
     }
 
+    public static void onTick(KeyBinding key) {
+        if (mc.currentScreen == null) {
+            KeyBinding.onTick(key.getKeyCode());
+        }
+    }
+
     public static void updateKeys(boolean wBool, boolean sBool, boolean aBool, boolean dBool, boolean atkBool, boolean useBool, boolean shiftBool) {
         if (mc.currentScreen != null) {
             resetKeybindState();

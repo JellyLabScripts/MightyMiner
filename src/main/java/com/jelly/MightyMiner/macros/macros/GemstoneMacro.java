@@ -129,6 +129,7 @@ public class GemstoneMacro extends Macro {
         return new MineBehaviour(
                 AutoMineType.DYNAMIC,
                 false,
+                true,
                 false,
                 MightyMiner.config.gemRotationTime,
                 MightyMiner.config.gemRestartTimeThreshold,

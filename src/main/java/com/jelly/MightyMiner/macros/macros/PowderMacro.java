@@ -16,6 +16,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import rosegoldaddons.Main;
 
@@ -112,11 +113,13 @@ public class PowderMacro extends Macro {
     @Override
     public void onDisable() {
         Main.autoHardStone = false;
+        mineBaritone.disableBaritone();
         KeybindHandler.resetKeybindState();
     }
 
     @Override
     public void onTick(TickEvent.Phase phase){
+        mineBaritone.onTickEvent(phase);
         if(phase != TickEvent.Phase.START)
             return;
 
@@ -131,7 +134,6 @@ public class PowderMacro extends Macro {
             KeybindHandler.resetKeybindState();
             return;
         }
-
 
 
         updateState();
@@ -153,6 +155,7 @@ public class PowderMacro extends Macro {
         }
 
 
+        System.out.println(currentState + " " + treasureState);
 
         switch (currentState){
             case TREASURE:
@@ -165,14 +168,16 @@ public class PowderMacro extends Macro {
                         rotation.intLockAngle(AngleUtils.getRequiredYaw(chest), 0, 1);
                         KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
                         KeybindHandler.setKeyBindState(KeybindHandler.keyBindJump, true);
+                        break;
                     case RETURNING:
                         if(!mineBaritone.isEnabled() && !BlockUtils.getPlayerLoc().equals(returnBlockPos)) {
-                            mineBaritone.enableBaritone();
+                            mineBaritone.enableBaritone(returnBlockPos);
                         } else if(!mineBaritone.isEnabled() && BlockUtils.getPlayerLoc().equals(returnBlockPos)){
                             if (MightyMiner.config.powCenter)
                                 centering = true;
                             currentState = treasureCacheState;
                         }
+                        break;
 
                 }
                 break;
@@ -198,15 +203,17 @@ public class PowderMacro extends Macro {
     private void updateState(){
         switch (currentState) {
             case TREASURE:
-                if(System.currentTimeMillis() - treasureInitialTime > 7000) {
+                if(System.currentTimeMillis() - treasureInitialTime > 7000 && treasureState != TreasureState.RETURNING) {
+                    treasureState = TreasureState.RETURNING;
                     LogUtils.debugLog("Completed treasure due to timeout");
-                    currentState = treasureCacheState;
                 }
-                if (treasureState == TreasureState.WALKING) {
-                    if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) > 4f)
-                        treasureState = TreasureState.SOLVING;
+                switch (treasureState){
+                    case WALKING:
+                        if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) < 3f)
+                            treasureState = TreasureState.SOLVING;
+                        break;
                 }
-                break;
+                return;
             case NORMAL:
                 if(!blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(0, 0, 1)) || !blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(0, 1, 1))) {
                     turnState = 1 - turnState;
@@ -229,8 +236,15 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onLastRender() {
+        mineBaritone.onRenderEvent();
+
         if(rotation.rotating)
             rotation.update();
+    }
+
+    @Override
+    public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
+        mineBaritone.onOverlayRenderEvent(event);
     }
 
     @Override
@@ -249,21 +263,19 @@ public class PowderMacro extends Macro {
             new Thread(() -> {
                 try{
                     Thread.sleep(350); // Hypickle lag
+                    LogUtils.debugLog("Starting to find ");
                     chest = BlockUtils.findBlock(16, Blocks.chest, Blocks.trapped_chest).get(0);
-                    treasureState = MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) > 4f ? TreasureState.WALKING : TreasureState.SOLVING;
-                    if(chest.getX() == Math.floor(mc.thePlayer.posX) || chest.getZ() == Math.floor(mc.thePlayer.posZ)){
-                        if(chest.getX() == Math.floor(mc.thePlayer.posX)){
-                            returnBlockPos = BlockUtils.getRelativeBlockPos(0, (float)mc.thePlayer.posY - chest.getY(), (float)Math.abs(chest.getZ() - Math.floor(mc.thePlayer.posZ)));
-                        } else if(chest.getZ() == Math.floor(mc.thePlayer.posZ)){
-                            returnBlockPos = BlockUtils.getRelativeBlockPos(0, (float)mc.thePlayer.posY - chest.getY(), (float)Math.abs(chest.getX() - Math.floor(mc.thePlayer.posX)));
+                    treasureState = MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) > 3f ? TreasureState.WALKING : TreasureState.SOLVING;
+                    for(int i = 0; i < 5; i++){
+                        if(BlockUtils.getRelativeBlockPos(0, 0, i).equals(chest) || BlockUtils.getRelativeBlockPos(0, 1, i).equals(chest)){
+                            returnBlockPos = BlockUtils.getRelativeBlockPos(0, (float)mc.thePlayer.posY - chest.getY(), i + 1);
                         }
                     }
+
 
                 }
                 catch (Exception ignored){}
             }).start();
-
-
 
 
             KeybindHandler.resetKeybindState();

@@ -222,6 +222,7 @@ public class AutoMineBaritone{
     int stuckTickCount = 0;
     public void onTickEvent(TickEvent.Phase phase){
 
+        System.out.println(inAction);
         if(phase != TickEvent.Phase.START || !inAction || blocksToMine.isEmpty())
             return;
 

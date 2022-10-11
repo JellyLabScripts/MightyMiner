@@ -229,7 +229,6 @@ public class AStarPathFinder {
                 openNodes.add(searchNode);
             } else {
                 if(currentNode.gValue + (Math.abs(searchNode.blockPos.getY() - currentNode.blockPos.getY()) > 0 ? 2 : 1) < searchNode.gValue){
-                    Logger.log("Found better path");
                     searchNode.lastNode = currentNode;
                     calculateCost(searchNode, endingBlockPos);
                     openNodes.remove(searchNode);

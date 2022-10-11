@@ -1,6 +1,5 @@
 package com.jelly.MightyMiner;
 
-import com.jelly.MightyMiner.baritone.logging.Logger;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.CoordsConfig;
 import com.jelly.MightyMiner.config.factory.ConfigurationFactory;
@@ -12,10 +11,8 @@ import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.relauncher.FMLCorePlugin;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

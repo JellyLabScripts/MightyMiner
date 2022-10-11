@@ -2,23 +2,23 @@ package com.jelly.MightyMiner.baritone.automine;
 
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
-import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
-import com.jelly.MightyMiner.baritone.autowalk.movement.Moves;
-import com.jelly.MightyMiner.baritone.logging.Logger;
+import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.pathing.AStarPathFinder;
-import com.jelly.MightyMiner.baritone.structures.BlockNode;
-import com.jelly.MightyMiner.baritone.structures.BlockType;
+import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
+import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
+import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
-import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.AngleUtils;
+import com.jelly.MightyMiner.utils.BlockUtils;
+import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.apache.commons.collections4.map.LinkedMap;
 
 import java.awt.*;
 import java.util.LinkedList;
@@ -82,12 +82,15 @@ public class AutoMineBaritone{
         }
 
         new Thread(() -> {
-            try{
+            long start = System.currentTimeMillis();
+            try {
                 blocksToMine = pathFinder.getPath(blockPos);
-            } catch (Throwable e){
+            } catch (Throwable e) {
                 Logger.playerLog("Error when getting path!");
                 e.printStackTrace();
             }
+            Logger.playerLog("finished pathfinding in " + (System.currentTimeMillis() - start));
+
             if (!blocksToMine.isEmpty()) {
                 for (BlockNode blockNode : blocksToMine) {
                     BlockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);

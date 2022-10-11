@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.baritone.logging;
+package com.jelly.MightyMiner.baritone.automine.logging;
 
 import com.jelly.MightyMiner.MightyMiner;
 import net.minecraft.client.Minecraft;

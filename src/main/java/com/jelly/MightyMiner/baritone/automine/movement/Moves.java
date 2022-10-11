@@ -39,13 +39,4 @@ public enum Moves {
     }
 
 
-    public static com.jelly.MightyMiner.baritone.autowalk.movement.Moves getMove(int dx, int dy, int dz){
-        for(com.jelly.MightyMiner.baritone.autowalk.movement.Moves move : com.jelly.MightyMiner.baritone.autowalk.movement.Moves.values()){
-            if(move.dx == dx && move.dy == dy && move.dz == dz){
-                return move;
-            }
-        }
-        return null;
-    }
-
 }

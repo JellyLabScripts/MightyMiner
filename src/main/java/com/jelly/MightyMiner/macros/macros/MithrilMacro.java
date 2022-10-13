@@ -7,6 +7,7 @@ import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -30,8 +31,22 @@ public class MithrilMacro extends Macro {
 
     @Override
     protected void onEnable() {
+        LogUtils.debugLog("Enabled Mithril macro checking if player is near");
+        if(isNearPlayer()){
+            LogUtils.addMessage("Didnt start macro since therese a player near");
+            this.enabled = false;
+            onDisable();
+            return;
+        }
+        LogUtils.debugLog("Didnt find any players nearby, continuing");
         baritone = new AutoMineBaritone(getMineBehaviour());
     }
+
+
+    boolean isNearPlayer(){
+        return PlayerUtils.hasPlayerInsideRadius(MightyMiner.config.mithPlayerRad);
+    }
+
 
     @Override
     public void onTick(TickEvent.Phase phase) {
@@ -39,7 +54,7 @@ public class MithrilMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-        if(PlayerUtils.hasPlayerInsideRadius(MightyMiner.config.mithPlayerRad)){
+        if(isNearPlayer()){
             PlayerUtils.warpBackToIsland();
             MacroHandler.disableScript();
         }
@@ -67,7 +82,7 @@ public class MithrilMacro extends Macro {
 
     @Override
     protected void onDisable() {
-        baritone.disableBaritone();
+        if(baritone != null) baritone.disableBaritone();
         KeybindHandler.resetKeybindState();
     }
 

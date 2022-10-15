@@ -193,8 +193,9 @@ public class AutoMineBaritone{
         if(mineBehaviour.isShiftWhenMine())
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
-        if(!blocksToMine.isEmpty())
+        if(!blocksToMine.isEmpty() && blocksToMine.getLast().getBlockType() == BlockType.MINE)
             pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
+
 
         clearBlocksToWalk();
 
@@ -241,7 +242,7 @@ public class AutoMineBaritone{
             }
         }
 
-        if(blocksToMine.isEmpty() || BlockUtils.isPassable(blocksToMine.getFirst().getBlockPos())){
+        if(blocksToMine.isEmpty() || (BlockUtils.isPassable(blocksToMine.getFirst().getBlockPos()) && blocksToMine.getFirst().getBlockType() != BlockType.WALK)){
             disableBaritone();
             return;
         }
@@ -312,6 +313,7 @@ public class AutoMineBaritone{
                 }
                 break;
         }
+
 
         if (deltaJumpTick > 0)
             deltaJumpTick--;

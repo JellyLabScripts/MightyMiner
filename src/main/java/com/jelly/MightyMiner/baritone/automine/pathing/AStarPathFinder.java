@@ -40,6 +40,7 @@ public class AStarPathFinder {
     }
 
     public void addToBlackList(BlockPos... blackListedPos){
+        System.out.println("blockpos adding to blacklist");
         this.blackListedPos.addAll(Arrays.asList(blackListedPos));
     }
     public void removeFromBlackList(BlockPos blockPos){
@@ -76,7 +77,6 @@ public class AStarPathFinder {
         for(Block block : blockType){
             Logger.playerLog(block.toString());
         }
-        Logger.playerLog(pathBehaviour.getSearchRadius() * 2 + " " + blackListedPos + " " + pathBehaviour.getMinY() + " " +  pathBehaviour.getMaxY() + " " + blockType);
         List<BlockPos> foundBlocks = BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType);
         Logger.playerLog("Found blocks : " + foundBlocks.size());
 

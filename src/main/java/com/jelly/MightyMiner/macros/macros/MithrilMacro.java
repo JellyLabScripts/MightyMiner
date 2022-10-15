@@ -101,4 +101,7 @@ public class MithrilMacro extends Macro {
                 0
         );
     }
+    boolean isNearPlayer(){
+        return PlayerUtils.hasPlayerInsideRadius(MightyMiner.config.mithPlayerRad);
+    }
 }

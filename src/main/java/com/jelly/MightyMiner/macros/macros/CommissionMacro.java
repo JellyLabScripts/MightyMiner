@@ -24,15 +24,9 @@ public class CommissionMacro extends Macro {
     WalkBaritone baritone = new WalkBaritone(getAutowalkConfig());
     AutoMineBaritone mineBaritone = new AutoMineBaritone(getMineBehaviour());
 
-    List<Block> forbiddenMiningBlocks = new ArrayList<Block>(){
-        {
-            add(Blocks.chest);
-            add(Blocks.trapped_chest);
-        }
-    };
     @Override
     protected void onEnable() {
-        mineBaritone.enableBaritone(new BlockPos(74, 56, -27));
+        mineBaritone.enableBaritone(new BlockPos(5, 1, -9));
        // LogUtils.addMessage(BlockUtils.getRelativeBlock(0, 0, 1).toString());
     }
 
@@ -71,7 +65,12 @@ public class CommissionMacro extends Macro {
                 false,
                 50,
                 8,
-                forbiddenMiningBlocks,
+                new ArrayList<Block>(){
+                    {
+                        add(Blocks.chest);
+                        add(Blocks.trapped_chest);
+                    }
+                },
                 null,
                 256,
                 0

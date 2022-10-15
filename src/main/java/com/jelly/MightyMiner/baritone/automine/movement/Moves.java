@@ -22,6 +22,7 @@ public enum Moves {
     DIAGONAL_SOUTHWEST(-1, 0, 1, 1.4d),
     DIAGONAL_NORTHWEST(-1, 0, -1, 1.4d);
 
+
     public final int dx;
     public final int dy;
     public final int dz;
@@ -33,6 +34,7 @@ public enum Moves {
         this.dz = dz;
         this.cost = cost;
     }
+
 
     public static com.jelly.MightyMiner.baritone.autowalk.movement.Moves getMove(int dx, int dy, int dz){
         for(com.jelly.MightyMiner.baritone.autowalk.movement.Moves move : com.jelly.MightyMiner.baritone.autowalk.movement.Moves.values()){

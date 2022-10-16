@@ -24,6 +24,14 @@ public class Config extends Vigilant {
     public boolean debugLogMode = false;
 
     @Property(
+            type = PropertyType.SWITCH,
+            name = "Toggle mouse ungrab",
+            category = "Core",
+            subcategory = "Macro"
+    )
+    public boolean mouseUngrab = true;
+
+    @Property(
             type = PropertyType.SLIDER,
             name = "Stuck time threshold (seconds)",
             description = "restarts macro when stuck time > threshold",
@@ -33,6 +41,7 @@ public class Config extends Vigilant {
             min = 3
     )
     public int gemRestartTimeThreshold = 8;
+
 
     @Property(type = PropertyType.SLIDER,
             name = "Max y level",

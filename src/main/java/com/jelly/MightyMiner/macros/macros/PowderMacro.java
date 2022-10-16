@@ -95,6 +95,7 @@ public class PowderMacro extends Macro {
         blocksAllowedToMine.add(Blocks.wool);
         blocksAllowedToMine.add(Blocks.chest);
         blocksAllowedToMine.add(Blocks.trapped_chest);
+        
 
         if(MightyMiner.config.powMineGemstone){
             blocksAllowedToMine.add(Blocks.stained_glass_pane);

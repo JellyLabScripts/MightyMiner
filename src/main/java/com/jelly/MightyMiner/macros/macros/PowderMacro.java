@@ -35,12 +35,6 @@ public class PowderMacro extends Macro {
             add(Blocks.wool);
         }
     };
-    List<Block> forbiddenMiningBlocks = new ArrayList<Block>(){
-        {
-            add(Blocks.chest);
-            add(Blocks.trapped_chest);
-        }
-    };
     long treasureInitialTime;
 
     float playerYaw;
@@ -325,10 +319,6 @@ public class PowderMacro extends Macro {
         return mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, 1))
                 || BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) ||  BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane) ;
     }
-    boolean isInCenterOfBlock() {
-        return (Math.round(AngleUtils.get360RotationYaw()) == 180 || Math.round(AngleUtils.get360RotationYaw()) == 0) ? Math.abs(Minecraft.getMinecraft().thePlayer.posZ) % 1 > 0.3f && Math.abs(Minecraft.getMinecraft().thePlayer.posZ) % 1 < 0.7f :
-                Math.abs(Minecraft.getMinecraft().thePlayer.posX) % 1 > 0.3f && Math.abs(Minecraft.getMinecraft().thePlayer.posX) % 1 < 0.7f;
-    }
 
 
     MineBehaviour getAutomineConfig(){
@@ -337,9 +327,14 @@ public class PowderMacro extends Macro {
                 false,
                 true,
                 false,
-                50,
+                250,
                 8,
-                forbiddenMiningBlocks,
+                new ArrayList<Block>(){
+                    {
+                        add(Blocks.chest);
+                        add(Blocks.trapped_chest);
+                    }
+                },
                 null,
                 256,
                 0

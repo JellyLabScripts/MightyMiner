@@ -3,6 +3,7 @@ package com.jelly.MightyMiner.baritone.automine;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
+import com.jelly.MightyMiner.baritone.autowalk.movement.Moves;
 import com.jelly.MightyMiner.baritone.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.pathing.AStarPathFinder;
 import com.jelly.MightyMiner.baritone.structures.BlockNode;
@@ -17,6 +18,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.collections4.map.LinkedMap;
 
 import java.awt.*;
 import java.util.LinkedList;
@@ -25,6 +27,7 @@ public class AutoMineBaritone{
 
     Minecraft mc = Minecraft.getMinecraft();
     MineBehaviour mineBehaviour;
+
 
     LinkedList<BlockNode> blocksToMine = new LinkedList<>();
     LinkedList<BlockNode> minedBlocks = new LinkedList<>();
@@ -45,6 +48,10 @@ public class AutoMineBaritone{
 
     AStarPathFinder pathFinder;
     BlockPos playerFloorPos;
+
+    Moves lastMove;
+    boolean jumpFlag;
+    int jumpCooldown;
 
     public AutoMineBaritone(MineBehaviour mineBehaviour){
         this.mineBehaviour = mineBehaviour;
@@ -193,8 +200,9 @@ public class AutoMineBaritone{
         if(mineBehaviour.isShiftWhenMine())
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
-        if(!blocksToMine.isEmpty())
+        if(!blocksToMine.isEmpty() && blocksToMine.getLast().getBlockType() == BlockType.MINE)
             pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
+
 
         clearBlocksToWalk();
 
@@ -222,7 +230,6 @@ public class AutoMineBaritone{
     int stuckTickCount = 0;
     public void onTickEvent(TickEvent.Phase phase){
 
-        System.out.println(inAction);
         if(phase != TickEvent.Phase.START || !inAction || blocksToMine.isEmpty())
             return;
 
@@ -241,51 +248,41 @@ public class AutoMineBaritone{
             }
         }
 
-        if(blocksToMine.isEmpty() || BlockUtils.isPassable(blocksToMine.getFirst().getBlockPos())){
+        if(blocksToMine.isEmpty() || (BlockUtils.isPassable(blocksToMine.getFirst().getBlockPos()) && blocksToMine.getFirst().getBlockType() != BlockType.WALK)){
             disableBaritone();
             return;
         }
 
         updateState();
 
-        BlockPos lastMinedBlockPos = minedBlocks.isEmpty() ? null : minedBlocks.getLast().getBlockPos();
         BlockPos targetMineBlock = blocksToMine.getLast().getBlockPos();
 
         switch (currentState){
             case WALKING:
-                KeybindHandler.updateKeys(
-                        (lastMinedBlockPos != null || BlockUtils.isPassable(targetMineBlock)),
-                        false,
-                        false,
-                        false,
-                        false,
-                        false,
-                        false,
-                        deltaJumpTick > 0);
-
-                if(BlockUtils.isPassable(targetMineBlock))
-                    rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), mc.thePlayer.rotationPitch, mineBehaviour.getRotationTime());
-                else if(lastMinedBlockPos != null)
-                    rotation.intLockAngle(AngleUtils.getRequiredYaw(lastMinedBlockPos), mc.thePlayer.rotationPitch, mineBehaviour.getRotationTime());
+                float reqYaw = AngleUtils.getRequiredYaw(blocksToMine.getLast().getBlockPos());
+                if(inAction && !blocksToMine.isEmpty())
+                    rotation.intLockAngle(reqYaw, 0, 5); // camera angle
 
 
-                if(lastMinedBlockPos != null){
-                    if(blocksToMine.getLast().getBlockType() == BlockType.WALK){
-                        if (targetMineBlock.getY() >= (int) mc.thePlayer.posY + 1)
-                            deltaJumpTick = 3;
-
-                    } else {
-                        if (minedBlocks.getLast().getBlockType() == BlockType.MINE) {
-                            if (lastMinedBlockPos.getY() >= (int) mc.thePlayer.posY + 1 && !(BlockUtils.onTheSameXZ(lastMinedBlockPos, BlockUtils.getPlayerLoc()))
-                                    && (BlockUtils.fitsPlayer(lastMinedBlockPos.down()) || BlockUtils.fitsPlayer(lastMinedBlockPos.down(2))))
-                                deltaJumpTick = 3;
-                        }
-                    }
-                } else {
-                    if(BlockUtils.isPassable(targetMineBlock) && targetMineBlock.getY() == (int) mc.thePlayer.posY + 1)
-                        deltaJumpTick = 3;
+                if((targetMineBlock.getY() > mc.thePlayer.posY || (!minedBlocks.isEmpty() && minedBlocks.getLast().getBlockPos().getY() > mc.thePlayer.posY))
+                        && !jumpFlag && mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0 && jumpCooldown == 0 && mc.thePlayer.onGround) {
+                    jumpFlag = true;
+                    jumpCooldown = 10;
                 }
+                KeybindHandler.updateKeys(
+                        AngleUtils.getAngleDifference(reqYaw, AngleUtils.getActualRotationYaw()) < -4 * 10 + 45,
+                        AngleUtils.getAngleDifference(reqYaw, AngleUtils.getActualRotationYaw()) >= 45,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        jumpFlag);
+
+                jumpFlag = false;
+                if(jumpCooldown > 0) jumpCooldown --;
                 break;
+
 
             case MINING:
                 mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Pick", "Drill", "Gauntlet");
@@ -313,6 +310,7 @@ public class AutoMineBaritone{
                 break;
         }
 
+
         if (deltaJumpTick > 0)
             deltaJumpTick--;
     }
@@ -337,6 +335,7 @@ public class AutoMineBaritone{
             currentState =  blocksToMine.getLast().getBlockType().equals(BlockType.MINE) ? PlayerState.MINING : PlayerState.WALKING;
             return;
         }
+
         if(blocksToMine.getLast().getBlockType() == BlockType.WALK) {
             currentState = PlayerState.WALKING;
             return;

@@ -204,7 +204,7 @@ public class BlockUtils {
     }
 
     public static boolean isPassable(BlockPos block) {
-        return isPassable(getBlock(block));
+        return isPassable(getBlockUnCashed(block));
     }
 
     public static boolean canWalkOn(Block groundBlock) {
@@ -216,9 +216,9 @@ public class BlockUtils {
     }
 
     public static boolean fitsPlayer(BlockPos groundBlock) {
-        return canWalkOn(getBlock(groundBlock))
-                && isPassable(getBlock(groundBlock.up()))
-                && isPassable(getBlock(groundBlock.up(2)));
+        return canWalkOn(getBlockUnCashed(groundBlock))
+                && isPassable(getBlockUnCashed(groundBlock.up()))
+                && isPassable(getBlockUnCashed(groundBlock.up(2)));
     }
 
     public static boolean onTheSameXZ(BlockPos b1, BlockPos b2) {

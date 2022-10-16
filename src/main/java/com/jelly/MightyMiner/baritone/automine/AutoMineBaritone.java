@@ -4,7 +4,6 @@ import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.baritone.automine.pathing.AStarPathFinder;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
-import com.jelly.MightyMiner.baritone.autowalk.movement.Moves;
 import com.jelly.MightyMiner.baritone.logging.Logger;
 import com.jelly.MightyMiner.baritone.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.structures.BlockType;
@@ -307,7 +306,7 @@ public class AutoMineBaritone{
                 if(mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null){
                     // special cases for optimization
                     if(BlockUtils.isAdjacentXZ(targetMineBlock, BlockUtils.getPlayerLoc()) && !AngleUtils.shouldLookAtCenter(targetMineBlock) &&
-                            (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetMineBlock.up()).equals(Blocks.air) )|| targetMineBlock.getY() - mc.thePlayer.posY == 1)){
+                            (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlockUnCashed(targetMineBlock.up()).equals(Blocks.air) )|| targetMineBlock.getY() - mc.thePlayer.posY == 1)){
                         rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), 28, mineBehaviour.getRotationTime());
                     } else if (!BlockUtils.isPassable(targetMineBlock) && !rotation.rotating)
                         rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock), mineBehaviour.getRotationTime());
@@ -383,7 +382,7 @@ public class AutoMineBaritone{
 
     private boolean shouldRemoveFromList(BlockNode lastBlockNode){
         if(lastBlockNode.getBlockType() == BlockType.MINE)
-            return BlockUtils.isPassable(lastBlockNode.getBlockPos()) || BlockUtils.getBlock(lastBlockNode.getBlockPos()).equals(Blocks.bedrock);
+            return BlockUtils.isPassable(lastBlockNode.getBlockPos()) || BlockUtils.getBlockUnCashed(lastBlockNode.getBlockPos()).equals(Blocks.bedrock);
         else
             return BlockUtils.onTheSameXZ(lastBlockNode.getBlockPos(), BlockUtils.getPlayerLoc()) || !BlockUtils.fitsPlayer(lastBlockNode.getBlockPos().down());
     }

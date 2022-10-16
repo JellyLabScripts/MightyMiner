@@ -88,9 +88,13 @@ public class BlockUtils {
     @SuppressWarnings("UnstableApiUsage")
     private static final LoadingCache<BlockPos, Block> blockCache = CacheBuilder.newBuilder().expireAfterWrite(3L, TimeUnit.SECONDS).build(new CacheLoader<BlockPos, Block>() {
         public Block load(@NotNull BlockPos pos) {
-            return mc.theWorld.getBlockState(pos).getBlock();
+            return getBlockUnCashed(pos);
         }
     });
+
+    public static Block getBlockUnCashed(BlockPos b){
+        return mc.theWorld.getBlockState(b).getBlock();
+    }
 
     @SuppressWarnings("UnstableApiUsage")
     public static Block getBlock(BlockPos blockPos) {

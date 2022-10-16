@@ -88,6 +88,8 @@ dependencies {
 
     implementation('org.projectlombok:lombok:1.18.24')
     annotationProcessor('org.projectlombok:lombok:1.18.24')
+
+    include('eu.okaeri:okaeri-configs-yaml-snakeyaml:4.0.6')
     implementation ('eu.okaeri:okaeri-configs-yaml-snakeyaml:4.0.6')
 
     include(fileTree(dir: 'libs', include: '*.jar'))

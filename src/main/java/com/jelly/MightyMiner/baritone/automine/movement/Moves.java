@@ -20,7 +20,10 @@ public enum Moves {
     DIAGONAL_NORTHEAST(1, 0, -1, 1.4d),
     DIAGONAL_SOUTHEAST(1, 0, 1, 1.4d),
     DIAGONAL_SOUTHWEST(-1, 0, 1, 1.4d),
-    DIAGONAL_NORTHWEST(-1, 0, -1, 1.4d);
+    DIAGONAL_NORTHWEST(-1, 0, -1, 1.4d),
+
+    DOWN(0, -1, 0, 1);
+
 
 
     public final int dx;

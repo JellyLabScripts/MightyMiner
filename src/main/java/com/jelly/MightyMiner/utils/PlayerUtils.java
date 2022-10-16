@@ -3,7 +3,6 @@ package com.jelly.MightyMiner.utils;
 import com.jelly.MightyMiner.MightyMiner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
@@ -58,7 +57,7 @@ public class PlayerUtils {
     }
 
     public static boolean isNearPlayer(){
-        LogUtils.addMessage("Found player nearby");
+//        LogUtils.addMessage("Found player nearby");
         return hasPlayerInsideRadius(MightyMiner.config.mithPlayerRad);
     }
 }

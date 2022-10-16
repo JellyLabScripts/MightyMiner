@@ -73,6 +73,12 @@ public class PowderMacro extends Macro {
     @Override
     public void onEnable() {
 
+        if(PlayerUtils.isNearPlayer()){
+            LogUtils.addMessage("Not stating, there is a player near");
+            this.toggle();
+            return;
+        }
+
         Main.configFile.hardIndex = MightyMiner.config.powAuraType;
         Main.configFile.includeOres = true;
         currentState = State.NORMAL;
@@ -117,7 +123,7 @@ public class PowderMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-        if(PlayerUtils.hasPlayerInsideRadius(MightyMiner.config.powPlayerRad)){
+        if(PlayerUtils.isNearPlayer()){
             PlayerUtils.warpBackToIsland();
             MacroHandler.disableScript();
             Main.autoHardStone = false;

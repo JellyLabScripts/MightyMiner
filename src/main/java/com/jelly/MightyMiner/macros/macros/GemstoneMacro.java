@@ -69,7 +69,7 @@ public class GemstoneMacro extends Macro {
             return;
 
 
-        if(PlayerUtils.hasPlayerInsideRadius(MightyMiner.config.gemPlayerRad)){
+        if(PlayerUtils.isNearPlayer()){
             PlayerUtils.warpBackToIsland();
             MacroHandler.disableScript();
         }

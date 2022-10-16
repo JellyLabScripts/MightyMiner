@@ -44,12 +44,11 @@ public class AutoMineBaritone{
     }
     PlayerState currentState;
     Block[] targetBlockType;
-    boolean enabled;
+    volatile boolean enabled;
 
     AStarPathFinder pathFinder;
     BlockPos playerFloorPos;
 
-    Moves lastMove;
     boolean jumpFlag;
     int jumpCooldown;
 
@@ -66,7 +65,7 @@ public class AutoMineBaritone{
     }
 
     public void enableBaritone(BlockPos blockPos){
-        enabled = true;
+        enable();
         clearBlocksToWalk();
         KeybindHandler.resetKeybindState();
 
@@ -106,9 +105,8 @@ public class AutoMineBaritone{
 
 
     public void enableBaritone(Block... blockType) {
-        enabled = true;
         targetBlockType = blockType;
-
+        enable();
         clearBlocksToWalk();
 
         KeybindHandler.resetKeybindState();
@@ -150,7 +148,7 @@ public class AutoMineBaritone{
     }
 
     public void enableBaritoneSingleThread(Block... blockType) throws Exception{ // ONLY USABLE IN SHORT DISTANCE!!!!
-        enabled = true;
+        enable();
         targetBlockType = blockType;
 
         clearBlocksToWalk();
@@ -185,6 +183,10 @@ public class AutoMineBaritone{
         inAction = true;
         currentState = PlayerState.NONE;
         stuckTickCount = 0;
+    }
+
+    private void enable(){
+        enabled = true;
     }
 
 

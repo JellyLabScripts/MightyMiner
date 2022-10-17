@@ -61,7 +61,7 @@ public class MithrilMacro extends Macro {
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
         if(!baritone.isEnabled()){
-            baritone.enableBaritone(priorityBlocks.get(MightyMiner.config.mithPriority1), priorityBlocks.get(MightyMiner.config.mithPriority2), priorityBlocks.get(MightyMiner.config.mithPriority3));
+            baritone.mineFor(priorityBlocks.get(MightyMiner.config.mithPriority1), priorityBlocks.get(MightyMiner.config.mithPriority2), priorityBlocks.get(MightyMiner.config.mithPriority3));
         }
 
     }

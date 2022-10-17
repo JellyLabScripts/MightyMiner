@@ -11,13 +11,11 @@ import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AOTVMacro extends Macro {
@@ -92,7 +90,7 @@ public class AOTVMacro extends Macro {
             case Mining:
                 if(!baritone.isEnabled()) {
                     try {
-                        baritone.enableBaritoneSingleThread(Blocks.stained_glass, Blocks.stained_glass_pane);
+                        baritone.mineForInSingleThread(Blocks.stained_glass, Blocks.stained_glass_pane);
                     } catch (Exception ignored) {
                         currentState = State.NONE;
                         baritone.disableBaritone();

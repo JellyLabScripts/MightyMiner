@@ -18,7 +18,6 @@ import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
@@ -78,8 +77,10 @@ public class GemstoneMacro extends Macro {
             haveTreasureChest = false;
         }
 
+        //System.out.println(baritone.isEnabled());
         if(!baritone.isEnabled() && !minedNearbyGemstones && !haveTreasureChest && PlayerUtils.hasStoppedMoving()){
-            baritone.enableBaritone(Blocks.stained_glass_pane, Blocks.stained_glass);
+
+            baritone.mineFor(Blocks.stained_glass_pane, Blocks.stained_glass);
 
          //   LogUtils.addMessage(baritone.isEnabled() + " ");
 

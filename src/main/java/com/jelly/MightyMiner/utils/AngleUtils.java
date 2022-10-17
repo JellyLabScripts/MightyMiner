@@ -4,12 +4,9 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AngleUtils {
 
@@ -85,7 +82,7 @@ public class AngleUtils {
 
         ArrayList<BlockUtils.BlockSides> blockSidesNotCovered = BlockUtils.getAdjBlocksNotCovered(blockLookingAt);
         BlockUtils.BlockSides blockSideToMine;
-        if(blockSidesNotCovered.size() > 0 && !lookAtCenterBlocks.contains(BlockUtils.getBlock(blockLookingAt))){
+        if(blockSidesNotCovered.size() > 0 && !lookAtCenterBlocks.contains(BlockUtils.getBlockCached(blockLookingAt))){
             double lowestCost = 9999;
             blockSideToMine = blockSidesNotCovered.get(0);
 
@@ -321,7 +318,6 @@ public class AngleUtils {
                     blockSideToMine = blockSide;
                 }
             }
-            System.out.println(blockSideToMine);
             switch (blockSideToMine){
                 case posX:
                     deltaX += 0.5d;

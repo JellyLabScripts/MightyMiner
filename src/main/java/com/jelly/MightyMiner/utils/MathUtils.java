@@ -1,13 +1,9 @@
 package com.jelly.MightyMiner.utils;
 
 import net.minecraft.block.BlockSlab;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-
-import java.util.*;
 
 public class MathUtils {
 
@@ -31,7 +27,7 @@ public class MathUtils {
     public static double getHeuristicCostBetweenTwoBlock(BlockPos b1, BlockPos b2){
         return  (Math.sqrt(
                 square(b1.getX() - b2.getX()) * 0.5d
-                + square( b1.getY() - b2.getY()) * (BlockUtils.getBlock(b1) instanceof BlockSlab ? 0.5 : 2) * (BlockUtils.getBlock(b2) instanceof BlockSlab ? 0.5 : 2)
+                + square( b1.getY() - b2.getY()) * (BlockUtils.getBlockCached(b1) instanceof BlockSlab ? 0.5 : 2) * (BlockUtils.getBlockCached(b2) instanceof BlockSlab ? 0.5 : 2)
                 + square(b1.getZ() - b2.getZ()) * 0.5d));
     }
 

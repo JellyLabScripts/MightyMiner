@@ -22,6 +22,4 @@ public class PathBehaviour{
     int searchRadius;
     @Getter
     boolean staticMode;
-
-
 }

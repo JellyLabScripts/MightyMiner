@@ -10,7 +10,6 @@ import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
@@ -154,9 +153,6 @@ public class PowderMacro extends Macro {
             return;
         }
 
-
-        System.out.println(currentState + " " + treasureState);
-
         switch (currentState){
             case TREASURE:
                 Main.autoHardStone = false;
@@ -171,7 +167,7 @@ public class PowderMacro extends Macro {
                         break;
                     case RETURNING:
                         if(!mineBaritone.isEnabled() && !BlockUtils.getPlayerLoc().equals(returnBlockPos)) {
-                            mineBaritone.enableBaritone(returnBlockPos);
+                            mineBaritone.goTo(returnBlockPos);
                         } else if(!mineBaritone.isEnabled() && BlockUtils.getPlayerLoc().equals(returnBlockPos)){
                             if (MightyMiner.config.powCenter)
                                 centering = true;

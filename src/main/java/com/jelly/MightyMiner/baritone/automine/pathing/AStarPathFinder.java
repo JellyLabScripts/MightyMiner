@@ -3,6 +3,7 @@ package com.jelly.MightyMiner.baritone.automine.pathing;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.movement.Moves;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
+import com.jelly.MightyMiner.baritone.automine.pathing.config.PathMode;
 import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoBlockException;
 import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
@@ -36,12 +37,14 @@ public class AStarPathFinder {
 
     PriorityQueue<Node> openNodes;
 
-    ArrayList<BlockPos> blackListedPos;
+    private ArrayList<BlockPos> blackListedPos;
+
+    PathMode mode = PathMode.MINE;
 
     public AStarPathFinder(PathBehaviour options) {
-        this.openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));
-        this.blackListedPos = new ArrayList<>();
-        this.pathBehaviour = options;
+        openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));
+        blackListedPos = new ArrayList<>();
+        pathBehaviour = options;
     }
 
     public void addToBlackList(BlockPos... blackListedPos) {
@@ -49,19 +52,20 @@ public class AStarPathFinder {
     }
 
     public void removeFromBlackList(BlockPos blockPos) {
-        this.blackListedPos.remove(blockPos);
+        blackListedPos.remove(blockPos);
     }
 
-    public LinkedList<BlockNode> getPathWithPreference(Block... blockType) throws NoBlockException, NoPathException {
+    public LinkedList<BlockNode> getPathWithPreference( Block... blockType) throws NoBlockException, NoPathException {
+        this.mode = PathMode.MINE;
         LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
-        if (BlockUtils.findBlock(this.pathBehaviour.getSearchRadius() * 2, this.blackListedPos, this.pathBehaviour.getMinY(), this.pathBehaviour.getMaxY(), blockType).isEmpty())
+        if (BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType).isEmpty())
             throw new NoBlockException();
         for (Block block : blockType) {
-            List<BlockPos> foundBlocks = BlockUtils.findBlock(this.pathBehaviour.getSearchRadius() * 2, this.blackListedPos, this.pathBehaviour.getMinY(), this.pathBehaviour.getMaxY(), new Block[] { block });
+            List<BlockPos> foundBlocks = BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), new Block[] { block });
             for (int i = 0; i < Math.min(foundBlocks.size(), 20); i++) {
                 LinkedList<BlockNode> path = calculatePath(BlockUtils.getPlayerLoc(), foundBlocks.get(i));
                 if (!path.isEmpty() && (
-                        !this.pathBehaviour.isStaticMode() || path.size() <= 1))
+                        !pathBehaviour.isStaticMode() || path.size() <= 1))
                     possiblePaths.add(path);
             }
             if (!possiblePaths.isEmpty()) {
@@ -72,10 +76,11 @@ public class AStarPathFinder {
         throw new NoPathException();
     }
 
-    public LinkedList<BlockNode> getPath(Block... blockType) throws NoBlockException, NoPathException {
+    public LinkedList<BlockNode> getPath(PathMode mode, Block... blockType) throws NoBlockException, NoPathException {
+        this.mode = mode;
         for (Block block : blockType)
             Logger.playerLog(block.toString());
-        List<BlockPos> foundBlocks = BlockUtils.findBlock(this.pathBehaviour.getSearchRadius() * 2, this.blackListedPos, this.pathBehaviour.getMinY(), this.pathBehaviour.getMaxY(), blockType);
+        List<BlockPos> foundBlocks = BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType);
         Logger.playerLog("Found blocks : " + foundBlocks.size());
         long pastTime = System.currentTimeMillis();
         if (foundBlocks.isEmpty())
@@ -84,7 +89,7 @@ public class AStarPathFinder {
         for (int i = 0; i < Math.min(foundBlocks.size(), 20); i++) {
             LinkedList<BlockNode> path = calculatePath(BlockUtils.getPlayerLoc(), foundBlocks.get(i));
             if (!path.isEmpty() && (
-                    !this.pathBehaviour.isStaticMode() || path.size() <= 1))
+                    !pathBehaviour.isStaticMode() || path.size() <= 1))
                 possiblePaths.add(path);
         }
         if (possiblePaths.isEmpty())
@@ -94,67 +99,81 @@ public class AStarPathFinder {
         return possiblePaths.getFirst();
     }
 
-    public LinkedList<BlockNode> getPath(BlockPos blockPos) throws NoPathException {
+    public LinkedList<BlockNode> getPath(Block... blockType) throws NoBlockException, NoPathException {
+        return getPath(PathMode.MINE, blockType);
+    }
+
+
+    public LinkedList<BlockNode> getPath(BlockPos blockPos, PathMode mode) throws NoPathException {
+        this.mode = mode;
         LinkedList<BlockNode> path = calculatePath(BlockUtils.getPlayerLoc(), blockPos);
         if (path.isEmpty())
             throw new NoPathException();
         return path;
     }
+    public LinkedList<BlockNode> getPath(BlockPos blockPos) throws NoPathException {
+        return getPath(blockPos, PathMode.MINE);
+    }
+
+
+
 
     private LinkedList<BlockNode> calculatePath(BlockPos startingPos, final BlockPos endingBlock) {
-        this.gridEnvironment.clear();
-        this.checkedNodes.clear();
-        this.openNodes.clear();
-        if (BlockUtils.canSeeBlock(endingBlock) && BlockUtils.canReachBlock(endingBlock))
-            return new LinkedList<BlockNode>() {
+        gridEnvironment.clear();
+        checkedNodes.clear();
+        openNodes.clear();
 
+        if (BlockUtils.canSeeBlock(endingBlock) && BlockUtils.canReachBlock(endingBlock) && mode == PathMode.MINE)
+            return new LinkedList<BlockNode>() {
+                {
+                    add(new BlockNode(endingBlock, BlockType.MINE));
+                }
             };
+
         int currentGridX = 0;
-        int currentGridY = (int)this.mc.thePlayer.posY;
+        int currentGridY = (int)mc.thePlayer.posY;
         int currentGridZ = 0;
+
         instantiateAnyNode(currentGridX, currentGridY, currentGridZ, new Node(startingPos));
-        Node startNode = (Node)this.gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
-        this.step = 0;
-        this.openNodes.add(startNode);
-        while (!this.openNodes.isEmpty()) {
-            Node currentNode = this.openNodes.poll();
+        Node startNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
+        step = 0;
+        openNodes.add(startNode);
+
+        while (!openNodes.isEmpty()) {
+            Node currentNode = openNodes.poll();
             if (currentNode.lastNode != null) {
                 currentGridX = currentNode.blockPos.getX() - startNode.blockPos.getX();
                 currentGridY = currentNode.blockPos.getY();
                 currentGridZ = currentNode.blockPos.getZ() - startNode.blockPos.getZ();
             }
-            this.checkedNodes.add(currentNode);
-            this.step++;
-            if (this.step > 3000)
+            checkedNodes.add(currentNode);
+            step++;
+            if (step > 3000)
                 break;
             for (Moves move : Moves.values()) {
                 instantiateNode(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz, startNode);
-                checkNode(move, (Node)this.gridEnvironment.get(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz), currentNode, endingBlock);
+                checkNode(move, gridEnvironment.get(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz), currentNode, endingBlock);
             }
             if (currentNode.blockPos.equals(endingBlock))
                 return trackBackPath(currentNode, startNode);
-        }
-        return new LinkedList<>();
+        }        return new LinkedList<>();
     }
 
     private void checkNode(Moves move, Node searchNode, Node currentNode, BlockPos endingBlockPos) {
-        if (this.checkedNodes.contains(searchNode) || BlockUtils.isPassable(searchNode.blockPos.down()))
+        if (checkedNodes.contains(searchNode) || BlockUtils.isPassable(searchNode.blockPos.down()))
             return;
         if (!searchNode.blockPos.equals(endingBlockPos)) {
-            if (this.pathBehaviour.getForbiddenMiningBlocks() != null && ((
-                    this.pathBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.blockPos)) && !BlockUtils.getBlock(searchNode.blockPos).equals(Blocks.air)) || (this.pathBehaviour
-                    .getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.blockPos.up())) && !BlockUtils.getBlock(searchNode.blockPos.up()).equals(Blocks.air))))
+            if (pathBehaviour.getForbiddenMiningBlocks() != null && ((
+                    pathBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) && !BlockUtils.getBlockCached(searchNode.blockPos).equals(Blocks.air)) || (pathBehaviour
+                    .getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())) && !BlockUtils.getBlockCached(searchNode.blockPos.up()).equals(Blocks.air))))
                 return;
-            if (this.pathBehaviour.getAllowedMiningBlocks() != null && ((
-                    !this.pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.blockPos)) && !BlockUtils.getBlock(searchNode.blockPos).equals(Blocks.air)) || (
-                    !this.pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.blockPos.up())) && !BlockUtils.getBlock(searchNode.blockPos.up()).equals(Blocks.air))))
+            if (pathBehaviour.getAllowedMiningBlocks() != null && ((
+                    !pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) && !BlockUtils.getBlockCached(searchNode.blockPos).equals(Blocks.air)) || (
+                    !pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())) && !BlockUtils.getBlockCached(searchNode.blockPos.up()).equals(Blocks.air))))
                 return;
         }
         switch (move) {
-            case DIAGONAL_NORTHEAST:
-            case DIAGONAL_NORTHWEST:
-            case DIAGONAL_SOUTHEAST:
-            case DIAGONAL_SOUTHWEST:
+            case DIAGONAL_NORTHEAST: case DIAGONAL_NORTHWEST: case DIAGONAL_SOUTHEAST: case DIAGONAL_SOUTHWEST:
                 if (!BlockUtils.isPassable(new BlockPos(searchNode.blockPos.getX(), searchNode.blockPos.getY(), currentNode.blockPos.getZ())) || !BlockUtils.isPassable(new BlockPos(currentNode.blockPos.getX(), searchNode.blockPos.getY(), searchNode.blockPos.getZ())) ||
                         !BlockUtils.isPassable(new BlockPos(searchNode.blockPos.getX(), searchNode.blockPos.getY() + 1, currentNode.blockPos.getZ())) || !BlockUtils.isPassable(new BlockPos(currentNode.blockPos.getX(), searchNode.blockPos.getY() + 1, searchNode.blockPos.getZ())))
                     return;
@@ -164,15 +183,15 @@ public class AStarPathFinder {
                     return;
                 break;
         }
-        if (!this.openNodes.contains(searchNode)) {
+        if (!openNodes.contains(searchNode)) {
             searchNode.lastNode = currentNode;
             calculateCost(move, searchNode, endingBlockPos);
-            this.openNodes.add(searchNode);
+            openNodes.add(searchNode);
         } else if (currentNode.gValue + move.cost < searchNode.gValue) {
             searchNode.lastNode = currentNode;
             calculateCost(move.cost, searchNode, endingBlockPos);
-            this.openNodes.remove(searchNode);
-            this.openNodes.add(searchNode);
+            openNodes.remove(searchNode);
+            openNodes.add(searchNode);
         }
     }
 
@@ -181,28 +200,34 @@ public class AStarPathFinder {
     }
 
     private void instantiateAnyNode(int gridX, int gridY, int gridZ, Node node) {
-        if (this.gridEnvironment.get(gridX, gridY, gridZ) == null)
-            this.gridEnvironment.set(gridX, gridY, gridZ, node);
+        if (gridEnvironment.get(gridX, gridY, gridZ) == null)
+            gridEnvironment.set(gridX, gridY, gridZ, node);
     }
 
     private LinkedList<BlockNode> trackBackPath(Node goalNode, Node startNode) {
         LinkedList<BlockNode> blocksToMine = new LinkedList<>();
         Node formerNode = null;
         Node currentTrackNode = null;
-        if (goalNode.lastNode != null && goalNode.lastNode.blockPos != null) {
-            blocksToMine.add(new BlockNode(goalNode.blockPos, getBlockType(goalNode.blockPos)));
-            if (goalNode.lastNode.blockPos.getY() > goalNode.blockPos.getY()) {
-                if (!BlockUtils.isPassable(goalNode.blockPos.up()))
+        if(mode == PathMode.MINE) {
+            if (goalNode.lastNode != null && goalNode.lastNode.blockPos != null) {
+                blocksToMine.add(new BlockNode(goalNode.blockPos, getBlockType(goalNode.blockPos)));
+                if (goalNode.lastNode.blockPos.getY() > goalNode.blockPos.getY()) {
+                    if (!BlockUtils.isPassable(goalNode.blockPos.up()))
+                        blocksToMine.add(new BlockNode(goalNode.blockPos.up(), getBlockType(goalNode.blockPos.up())));
+                    if (!BlockUtils.isPassable(goalNode.blockPos.up(2)) && getBlockType(goalNode.blockPos.up(2)) == BlockType.WALK)
+                        blocksToMine.add(new BlockNode(goalNode.blockPos.up(2), getBlockType(goalNode.blockPos.up(2))));
+                } else if (goalNode.lastNode.blockPos.getY() == goalNode.blockPos.getY() && (
+                        AngleUtils.shouldLookAtCenter(goalNode.blockPos) || getBlockType(goalNode.blockPos.up()) == BlockType.WALK)) {
                     blocksToMine.add(new BlockNode(goalNode.blockPos.up(), getBlockType(goalNode.blockPos.up())));
-                if (!BlockUtils.isPassable(goalNode.blockPos.up(2)) && getBlockType(goalNode.blockPos.up(2)) == BlockType.WALK)
-                    blocksToMine.add(new BlockNode(goalNode.blockPos.up(2), getBlockType(goalNode.blockPos.up(2))));
-            } else if (goalNode.lastNode.blockPos.getY() == goalNode.blockPos.getY() && (
-                    AngleUtils.shouldLookAtCenter(goalNode.blockPos) || getBlockType(goalNode.blockPos.up()) == BlockType.WALK)) {
-                blocksToMine.add(new BlockNode(goalNode.blockPos.up(), getBlockType(goalNode.blockPos.up())));
+                }
+                formerNode = goalNode;
+                currentTrackNode = goalNode.lastNode;
             }
+        } else {
             formerNode = goalNode;
-            currentTrackNode = goalNode.lastNode;
+            currentTrackNode = goalNode;
         }
+
         if (currentTrackNode != null && currentTrackNode.lastNode != null) {
             do {
                 if (currentTrackNode.lastNode.blockPos.getY() > currentTrackNode.blockPos.getY()) {
@@ -211,6 +236,7 @@ public class AStarPathFinder {
                         blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(), getBlockType(currentTrackNode.blockPos.up())));
                     if (!BlockUtils.isPassable(currentTrackNode.blockPos.up(2)))
                         blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(2), getBlockType(currentTrackNode.blockPos.up(2))));
+
                 } else if (formerNode.blockPos.getY() > currentTrackNode.blockPos.getY()) {
                     if (!BlockUtils.isPassable(currentTrackNode.blockPos.up(2)) && ((
                             !formerNode.blockPos.equals(goalNode.blockPos) && !BlockUtils.isPassable(currentTrackNode.blockPos)) || BlockUtils.isPassable(currentTrackNode.blockPos)))
@@ -218,15 +244,17 @@ public class AStarPathFinder {
                     if (!BlockUtils.isPassable(currentTrackNode.blockPos.up()))
                         blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(), getBlockType(currentTrackNode.blockPos.up())));
                     blocksToMine.add(new BlockNode(currentTrackNode.blockPos, getBlockType(currentTrackNode.blockPos)));
+
                 } else {
                     blocksToMine.add(new BlockNode(currentTrackNode.blockPos, getBlockType(currentTrackNode.blockPos)));
                     if (!BlockUtils.isPassable(currentTrackNode.blockPos.up()))
                         blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(), getBlockType(currentTrackNode.blockPos.up())));
+
                 }
                 formerNode = currentTrackNode;
                 currentTrackNode = currentTrackNode.lastNode;
             } while (!startNode.equals(currentTrackNode) && currentTrackNode.lastNode.blockPos != null);
-            if (((BlockNode)blocksToMine.getLast()).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1 && ((BlockNode)blocksToMine.get(blocksToMine.size() - 2)).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1)
+            if ((blocksToMine.getLast()).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1 && (blocksToMine.get(blocksToMine.size() - 2)).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1)
                 blocksToMine.add(new BlockNode(BlockUtils.getPlayerLoc().up(2), getBlockType(BlockUtils.getPlayerLoc().up(2))));
         }
         Logger.playerLog("Block count : " + blocksToMine.size());

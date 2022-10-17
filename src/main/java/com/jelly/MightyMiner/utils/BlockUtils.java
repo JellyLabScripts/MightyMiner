@@ -88,16 +88,16 @@ public class BlockUtils {
     @SuppressWarnings("UnstableApiUsage")
     private static final LoadingCache<BlockPos, Block> blockCache = CacheBuilder.newBuilder().expireAfterWrite(3L, TimeUnit.SECONDS).build(new CacheLoader<BlockPos, Block>() {
         public Block load(@NotNull BlockPos pos) {
-            return getBlockUnCashed(pos);
+            return getBlock(pos);
         }
     });
 
-    public static Block getBlockUnCashed(BlockPos b){
+    public static Block getBlock(BlockPos b){
         return mc.theWorld.getBlockState(b).getBlock();
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public static Block getBlock(BlockPos blockPos) {
+    public static Block getBlockCached(BlockPos blockPos) {
         return blockCache.getUnchecked(blockPos);
     }
 
@@ -204,7 +204,7 @@ public class BlockUtils {
     }
 
     public static boolean isPassable(BlockPos block) {
-        return isPassable(getBlockUnCashed(block));
+        return isPassable(getBlock(block));
     }
 
     public static boolean canWalkOn(Block groundBlock) {
@@ -216,9 +216,9 @@ public class BlockUtils {
     }
 
     public static boolean fitsPlayer(BlockPos groundBlock) {
-        return canWalkOn(getBlockUnCashed(groundBlock))
-                && isPassable(getBlockUnCashed(groundBlock.up()))
-                && isPassable(getBlockUnCashed(groundBlock.up(2)));
+        return canWalkOn(getBlock(groundBlock))
+                && isPassable(getBlock(groundBlock.up()))
+                && isPassable(getBlock(groundBlock.up(2)));
     }
 
     public static boolean onTheSameXZ(BlockPos b1, BlockPos b2) {

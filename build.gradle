@@ -72,13 +72,11 @@ dependencies {
     annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 
     include('org.apache.commons:commons-collections4:4.4')
-    implementation('org.apache.commons:commons-collections4:4.4')
 
     implementation('org.projectlombok:lombok:1.18.24')
     annotationProcessor('org.projectlombok:lombok:1.18.24')
-
     include('eu.okaeri:okaeri-configs-yaml-snakeyaml:4.0.6')
-    implementation('eu.okaeri:okaeri-configs-yaml-snakeyaml:4.0.6')
+    implementation ('eu.okaeri:okaeri-configs-yaml-snakeyaml:4.0.6')
 
     include(fileTree(dir: 'libs', include: '*.jar'))
     implementation(fileTree(dir: 'libs', include: '*.jar'))

@@ -4,8 +4,6 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
-import com.jelly.MightyMiner.baritone.autowalk.WalkBaritone;
-import com.jelly.MightyMiner.baritone.autowalk.config.AutowalkConfig;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
@@ -21,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommissionMacro extends Macro {
-    WalkBaritone baritone = new WalkBaritone(getAutowalkConfig());
     AutoMineBaritone mineBaritone = new AutoMineBaritone(getMineBehaviour());
 
     @Override
@@ -51,12 +48,6 @@ public class CommissionMacro extends Macro {
 
     }
 
-
-    private AutowalkConfig getAutowalkConfig(){
-        return new AutowalkConfig(
-                MightyMiner.config.comBarSafeIndex,
-                MightyMiner.config.comBarRotationTime);
-    }
     private MineBehaviour getMineBehaviour(){
         return new MineBehaviour(
                 AutoMineType.DYNAMIC,

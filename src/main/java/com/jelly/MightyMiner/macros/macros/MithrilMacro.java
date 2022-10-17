@@ -33,7 +33,7 @@ public class MithrilMacro extends Macro {
     @Override
     protected void onEnable() {
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");
-        if(isNearPlayer()){
+        if(PlayerUtils.isNearPlayer()){
             LogUtils.addMessage("Didnt start macro since therese a player near");
             this.enabled = false;
             onDisable();
@@ -44,13 +44,16 @@ public class MithrilMacro extends Macro {
     }
 
 
+
+
+
     @Override
     public void onTick(TickEvent.Phase phase) {
         baritone.onTickEvent(phase);
         if(phase != TickEvent.Phase.START)
             return;
 
-        if(isNearPlayer()){
+        if(PlayerUtils.isNearPlayer()){
             PlayerUtils.warpBackToIsland();
             MacroHandler.disableScript();
         }
@@ -96,8 +99,5 @@ public class MithrilMacro extends Macro {
                256,
                 0
         );
-    }
-    boolean isNearPlayer(){
-        return PlayerUtils.hasPlayerInsideRadius(MightyMiner.config.mithPlayerRad);
     }
 }

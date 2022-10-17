@@ -2,12 +2,11 @@ package com.jelly.MightyMiner.baritone.automine;
 
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
+import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
-import com.jelly.MightyMiner.baritone.autowalk.movement.Moves;
-import com.jelly.MightyMiner.baritone.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.pathing.AStarPathFinder;
-import com.jelly.MightyMiner.baritone.structures.BlockNode;
-import com.jelly.MightyMiner.baritone.structures.BlockType;
+import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
+import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
@@ -44,12 +43,11 @@ public class AutoMineBaritone{
     }
     PlayerState currentState;
     Block[] targetBlockType;
-    boolean enabled;
+    volatile boolean enabled;
 
     AStarPathFinder pathFinder;
     BlockPos playerFloorPos;
 
-    Moves lastMove;
     boolean jumpFlag;
     int jumpCooldown;
 
@@ -66,7 +64,7 @@ public class AutoMineBaritone{
     }
 
     public void enableBaritone(BlockPos blockPos){
-        enabled = true;
+        enable();
         clearBlocksToWalk();
         KeybindHandler.resetKeybindState();
 
@@ -106,9 +104,8 @@ public class AutoMineBaritone{
 
 
     public void enableBaritone(Block... blockType) {
-        enabled = true;
         targetBlockType = blockType;
-
+        enable();
         clearBlocksToWalk();
 
         KeybindHandler.resetKeybindState();
@@ -150,7 +147,7 @@ public class AutoMineBaritone{
     }
 
     public void enableBaritoneSingleThread(Block... blockType) throws Exception{ // ONLY USABLE IN SHORT DISTANCE!!!!
-        enabled = true;
+        enable();
         targetBlockType = blockType;
 
         clearBlocksToWalk();
@@ -185,6 +182,10 @@ public class AutoMineBaritone{
         inAction = true;
         currentState = PlayerState.NONE;
         stuckTickCount = 0;
+    }
+
+    private void enable(){
+        enabled = true;
     }
 
 
@@ -301,7 +302,7 @@ public class AutoMineBaritone{
                 if(mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null){
                     // special cases for optimization
                     if(BlockUtils.isAdjacentXZ(targetMineBlock, BlockUtils.getPlayerLoc()) && !AngleUtils.shouldLookAtCenter(targetMineBlock) &&
-                            (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetMineBlock.up()).equals(Blocks.air) )|| targetMineBlock.getY() - mc.thePlayer.posY == 1)){
+                            (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlockUnCashed(targetMineBlock.up()).equals(Blocks.air) )|| targetMineBlock.getY() - mc.thePlayer.posY == 1)){
                         rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), 28, mineBehaviour.getRotationTime());
                     } else if (!BlockUtils.isPassable(targetMineBlock) && !rotation.rotating)
                         rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock), mineBehaviour.getRotationTime());
@@ -377,7 +378,7 @@ public class AutoMineBaritone{
 
     private boolean shouldRemoveFromList(BlockNode lastBlockNode){
         if(lastBlockNode.getBlockType() == BlockType.MINE)
-            return BlockUtils.isPassable(lastBlockNode.getBlockPos()) || BlockUtils.getBlock(lastBlockNode.getBlockPos()).equals(Blocks.bedrock);
+            return BlockUtils.isPassable(lastBlockNode.getBlockPos()) || BlockUtils.getBlockUnCashed(lastBlockNode.getBlockPos()).equals(Blocks.bedrock);
         else
             return BlockUtils.onTheSameXZ(lastBlockNode.getBlockPos(), BlockUtils.getPlayerLoc()) || !BlockUtils.fitsPlayer(lastBlockNode.getBlockPos().down());
     }

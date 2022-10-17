@@ -1,8 +1,11 @@
 package com.jelly.MightyMiner.handlers;
 
+import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.*;
 import com.jelly.MightyMiner.utils.LogUtils;
+import com.jelly.MightyMiner.utils.UngrabUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Packet;
 import net.minecraftforge.client.event.*;
@@ -93,6 +96,9 @@ public class MacroHandler {
             LogUtils.addMessage("Enabled script");
             macro.toggle();
             enabled = true;
+            if (MightyMiner.config.mouseUngrab) {
+                UngrabUtils.ungrabMouse();
+            }
         }
     }
     public static void startScript(int index){
@@ -113,6 +119,7 @@ public class MacroHandler {
        if(flag)
            LogUtils.addMessage("Disabled script");
 
+       UngrabUtils.regrabMouse();
     }
 
 

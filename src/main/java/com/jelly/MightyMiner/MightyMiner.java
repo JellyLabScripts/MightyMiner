@@ -35,7 +35,7 @@ public class MightyMiner {
     //thx pizza for fixing this
     public static void onStartGame(){
         coords.clear();
-        coordsConfig = configurationFactory.create(CoordsConfig.class, new File("config/coords.yml"));
+        coordsConfig = configurationFactory.create(CoordsConfig.class, new File("config/coords.json"));
 
 
 

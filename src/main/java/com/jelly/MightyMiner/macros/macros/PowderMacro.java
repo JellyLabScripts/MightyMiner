@@ -37,6 +37,8 @@ public class PowderMacro extends Macro {
     long treasureInitialTime;
 
     float playerYaw;
+
+
     BlockPos uTurnCachePos;
 
     Rotation rotation = new Rotation();
@@ -44,13 +46,16 @@ public class PowderMacro extends Macro {
     State currentState;
     State treasureCacheState;
     TreasureState treasureState = TreasureState.NONE;
-    int centerToBlockTick = 0;
 
-    boolean centering = false;
+    boolean aote;
+    boolean saved;
+    int aoteTick;
+    float savedPitch;
+    int savedItemIndex;
+
+
     int turnState = 0;
-
     AutoMineBaritone mineBaritone = new AutoMineBaritone(getAutomineConfig());
-    boolean chestInStraightLine;
     BlockPos chest;
     BlockPos returnBlockPos;
 
@@ -72,7 +77,7 @@ public class PowderMacro extends Macro {
     @Override
     public void onEnable() {
 
-        if(PlayerUtils.isNearPlayer()){
+        if(PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)){
             LogUtils.addMessage("Not stating, there is a player near");
             this.toggle();
             return;
@@ -113,6 +118,7 @@ public class PowderMacro extends Macro {
     @Override
     public void onDisable() {
         Main.autoHardStone = false;
+        aote = false;
         mineBaritone.disableBaritone();
         KeybindHandler.resetKeybindState();
     }
@@ -123,7 +129,7 @@ public class PowderMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-        if(PlayerUtils.isNearPlayer()){
+        if(PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)){
             PlayerUtils.warpBackToIsland();
             MacroHandler.disableScript();
             Main.autoHardStone = false;
@@ -138,20 +144,39 @@ public class PowderMacro extends Macro {
 
         updateState();
 
-        if(centering) {
-            if(centerToBlockTick == 0) {
+        if (aote) {
+            if(!saved){
+                rotation.reset();
                 KeybindHandler.resetKeybindState();
-                centerToBlockTick = 20;
+                savedPitch = mc.thePlayer.rotationPitch;
+                savedItemIndex = mc.thePlayer.inventory.currentItem;
+                aoteTick = 12;
+                saved = true;
             }
 
-            if(centerToBlockTick == 10)
-                PlayerUtils.centerToBlock();
+            if(aoteTick > 0) {
+                aoteTick --;
+                rotation.intLockAngle(AngleUtils.get360RotationYaw(), 89, 500);
+                return;
+            }
 
-            centerToBlockTick --;
 
-            if(centerToBlockTick == 0)
-                centering = false;
+            mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void", "End");
+            KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
+
+
+            if (BlockUtils.inCenterOfBlock()) {
+                aote = false;
+                rotation.reset();
+                rotation.easeTo(AngleUtils.get360RotationYaw(), savedPitch, 500);
+                mc.thePlayer.inventory.currentItem = savedItemIndex;
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
+            }
             return;
+        } else {
+            if(rotation.rotating)
+                rotation.reset();
+            saved = false;
         }
 
         switch (currentState){
@@ -170,8 +195,6 @@ public class PowderMacro extends Macro {
                         if(!mineBaritone.isEnabled() && !BlockUtils.getPlayerLoc().equals(returnBlockPos)) {
                             mineBaritone.goTo(returnBlockPos);
                         } else if(!mineBaritone.isEnabled() && BlockUtils.getPlayerLoc().equals(returnBlockPos)){
-                            if (MightyMiner.config.powCenter)
-                                centering = true;
                             currentState = treasureCacheState;
                         }
                         break;
@@ -221,10 +244,11 @@ public class PowderMacro extends Macro {
                 }
                 break;
             case UTurn:
-                if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), uTurnCachePos) > 4) {
+                if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), uTurnCachePos) > MightyMiner.config.powLaneWidth) {
                     playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
-                    if (MightyMiner.config.powCenter)
-                        centering = true;
+                    if (MightyMiner.config.powCenter) {
+                        aote = true;
+                    }
                     currentState = State.NORMAL;
                 }
                 break;
@@ -265,7 +289,7 @@ public class PowderMacro extends Macro {
                     treasureState = MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) > 3f ? TreasureState.WALKING : TreasureState.SOLVING;
                     for(int i = 0; i < 5; i++){
                         if(BlockUtils.getRelativeBlockPos(0, 0, i).equals(chest) || BlockUtils.getRelativeBlockPos(0, 1, i).equals(chest)){
-                            returnBlockPos = BlockUtils.getRelativeBlockPos(0, (float)mc.thePlayer.posY - chest.getY(), i + 1);
+                            returnBlockPos = BlockUtils.getRelativeBlockPos(0, 0, i + 1);
                         }
                     }
 

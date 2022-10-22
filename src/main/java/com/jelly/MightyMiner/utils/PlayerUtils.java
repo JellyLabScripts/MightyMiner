@@ -37,7 +37,7 @@ public class PlayerUtils {
                 continue;
 
             if(e.getDistanceToEntity(mc.thePlayer) < radius) {
-                LogUtils.debugLog("Entity found: " + e.getDisplayName());
+                LogUtils.debugLog("Entity found");
                 return true;
             }
         }
@@ -56,8 +56,7 @@ public class PlayerUtils {
         }
     }
 
-    public static boolean isNearPlayer(){
-//        LogUtils.addMessage("Found player nearby");
-        return hasPlayerInsideRadius(MightyMiner.config.mithPlayerRad);
+    public static boolean isNearPlayer(int radius){
+        return hasPlayerInsideRadius(radius);
     }
 }

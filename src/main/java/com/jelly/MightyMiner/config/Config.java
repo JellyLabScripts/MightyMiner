@@ -1,7 +1,9 @@
 package com.jelly.MightyMiner.config;
 
 import gg.essential.vigilance.Vigilant;
-import gg.essential.vigilance.data.*;
+import gg.essential.vigilance.data.JVMAnnotationPropertyCollector;
+import gg.essential.vigilance.data.Property;
+import gg.essential.vigilance.data.PropertyType;
 
 import java.io.File;
 
@@ -11,9 +13,10 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Macro", category = "Core",
             subcategory = "Macro",
-            options = { "Gemstone macro", "Powder macro", "Mithril macro", "Commission macro", "AOTV Gemstone macro"}
+            options = { "Gemstone macro", "Powder macro", "Mithril macro", "AOTV Gemstone macro"}
     )
     public int macroType = 0;
+
     @Property(
             type = PropertyType.SWITCH,
             name = "Debug mode",
@@ -26,10 +29,11 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Toggle mouse ungrab",
+            description = "May not work on some computers",
             category = "Core",
             subcategory = "Macro"
     )
-    public boolean mouseUngrab = true;
+    public boolean mouseUngrab = false;
 
     @Property(
             type = PropertyType.SLIDER,
@@ -86,6 +90,7 @@ public class Config extends Vigilant {
     )
     public int gemPlayerRad = 10;
 
+
     @Property(type = PropertyType.SWITCH,
             name = "Mine gemstones",
             category = "Powder macro",
@@ -112,12 +117,11 @@ public class Config extends Vigilant {
 
     @Property(type = PropertyType.SWITCH,
             name = "Center to block",
-            description = "Center to the middle of block like AOTE when necessary (Hasn't been fully tested out). However, please have this turned on if you are using RGA hardstone aura",
+            description = "Center to the middle of block using AOTE or AOTV when necessary",
             category = "Powder macro",
             subcategory = "Miscellaneous"
     )
     public boolean powCenter = false;
-
 
     @Property(type = PropertyType.SLIDER,
             name = "Player detection radius",
@@ -127,6 +131,15 @@ public class Config extends Vigilant {
             max = 30
     )
     public int powPlayerRad = 10;
+
+    @Property(type = PropertyType.SLIDER,
+            name = "Width between each lane",
+            category = "Powder macro",
+            subcategory = "Miscellaneous",
+            max = 15,
+            min = 3
+    )
+    public int powLaneWidth = 6;
 
 
 
@@ -186,6 +199,7 @@ public class Config extends Vigilant {
     public int mithRestartTimeThreshold = 5;
 
 
+
     @Property(type = PropertyType.SLIDER,
             name = "Player detection radius",
             description = "Warp back to island if there is player inside the given radius of player",
@@ -196,7 +210,7 @@ public class Config extends Vigilant {
     public int mithPlayerRad = 10;
 
 
-    @Property( type = PropertyType.SLIDER,
+   /* @Property( type = PropertyType.SLIDER,
             name = "Rotation time (milliseconds)",
             description = "Time the pathfinding AI takes for each rotation",
             category = "Commission macro",
@@ -214,7 +228,7 @@ public class Config extends Vigilant {
             subcategory = "Miscellaneous",
             max = 10
     )
-    public int comBarSafeIndex = 5;
+    public int comBarSafeIndex = 5;*/
 
     @Property(type = PropertyType.SLIDER,
             name = "Rotation time (milliseconds)",
@@ -237,23 +251,6 @@ public class Config extends Vigilant {
     )
     public int aotvRestartTimeThreshold = 5;
 
-   /* @Property(
-            type = PropertyType.SLIDER,
-            name = "Safewalk index",
-            description = "Stops walking when there is a large rotation. TURN THIS UP IF you are using high speed",
-            category = "Commission macro",
-            subcategory = "Miscellaneous",
-            max = 10
-    )
-    public int aotv = 5;*/
-
-
-
-
-
-
-
-
 
     public Config() {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector());
@@ -265,7 +262,4 @@ public class Config extends Vigilant {
         this.markDirty();
         this.preload();
     }
-
-
-
 }

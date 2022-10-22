@@ -68,7 +68,7 @@ public class GemstoneMacro extends Macro {
             return;
 
 
-        if(PlayerUtils.isNearPlayer()){
+        if(PlayerUtils.isNearPlayer(MightyMiner.config.gemPlayerRad)){
             PlayerUtils.warpBackToIsland();
             MacroHandler.disableScript();
         }
@@ -77,12 +77,9 @@ public class GemstoneMacro extends Macro {
             haveTreasureChest = false;
         }
 
-        //System.out.println(baritone.isEnabled());
         if(!baritone.isEnabled() && !minedNearbyGemstones && !haveTreasureChest && PlayerUtils.hasStoppedMoving()){
 
             baritone.mineFor(Blocks.stained_glass_pane, Blocks.stained_glass);
-
-         //   LogUtils.addMessage(baritone.isEnabled() + " ");
 
         }
     }

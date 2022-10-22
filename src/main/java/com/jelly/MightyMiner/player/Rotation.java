@@ -60,6 +60,7 @@ public class Rotation {
         rotating = false;
     }
 
+
     private void getDifference() {
         difference.setLeft(AngleUtils.smallestAngleDifference(AngleUtils.get360RotationYaw(), target.left));
         difference.setRight(target.right - start.right);

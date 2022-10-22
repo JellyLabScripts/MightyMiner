@@ -1,9 +1,7 @@
 package com.jelly.MightyMiner.render;
 
+import com.jelly.MightyMiner.MightyMiner;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.DrawBlockHighlightEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -19,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BlockRenderer {
-    private static final HashMap<Integer, Boolean> glCapMap = new HashMap<>();
+    public static final HashMap<Integer, Boolean> glCapMap = new HashMap<>();
     public static HashMap<BlockPos, Color> renderMap = new HashMap<>();
 
     @SubscribeEvent
@@ -27,6 +25,9 @@ public class BlockRenderer {
         try {
             if (!renderMap.isEmpty()) {
                 for (Map.Entry<BlockPos, Color> entry : renderMap.entrySet()) {
+                    if (MightyMiner.coordsConfig.getSelectedRoute().valueList().contains(entry.getKey())) {
+                        // dont render if on crystal hollows
+                    }
                     BlockPos blockPos = entry.getKey();
                     Color color = entry.getValue();
 
@@ -36,7 +37,7 @@ public class BlockRenderer {
                     double z = (double) blockPos.getZ() - renderManager.viewerPosZ;
                     AxisAlignedBB aabb = new AxisAlignedBB(x, y, z, x + 1.0, y + 1.0, z + 1.0);
 
-                    int width = 5;
+                    int width = 3;
                     GL11.glBlendFunc(770, 771);
 
                     glCapMap.put(3042, GL11.glGetBoolean(3042));

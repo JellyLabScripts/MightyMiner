@@ -81,8 +81,8 @@ public class AngleUtils {
         double deltaZ = blockLookingAt.getZ() - blockFrom.getZ();
 
         ArrayList<BlockUtils.BlockSides> blockSidesNotCovered = BlockUtils.getAdjBlocksNotCovered(blockLookingAt);
-        BlockUtils.BlockSides blockSideToMine;
-        if(blockSidesNotCovered.size() > 0 && !lookAtCenterBlocks.contains(BlockUtils.getBlockCached(blockLookingAt))){
+        BlockUtils.BlockSides blockSideToMine ;
+        if(blockSidesNotCovered.size() > 0 && !lookAtCenterBlocks.contains(BlockUtils.getBlock(blockLookingAt))){
             double lowestCost = 9999;
             blockSideToMine = blockSidesNotCovered.get(0);
 
@@ -211,54 +211,23 @@ public class AngleUtils {
         double deltaX = blockLookingAt.getX() - mc.thePlayer.posX + 0.5d;
         double deltaZ = blockLookingAt.getZ() - mc.thePlayer.posZ + 0.5d;
 
-        ArrayList<BlockUtils.BlockSides> blockSidesNotCovered = BlockUtils.getAdjBlocksNotCovered(blockLookingAt);
-        BlockUtils.BlockSides blockSideToMine;
-        if(blockSidesNotCovered.size() > 0 &&  !lookAtCenterBlocks.contains(BlockUtils.getBlock(blockLookingAt))){
-            double lowestCost = 9999;
-            blockSideToMine = blockSidesNotCovered.get(0);
+        BlockUtils.BlockSides blockSideToMine = getOptimalSide(blockLookingAt);
 
-            for(BlockUtils.BlockSides blockSide : blockSidesNotCovered){
-                double tempCost = 0;
-                switch (blockSide){
-                    case posX:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
-                        break;
-                    case negX:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
-                        break;
-                    case posZ:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
-                        break;
-                    case negZ:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
-                        break;
-                }
-                if(tempCost < lowestCost) {
-                    lowestCost = tempCost;
-                    blockSideToMine = blockSide;
-                }
-            }
-
-            switch (blockSideToMine){
-                case posX:
-                    deltaX += 0.5d;
-                    break;
-                case negX:
-                    deltaX -= 0.5d;
-                    break;
-                case posZ:
-                    deltaZ += 0.5d;
-                    break;
-                case negZ:
-                    deltaZ -= 0.5d;
-                    break;
-            }
-
+        switch (blockSideToMine){
+            case posX:
+                deltaX += 0.5d;
+                break;
+            case negX:
+                deltaX -= 0.5d;
+                break;
+            case posZ:
+                deltaZ += 0.5d;
+                break;
+            case negZ:
+                deltaZ -= 0.5d;
+                break;
         }
+
         return  getRequiredYaw(deltaX, deltaZ);
     }
     public static float getRequiredYaw(double deltaX, double deltaZ) {
@@ -279,67 +248,30 @@ public class AngleUtils {
         double deltaZ = blockLookingAt.getZ() - mc.thePlayer.posZ + 0.5d;
         double deltaY = (blockLookingAt.getY() + 0.5d) - (mc.thePlayer.posY + 1.62d);
 
-        ArrayList<BlockUtils.BlockSides> blockSidesNotCovered = BlockUtils.getAdjBlocksNotCovered(blockLookingAt);
-        BlockUtils.BlockSides blockSideToMine;
-        if(blockSidesNotCovered.size() > 0 && !lookAtCenterBlocks.contains(BlockUtils.getBlock(blockLookingAt))){
-            double lowestCost = 9999;
-            blockSideToMine = blockSidesNotCovered.get(0);
+        BlockUtils.BlockSides blockSideToMine = getOptimalSide(blockLookingAt);
 
-            for(BlockUtils.BlockSides blockSide : blockSidesNotCovered){
-                double tempCost = 0;
-                switch (blockSide){
-                    case posX:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX() + 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
-                        break;
-                    case negX:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX() - 0.5d, blockLookingAt.getY(), blockLookingAt.getZ());
-                        break;
-                    case posZ:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() + 0.5d);
-                        break;
-                    case negZ:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY(), blockLookingAt.getZ() - 0.5d);
-                        break;
-                    case up:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY() + 0.5d, blockLookingAt.getZ());
-                        break;
-                    case down:
-                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
-                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockLookingAt.getX(), blockLookingAt.getY() - 0.5d, blockLookingAt.getZ());
-                        break;
-                }
-                if(tempCost < lowestCost) {
-                    lowestCost = tempCost;
-                    blockSideToMine = blockSide;
-                }
-            }
-            switch (blockSideToMine){
-                case posX:
-                    deltaX += 0.5d;
-                    break;
-                case negX:
-                    deltaX -= 0.5d;
-                    break;
-                case posZ:
-                    deltaZ += 0.5d;
-                    break;
-                case negZ:
-                    deltaZ -= 0.5d;
-                    break;
-                case up:
-                    deltaY += 0.5d;
-                    break;
-                case down:
-                    deltaY -= 0.5d;
-                    break;
-            }
-
+        switch (blockSideToMine){
+            case posX:
+                deltaX += 0.5d;
+                break;
+            case negX:
+                deltaX -= 0.5d;
+                break;
+            case posZ:
+                deltaZ += 0.5d;
+                break;
+            case negZ:
+                deltaZ -= 0.5d;
+                break;
+            case up:
+                deltaY += 0.5d;
+                break;
+            case down:
+                deltaY -= 0.5d;
+                break;
         }
+
+
         return  getRequiredPitch(deltaX, deltaY, deltaZ);
     }
 
@@ -398,6 +330,53 @@ public class AngleUtils {
         return currentYaw;
 
 
+    }
+
+    public static BlockUtils.BlockSides getOptimalSide(BlockPos blockPos){
+
+        ArrayList<BlockUtils.BlockSides> blockSidesNotCovered = BlockUtils.getAdjBlocksNotCovered(blockPos);
+        BlockUtils.BlockSides blockSideToMine = BlockUtils.BlockSides.NONE;
+        if(blockSidesNotCovered.size() > 0 && !lookAtCenterBlocks.contains(BlockUtils.getBlock(blockPos))) {
+            double lowestCost = 9999;
+            blockSideToMine = blockSidesNotCovered.get(0);
+
+
+            for (BlockUtils.BlockSides blockSide : blockSidesNotCovered) {
+                double tempCost = 0;
+
+                switch (blockSide) {
+                    case posX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockPos.getX() + 0.5d, blockPos.getY(), blockPos.getZ());
+                        break;
+                    case negX:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockPos.getX() - 0.5d, blockPos.getY(), blockPos.getZ());
+                        break;
+                    case posZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockPos.getX(), blockPos.getY(), blockPos.getZ() + 0.5d);
+                        break;
+                    case negZ:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockPos.getX(), blockPos.getY(), blockPos.getZ() - 0.5d);
+                        break;
+                    case up:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockPos.getX(), blockPos.getY() + 0.5d, blockPos.getZ());
+                        break;
+                    case down:
+                        tempCost = MathUtils.getDistanceBetweenTwoPoints(
+                                mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ, blockPos.getX(), blockPos.getY() - 0.5d, blockPos.getZ());
+                        break;
+                }
+                if (tempCost < lowestCost) {
+                    lowestCost = tempCost;
+                    blockSideToMine = blockSide;
+                }
+            }
+        }
+        return blockSideToMine;
     }
 
 }

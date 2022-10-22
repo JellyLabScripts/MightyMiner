@@ -57,6 +57,7 @@ public class BlockUtils {
         posZ,
         negX,
         negZ,
+        NONE
     }
 
     public static int getUnitX() {
@@ -104,7 +105,9 @@ public class BlockUtils {
     public static List<BlockPos> findBlock(int searchDiameter, Block... requiredBlock) {
         return findBlock(searchDiameter, null, 0, 256, requiredBlock);
     }
-
+    public static List<BlockPos> findBlock(int searchDiameter, ArrayList<BlockPos> forbiddenBlockPos, Block... requiredBlock) {
+        return findBlock(searchDiameter, forbiddenBlockPos, 0, 256, requiredBlock);
+    }
     public static List<BlockPos> findBlock(int searchDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlock) {
 
         List<Block> requiredBlocks = Arrays.asList(requiredBlock);
@@ -130,13 +133,16 @@ public class BlockUtils {
         return foundBlocks;
     }
 
-    public static List<BlockPos> findBlockWithPreference(int searchDiameter, Block... requiredBlock) {
+    public static List<BlockPos> findBlockWithPreference(int searchDiameter, ArrayList<BlockPos> forbiddenBlockPos, Block... requiredBlock) {
         List<BlockPos> foundBlocks = new ArrayList<>();
         for (Block block : requiredBlock) {
             List<BlockPos> foundCurrentBlocks = new ArrayList<>();
             for (int i = 0; i < searchDiameter; i++) {
                 for (int j = 0; j < searchDiameter; j++) {
                     for (int k = 0; k < searchDiameter; k++) {
+
+                        if (forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2)))
+                            continue;
                         if ((getBlock(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2))).equals(block)) {
                             foundCurrentBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2));
                         }
@@ -244,24 +250,16 @@ public class BlockUtils {
         return objectPosition.getBlockPos().equals(blockChecked);
     }
 
-    public static boolean canSeeBlock(BlockPos blockFrom, BlockPos blockChecked) {
-
-        Vec3 vec3 = new Vec3(blockFrom.getX() + 0.5d, blockFrom.getY() + 0.5d, blockFrom.getZ() + 0.5d);
-        Vec3 vec31 = MathUtils.getVectorForRotation(AngleUtils.getRequiredPitch(blockFrom, blockChecked), AngleUtils.getRequiredYaw(blockFrom, blockChecked));
-        Vec3 vec32 = vec3.addVector(vec31.xCoord * 4.5f, vec31.yCoord * 4.5f, vec31.zCoord * 4.5f);
-        MovingObjectPosition objectPosition = mc.theWorld.rayTraceBlocks(vec3, vec32, false, false, true);
-
-        return objectPosition.getBlockPos().equals(blockChecked);
-    }
 
     public static boolean canReachBlock(BlockPos blockChecked) {
         return MathUtils.getDistanceBetweenTwoPoints(
-                mc.thePlayer.posX, mc.thePlayer.posY + 1.62f, mc.thePlayer.posZ, blockChecked.getX(), blockChecked.getY(), blockChecked.getZ()) < 4.5f;
+                mc.thePlayer.posX, mc.thePlayer.posY + 1.62f, mc.thePlayer.posZ, blockChecked.getX() + 0.5f, blockChecked.getY() + 0.5f, blockChecked.getZ() + 0.5f) < 4.5f;
     }
 
 
     public static ArrayList<BlockSides> getAdjBlocksNotCovered(BlockPos blockToSearch) {
         ArrayList<BlockSides> blockSidesNotCovered = new ArrayList<>();
+
         if (isPassable(blockToSearch.up()))
             blockSidesNotCovered.add(BlockSides.up);
         if (isPassable(blockToSearch.down()))
@@ -308,9 +306,7 @@ public class BlockUtils {
                 z0 += sy;
             }
         }
-       /* for(BlockPos pos : lineBlock){
-            BlockRenderer.renderMap.put(pos, Color.CYAN);
-        }*/
+
         for (BlockPos pos : lineBlock) {
             if (!BlockUtils.isPassable(pos))
                 return true;
@@ -318,6 +314,12 @@ public class BlockUtils {
         return false;
 
     }
+
+    public static boolean inCenterOfBlock(){
+        return Math.abs(mc.thePlayer.posX % 1) == 0.5 && Math.abs(mc.thePlayer.posZ % 1) == 0.5;
+    }
+
+
 
 
 }

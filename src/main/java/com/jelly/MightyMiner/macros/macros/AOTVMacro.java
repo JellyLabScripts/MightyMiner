@@ -5,6 +5,7 @@ import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.AngleUtils;
@@ -19,7 +20,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.List;
 
 public class AOTVMacro extends Macro {
-    AutoMineBaritone baritone = new AutoMineBaritone(getAutoMineConfig());
+    AutoMineBaritone baritone;
 
     enum State{
         NONE,
@@ -27,40 +28,39 @@ public class AOTVMacro extends Macro {
         Mining
     }
 
+
+
     State currentState = State.NONE;
 
     BlockPos targetCoordinate;
     int targetCoordIndex;
     int rightClickCD;
+    boolean rotationFlag;
     Rotation rotation = new Rotation();
 
-    boolean rightClickFlag;
-
-    List<BlockPos> coords = MightyMiner.coords;
+    List<BlockPos> coords;
 
 
 
 
     @Override
     protected void onEnable() {
-        currentState = State.NONE;
+        baritone = new AutoMineBaritone(getAutoMineConfig());
+        currentState = State.Mining;
 
-
+        coords = MightyMiner.coordsConfig.getSelectedRoute().valueList();
         coords.forEach(System.out::println);
   
         targetCoordIndex = -1;
         for(int i = 0; i < coords.size(); i++){
             if(BlockUtils.getPlayerLoc().down().equals(coords.get(i))){
-                if(i == coords.size() - 1)
-                    targetCoordIndex = 0;
-                  else
-                    targetCoordIndex = i + 1;
-
+                targetCoordIndex = i;
             }
         }
+
         if(targetCoordIndex == -1){
             LogUtils.addMessage("You must stand on one of the coordinates to start!");
-            onDisable();
+            MacroHandler.disableScript();
             return;
         }
         targetCoordinate = coords.get(targetCoordIndex);
@@ -73,18 +73,26 @@ public class AOTVMacro extends Macro {
 
         if(targetCoordIndex == -1) return;
 
-
         switch(currentState) {
             case NONE:
                 break;
             case Teleporting:
-                rightClickCD--;
+
+                if(rightClickCD > 0)
+                    rightClickCD--;
+
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
-                rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  200);
-                if(rightClickFlag && !rotation.rotating && rightClickCD == 0){
+
+                if(rotationFlag)
+                    rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  500);
+
+                //flag
+                if(!rotation.rotating && rightClickCD < 2){
+                    rotationFlag = false;
+                    rotation.reset();
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void");
-                    KeybindHandler.onTick(KeybindHandler.keybindUseItem);
-                    rightClickFlag = false;
+                    KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
+
                 }
                 break;
             case Mining:
@@ -112,13 +120,15 @@ public class AOTVMacro extends Macro {
         switch(currentState){
             case NONE:
                 currentState = State.Teleporting;
-                rightClickCD = 10;
-                rightClickFlag = true;
+                rotationFlag = true;
+                rightClickCD = 15;
                 LogUtils.debugLog("Going to coordinates " + targetCoordinate.getX() + " " + targetCoordinate.getY() + " " + targetCoordinate.getZ());
                 return;
             case Teleporting:
-                if((BlockUtils.getPlayerLoc().down().equals(targetCoordinate)))
+                if((BlockUtils.getPlayerLoc().down().equals(targetCoordinate))) {
                     currentState = State.Mining;
+                    KeybindHandler.resetKeybindState();
+                }
         }
     }
     @Override

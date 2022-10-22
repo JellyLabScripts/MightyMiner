@@ -67,10 +67,11 @@ public class GemstoneMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-
-        if(PlayerUtils.isNearPlayer(MightyMiner.config.gemPlayerRad)){
-            PlayerUtils.warpBackToIsland();
-            MacroHandler.disableScript();
+        if(MightyMiner.config.gemPlayerFailsafe) {
+            if(PlayerUtils.isNearPlayer(MightyMiner.config.gemPlayerRad)){
+                PlayerUtils.warpBackToIsland();
+                MacroHandler.disableScript();
+            }
         }
 
         if(haveTreasureChest && System.currentTimeMillis() - treasureInitialTime > 7000) {

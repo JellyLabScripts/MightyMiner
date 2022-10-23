@@ -241,6 +241,7 @@ public class AutoMineBaritone{
 
 
     public void disableBaritone() {
+        Logger.log("Baritone completed");
         pauseBaritone();
         enabled = false;
     }
@@ -309,18 +310,19 @@ public class AutoMineBaritone{
 
         updateState();
 
-        BlockPos targetBlock = blocksToMine.isEmpty() ? minedBlocks.getLast().getBlockPos() : blocksToMine.getLast().getBlockPos();
+
 
         switch (currentState){
             case WALKING:
-                float reqYaw = AngleUtils.getRequiredYaw(targetBlock);
-                if(inAction && !blocksToMine.isEmpty())
-                    rotation.intLockAngle(reqYaw, 0, 5); // camera angle
+                BlockPos targetWalkBlock = (blocksToMine.isEmpty() || blocksToMine.getLast().getBlockType() == BlockType.MINE) ? minedBlocks.getLast().getBlockPos() : blocksToMine.getLast().getBlockPos();
+                float reqYaw = AngleUtils.getRequiredYaw(targetWalkBlock);
+
+                if(inAction)
+                    rotation.intLockAngle(reqYaw, mc.thePlayer.rotationPitch, 5); // camera angle
 
                 if(!jumpFlag && mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0 && jumpCooldown == 0 && mc.thePlayer.onGround){
 
-                    if((targetBlock.getY() > mc.thePlayer.posY && (blocksToMine.isEmpty() || blocksToMine.getLast().getBlockType() == BlockType.WALK)) ||
-                            (!minedBlocks.isEmpty() && minedBlocks.getLast().getBlockPos().getY() > mc.thePlayer.posY) && blocksToMine.getLast().getBlockType() == BlockType.MINE){
+                    if(targetWalkBlock.getY() > mc.thePlayer.posY){
                         jumpFlag = true;
                         jumpCooldown = 10;
                     }
@@ -338,11 +340,12 @@ public class AutoMineBaritone{
 
 
             case MINING:
+                BlockPos targetMineBlock = blocksToMine.getLast().getBlockPos();
                 mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Pick", "Drill", "Gauntlet");
                 KeybindHandler.updateKeys(
                         false, false, false, false,
                         mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null &&
-                                mc.objectMouseOver.getBlockPos().equals(targetBlock),
+                                mc.objectMouseOver.getBlockPos().equals(targetMineBlock),
                         false,
                         mineBehaviour.isShiftWhenMine(),
                         false);
@@ -350,11 +353,11 @@ public class AutoMineBaritone{
 
                 if(mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null){
                     // special cases for optimization
-                    if(BlockUtils.isAdjacentXZ(targetBlock, BlockUtils.getPlayerLoc()) && !AngleUtils.shouldLookAtCenter(targetBlock) &&
-                            (( targetBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetBlock.up()).equals(Blocks.air) )|| targetBlock.getY() - mc.thePlayer.posY == 1)){
-                        rotation.intLockAngle(AngleUtils.getRequiredYaw(targetBlock), 28, mineBehaviour.getRotationTime());
-                    } else if (!BlockUtils.isPassable(targetBlock) && !rotation.rotating)
-                        rotation.intLockAngle(AngleUtils.getRequiredYaw(targetBlock), AngleUtils.getRequiredPitch(targetBlock), mineBehaviour.getRotationTime());
+                    if(BlockUtils.isAdjacentXZ(targetMineBlock, BlockUtils.getPlayerLoc()) && !AngleUtils.shouldLookAtCenter(targetMineBlock) &&
+                            (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetMineBlock.up()).equals(Blocks.air) )|| targetMineBlock.getY() - mc.thePlayer.posY == 1)){
+                        rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), 28, mineBehaviour.getRotationTime());
+                    } else if (!BlockUtils.isPassable(targetMineBlock) && !rotation.rotating)
+                        rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock), mineBehaviour.getRotationTime());
 
                 }
                 break;
@@ -395,26 +398,19 @@ public class AutoMineBaritone{
             return;
         }
 
-        if(currentState == PlayerState.WALKING){
-            if(minedBlocks.getLast().getBlockType() == BlockType.WALK){
-                if(blocksToMine.getLast().getBlockType() == BlockType.MINE)
+        switch (currentState){
+            case NONE:
+                currentState = blocksToMine.getLast().getBlockType().equals(BlockType.MINE) ? PlayerState.MINING : PlayerState.WALKING;
+                break;
+            case WALKING:
+                if((minedBlocks.getLast().getBlockType() == BlockType.WALK && blocksToMine.getLast().getBlockType() == BlockType.MINE) ||
+                        (minedBlocks.getLast().getBlockType() == BlockType.MINE && BlockUtils.onTheSameXZ(minedBlocks.getLast().getBlockPos(), BlockUtils.getPlayerLoc())))
                     currentState = PlayerState.MINING;
-
-            } else if(minedBlocks.getLast().getBlockType() == BlockType.MINE) {
-                if (BlockUtils.onTheSameXZ(minedBlocks.getLast().getBlockPos(), BlockUtils.getPlayerLoc()))
-                    currentState = PlayerState.MINING;
-            }
-
-        } else if(currentState == PlayerState.MINING){
-            if (blocksToMine.getLast().getBlockType() == BlockType.MINE) {
-                if( (BlockUtils.fitsPlayer(minedBlocks.getLast().getBlockPos().down()) || BlockUtils.fitsPlayer(minedBlocks.getLast().getBlockPos().down(2)))
-                        && !BlockUtils.onTheSameXZ(minedBlocks.getLast().getBlockPos(), BlockUtils.getPlayerLoc())) {
+                break;
+            case MINING:
+                if (blocksToMine.getLast().getBlockType() == BlockType.MINE && shouldWalkTo(minedBlocks.getLast().getBlockPos()))
                     currentState = PlayerState.WALKING;
-                }
-            }
-
-        } else if(currentState == PlayerState.NONE){
-            currentState = blocksToMine.getLast().getBlockType().equals(BlockType.MINE) ? PlayerState.MINING : PlayerState.WALKING;
+                break;
         }
     }
 
@@ -430,12 +426,18 @@ public class AutoMineBaritone{
     };
 
     private boolean shouldRemoveFromList(BlockNode lastBlockNode){
-        if(lastBlockNode.getBlockType() == BlockType.MINE) {
-           //System.out.println(BlockUtils.getBlockUnCashed(lastBlockNode.getBlockPos()));
+        if(lastBlockNode.getBlockType() == BlockType.MINE)
             return BlockUtils.isPassable(lastBlockNode.getBlockPos()) || BlockUtils.getBlock(lastBlockNode.getBlockPos()).equals(Blocks.bedrock);
-        }
         else
             return BlockUtils.onTheSameXZ(lastBlockNode.getBlockPos(), BlockUtils.getPlayerLoc()) || !BlockUtils.fitsPlayer(lastBlockNode.getBlockPos().down());
+    }
+
+    private boolean shouldWalkTo(BlockPos blockPos){
+
+        return  blockPos.getY() <= (mc.thePlayer.posY) + 1 &&
+                ((blockPos.getY() > Math.round(mc.thePlayer.posY) && BlockUtils.isPassable(BlockUtils.getPlayerLoc().up(2))) ||
+                (blockPos.getY() < Math.round(mc.thePlayer.posY) && BlockUtils.isPassable(blockPos.up(2))) ||
+                (blockPos.getY() == Math.round(mc.thePlayer.posY))) && BlockUtils.fitsPlayer(blockPos.down()) && !BlockUtils.onTheSameXZ(blockPos, BlockUtils.getPlayerLoc());
     }
 
     private PathBehaviour getPathBehaviour(){

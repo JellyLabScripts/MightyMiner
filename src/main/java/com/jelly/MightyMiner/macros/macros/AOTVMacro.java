@@ -78,7 +78,7 @@ public class AOTVMacro extends Macro {
                 break;
             case Teleporting:
 
-                if(rightClickCD > 0)
+                if(rightClickCD >= 0)
                     rightClickCD--;
 
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
@@ -86,14 +86,15 @@ public class AOTVMacro extends Macro {
                 if(rotationFlag)
                     rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  500);
 
-                //flag
-                if(!rotation.rotating && rightClickCD < 2){
+                // LOGICAL ERROR, need to test out
+                if(!rotation.rotating && rightClickCD == 1){
                     rotationFlag = false;
                     rotation.reset();
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void");
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
+                } else if(rightClickCD == -1)
+                    KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
 
-                }
                 break;
             case Mining:
                 if(!baritone.isEnabled()) {

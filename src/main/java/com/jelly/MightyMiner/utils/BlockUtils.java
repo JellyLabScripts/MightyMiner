@@ -278,40 +278,41 @@ public class BlockUtils {
 
 
     public static boolean hasBlockInterfere(BlockPos b1, BlockPos b2) {
+        for (BlockPos pos : getRasterizedBlocks(b1, b2)) {
+            if (!BlockUtils.isPassable(pos))
+                return true;
+        }
+        return false;
+    }
 
-        // BlockRenderer.renderMap.clear();
-        List<BlockPos> lineBlock = new ArrayList<>();
+    public static ArrayList<BlockPos> getRasterizedBlocks(BlockPos b1, BlockPos b2){
+        ArrayList<BlockPos> lineBlock = new ArrayList<>();
         int x0 = b1.getX();
         int x1 = b2.getX();
         int z0 = b1.getZ();
         int z1 = b2.getZ();
 
         int dx = Math.abs(x1 - x0);
-        int dy = Math.abs(z1 - z0);
+        int dz = Math.abs(z1 - z0);
         int sx = (x0 < x1) ? 1 : -1;
         int sy = (z0 < z1) ? 1 : -1;
-        int err = dx - dy;
+        int err = dx - dz;
 
         while (true) {
-            lineBlock.add(new BlockPos(x0, b1.getY(), z0)); // Do what you need to for this
+            lineBlock.add(new BlockPos(x0, b1.getY(), z0));
 
             if ((x0 == x1) && (z0 == z1)) break;
             int e2 = 2 * err;
 
-            if (e2 > -dy) {
-                err -= dy;
+            if (e2 > -dz) {
+                err -= dz;
                 x0 += sx;
             } else if (e2 < dx) {
                 err += dx;
                 z0 += sy;
             }
         }
-
-        for (BlockPos pos : lineBlock) {
-            if (!BlockUtils.isPassable(pos))
-                return true;
-        }
-        return false;
+        return lineBlock;
 
     }
 

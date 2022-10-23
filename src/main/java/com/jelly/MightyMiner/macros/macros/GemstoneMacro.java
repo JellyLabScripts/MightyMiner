@@ -37,6 +37,7 @@ public class GemstoneMacro extends Macro {
             add(Blocks.coal_ore);
             add(Blocks.stained_glass_pane);
             add(Blocks.stained_glass);
+            add(Blocks.air);
         }
     };
 

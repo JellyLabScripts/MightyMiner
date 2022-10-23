@@ -15,6 +15,10 @@ import java.util.ArrayList;
 public class CommissionMacro extends Macro {
     AutoMineBaritone mineBaritone = new AutoMineBaritone(getMineBehaviour());
 
+    public enum Quest {
+        ROYAL_MINES,
+
+    }
     @Override
     protected void onEnable() {
         mineBaritone.mineFor(new BlockPos(5, 1, -9));

@@ -79,7 +79,7 @@ public class PowderMacro extends Macro {
     public void onEnable() {
 
         if(PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)){
-            LogUtils.addMessage("Not stating, there is a player near");
+            LogUtils.addMessage("Not starting, there is a player near");
             this.toggle();
             return;
         }

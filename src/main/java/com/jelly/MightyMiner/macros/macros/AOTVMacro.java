@@ -97,6 +97,10 @@ public class AOTVMacro extends Macro {
 
                 break;
             case Mining:
+                if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
+                    mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(mc.thePlayer.inventory.currentItem));
+                    MacroHandler.pickaxeSkillReady = false;
+                }
                 if(!baritone.isEnabled()) {
                     try {
                         baritone.mineForInSingleThread(Blocks.stained_glass, Blocks.stained_glass_pane);

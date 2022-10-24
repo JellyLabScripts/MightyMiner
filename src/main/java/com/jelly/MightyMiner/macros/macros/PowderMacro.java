@@ -219,6 +219,10 @@ public class PowderMacro extends Macro {
 
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
+                if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
+                    mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(mc.thePlayer.inventory.currentItem));
+                    MacroHandler.pickaxeSkillReady = false;
+                }
                 break;
         }
 

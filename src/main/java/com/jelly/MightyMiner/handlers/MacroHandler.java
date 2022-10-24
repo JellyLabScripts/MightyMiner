@@ -8,6 +8,7 @@ import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.UngrabUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Packet;
+import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -19,6 +20,7 @@ public class MacroHandler {
     public static List<Macro> macros = new ArrayList<>();
     public static Minecraft mc = Minecraft.getMinecraft();
 
+    public static boolean pickaxeSkillReady = true;
 
     static boolean enabled = false;
 
@@ -76,6 +78,15 @@ public class MacroHandler {
                 process.onMessageReceived(event.message.getUnformattedText());
             }
         }
+        try {
+            String message = StringUtils.stripControlCodes(event.message.getUnformattedText());
+            if (message.contains(":") || message.contains(">")) return;
+            if(message.startsWith("You used your")) {
+                pickaxeSkillReady = false;
+            } else if(message.endsWith("is now available!")) {
+                pickaxeSkillReady = true;
+            }
+        } catch (Exception ignored) {}
     }
 
     public static void onPacketReceive(Packet<?> packet) {
@@ -113,7 +124,7 @@ public class MacroHandler {
                flag = true;
            }
        }
-
+       pickaxeSkillReady = true;
        enabled = false;
        if(flag)
            LogUtils.addMessage("Disabled script");

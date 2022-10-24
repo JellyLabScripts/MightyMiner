@@ -18,6 +18,13 @@ public class Config extends Vigilant {
     public int macroType = 0;
 
     @Property(
+                type = PropertyType.SWITCH,
+                name = "Use mining speed boost", category = "Core",
+                subcategory = "Macro"
+    )
+    public boolean useMiningSpeedBoost = true;
+
+    @Property(
             type = PropertyType.SWITCH,
             name = "Debug mode",
             category = "Core",

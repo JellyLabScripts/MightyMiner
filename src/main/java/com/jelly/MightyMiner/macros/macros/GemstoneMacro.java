@@ -83,6 +83,11 @@ public class GemstoneMacro extends Macro {
             baritone.mineFor(Blocks.stained_glass_pane, Blocks.stained_glass);
 
         }
+
+        if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
+            mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(mc.thePlayer.inventory.currentItem));
+            MacroHandler.pickaxeSkillReady = false;
+        }
     }
 
     @Override

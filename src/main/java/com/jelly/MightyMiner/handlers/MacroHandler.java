@@ -26,7 +26,6 @@ public class MacroHandler {
        macros.add(new GemstoneMacro());
        macros.add(new PowderMacro());
        macros.add(new MithrilMacro());
-       macros.add(new CommissionMacro());
         macros.add(new AOTVMacro());
     }
 

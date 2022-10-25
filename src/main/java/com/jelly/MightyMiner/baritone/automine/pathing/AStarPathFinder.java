@@ -26,6 +26,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
+import org.apache.logging.log4j.core.pattern.AbstractStyleNameConverter;
 
 public class AStarPathFinder {
     Minecraft mc = Minecraft.getMinecraft();
@@ -253,9 +254,9 @@ public class AStarPathFinder {
             searchNode.lastNode = currentNode;
             calculateCost(move, searchNode, endingBlockPos);
             openNodes.add(searchNode);
-        } else if (currentNode.gValue + move.cost < searchNode.gValue) {
+        } else if (currentNode.gValue + (move.cost + (BlockUtils.isPassable(searchNode.blockPos) ? 1 : 2)) < searchNode.gValue) {
             searchNode.lastNode = currentNode;
-            calculateCost(move.cost, searchNode, endingBlockPos);
+            calculateCost((move.cost + (BlockUtils.isPassable(searchNode.blockPos) ? 1 : 2)), searchNode, endingBlockPos);
             openNodes.remove(searchNode);
             openNodes.add(searchNode);
         }
@@ -278,13 +279,14 @@ public class AStarPathFinder {
             if (goalNode.lastNode != null && goalNode.lastNode.blockPos != null) {
                 blocksToMine.add(new BlockNode(goalNode.blockPos, getBlockType(goalNode.blockPos)));
                 if (goalNode.lastNode.blockPos.getY() > goalNode.blockPos.getY()) {
+
                     if (!BlockUtils.isPassable(goalNode.blockPos.up()))
                         blocksToMine.add(new BlockNode(goalNode.blockPos.up(), getBlockType(goalNode.blockPos.up())));
                     if (!BlockUtils.isPassable(goalNode.blockPos.up(2)) && getBlockType(goalNode.blockPos.up(2)) == BlockType.WALK)
                         blocksToMine.add(new BlockNode(goalNode.blockPos.up(2), getBlockType(goalNode.blockPos.up(2))));
                 } else if (goalNode.lastNode.blockPos.getY() == goalNode.blockPos.getY() && (
-                        AngleUtils.shouldLookAtCenter(goalNode.blockPos) || getBlockType(goalNode.blockPos.up()) == BlockType.WALK)) {
-                    blocksToMine.add(new BlockNode(goalNode.blockPos.up(), getBlockType(goalNode.blockPos.up())));
+                        AngleUtils.shouldLookAtCenter(goalNode.blockPos) /*|| getBlockType(goalNode.blockPos.up()) == BlockType.WALK)*/)) {
+                    blocksToMine.add(new BlockNode(goalNode.blockPos.up(), BlockType.MINE/*getBlockType(goalNode.blockPos.up())*/));
                 }
                 formerNode = goalNode;
                 currentTrackNode = goalNode.lastNode;
@@ -296,14 +298,17 @@ public class AStarPathFinder {
 
         if (currentTrackNode != null && currentTrackNode.lastNode != null) {
             do {
-                if (currentTrackNode.lastNode.blockPos.getY() > currentTrackNode.blockPos.getY()) {
+
+                if (currentTrackNode.lastNode.blockPos.getY() > currentTrackNode.blockPos.getY()) { // going down
+
                     blocksToMine.add(new BlockNode(currentTrackNode.blockPos, getBlockType(currentTrackNode.blockPos)));
                     if (!BlockUtils.isPassable(currentTrackNode.blockPos.up()))
                         blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(), getBlockType(currentTrackNode.blockPos.up())));
                     if (!BlockUtils.isPassable(currentTrackNode.blockPos.up(2)))
                         blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(2), getBlockType(currentTrackNode.blockPos.up(2))));
 
-                } else if (formerNode.blockPos.getY() > currentTrackNode.blockPos.getY()) {
+                } else if (formerNode.blockPos.getY() > currentTrackNode.blockPos.getY()) { // going up
+
                     if (!BlockUtils.isPassable(currentTrackNode.blockPos.up(2)) && ((
                             !formerNode.blockPos.equals(goalNode.blockPos) && !BlockUtils.isPassable(currentTrackNode.blockPos)) || BlockUtils.isPassable(currentTrackNode.blockPos)))
                         blocksToMine.add(new BlockNode(currentTrackNode.blockPos.up(2), getBlockType(currentTrackNode.blockPos.up(2))));
@@ -330,7 +335,7 @@ public class AStarPathFinder {
     private void calculateCost(Moves move, Node node, BlockPos endingBlock) {
         node.hValue = getHeuristic(node.blockPos, endingBlock);
         if (node.lastNode != null) {
-            node.lastNode.gValue += move.cost;
+            node.lastNode.gValue += move.cost + (BlockUtils.isPassable(node.blockPos) ? 1 : 2);
         } else {
             node.gValue = 1.0D;
         }
@@ -354,16 +359,21 @@ public class AStarPathFinder {
                 cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYaw(node.getBlockPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitch(node.getBlockPos()))) / 540.0d;
         } else {
             for (BlockNode node : nodes)
-                cost += (node.getBlockType() == BlockType.WALK) ? 1.5D : 1.0D;
+                cost += (node.getBlockType() == BlockType.WALK) ? 1D : 1.5D;
         }
         return cost;
     }
 
-    BlockType getBlockType(BlockPos blockToSearch) {
+    private BlockType getBlockType(BlockPos blockToSearch) {
         return BlockUtils.isPassable(blockToSearch) ? BlockType.WALK : BlockType.MINE;
     }
 
-    double getHeuristic(BlockPos start, BlockPos goal) {
+
+    private double getHeuristic(BlockPos start, BlockPos goal) {
         return MathUtils.getBlockDistanceBetweenTwoBlock(start, goal);
     }
+
+
+
+
 }

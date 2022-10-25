@@ -43,6 +43,7 @@ public class MithrilMacro extends Macro {
         }
         LogUtils.debugLog("Didnt find any players nearby, continuing");
         baritone = new AutoMineBaritone(getMineBehaviour());
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
     }
 
 
@@ -61,8 +62,7 @@ public class MithrilMacro extends Macro {
             }
         }
 
-        if(MightyMiner.config.mithShiftWhenMine)
-            KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
+        if(MightyMiner.config.mithShiftWhenMine) KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
         if(!baritone.isEnabled()){
             baritone.mineFor(priorityBlocks.get(MightyMiner.config.mithPriority1), priorityBlocks.get(MightyMiner.config.mithPriority2), priorityBlocks.get(MightyMiner.config.mithPriority3));
@@ -88,6 +88,12 @@ public class MithrilMacro extends Macro {
         KeybindHandler.resetKeybindState();
     }
 
+    @Override
+    public void onMessageReceived(String message){
+        if (message.equals("Mining speed boost is now available!")) {
+            KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
+        }
+    }
 
     private MineBehaviour getMineBehaviour(){
         return new MineBehaviour(

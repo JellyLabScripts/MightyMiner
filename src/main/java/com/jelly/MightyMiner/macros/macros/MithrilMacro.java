@@ -68,6 +68,10 @@ public class MithrilMacro extends Macro {
             baritone.mineFor(priorityBlocks.get(MightyMiner.config.mithPriority1), priorityBlocks.get(MightyMiner.config.mithPriority2), priorityBlocks.get(MightyMiner.config.mithPriority3));
         }
 
+        if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
+            mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(mc.thePlayer.inventory.currentItem));
+            MacroHandler.pickaxeSkillReady = false;
+        }
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.*;
 import com.jelly.MightyMiner.utils.LogUtils;
@@ -45,6 +44,16 @@ public class MacroHandler {
 
     @SubscribeEvent
     public void onRenderWorld(final RenderWorldLastEvent event) {
+        if (!enabled && MightyMiner.config.showAlwaysDrawings && mc.thePlayer != null && mc.theWorld != null) {
+            // Have to find better solution for this...
+            // switch is there for possible next global drawings
+            switch (MightyMiner.config.macroType) {
+                case 3:
+                    AOTVMacro.drawRoutes(MightyMiner.coordsConfig.getSelectedRoute().valueList(), event);
+                    break;
+            }
+            return;
+        }
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
 

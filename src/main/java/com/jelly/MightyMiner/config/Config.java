@@ -326,7 +326,13 @@ public class Config extends Vigilant {
     )
     public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
 
-
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Always show drawings",
+            category = "Core",
+            subcategory = "Drawings"
+    )
+    public boolean showAlwaysDrawings = true;
 
     public Config() {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector());

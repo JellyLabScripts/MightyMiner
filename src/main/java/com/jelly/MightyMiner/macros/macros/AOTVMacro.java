@@ -49,7 +49,6 @@ public class AOTVMacro extends Macro {
         currentState = State.Mining;
 
         coords = MightyMiner.coordsConfig.getSelectedRoute().valueList();
-        coords.forEach(System.out::println);
   
         targetCoordIndex = -1;
         for(int i = 0; i < coords.size(); i++){
@@ -71,6 +70,8 @@ public class AOTVMacro extends Macro {
 
         baritone.onTickEvent(phase);
 
+        if(phase != TickEvent.Phase.START) return;
+
         if(targetCoordIndex == -1) return;
 
         switch(currentState) {
@@ -86,14 +87,16 @@ public class AOTVMacro extends Macro {
                 if(rotationFlag)
                     rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  500);
 
-                // LOGICAL ERROR, need to test out
-                if(!rotation.rotating && rightClickCD == 1){
+
+                if(rightClickCD == -1)
+                    KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
+                else if(!rotation.rotating && rightClickCD < 2) {
                     rotationFlag = false;
                     rotation.reset();
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void");
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
-                } else if(rightClickCD == -1)
-                    KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
+                }
+
 
                 break;
             case Mining:

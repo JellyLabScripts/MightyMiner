@@ -252,6 +252,7 @@ public class Config extends Vigilant {
     public int aotvRestartTimeThreshold = 5;
 
 
+
     public Config() {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector());
         init();

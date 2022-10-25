@@ -78,11 +78,14 @@ public class PowderMacro extends Macro {
     @Override
     public void onEnable() {
 
-        if(PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)){
-            LogUtils.addMessage("Not starting, there is a player near");
-            this.toggle();
-            return;
+        if(MightyMiner.config.powPlayerFailsafe) {
+            if (PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)) {
+                LogUtils.addMessage("Not stating, there is a player near");
+                this.toggle();
+                return;
+            }
         }
+
 
         Main.configFile.hardIndex = MightyMiner.config.powAuraType;
         Main.configFile.includeOres = true;
@@ -129,11 +132,13 @@ public class PowderMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-        if(PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)){
-            PlayerUtils.warpBackToIsland();
-            MacroHandler.disableScript();
-            Main.autoHardStone = false;
-            return;
+        if(MightyMiner.config.powPlayerFailsafe) {
+            if(PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)){
+                PlayerUtils.warpBackToIsland();
+                MacroHandler.disableScript();
+                Main.autoHardStone = false;
+                return;
+            }
         }
 
         if(rotation.rotating){

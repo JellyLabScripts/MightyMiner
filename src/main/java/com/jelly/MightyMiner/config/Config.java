@@ -80,23 +80,34 @@ public class Config extends Vigilant {
     )
     public int gemRotationTime = 300;
 
+    
+    @Property(type = PropertyType.SWITCH,
+            name = "Mine gemstones",
+            category = "Gemstone macro",
+            subcategory = "Miscellaneous"
+    )
+    public boolean powMineGemstone = true;
+
+    @Property(type = PropertyType.SWITCH,
+            name = "Enable Player detection failsafe",
+            description = "Teleports you to your island if there is a player nearby",
+            category = "Gemstone macro",
+            subcategory = "Failsafes"
+    )
+    public boolean gemPlayerFailsafe = true;
 
     @Property(type = PropertyType.SLIDER,
             name = "Player detection radius",
             description = "Warp back to island if there is player inside the given radius of player",
             category = "Gemstone macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Failsafes",
+            min = 1,
             max = 30
     )
     public int gemPlayerRad = 10;
 
 
-    @Property(type = PropertyType.SWITCH,
-            name = "Mine gemstones",
-            category = "Powder macro",
-            subcategory = "Miscellaneous"
-    )
-    public boolean powMineGemstone = true;
+    
 
     @Property(type = PropertyType.SWITCH,
             name = "RGA hardstone aura",
@@ -123,11 +134,20 @@ public class Config extends Vigilant {
     )
     public boolean powCenter = false;
 
+    @Property(type = PropertyType.SWITCH,
+            name = "Enable Player detection failsafe",
+            description = "Teleports you to your island if there is a player nearby",
+            category = "Powder macro",
+            subcategory = "Failsafes"
+    )
+    public boolean powPlayerFailsafe = true;
+
     @Property(type = PropertyType.SLIDER,
             name = "Player detection radius",
             description = "Warp back to island if there is player inside the given radius of player",
             category = "Powder macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Failsafes",
+            min = 1,
             max = 30
     )
     public int powPlayerRad = 10;
@@ -198,13 +218,20 @@ public class Config extends Vigilant {
     )
     public int mithRestartTimeThreshold = 5;
 
-
+    @Property(type = PropertyType.SWITCH,
+            name = "Enable Player detection failsafe",
+            description = "Teleports you to your island if there is a player nearby",
+            category = "Mithril macro",
+            subcategory = "Failsafes"
+    )
+    public boolean mithPlayerFailsafe = true;
 
     @Property(type = PropertyType.SLIDER,
             name = "Player detection radius",
             description = "Warp back to island if there is player inside the given radius of player",
             category = "Mithril macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Failsafes",
+            min = 1,
             max = 30
     )
     public int mithPlayerRad = 10;
@@ -262,5 +289,8 @@ public class Config extends Vigilant {
         this.initialize();
         this.markDirty();
         this.preload();
+        this.addDependency("gemPlayerRad", "gemPlayerFailsafe");
+        this.addDependency("powPlayerRad", "powPlayerFailsafe");
+        this.addDependency("mithPlayerRad", "mithPlayerFailsafe");
     }
 }

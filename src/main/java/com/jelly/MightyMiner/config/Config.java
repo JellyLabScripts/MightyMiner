@@ -4,7 +4,9 @@ import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.JVMAnnotationPropertyCollector;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
+import scala.sys.Prop;
 
+import java.awt.*;
 import java.io.File;
 
 public class Config extends Vigilant {
@@ -257,6 +259,38 @@ public class Config extends Vigilant {
             min = 2
     )
     public int aotvRestartTimeThreshold = 5;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Show route lines",
+            category = "AOTV gemstone macro",
+            subcategory = "Drawings"
+    )
+    public boolean showRouteLines = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Highlight route blocks",
+            category = "AOTV gemstone macro",
+            subcategory = "Drawings"
+    )
+    public boolean highlightRouteBlocks = true;
+
+    @Property(
+            type = PropertyType.COLOR,
+            name = "Color of route line",
+            category = "AOTV gemstone macro",
+            subcategory = "Drawings"
+    )
+    public Color routeLineColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
+
+    @Property(
+            type = PropertyType.COLOR,
+            name = "Color of highlighted route blocks",
+            category = "AOTV gemstone macro",
+            subcategory = "Drawings"
+    )
+    public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
 
 
     public Config() {

@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class CommissionMacro extends Macro {
     }
 
     @Override
-    public void onLastRender() {
+    public void onLastRender(RenderWorldLastEvent event) {
         mineBaritone.onRenderEvent();
     }
 

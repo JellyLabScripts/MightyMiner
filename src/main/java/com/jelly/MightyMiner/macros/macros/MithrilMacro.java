@@ -12,7 +12,9 @@ import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.UngrabUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
@@ -45,9 +47,6 @@ public class MithrilMacro extends Macro {
     }
 
 
-
-
-
     @Override
     public void onTick(TickEvent.Phase phase) {
         baritone.onTickEvent(phase);
@@ -65,14 +64,11 @@ public class MithrilMacro extends Macro {
             baritone.mineFor(priorityBlocks.get(MightyMiner.config.mithPriority1), priorityBlocks.get(MightyMiner.config.mithPriority2), priorityBlocks.get(MightyMiner.config.mithPriority3));
         }
 
-        if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
-            mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(mc.thePlayer.inventory.currentItem));
-            MacroHandler.pickaxeSkillReady = false;
-        }
+        useMiningSpeedBoost();
     }
 
     @Override
-    public void onLastRender() {
+    public void onLastRender(RenderWorldLastEvent event) {
         baritone.onRenderEvent();
     }
 

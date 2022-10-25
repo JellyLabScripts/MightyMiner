@@ -4,7 +4,6 @@ import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.JVMAnnotationPropertyCollector;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
-import scala.sys.Prop;
 
 import java.awt.*;
 import java.io.File;

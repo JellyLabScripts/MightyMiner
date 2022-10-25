@@ -303,6 +303,14 @@ public class Config extends Vigilant {
     public boolean highlightRouteBlocks = true;
 
     @Property(
+            type = PropertyType.SWITCH,
+            name = "Mine gemstone panes",
+            category = "AOTV gemstone macro",
+            subcategory = "Miscellaneous"
+    )
+    public boolean mineGemstonePanes = false;
+
+    @Property(
             type = PropertyType.COLOR,
             name = "Color of route line",
             category = "AOTV gemstone macro",

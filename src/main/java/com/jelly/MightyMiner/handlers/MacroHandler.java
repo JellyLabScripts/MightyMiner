@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.config.Config;
+import com.jelly.MightyMiner.events.ReceivePacketEvent;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.*;
 import com.jelly.MightyMiner.utils.LogUtils;
@@ -89,13 +90,14 @@ public class MacroHandler {
         } catch (Exception ignored) {}
     }
 
-    public static void onPacketReceive(Packet<?> packet) {
+    @SubscribeEvent
+    public void onPacketReceived(ReceivePacketEvent event) {
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
 
         for (Macro process : macros) {
             if (process.isEnabled()) {
-                process.onPacketReceived(packet);
+                process.onPacketReceived(event.packet);
             }
         }
     }

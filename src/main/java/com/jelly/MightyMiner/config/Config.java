@@ -120,15 +120,25 @@ public class Config extends Vigilant {
             name = "RGA hardstone aura",
             description = "Mines hard stone around you. USE WITH Center to block",
             category = "Powder macro",
-            subcategory = "Miscellaneous"
+            subcategory = "RGA Nuker"
     )
     public boolean powStoneAura = false;
 
     @Property(
-            type = PropertyType.SELECTOR,
-            name = "Hardstone aura mode",
+            type = PropertyType.SLIDER,
+            name = "Hardstone aura height",
             category = "Powder macro",
-            subcategory = "Miscellaneous",
+            subcategory = "RGA Nuker",
+            max = 4,
+            min = 2
+    )
+    public int powAuraHeight = 3;
+
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Hardstone aura ",
+            category = "Powder macro",
+            subcategory = "RGA Nuker",
             options = { "Blocks around", "Facing axis"}
     )
     public int powAuraType = 1;

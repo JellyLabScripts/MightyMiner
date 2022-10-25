@@ -16,12 +16,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static com.jelly.MightyMiner.MightyMiner.coordsConfig;
-import static rosegoldaddons.utils.RenderUtils.drawNametag;
+
 
 public class Route extends CommandBase {
     Minecraft mc = Minecraft.getMinecraft();
@@ -180,7 +178,7 @@ public class Route extends CommandBase {
     }
 
     private void drawSpots(BlockPos pos, float partialTicks, int name) {
-        GlStateManager.alphaFunc(516, 0.1f);
+    /*    GlStateManager.alphaFunc(516, 0.1f);
         GlStateManager.pushMatrix();
         Entity viewer = mc.getRenderViewEntity();
         double viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks;
@@ -205,6 +203,6 @@ public class Route extends CommandBase {
         GlStateManager.rotate(-mc.getRenderManager().playerViewX, 1.0f, 0.0f, 0.0f);
         GlStateManager.rotate(mc.getRenderManager().playerViewY, 0.0f, 1.0f, 0.0f);
         GlStateManager.popMatrix();
-        GlStateManager.disableLighting();
+        GlStateManager.disableLighting();*/
     }
 }

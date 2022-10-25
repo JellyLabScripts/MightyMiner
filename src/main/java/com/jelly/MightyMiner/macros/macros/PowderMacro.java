@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
+import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
@@ -17,7 +18,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import rosegoldaddons.Main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,8 +87,8 @@ public class PowderMacro extends Macro {
         }
 
 
-        Main.configFile.hardIndex = MightyMiner.config.powAuraType;
-        Main.configFile.includeOres = true;
+        RGANuker.enabled = MightyMiner.config.powStoneAura;
+
         currentState = State.NORMAL;
         turnState = 1;
         treasureInitialTime = System.currentTimeMillis();
@@ -120,7 +120,7 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onDisable() {
-        Main.autoHardStone = false;
+        RGANuker.enabled = false;
         aote = false;
         mineBaritone.disableBaritone();
         KeybindHandler.resetKeybindState();
@@ -136,7 +136,6 @@ public class PowderMacro extends Macro {
             if(PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)){
                 PlayerUtils.warpBackToIsland();
                 MacroHandler.disableScript();
-                Main.autoHardStone = false;
                 return;
             }
         }
@@ -186,7 +185,6 @@ public class PowderMacro extends Macro {
 
         switch (currentState){
             case TREASURE:
-                Main.autoHardStone = false;
                 switch(treasureState){
                     case NONE: case SOLVING:
                         KeybindHandler.resetKeybindState();
@@ -217,7 +215,6 @@ public class PowderMacro extends Macro {
 
             case NORMAL: case UTurn:
                 if(MightyMiner.config.powStoneAura) {
-                    Main.autoHardStone = !frontShouldMineSlow();
                     rotation.intLockAngle(playerYaw, (shouldLookDown() ? 60 : (frontShouldMineSlow() ? 27 : 0)), 200);
                 } else
                     rotation.intLockAngle(playerYaw, (shouldLookDown() ? 60 : 27), 200);

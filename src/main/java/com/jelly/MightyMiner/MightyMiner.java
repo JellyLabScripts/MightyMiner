@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.command.Route;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.CoordsConfig;
 import com.jelly.MightyMiner.config.factory.ConfigurationFactory;
+import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.render.BlockRenderer;
@@ -50,6 +51,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new BlockRenderer());
+        MinecraftForge.EVENT_BUS.register(new RGANuker());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 

@@ -13,11 +13,13 @@ import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
@@ -85,14 +87,11 @@ public class GemstoneMacro extends Macro {
 
         }
 
-        if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
-            mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(mc.thePlayer.inventory.currentItem));
-            MacroHandler.pickaxeSkillReady = false;
-        }
+        useMiningSpeedBoost();
     }
 
     @Override
-    public void onLastRender() {
+    public void onLastRender(RenderWorldLastEvent event) {
         baritone.onRenderEvent();
         rotation.update();
     }

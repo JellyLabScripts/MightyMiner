@@ -17,10 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BlockRenderer {
-    public static final HashMap<Integer, Boolean> glCapMap = new HashMap<>();
-    public static HashMap<BlockPos, Color> renderMap = new HashMap<>();
+    public final HashMap<Integer, Boolean> glCapMap = new HashMap<>();
+    public HashMap<BlockPos, Color> renderMap = new HashMap<>();
 
-    @SubscribeEvent
     public void renderAABB(RenderWorldLastEvent e) {
         try {
             if (!renderMap.isEmpty()) {

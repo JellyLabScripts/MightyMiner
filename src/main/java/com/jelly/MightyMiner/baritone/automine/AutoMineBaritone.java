@@ -17,6 +17,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
@@ -24,8 +27,12 @@ import java.util.LinkedList;
 
 public class AutoMineBaritone{
 
+
     Minecraft mc = Minecraft.getMinecraft();
+    BlockRenderer blockRenderer = new BlockRenderer();
+
     MineBehaviour mineBehaviour;
+
 
 
     LinkedList<BlockNode> blocksToMine = new LinkedList<>();
@@ -54,14 +61,16 @@ public class AutoMineBaritone{
     boolean shouldGoToFinalBlock;
 
     public AutoMineBaritone(MineBehaviour mineBehaviour){
+        MinecraftForge.EVENT_BUS.register(this);
         this.mineBehaviour = mineBehaviour;
+
         pathFinder = new AStarPathFinder(getPathBehaviour());
     }
 
 
     public void clearBlocksToWalk(){
         blocksToMine.clear();
-        BlockRenderer.renderMap.clear();
+        blockRenderer.renderMap.clear();
         minedBlocks.clear();
     }
 
@@ -95,9 +104,9 @@ public class AutoMineBaritone{
             }
             if (!blocksToMine.isEmpty()) {
                 for (BlockNode blockNode : blocksToMine) {
-                    BlockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
+                    blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
                 }
-                BlockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
+                blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
             } else {
                 Logger.playerLog("blocks to mine EMPTY!");
             }
@@ -140,9 +149,9 @@ public class AutoMineBaritone{
             }
             if (!blocksToMine.isEmpty()) {
                 for (BlockNode blockNode : blocksToMine) {
-                    BlockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
+                    blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
                 }
-                BlockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
+                blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
             } else {
                 Logger.playerLog("blocks to mine EMPTY!");
             }
@@ -180,9 +189,9 @@ public class AutoMineBaritone{
 
         if (!blocksToMine.isEmpty()) {
             for (BlockNode blockNode : blocksToMine) {
-                BlockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
+                blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
             }
-            BlockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
+            blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
         } else {
             Logger.playerLog("blocks to mine EMPTY!");
         }
@@ -220,9 +229,9 @@ public class AutoMineBaritone{
             }
             if (!blocksToMine.isEmpty()) {
                 for (BlockNode blockNode : blocksToMine) {
-                    BlockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
+                    blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
                 }
-                BlockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
+                blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
             } else {
                 Logger.playerLog("blocks to mine EMPTY!");
             }
@@ -265,7 +274,9 @@ public class AutoMineBaritone{
     }
 
 
+
     public void onOverlayRenderEvent(RenderGameOverlayEvent event){
+
         if(event.type == RenderGameOverlayEvent.ElementType.TEXT){
             if(blocksToMine != null){
                 if(!blocksToMine.isEmpty()){
@@ -279,6 +290,13 @@ public class AutoMineBaritone{
         }
     }
 
+    double a = 0;
+    @SubscribeEvent
+    public void onRenderWorldLastEvent(RenderWorldLastEvent e){
+        a += 0.000001d;
+        System.out.println(a);
+    }
+
 
     int stuckTickCount = 0;
     public void onTickEvent(TickEvent.Phase phase){
@@ -290,7 +308,7 @@ public class AutoMineBaritone{
         if (shouldRemoveFromList(blocksToMine.getLast())) {
             stuckTickCount = 0;
             minedBlocks.add(blocksToMine.getLast());
-            BlockRenderer.renderMap.remove(blocksToMine.getLast().getBlockPos());
+            blockRenderer.renderMap.remove(blocksToMine.getLast().getBlockPos());
             blocksToMine.removeLast();
         } else {
             //stuck handling

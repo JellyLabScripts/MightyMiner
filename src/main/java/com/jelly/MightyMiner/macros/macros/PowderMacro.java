@@ -12,11 +12,13 @@ import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
@@ -55,7 +57,7 @@ public class PowderMacro extends Macro {
 
 
     int turnState = 0;
-    AutoMineBaritone mineBaritone = new AutoMineBaritone(getAutomineConfig());
+    AutoMineBaritone mineBaritone;
     BlockPos chest;
     BlockPos returnBlockPos;
     BlockPos targetBlockPos;
@@ -85,6 +87,8 @@ public class PowderMacro extends Macro {
                 return;
             }
         }
+
+        mineBaritone = new AutoMineBaritone(getAutomineConfig());
 
 
         RGANuker.enabled = MightyMiner.config.powStoneAura;
@@ -221,10 +225,7 @@ public class PowderMacro extends Macro {
 
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
-                if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
-                    mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(mc.thePlayer.inventory.currentItem));
-                    MacroHandler.pickaxeSkillReady = false;
-                }
+                useMiningSpeedBoost();
                 break;
         }
 
@@ -265,7 +266,7 @@ public class PowderMacro extends Macro {
     }
 
     @Override
-    public void onLastRender() {
+    public void onLastRender(RenderWorldLastEvent event) {
         mineBaritone.onRenderEvent();
 
         if(rotation.rotating)

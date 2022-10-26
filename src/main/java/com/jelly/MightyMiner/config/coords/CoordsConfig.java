@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.config;
+package com.jelly.MightyMiner.config.coords;
 
 import eu.okaeri.configs.OkaeriConfig;
 import net.minecraft.util.BlockPos;

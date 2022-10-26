@@ -1,6 +1,6 @@
-package com.jelly.MightyMiner.config.factory;
+package com.jelly.MightyMiner.config.coords.factory;
 
-import com.jelly.MightyMiner.config.serdes.CoordsSerdes;
+import com.jelly.MightyMiner.config.coords.serdes.CoordsSerdes;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;

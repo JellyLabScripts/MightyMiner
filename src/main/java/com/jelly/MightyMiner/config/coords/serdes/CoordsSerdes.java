@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.config.serdes;
+package com.jelly.MightyMiner.config.coords.serdes;
 
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.SerdesRegistry;

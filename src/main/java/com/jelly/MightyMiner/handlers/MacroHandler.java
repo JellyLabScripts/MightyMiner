@@ -51,7 +51,7 @@ public class MacroHandler {
 
         for (Macro process : macros) {
             if (process.isEnabled()) {
-                process.onLastRender();
+                process.onLastRender(event);
             }
         }
     }

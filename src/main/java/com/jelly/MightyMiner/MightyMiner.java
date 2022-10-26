@@ -11,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
@@ -36,10 +35,6 @@ public class MightyMiner {
     public static void onStartGame(){
         coords.clear();
         coordsConfig = configurationFactory.create(CoordsConfig.class, new File("config/coords.json"));
-
-
-
-
     }
 
 

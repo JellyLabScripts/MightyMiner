@@ -61,7 +61,7 @@ public class AutoMineBaritone{
     boolean shouldGoToFinalBlock;
 
     public AutoMineBaritone(MineBehaviour mineBehaviour){
-        MinecraftForge.EVENT_BUS.register(this);
+
         this.mineBehaviour = mineBehaviour;
 
         pathFinder = new AStarPathFinder(getPathBehaviour());
@@ -290,12 +290,6 @@ public class AutoMineBaritone{
         }
     }
 
-    double a = 0;
-    @SubscribeEvent
-    public void onRenderWorldLastEvent(RenderWorldLastEvent e){
-        a += 0.000001d;
-        System.out.println(a);
-    }
 
 
     int stuckTickCount = 0;

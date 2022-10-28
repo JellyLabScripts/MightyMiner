@@ -34,6 +34,8 @@ public class AOTVMacro extends Macro {
         Mining
     }
 
+    private final Block[] glassWithPanes = new Block[] { Blocks.stained_glass, Blocks.stained_glass_pane };
+    private final Block[] glassWithoutPanes = new Block[]{ Blocks.stained_glass };
 
 
     State currentState = State.NONE;
@@ -74,8 +76,6 @@ public class AOTVMacro extends Macro {
     @Override
     public void onTick(TickEvent.Phase phase) {
 
-        baritone.onTickEvent(phase);
-
         if(phase != TickEvent.Phase.START) return;
 
         if(targetCoordIndex == -1) return;
@@ -109,7 +109,7 @@ public class AOTVMacro extends Macro {
                 useMiningSpeedBoost();
                 if(!baritone.isEnabled()) {
                     try {
-                        baritone.mineForInSingleThread(Blocks.stained_glass, Blocks.stained_glass_pane);
+                        baritone.mineForInSingleThread(MightyMiner.config.aotvMineGemstonePanes ? glassWithPanes : glassWithoutPanes);
                     } catch (Exception ignored) {
                         currentState = State.NONE;
                         baritone.disableBaritone();
@@ -144,27 +144,15 @@ public class AOTVMacro extends Macro {
     }
     @Override
     public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
-        baritone.onOverlayRenderEvent(event);
     }
 
 
-    public static void drawRoutes(List<BlockPos> coords, RenderWorldLastEvent event) {
-      /*  if (MightyMiner.config.highlightRouteBlocks) {
-            coords.forEach(coord -> RenderUtils.drawBlockBox(coord, MightyMiner.config.routeBlocksColor, 3, event.partialTicks));
-        }*/
-
-        if (MightyMiner.config.showRouteLines) {
-            DrawUtils.drawCoordsRoute(coords, event);
-        }
-    }
 
     @Override
     public void onLastRender(RenderWorldLastEvent event) {
-        baritone.onRenderEvent();
         if(rotation.rotating)
             rotation.update();
 
-        drawRoutes(coords, event);
     }
 
     @Override

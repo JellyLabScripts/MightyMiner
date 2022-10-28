@@ -6,6 +6,8 @@ import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
 import com.jelly.MightyMiner.baritone.automine.pathing.AStarPathFinder;
 import com.jelly.MightyMiner.baritone.automine.pathing.config.PathMode;
+import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoBlockException;
+import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
@@ -76,7 +78,6 @@ public class AutoMineBaritone{
 
 
 
-
     public void mineFor(BlockPos blockPos){
         enable();
         clearBlocksToWalk();
@@ -98,19 +99,18 @@ public class AutoMineBaritone{
         new Thread(() -> {
             try{
                 blocksToMine = pathFinder.getPath(blockPos);
-            } catch (Throwable e){
-                Logger.playerLog("Error when getting path!");
-                e.printStackTrace();
+            } catch (NoPathException e){
+                Logger.playerLog("Error when getting path!: " + e);
+                unregister();
+                return;
             }
-            if (!blocksToMine.isEmpty()) {
-                for (BlockNode blockNode : blocksToMine) {
-                    blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
-                }
-                blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
-            } else {
-                Logger.playerLog("blocks to mine EMPTY!");
+
+            for (BlockNode blockNode : blocksToMine) {
+                blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
             }
+            blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
             Logger.log("Starting to mine");
+
             inAction = true;
             currentState = PlayerState.NONE;
             stuckTickCount = 0;
@@ -143,24 +143,23 @@ public class AutoMineBaritone{
                     blocksToMine = pathFinder.getPathWithPreference(blockType);
                 else
                     blocksToMine = pathFinder.getPath(blockType);
-            } catch (Throwable e){
-                Logger.playerLog("Error when getting path!");
-                e.printStackTrace();
+            } catch (NoPathException | NoBlockException e){
+                Logger.playerLog("Error when getting path!: " + e);
+                unregister();
+                return;
             }
-            if (!blocksToMine.isEmpty()) {
-                for (BlockNode blockNode : blocksToMine) {
-                    blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
-                }
-                blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
-            } else {
-                Logger.playerLog("blocks to mine EMPTY!");
+            for (BlockNode blockNode : blocksToMine) {
+                blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
             }
+            blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
+
             Logger.log("Starting to mine");
             inAction = true;
             currentState = PlayerState.NONE;
             stuckTickCount = 0;
         }).start();
     }
+
 
     public void mineForInSingleThread(Block... blockType) throws Exception{ // ONLY USABLE IN SHORT DISTANCE!!!!
         enable();
@@ -187,14 +186,11 @@ public class AutoMineBaritone{
         else
             blocksToMine = pathFinder.getPath(blockType);
 
-        if (!blocksToMine.isEmpty()) {
-            for (BlockNode blockNode : blocksToMine) {
-                blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
-            }
-            blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
-        } else {
-            Logger.playerLog("blocks to mine EMPTY!");
+        for (BlockNode blockNode : blocksToMine) {
+            blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
         }
+        blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
+
         Logger.log("Starting to mine");
         inAction = true;
         currentState = PlayerState.NONE;
@@ -221,20 +217,20 @@ public class AutoMineBaritone{
         }
 
         new Thread(() -> {
+
             try{
                 blocksToMine = pathFinder.getPath(blockPos, PathMode.GOTO);
-            } catch (Throwable e){
-                Logger.playerLog("Error when getting path!");
-                e.printStackTrace();
+            } catch (NoPathException e){
+                Logger.playerLog("Error when getting path: " + e);
+                unregister();
+                return;
             }
-            if (!blocksToMine.isEmpty()) {
-                for (BlockNode blockNode : blocksToMine) {
-                    blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
-                }
-                blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
-            } else {
-                Logger.playerLog("blocks to mine EMPTY!");
+
+            for (BlockNode blockNode : blocksToMine) {
+                blockRenderer.renderMap.put(blockNode.getBlockPos(), Color.ORANGE);
             }
+            blockRenderer.renderMap.put(blocksToMine.getFirst().getBlockPos(), Color.RED);
+
             Logger.log("Starting to mine");
             inAction = true;
             currentState = PlayerState.NONE;
@@ -244,15 +240,21 @@ public class AutoMineBaritone{
 
 
 
-    private void enable(){
+    private void enable() {
+        MinecraftForge.EVENT_BUS.register(this);
         enabled = true;
     }
 
 
     public void disableBaritone() {
         Logger.log("Baritone completed");
-        pauseBaritone();
         enabled = false;
+        pauseBaritone();
+        unregister();
+    }
+
+    private void unregister(){
+        MinecraftForge.EVENT_BUS.unregister(this);
     }
     private void pauseBaritone() {
         inAction = false;
@@ -265,16 +267,14 @@ public class AutoMineBaritone{
         if(!blocksToMine.isEmpty() && blocksToMine.getLast().getBlockType() == BlockType.MINE)
             pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
 
-
         clearBlocksToWalk();
-
     }
     public boolean isEnabled(){
         return enabled;
     }
 
 
-
+    @SubscribeEvent
     public void onOverlayRenderEvent(RenderGameOverlayEvent event){
 
         if(event.type == RenderGameOverlayEvent.ElementType.TEXT){
@@ -293,9 +293,12 @@ public class AutoMineBaritone{
 
 
     int stuckTickCount = 0;
-    public void onTickEvent(TickEvent.Phase phase){
 
-        if(phase != TickEvent.Phase.START || !inAction || blocksToMine.isEmpty())
+    @SubscribeEvent
+    public void onTickEvent(TickEvent.ClientTickEvent event){
+
+
+        if(event.phase != TickEvent.Phase.START || !inAction || blocksToMine.isEmpty())
             return;
 
 
@@ -380,9 +383,12 @@ public class AutoMineBaritone{
             deltaJumpTick--;
     }
 
-    public void onRenderEvent(){
+    @SubscribeEvent
+    public void onRenderEvent(RenderWorldLastEvent event){
+        blockRenderer.renderAABB(event);
         if(rotation.rotating)
             rotation.update();
+
 
     }
 

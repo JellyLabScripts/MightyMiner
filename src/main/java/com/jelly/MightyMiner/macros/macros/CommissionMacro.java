@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.ArrayList;
 
 public class CommissionMacro extends Macro {
-    AutoMineBaritone mineBaritone;
+    //AutoMineBaritone mineBaritone;
 
     public enum Quest {
         ROYAL_MINES,
@@ -22,11 +22,11 @@ public class CommissionMacro extends Macro {
     }
     @Override
     protected void onEnable() {
-        mineBaritone.mineFor(new BlockPos(5, 1, -9));
+       // mineBaritone.mineFor(new BlockPos(5, 1, -9));
        // LogUtils.addMessage(BlockUtils.getRelativeBlock(0, 0, 1).toString());
     }
 
-    @Override
+   /* @Override
     public void onTick(TickEvent.Phase phase) {
         mineBaritone.onTickEvent(phase);
     }
@@ -39,14 +39,14 @@ public class CommissionMacro extends Macro {
     @Override
     public void onLastRender(RenderWorldLastEvent event) {
         mineBaritone.onRenderEvent();
-    }
+    }*/
 
     @Override
     protected void onDisable() {
-        mineBaritone.disableBaritone();
+       // mineBaritone.disableBaritone();
 
     }
-
+    /*
     private MineBehaviour getMineBehaviour(){
         return new MineBehaviour(
                 AutoMineType.DYNAMIC,
@@ -65,5 +65,5 @@ public class CommissionMacro extends Macro {
                 256,
                 0
         );
-    }
+    }*/
 }

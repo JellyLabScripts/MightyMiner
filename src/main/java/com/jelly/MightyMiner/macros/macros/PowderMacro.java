@@ -132,7 +132,6 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase){
-        mineBaritone.onTickEvent(phase);
         if(phase != TickEvent.Phase.START)
             return;
 
@@ -267,7 +266,6 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onLastRender(RenderWorldLastEvent event) {
-        mineBaritone.onRenderEvent();
 
         if(rotation.rotating)
             rotation.update();
@@ -275,7 +273,6 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
-        mineBaritone.onOverlayRenderEvent(event);
     }
 
     @Override

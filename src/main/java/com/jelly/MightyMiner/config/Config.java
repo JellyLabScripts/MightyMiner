@@ -299,6 +299,14 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "Mine gemstone panes",
+            category = "AOTV gemstone macro",
+            subcategory = "Miscellaneous"
+    )
+    public boolean aotvMineGemstonePanes = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Show route lines",
             category = "AOTV gemstone macro",
             subcategory = "Drawings"
@@ -330,13 +338,13 @@ public class Config extends Vigilant {
     )
     public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
 
-    @Property(
+   /* @Property(
             type = PropertyType.SWITCH,
             name = "Always show drawings",
             category = "Core",
             subcategory = "Drawings"
     )
-    public boolean showAlwaysDrawings = true;
+    public boolean showAlwaysDrawings = true;*/
 
     public Config() {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector(), new ConfigSorting());
@@ -355,5 +363,7 @@ public class Config extends Vigilant {
         this.addDependency("mithPlayerRad", "mithPlayerFailsafe");
         this.addDependency("powAuraHeight", "powStoneAura");
         this.addDependency("powAuraType", "powStoneAura");
+        this.addDependency("routeLineColor", "showRouteLines");
+        this.addDependency("routeBlocksColor", "highlightRouteBlocks");
     }
 }

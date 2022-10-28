@@ -51,7 +51,7 @@ public class MithrilMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase) {
-        baritone.onTickEvent(phase);
+
         if(phase != TickEvent.Phase.START)
             return;
         if(MightyMiner.config.mithPlayerFailsafe) {
@@ -72,12 +72,10 @@ public class MithrilMacro extends Macro {
 
     @Override
     public void onLastRender(RenderWorldLastEvent event) {
-        baritone.onRenderEvent();
     }
 
     @Override
     public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
-        baritone.onOverlayRenderEvent(event);
     }
 
 

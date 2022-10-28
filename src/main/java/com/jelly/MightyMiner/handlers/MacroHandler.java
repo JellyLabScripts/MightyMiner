@@ -5,10 +5,13 @@ import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.events.ReceivePacketEvent;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.*;
+import com.jelly.MightyMiner.render.BlockRenderer;
+import com.jelly.MightyMiner.utils.DrawUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.UngrabUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Packet;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -24,6 +27,7 @@ public class MacroHandler {
     public static boolean pickaxeSkillReady = true;
 
     static boolean enabled = false;
+    static BlockRenderer blockRenderer = new BlockRenderer();
 
     public static void initializeMacro(){
        macros.add(new GemstoneMacro());
@@ -48,6 +52,9 @@ public class MacroHandler {
     public void onRenderWorld(final RenderWorldLastEvent event) {
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
+
+        if(MightyMiner.coordsConfig.getSelectedRoute().valueList() != null)
+            drawRoutes(MightyMiner.coordsConfig.getSelectedRoute().valueList(), event);
 
         for (Macro process : macros) {
             if (process.isEnabled()) {
@@ -132,6 +139,18 @@ public class MacroHandler {
            LogUtils.addMessage("Disabled script");
 
        UngrabUtils.regrabMouse();
+    }
+
+
+    public static void drawRoutes(List<BlockPos> coords, RenderWorldLastEvent event) {
+        blockRenderer.renderAABB(event);
+        if (MightyMiner.config.highlightRouteBlocks) {
+            coords.forEach(coord -> blockRenderer.renderAABB(coord, MightyMiner.config.routeBlocksColor));
+        }
+
+        if (MightyMiner.config.showRouteLines) {
+            DrawUtils.drawCoordsRoute(coords, event);
+        }
     }
 
 

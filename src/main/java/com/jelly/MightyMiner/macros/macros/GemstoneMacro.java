@@ -65,8 +65,6 @@ public class GemstoneMacro extends Macro {
     @Override
     public void onTick(TickEvent.Phase phase){
 
-        baritone.onTickEvent(phase);
-
         if(phase != TickEvent.Phase.START)
             return;
 
@@ -82,7 +80,6 @@ public class GemstoneMacro extends Macro {
         }
 
         if(!baritone.isEnabled() && !minedNearbyGemstones && !haveTreasureChest && PlayerUtils.hasStoppedMoving()){
-
             baritone.mineFor(Blocks.stained_glass_pane, Blocks.stained_glass);
 
         }
@@ -92,13 +89,12 @@ public class GemstoneMacro extends Macro {
 
     @Override
     public void onLastRender(RenderWorldLastEvent event) {
-        baritone.onRenderEvent();
-        rotation.update();
+        if(rotation.rotating)
+            rotation.update();
     }
 
     @Override
     public void onOverlayRenderEvent(RenderGameOverlayEvent event){
-        baritone.onOverlayRenderEvent(event);
     }
 
 

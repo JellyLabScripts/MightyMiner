@@ -1,6 +1,5 @@
 package com.jelly.MightyMiner.utils;
 
-import com.jelly.MightyMiner.MightyMiner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;

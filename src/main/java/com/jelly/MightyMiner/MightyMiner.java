@@ -7,7 +7,7 @@ import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
 import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
-import com.jelly.MightyMiner.render.BlockRenderer;
+import com.jelly.MightyMiner.utils.SkyblockInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -46,6 +46,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new RGANuker());
+        MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 

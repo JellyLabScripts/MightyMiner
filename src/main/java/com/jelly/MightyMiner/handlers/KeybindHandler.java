@@ -80,7 +80,7 @@ public class KeybindHandler {
             MacroHandler.disableScript();
         }
         if(macroKeybinds[2].isKeyDown()){
-            BlockUtils.hasBlockInterfere(BlockUtils.getPlayerLoc(), new BlockPos(2, 64, 2));
+            System.out.println(mc.objectMouseOver.getBlockPos());
         }
         if(macroKeybinds[3].isKeyDown()){
             mc.displayGuiScreen(MightyMiner.config.gui());

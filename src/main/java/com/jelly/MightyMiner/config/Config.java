@@ -303,7 +303,7 @@ public class Config extends Vigilant {
             category = "AOTV gemstone macro",
             subcategory = "Miscellaneous"
     )
-    public boolean aotvMineGemstonePanes = false;
+    public boolean aotvMineGemstonePanes = true;
 
     @Property(
             type = PropertyType.SWITCH,

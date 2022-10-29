@@ -91,7 +91,7 @@ public class AOTVMacro extends Macro {
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
                 if(rotationFlag)
-                    rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  500);
+                    rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  300);
 
 
                 if(rightClickCD == -1)
@@ -99,6 +99,12 @@ public class AOTVMacro extends Macro {
                 else if(!rotation.rotating && rightClickCD < 2) {
                     rotationFlag = false;
                     rotation.reset();
+
+                    if(mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && !mc.objectMouseOver.getBlockPos().equals(targetCoordinate)){
+                        LogUtils.addMessage("The path is not cleared or it is set up wrongly, please clear it up before using the script! " + mc.objectMouseOver.getBlockPos() + " " + targetCoordinate);
+                        MacroHandler.disableScript();
+                        return;
+                    }
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void");
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
                 }
@@ -132,7 +138,7 @@ public class AOTVMacro extends Macro {
             case NONE:
                 currentState = State.Teleporting;
                 rotationFlag = true;
-                rightClickCD = 15;
+                rightClickCD = 10;
                 LogUtils.debugLog("Going to coordinates " + targetCoordinate.getX() + " " + targetCoordinate.getY() + " " + targetCoordinate.getZ());
                 return;
             case Teleporting:
@@ -158,6 +164,7 @@ public class AOTVMacro extends Macro {
     @Override
     protected void onDisable() {
         baritone.disableBaritone();
+        KeybindHandler.resetKeybindState();
     }
 
 

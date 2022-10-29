@@ -38,6 +38,7 @@ public class MacroHandler {
 
     @SubscribeEvent
     public void onTickPlayer(TickEvent.ClientTickEvent tickEvent) {
+
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
 
@@ -50,11 +51,14 @@ public class MacroHandler {
 
     @SubscribeEvent
     public void onRenderWorld(final RenderWorldLastEvent event) {
-        if (!enabled || mc.thePlayer == null || mc.theWorld == null)
+        if(mc.theWorld == null || mc.thePlayer == null)
             return;
 
         if(MightyMiner.coordsConfig.getSelectedRoute().valueList() != null)
             drawRoutes(MightyMiner.coordsConfig.getSelectedRoute().valueList(), event);
+
+        if (!enabled)
+            return;
 
         for (Macro process : macros) {
             if (process.isEnabled()) {

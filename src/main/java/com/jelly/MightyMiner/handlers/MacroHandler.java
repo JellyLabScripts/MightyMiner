@@ -9,6 +9,7 @@ import com.jelly.MightyMiner.utils.DrawUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.SkyblockInfo;
 import com.jelly.MightyMiner.utils.UngrabUtils;
+import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
@@ -81,6 +82,13 @@ public class MacroHandler {
 
     @SubscribeEvent
     public void onMessageReceived(ClientChatReceivedEvent event) {
+        String message = ChatFormatting.stripFormatting(event.message.getUnformattedText());
+        if(message.equals("You used your Mining Speed Boost Pickaxe Ability!")) {
+            pickaxeSkillReady = false;
+        } else if(message.equals("Mining Speed Boost is now available!")) {
+            pickaxeSkillReady = true;
+        }
+
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
 
@@ -89,15 +97,6 @@ public class MacroHandler {
                 process.onMessageReceived(event.message.getUnformattedText());
             }
         }
-        try {
-            String message = StringUtils.stripControlCodes(event.message.getUnformattedText());
-            if (message.contains(":") || message.contains(">")) return;
-            if(message.startsWith("You used your")) {
-                pickaxeSkillReady = false;
-            } else if(message.endsWith("is now available!")) {
-                pickaxeSkillReady = true;
-            }
-        } catch (Exception ignored) {}
     }
 
     @SubscribeEvent
@@ -136,7 +135,6 @@ public class MacroHandler {
                flag = true;
            }
        }
-       pickaxeSkillReady = true;
        enabled = false;
        if(flag)
            LogUtils.addMessage("Disabled script");

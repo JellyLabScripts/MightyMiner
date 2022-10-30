@@ -90,15 +90,10 @@ public class MacroHandler {
                 process.onMessageReceived(event.message.getUnformattedText());
             }
         }
-        try {
-            String message = StringUtils.stripControlCodes(event.message.getUnformattedText());
-            if (message.contains(":") || message.contains(">")) return;
-            if(message.startsWith("You used your")) {
-                pickaxeSkillReady = false;
-            } else if(message.endsWith("is now available!")) {
-                pickaxeSkillReady = true;
-            }
-        } catch (Exception ignored) {}
+        final String message = event.message.getFormattedText();
+        if (ChatFormatting.stripFormatting(event.message.getUnformattedText()).equals("Mining Speed Boost is now available!") && this.mc.thePlayer.getHeldItem() != null) {
+            pickaxeSkillReady = true;
+        }
     }
 
     @SubscribeEvent

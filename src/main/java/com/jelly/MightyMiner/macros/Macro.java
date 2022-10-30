@@ -2,8 +2,9 @@ package com.jelly.MightyMiner.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.handlers.MacroHandler;
+import com.jelly.MightyMiner.utils.LogUtils;
+import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldEvent;
@@ -47,11 +48,15 @@ public abstract class Macro {
 
     public void useMiningSpeedBoost() {
         if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
-            ItemStack itemInHand = mc.thePlayer.inventory.getStackInSlot(mc.thePlayer.inventory.currentItem);
-            if (itemInHand != null && (itemInHand.getItem().getUnlocalizedName().toLowerCase().contains("drill") || itemInHand.getItem().getUnlocalizedName().toLowerCase().contains("pickaxe") || itemInHand.getItem().getUnlocalizedName().toLowerCase().contains("gauntlet"))) {
-                mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(mc.thePlayer.inventory.currentItem));
-                MacroHandler.pickaxeSkillReady = false;
+            int pickSlot = PlayerUtils.getItemInHotbar("Pick", "Gauntlet", "Drill");
+            if (pickSlot == -1) {
+                LogUtils.addMessage("You don't have any mining tool in hotbar to use mining speed boost!");
+                toggle();
+                return;
             }
+            mc.thePlayer.inventory.currentItem = pickSlot;
+            mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(pickSlot));
+            MacroHandler.pickaxeSkillReady = false;
         }
     }
 

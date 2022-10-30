@@ -82,6 +82,13 @@ public class MacroHandler {
 
     @SubscribeEvent
     public void onMessageReceived(ClientChatReceivedEvent event) {
+        String message = ChatFormatting.stripFormatting(event.message.getUnformattedText());
+        if(message.equals("You used your Mining Speed Boost Pickaxe Ability!")) {
+            pickaxeSkillReady = false;
+        } else if(message.equals("Mining Speed Boost is now available!")) {
+            pickaxeSkillReady = true;
+        }
+
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
 
@@ -89,10 +96,6 @@ public class MacroHandler {
             if (process.isEnabled()) {
                 process.onMessageReceived(event.message.getUnformattedText());
             }
-        }
-
-        if (ChatFormatting.stripFormatting(event.message.getUnformattedText()).equals("Mining Speed Boost is now available!") && this.mc.thePlayer.getHeldItem() != null) {
-            pickaxeSkillReady = true;
         }
     }
 

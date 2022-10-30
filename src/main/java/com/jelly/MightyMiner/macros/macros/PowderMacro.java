@@ -12,7 +12,6 @@ import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;

@@ -1,16 +1,15 @@
 package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.events.ReceivePacketEvent;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.*;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.DrawUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
+import com.jelly.MightyMiner.utils.SkyblockInfo;
 import com.jelly.MightyMiner.utils.UngrabUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.Packet;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.*;
@@ -54,7 +53,7 @@ public class MacroHandler {
         if(mc.theWorld == null || mc.thePlayer == null)
             return;
 
-        if(MightyMiner.coordsConfig.getSelectedRoute().valueList() != null)
+        if(SkyblockInfo.onCrystalHollows() && MightyMiner.coordsConfig.getSelectedRoute().valueList() != null)
             drawRoutes(MightyMiner.coordsConfig.getSelectedRoute().valueList(), event);
 
         if (!enabled)

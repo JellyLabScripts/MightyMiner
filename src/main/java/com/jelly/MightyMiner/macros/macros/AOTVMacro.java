@@ -10,21 +10,14 @@ import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class AOTVMacro extends Macro {
     AutoMineBaritone baritone;
@@ -44,6 +37,7 @@ public class AOTVMacro extends Macro {
     BlockPos targetCoordinate;
     int targetCoordIndex;
     int rightClickCD;
+    int ticksStuck = 0;
     boolean rotationFlag;
     Rotation rotation = new Rotation();
 
@@ -94,9 +88,17 @@ public class AOTVMacro extends Macro {
                 if(rotationFlag)
                     rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  300);
 
-
-                if(rightClickCD == -1)
+                if(rightClickCD == -1) {
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
+                    if (ticksStuck++ >= 20) {
+                        if(!(BlockUtils.getPlayerLoc().down().equals(targetCoordinate))) {
+                            LogUtils.addMessage("I'm stuck, trying to teleport again.");
+                            rightClickCD = 15;
+                            ticksStuck = 0;
+                            return;
+                        }
+                    }
+                }
                 else if(!rotation.rotating && rightClickCD == 2) {
                     rotationFlag = false;
                     rotation.reset();
@@ -141,7 +143,8 @@ public class AOTVMacro extends Macro {
             case NONE:
                 currentState = State.Teleporting;
                 rotationFlag = true;
-                rightClickCD = 10;
+                rightClickCD = 15;
+                ticksStuck = 0;
                 LogUtils.debugLog("Going to coordinates " + targetCoordinate.getX() + " " + targetCoordinate.getY() + " " + targetCoordinate.getZ());
                 return;
             case Teleporting:

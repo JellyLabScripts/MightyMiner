@@ -25,27 +25,25 @@ public class MacroHandler {
     public static Minecraft mc = Minecraft.getMinecraft();
 
     public static boolean pickaxeSkillReady = true;
-
     static boolean enabled = false;
+    
     static BlockRenderer blockRenderer = new BlockRenderer();
 
     public static void initializeMacro(){
-       macros.add(new GemstoneMacro());
-       macros.add(new PowderMacro());
-       macros.add(new MithrilMacro());
+        macros.add(new GemstoneMacro());
+        macros.add(new PowderMacro());
+        macros.add(new MithrilMacro());
         macros.add(new AOTVMacro());
     }
 
     @SubscribeEvent
     public void onTickPlayer(TickEvent.ClientTickEvent tickEvent) {
-
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
 
         for (Macro process : macros) {
-            if (process.isEnabled()) {
+            if (process.isEnabled())
                 process.onTick(tickEvent.phase);
-            }
         }
     }
 
@@ -79,7 +77,6 @@ public class MacroHandler {
         }
     }
 
-
     @SubscribeEvent
     public void onMessageReceived(ClientChatReceivedEvent event) {
         String message = ChatFormatting.stripFormatting(event.message.getUnformattedText());
@@ -93,9 +90,8 @@ public class MacroHandler {
             return;
 
         for (Macro process : macros) {
-            if (process.isEnabled()) {
+            if (process.isEnabled())
                 process.onMessageReceived(event.message.getUnformattedText());
-            }
         }
     }
 
@@ -105,29 +101,26 @@ public class MacroHandler {
             return;
 
         for (Macro process : macros) {
-            if (process.isEnabled()) {
+            if (process.isEnabled())
                 process.onPacketReceived(event.packet);
-            }
         }
     }
-
 
     public static void startScript(Macro macro){
         if(!macro.isEnabled()) {
             LogUtils.addMessage("Enabled script");
             macro.toggle();
             enabled = true;
-            if (MightyMiner.config.mouseUngrab) {
+            if (MightyMiner.config.mouseUngrab)
                 UngrabUtils.ungrabMouse();
-            }
         }
     }
+    
     public static void startScript(int index){
         startScript(macros.get(index));
     }
 
     public static void disableScript() {
-
        boolean flag = false;
        for(Macro macro : macros){
            if(macro.isEnabled()) {
@@ -143,19 +136,12 @@ public class MacroHandler {
        UngrabUtils.regrabMouse();
     }
 
-
     public static void drawRoutes(List<BlockPos> coords, RenderWorldLastEvent event) {
         blockRenderer.renderAABB(event);
-        if (MightyMiner.config.highlightRouteBlocks) {
+        if (MightyMiner.config.highlightRouteBlocks)
             coords.forEach(coord -> blockRenderer.renderAABB(coord, MightyMiner.config.routeBlocksColor));
-        }
 
-        if (MightyMiner.config.showRouteLines) {
+        if (MightyMiner.config.showRouteLines)
             DrawUtils.drawCoordsRoute(coords, event);
-        }
     }
-
-
-
-
 }

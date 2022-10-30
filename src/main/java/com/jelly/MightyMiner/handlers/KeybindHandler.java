@@ -7,6 +7,7 @@ import com.jelly.MightyMiner.utils.ReflectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -80,7 +81,7 @@ public class KeybindHandler {
             MacroHandler.disableScript();
         }
         if(macroKeybinds[2].isKeyDown()){
-            System.out.println(mc.objectMouseOver.getBlockPos());
+
         }
         if(macroKeybinds[3].isKeyDown()){
             mc.displayGuiScreen(MightyMiner.config.gui());

@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -96,11 +97,13 @@ public class AOTVMacro extends Macro {
 
                 if(rightClickCD == -1)
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
-                else if(!rotation.rotating && rightClickCD < 2) {
+                else if(!rotation.rotating && rightClickCD == 2) {
                     rotationFlag = false;
                     rotation.reset();
 
-                    if(mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && !mc.objectMouseOver.getBlockPos().equals(targetCoordinate)){
+                    MovingObjectPosition rayTraceResult = mc.thePlayer.rayTrace(200, 1);
+
+                    if(rayTraceResult != null && rayTraceResult.getBlockPos() != null && !rayTraceResult.getBlockPos().equals(targetCoordinate)) {
                         LogUtils.addMessage("The path is not cleared or it is set up wrongly, please clear it up before using the script! " + mc.objectMouseOver.getBlockPos() + " " + targetCoordinate);
                         MacroHandler.disableScript();
                         return;

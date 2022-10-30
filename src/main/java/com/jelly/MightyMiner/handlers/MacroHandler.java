@@ -9,6 +9,7 @@ import com.jelly.MightyMiner.utils.DrawUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.SkyblockInfo;
 import com.jelly.MightyMiner.utils.UngrabUtils;
+import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
@@ -89,7 +90,7 @@ public class MacroHandler {
                 process.onMessageReceived(event.message.getUnformattedText());
             }
         }
-        final String message = event.message.getFormattedText();
+
         if (ChatFormatting.stripFormatting(event.message.getUnformattedText()).equals("Mining Speed Boost is now available!") && this.mc.thePlayer.getHeldItem() != null) {
             pickaxeSkillReady = true;
         }

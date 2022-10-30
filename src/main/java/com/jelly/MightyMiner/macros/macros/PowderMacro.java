@@ -56,9 +56,11 @@ public class PowderMacro extends Macro {
     int savedItemIndex;
 
 
+
     int turnState = 0;
     AutoMineBaritone mineBaritone;
     BlockPos chest;
+    BlockPos prevChest;
     BlockPos returnBlockPos;
     BlockPos targetBlockPos;
 
@@ -207,9 +209,29 @@ public class PowderMacro extends Macro {
 
                         if(!mineBaritone.isEnabled() && !BlockUtils.getPlayerLoc().equals(returnBlockPos)) {
                             mineBaritone.goTo(returnBlockPos);
-                        } else if(/*!mineBaritone.isEnabled() && */BlockUtils.getPlayerLoc().equals(returnBlockPos)){
+
+                        } else if(BlockUtils.getPlayerLoc().equals(returnBlockPos)){
                             mineBaritone.disableBaritone();
-                            currentState = treasureCacheState;
+
+                            ArrayList<BlockPos> prevChests = new ArrayList<BlockPos>(){{add(chest);}};
+
+                            if(prevChest != null)
+                                prevChests.add(prevChest);
+
+                            if(!BlockUtils.findBlock(18, prevChests, Blocks.chest, Blocks.trapped_chest).isEmpty()){
+                                prevChest = chest;
+                                chest = BlockUtils.findBlock(18, prevChests, Blocks.chest, Blocks.trapped_chest).get(0);
+
+                                for(BlockPos blockPos : BlockUtils.getRasterizedBlocks(BlockUtils.getPlayerLoc(), chest)){
+                                    if(MathUtils.getDistanceBetweenTwoBlock(chest, blockPos) < 3.5f){
+                                        targetBlockPos = blockPos;
+                                        break;
+                                    }
+                                    treasureState = MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) > 3.5f ? TreasureState.WALKING : TreasureState.SOLVING;
+                                }
+                            } else {
+                                currentState = treasureCacheState;
+                            }
                         }
                         break;
 
@@ -278,7 +300,6 @@ public class PowderMacro extends Macro {
     @Override
     public void onMessageReceived(String message){
         if(message.contains("You have successfully picked the lock on this chest")){
-          //  currentState = treasureCacheState;
             treasureState = TreasureState.RETURNING;
             LogUtils.debugLog("Completed treasure");
         }
@@ -286,6 +307,7 @@ public class PowderMacro extends Macro {
 
             if(currentState != State.TREASURE)
                 treasureCacheState = currentState;
+
             currentState = State.TREASURE;
             treasureState = TreasureState.NONE;
             returnBlockPos = BlockUtils.getPlayerLoc();
@@ -293,6 +315,8 @@ public class PowderMacro extends Macro {
                 try{
                     Thread.sleep(350); // Hypickle lag
                     LogUtils.debugLog("Starting to find chest");
+
+                    prevChest = chest;
                     chest = BlockUtils.findBlock(18, Blocks.chest, Blocks.trapped_chest).get(0);
                     for(int i = 0; i < 5; i++){
                         if(BlockUtils.getRelativeBlockPos(0, 0, i).equals(chest) || BlockUtils.getRelativeBlockPos(0, 1, i).equals(chest)){
@@ -314,6 +338,7 @@ public class PowderMacro extends Macro {
 
             KeybindHandler.resetKeybindState();
             treasureInitialTime = System.currentTimeMillis();
+
         }
     }
 
@@ -333,6 +358,7 @@ public class PowderMacro extends Macro {
         }
     }
 
+
     int getRotAmount(){
         //check blacklisted blocks
         if(!(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(-1, 0, 0))) || !(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(1, 0, 0)))
@@ -345,6 +371,8 @@ public class PowderMacro extends Macro {
             return turnState == 1 ? 90 : -90;
         // both sides can be walked, oscillate between 90 and -90 to increase area mined
     }
+
+
     boolean shouldLookDown(){
         return (AngleUtils.shouldLookAtCenter(BlockUtils.getRelativeBlockPos(0, 0, 1)) && BlockUtils.isPassable(BlockUtils.getRelativeBlock(0, 1, 1)))
         || (AngleUtils.shouldLookAtCenter(BlockUtils.getRelativeBlockPos(0, 0, 0)) && BlockUtils.isPassable(BlockUtils.getRelativeBlock(0, 1, 0)));

@@ -95,6 +95,7 @@ public class AOTVMacro extends Macro {
                             LogUtils.addMessage("I'm stuck, trying to teleport again.");
                             rightClickCD = 15;
                             ticksStuck = 0;
+                            rotationFlag = true;
                             return;
                         }
                     }

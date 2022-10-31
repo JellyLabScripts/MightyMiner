@@ -127,8 +127,8 @@ public class AngleUtils {
             }
 
         }
-        return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) +
-                ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
+        return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX >= 0 && deltaZ <= 0) ? -90 : 0) +
+                ((deltaX < 0 && deltaZ < 0) ? 45 : 0);
     }
     public static float getRequiredPitch(BlockPos blockFrom, BlockPos blockLookingAt) {
         double deltaX = blockLookingAt.getX() - blockFrom.getX();
@@ -231,7 +231,7 @@ public class AngleUtils {
         return  getRequiredYaw(deltaX, deltaZ);
     }
     public static float getRequiredYaw(double deltaX, double deltaZ) {
-        return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) +
+        return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX >= 0 && deltaZ <= 0) ? -180 : 0) +
                 ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
     }
 

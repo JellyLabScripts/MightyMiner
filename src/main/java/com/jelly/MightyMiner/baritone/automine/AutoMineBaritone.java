@@ -101,7 +101,7 @@ public class AutoMineBaritone{
                 blocksToMine = pathFinder.getPath(blockPos);
             } catch (NoPathException e){
                 Logger.playerLog("Error when getting path!: " + e);
-                unregister();
+                disableBaritone(); // Next baritone execution will re-register and re-enable whole mining process, instead of just unregistering
                 return;
             }
 
@@ -145,7 +145,7 @@ public class AutoMineBaritone{
                     blocksToMine = pathFinder.getPath(blockType);
             } catch (NoPathException | NoBlockException e){
                 Logger.playerLog("Error when getting path!: " + e);
-                unregister();
+                disableBaritone(); // Next baritone execution will re-register and re-enable whole mining process, instead of just unregistering
                 return;
             }
             for (BlockNode blockNode : blocksToMine) {
@@ -221,8 +221,8 @@ public class AutoMineBaritone{
             try{
                 blocksToMine = pathFinder.getPath(blockPos, PathMode.GOTO);
             } catch (NoPathException e){
-                Logger.playerLog("Error when getting path: " + e);
-                unregister();
+                Logger.playerLog("Error when getting path!: " + e);
+                disableBaritone(); // Next baritone execution will re-register and re-enable whole mining process, instead of just unregistering
                 return;
             }
 

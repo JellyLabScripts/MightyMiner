@@ -24,7 +24,7 @@ public class PlayerUtils {
                 }
             }
         }
-        return 0;
+        return -1;
     }
 
     public static boolean hasPlayerInsideRadius(int radius){

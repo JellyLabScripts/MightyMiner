@@ -5,6 +5,9 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
+import javax.vecmath.Vector3d;
+import java.util.Vector;
+
 public class MathUtils {
 
 
@@ -37,12 +40,13 @@ public class MathUtils {
 
     public static Vec3 getVectorForRotation(float pitch, float yaw)
     {
-        float f = MathHelper.cos(-yaw * 0.017453292F - (float)Math.PI);
-        float f1 = MathHelper.sin(-yaw * 0.017453292F - (float)Math.PI);
-        float f2 = -MathHelper.cos(-pitch * 0.017453292F);
-        float f3 = MathHelper.sin(-pitch * 0.017453292F);
+        float f = MathHelper.cos((float) (-yaw * Math.PI/180f - Math.PI));
+        float f1 = MathHelper.sin((float) (-yaw * Math.PI/180f - Math.PI));
+        float f2 = -MathHelper.cos((float) (-pitch * Math.PI/180f));
+        float f3 = MathHelper.sin((float) (-pitch * Math.PI/180f));
         return new Vec3((double)(f1 * f2), (double)f3, (double)(f * f2));
     }
+
 
 
 

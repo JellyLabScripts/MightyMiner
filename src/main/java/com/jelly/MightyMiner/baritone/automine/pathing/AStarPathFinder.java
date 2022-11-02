@@ -10,12 +10,10 @@ import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.baritone.automine.structures.GridEnvironment;
 import com.jelly.MightyMiner.baritone.automine.structures.Node;
-import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -24,9 +22,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
-import org.apache.logging.log4j.core.pattern.AbstractStyleNameConverter;
 
 public class AStarPathFinder {
     Minecraft mc = Minecraft.getMinecraft();
@@ -139,7 +135,9 @@ public class AStarPathFinder {
         if(foundBlocks.isEmpty()) throw new NoBlockException();
 
         LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
+
         for(BlockPos blockPos : foundBlocks){
+
             if (BlockUtils.canSeeBlock(blockPos) && BlockUtils.canReachBlock(blockPos))
                 possiblePaths.add(new LinkedList<BlockNode>() {
                     {

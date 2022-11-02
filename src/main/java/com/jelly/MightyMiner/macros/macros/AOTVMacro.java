@@ -97,7 +97,7 @@ public class AOTVMacro extends Macro {
 
                 if(rightClickCD == -1)
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
-                else if(!rotation.rotating && rightClickCD == 2) {
+                else if(!rotation.rotating && rightClickCD == 1) {
                     rotationFlag = false;
                     rotation.reset();
 
@@ -109,6 +109,7 @@ public class AOTVMacro extends Macro {
                         return;
                     }
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void");
+                    LogUtils.debugLog("Right clicked");
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
                 }
 

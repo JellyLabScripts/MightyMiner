@@ -47,6 +47,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
+        MinecraftForge.EVENT_BUS.register(new StaticBlockRenderer());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 

@@ -119,6 +119,9 @@ public class AutoMineBaritone{
 
 
     public void mineFor(Block... blockType) {
+
+
+
         targetBlockType = blockType;
         shouldGoToFinalBlock = false;
         enable();
@@ -249,6 +252,7 @@ public class AutoMineBaritone{
     public void disableBaritone() {
         Logger.log("Baritone completed");
         enabled = false;
+
         pauseBaritone();
         unregister();
     }

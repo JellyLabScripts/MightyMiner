@@ -244,11 +244,13 @@ public class BlockUtils {
     public static boolean canSeeBlock(BlockPos blockChecked) {
 
         Vec3 vec3 = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + (double) mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
+        //get required yaw have problems
         Vec3 vec31 = MathUtils.getVectorForRotation(AngleUtils.getRequiredPitch(blockChecked), AngleUtils.getRequiredYaw(blockChecked));
         Vec3 vec32 = vec3.addVector(vec31.xCoord * 4.5f, vec31.yCoord * 4.5f, vec31.zCoord * 4.5f);
         MovingObjectPosition objectPosition = mc.theWorld.rayTraceBlocks(vec3, vec32, false, false, true);
         return objectPosition.getBlockPos().equals(blockChecked);
     }
+
 
 
     public static boolean canReachBlock(BlockPos blockChecked) {

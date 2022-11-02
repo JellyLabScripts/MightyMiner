@@ -81,6 +81,7 @@ public class KeybindHandler {
             MacroHandler.disableScript();
         }
         if(macroKeybinds[2].isKeyDown()){
+            mc.thePlayer.rotationYaw = 180;
 
         }
         if(macroKeybinds[3].isKeyDown()){

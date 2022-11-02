@@ -76,6 +76,7 @@ public class AngleUtils {
         return lookAtCenterBlocks.contains(block);
     }
 
+
     public static float getRequiredYaw(BlockPos blockLookingAt) {
 
         double deltaX = blockLookingAt.getX() - mc.thePlayer.posX + 0.5d;
@@ -167,6 +168,7 @@ public class AngleUtils {
         }
         return  (float) pitch;
     }
+
 
 
 

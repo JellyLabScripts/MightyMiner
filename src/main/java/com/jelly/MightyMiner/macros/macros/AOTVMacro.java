@@ -44,6 +44,7 @@ public class AOTVMacro extends Macro {
     BlockPos targetCoordinate;
     int targetCoordIndex;
     int rightClickCD;
+    int ticksStuck = 0;
     boolean rotationFlag;
     Rotation rotation = new Rotation();
 
@@ -95,9 +96,19 @@ public class AOTVMacro extends Macro {
                     rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  300);
 
 
-                if(rightClickCD == -1)
+                if(rightClickCD == -1) {
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
-                else if(!rotation.rotating && rightClickCD == 1) {
+                    if (ticksStuck++ >= 20) {
+                        if(!(BlockUtils.getPlayerLoc().down().equals(targetCoordinate))) {
+                            LogUtils.addMessage("I'm stuck, trying to teleport again.");
+                            rightClickCD = 15;
+                            ticksStuck = 0;
+                            rotationFlag = true;
+                            return;
+                        }
+                    }
+                }
+                else if(!rotation.rotating && rightClickCD == 2) {
                     rotationFlag = false;
                     rotation.reset();
 
@@ -109,7 +120,6 @@ public class AOTVMacro extends Macro {
                         return;
                     }
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void");
-                    LogUtils.debugLog("Right clicked");
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
                 }
 
@@ -143,6 +153,7 @@ public class AOTVMacro extends Macro {
                 currentState = State.Teleporting;
                 rotationFlag = true;
                 rightClickCD = 10;
+                ticksStuck = 0;
                 LogUtils.debugLog("Going to coordinates " + targetCoordinate.getX() + " " + targetCoordinate.getY() + " " + targetCoordinate.getZ());
                 return;
             case Teleporting:

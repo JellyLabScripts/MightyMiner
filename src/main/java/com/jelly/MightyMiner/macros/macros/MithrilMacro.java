@@ -3,16 +3,14 @@ package com.jelly.MightyMiner.macros.macros;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
-import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
+import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
-import com.jelly.MightyMiner.utils.UngrabUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -85,8 +83,8 @@ public class MithrilMacro extends Macro {
         KeybindHandler.resetKeybindState();
     }
 
-    private MineBehaviour getMineBehaviour(){
-        return new MineBehaviour(
+    private BaritoneConfig getMineBehaviour(){
+        return new BaritoneConfig(
                 AutoMineType.STATIC,
                 MightyMiner.config.mithShiftWhenMine,
                 true,

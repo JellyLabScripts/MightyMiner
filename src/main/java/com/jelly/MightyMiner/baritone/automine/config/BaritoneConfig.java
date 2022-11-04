@@ -7,7 +7,7 @@ import net.minecraft.block.Block;
 import java.util.List;
 
 @AllArgsConstructor
-public class MineBehaviour {
+public class BaritoneConfig {
     @Getter
     AutoMineType mineType;
     @Getter

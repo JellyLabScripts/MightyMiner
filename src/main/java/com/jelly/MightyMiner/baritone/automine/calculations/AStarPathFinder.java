@@ -1,15 +1,12 @@
-package com.jelly.MightyMiner.baritone.automine.pathing;
+package com.jelly.MightyMiner.baritone.automine.calculations;
 
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.movement.Moves;
-import com.jelly.MightyMiner.baritone.automine.pathing.config.PathBehaviour;
-import com.jelly.MightyMiner.baritone.automine.pathing.config.PathMode;
-import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoBlockException;
-import com.jelly.MightyMiner.baritone.automine.pathing.exceptions.NoPathException;
-import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
-import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
-import com.jelly.MightyMiner.baritone.automine.structures.GridEnvironment;
-import com.jelly.MightyMiner.baritone.automine.structures.Node;
+import com.jelly.MightyMiner.baritone.automine.calculations.config.PathBehaviour;
+import com.jelly.MightyMiner.baritone.automine.calculations.config.PathMode;
+import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoBlockException;
+import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
+import com.jelly.MightyMiner.baritone.automine.structures.*;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
@@ -55,7 +52,7 @@ public class AStarPathFinder {
         blackListedPos.remove(blockPos);
     }
 
-    public LinkedList<BlockNode> getPathWithPreference(Block... blockType) throws NoBlockException, NoPathException {
+    public Path getPathWithPreference(Block... blockType) throws NoBlockException, NoPathException {
 
         if(pathBehaviour.isStaticMode()){
             return calculateStaticPath(true, blockType);
@@ -75,14 +72,14 @@ public class AStarPathFinder {
             }
             if (!possiblePaths.isEmpty()) {
                 possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
-                return possiblePaths.getFirst();
+                return new Path(possiblePaths.getFirst(), mode);
             }
         }
 
         throw new NoPathException();
     }
 
-    public LinkedList<BlockNode> getPath(PathMode mode, Block... blockType) throws NoBlockException, NoPathException {
+    public Path getPath(PathMode mode, Block... blockType) throws NoBlockException, NoPathException {
         if(pathBehaviour.isStaticMode()){
             return calculateStaticPath(false, blockType);
         }
@@ -107,28 +104,28 @@ public class AStarPathFinder {
 
         Logger.playerLog("Total time | Time per path : " + (System.currentTimeMillis() - pastTime) + " ms | " + ((System.currentTimeMillis() - pastTime) * 1.0D / possiblePaths.size()) + " ms");
         possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
-        return possiblePaths.getFirst();
+        return new Path(possiblePaths.getFirst(), mode);
     }
 
-    public LinkedList<BlockNode> getPath(Block... blockType) throws NoBlockException, NoPathException {
+    public Path getPath(Block... blockType) throws NoBlockException, NoPathException {
         return getPath(PathMode.MINE, blockType);
     }
 
-    public LinkedList<BlockNode> getPath(BlockPos blockPos, PathMode mode) throws NoPathException {
+    public Path getPath(BlockPos blockPos, PathMode mode) throws NoPathException {
         this.mode = mode;
 
         LinkedList<BlockNode> path = calculatePath(BlockUtils.getPlayerLoc(), blockPos);
         if (path.isEmpty())
             throw new NoPathException();
-        return path;
+        return new Path(path, mode);
     }
-    public LinkedList<BlockNode> getPath(BlockPos blockPos) throws NoPathException {
+    public Path getPath(BlockPos blockPos) throws NoPathException {
         return getPath(blockPos, PathMode.MINE);
     }
 
 
 
-    private LinkedList<BlockNode> calculateStaticPath(boolean withPreference, Block... blockType) throws NoPathException, NoBlockException{
+    private Path calculateStaticPath(boolean withPreference, Block... blockType) throws NoPathException, NoBlockException{
         List<BlockPos> foundBlocks = withPreference ?
                 BlockUtils.findBlockWithPreference(10, blackListedPos, blockType) : BlockUtils.findBlock(10, blackListedPos, blockType);
 
@@ -149,7 +146,8 @@ public class AStarPathFinder {
         if (possiblePaths.isEmpty())
             throw new NoPathException();
         possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
-        return possiblePaths.getFirst();
+
+        return new Path(possiblePaths.getFirst(), mode);
 
 
     }

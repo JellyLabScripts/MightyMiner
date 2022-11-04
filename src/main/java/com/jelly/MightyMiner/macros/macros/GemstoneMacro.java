@@ -3,7 +3,7 @@ package com.jelly.MightyMiner.macros.macros;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
-import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
+import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
@@ -13,7 +13,6 @@ import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
@@ -128,8 +127,8 @@ public class GemstoneMacro extends Macro {
         }
     }
 
-    private MineBehaviour getMineBehaviour(){
-        return new MineBehaviour(
+    private BaritoneConfig getMineBehaviour(){
+        return new BaritoneConfig(
                 AutoMineType.DYNAMIC,
                 false,
                 true,

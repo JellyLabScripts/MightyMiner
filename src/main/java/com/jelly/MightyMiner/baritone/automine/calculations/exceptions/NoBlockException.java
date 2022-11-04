@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.baritone.automine.pathing.exceptions;
+package com.jelly.MightyMiner.baritone.automine.calculations.exceptions;
 
 public class NoBlockException extends Exception{
     public NoBlockException(){}

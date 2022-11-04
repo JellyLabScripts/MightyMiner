@@ -1,10 +1,8 @@
-package com.jelly.MightyMiner.baritone.automine.pathing.config;
+package com.jelly.MightyMiner.baritone.automine.calculations.config;
 
-import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.minecraft.block.Block;
-import net.minecraft.util.BlockPos;
 
 import java.util.List;
 

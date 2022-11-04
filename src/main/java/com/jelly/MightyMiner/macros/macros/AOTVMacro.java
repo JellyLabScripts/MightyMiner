@@ -3,28 +3,21 @@ package com.jelly.MightyMiner.macros.macros;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
-import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
+import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class AOTVMacro extends Macro {
     AutoMineBaritone baritone;
@@ -127,10 +120,14 @@ public class AOTVMacro extends Macro {
                 break;
             case Mining:
                 useMiningSpeedBoost();
-                if(!baritone.isEnabled()) {
-                    try {
-                        baritone.mineForInSingleThread(MightyMiner.config.aotvMineGemstonePanes ? glassWithPanes : glassWithoutPanes);
-                    } catch (Exception ignored) {
+
+                switch(baritone.getState()){
+                    case IDLE:
+                        baritone.mineFor(MightyMiner.config.aotvMineGemstonePanes ? glassWithPanes : glassWithoutPanes);
+                        break;
+                    case EXECUTING: case PATH_FINDING:
+                        break;
+                    case FAILED:
                         currentState = State.NONE;
                         baritone.disableBaritone();
                         if(targetCoordIndex < coords.size() - 1) {
@@ -141,7 +138,8 @@ public class AOTVMacro extends Macro {
                             targetCoordinate = coords.get(0);
                             targetCoordIndex = 0;
                         }
-                    }
+                        break;
+
                 }
         }
         updateState();
@@ -183,8 +181,8 @@ public class AOTVMacro extends Macro {
     }
 
 
-    private MineBehaviour getAutoMineConfig(){
-        return new MineBehaviour(
+    private BaritoneConfig getAutoMineConfig(){
+        return new BaritoneConfig(
                 AutoMineType.STATIC,
                 true,
                 false,

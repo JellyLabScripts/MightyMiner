@@ -1,17 +1,6 @@
 package com.jelly.MightyMiner.macros.macros;
 
-import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
-import com.jelly.MightyMiner.baritone.automine.config.MineBehaviour;
 import com.jelly.MightyMiner.macros.Macro;
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-
-import java.util.ArrayList;
 
 public class CommissionMacro extends Macro {
     //AutoMineBaritone mineBaritone;

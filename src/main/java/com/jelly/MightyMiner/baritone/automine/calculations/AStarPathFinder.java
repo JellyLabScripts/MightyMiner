@@ -49,7 +49,7 @@ public class AStarPathFinder {
     public Path getPath(PathMode mode, boolean withPreference, Block... blockType) throws NoBlockException, NoPathException {
         initialize(mode);
 
-        long pastTime = System.currentTimeMillis();
+        long pastTime = System.currentTimeMillis();;
 
         LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
         List<BlockPos> foundBlocks = new ArrayList<>();
@@ -71,7 +71,7 @@ public class AStarPathFinder {
             }
 
         } else { // 1 loop for ALL block types
-            foundBlocks = BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType);;
+            foundBlocks = BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType);
             for (int i = 0; i < Math.min(foundBlocks.size(), 20); i++) {
                 LinkedList<BlockNode> path = pathFinderBehaviour.isStaticMode() ? calculator.calculateStaticPath(foundBlocks.get(i)) : calculator.calculatePath(BlockUtils.getPlayerLoc(), foundBlocks.get(i), pathFinderBehaviour, mode);
                 if (!path.isEmpty())

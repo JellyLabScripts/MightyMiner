@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.baritone.automine.calculations.config;
+package com.jelly.MightyMiner.baritone.automine.calculations.behaviour;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import net.minecraft.block.Block;
 import java.util.List;
 
 @AllArgsConstructor
-public class PathBehaviour{
+public class PathFinderBehaviour {
     @Getter
     List<Block> forbiddenMiningBlocks;
     @Getter

@@ -1,11 +1,11 @@
 package com.jelly.MightyMiner.baritone.automine;
 
-import com.jelly.MightyMiner.baritone.automine.calculations.config.PathMode;
+import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
-import com.jelly.MightyMiner.baritone.automine.config.PathSetting;
+import com.jelly.MightyMiner.baritone.automine.config.PathFindSetting;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
-import com.jelly.MightyMiner.baritone.automine.calculations.config.PathBehaviour;
+import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
 import com.jelly.MightyMiner.baritone.automine.calculations.AStarPathFinder;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoBlockException;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
@@ -32,7 +32,7 @@ public class AutoMineBaritone{
     }
     volatile BaritoneState state = BaritoneState.IDLE;
 
-    PathSetting pathSetting;
+    PathFindSetting pathSetting;
     BaritoneConfig config;
 
 
@@ -58,9 +58,9 @@ public class AutoMineBaritone{
 
     public void mineFor(Block... blockType) {
 
-        Logger.playerLog("Initializing Mining");
+        Logger.playerLog("Starting to Mining");
         registerEvent();
-        pathSetting = new PathSetting(config.isMineWithPreference(), PathMode.MINE);
+        pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.MINE, false);
         path = null;
 
         targetBlockType = blockType;
@@ -69,7 +69,7 @@ public class AutoMineBaritone{
 
     public void goTo(BlockPos blockPos){
         registerEvent();
-        pathSetting = new PathSetting(config.isMineWithPreference(), PathMode.MINE);
+        pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.GOTO, true);
         path = null;
 
         targetBlockPos = blockPos;
@@ -96,35 +96,29 @@ public class AutoMineBaritone{
 
     public void disableBaritone() {
         Logger.playerLog("Baritone completed");
-        KeybindHandler.resetKeybindState();
         executor.disable();
         state = BaritoneState.IDLE;
+        KeybindHandler.resetKeybindState();
         unregister();
     }
 
 
 
 
-    /*private void pauseBaritone() {
-        inAction = false;
-        currentState = PlayerState.NONE;
+    private void failBaritone() {
+        state = BaritoneState.FAILED;
         KeybindHandler.resetKeybindState();
 
-        if(mineBehaviour.isShiftWhenMine())
-            KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
+        if(path != null)
+            pathFinder.addToBlackList(path.getBlocksInPath().getFirst().getBlockPos());
 
-        if(!blocksToMine.isEmpty() && blocksToMine.getLast().getBlockType() == BlockType.MINE)
-            pathFinder.addToBlackList(blocksToMine.getLast().getBlockPos());
-
-        clearBlocksToWalk();
-    }*/
+    }
 
 
     @SubscribeEvent
     public void TickEvent(TickEvent.ClientTickEvent event){
         if(mc.thePlayer == null || mc.theWorld == null || state == BaritoneState.IDLE || state == BaritoneState.FAILED)
             return;
-
 
 
         switch (state){
@@ -135,7 +129,7 @@ public class AutoMineBaritone{
                     disableBaritone();
 
                 if(executor.hasFailed())
-                    state = BaritoneState.FAILED;
+                    failBaritone();
 
                 if(!executor.isExecuting())
                     executor.executePath(path, config);
@@ -146,10 +140,11 @@ public class AutoMineBaritone{
 
     private void startPathFinding(){
         state = BaritoneState.PATH_FINDING;
+        KeybindHandler.resetKeybindState();
+
         new Thread(() -> {
 
-            Logger.playerLog("Started pathfinding");
-            if(config.isMineFloor()) {
+            if(!config.isMineFloor()) {
                 if(playerFloorPos != null)
                     pathFinder.removeFromBlackList(playerFloorPos);
 
@@ -160,13 +155,14 @@ public class AutoMineBaritone{
             try {
                 switch (pathSetting.getPathMode()) {
                     case MINE:
-                        path = pathSetting.isMineWithPreference() ? pathFinder.getPathWithPreference(targetBlockType) : pathFinder.getPath(targetBlockType);
+                        path = pathSetting.isMineWithPreference() ?
+                                (pathFinder.getPathWithPreference(PathMode.MINE, targetBlockType))
+                                :  (pathSetting.isFindWithBlockPos() ? pathFinder.getPath(PathMode.MINE, targetBlockPos) : pathFinder.getPath(PathMode.MINE, targetBlockType));
                         break;
-                    case GOTO:
-                        path = pathFinder.getPath(targetBlockPos, PathMode.GOTO);
+                    case GOTO: // can add more options later
+                        path = pathFinder.getPath(PathMode.GOTO, targetBlockPos);
                         break;
                 }
-                Logger.playerLog("Finished pathfinding");
                 state = BaritoneState.EXECUTING;
 
             }catch (NoBlockException | NoPathException e){
@@ -177,8 +173,8 @@ public class AutoMineBaritone{
     }
 
 
-    private PathBehaviour getPathBehaviour(){
-        return new PathBehaviour(
+    private PathFinderBehaviour getPathBehaviour(){
+        return new PathFinderBehaviour(
                 config.getForbiddenMiningBlocks() == null ? null : config.getForbiddenMiningBlocks(),
                 config.getAllowedMiningBlocks() == null ? null : config.getAllowedMiningBlocks(),
                 config.getMaxY(),

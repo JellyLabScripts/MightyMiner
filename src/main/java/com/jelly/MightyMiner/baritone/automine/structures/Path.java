@@ -1,6 +1,6 @@
 package com.jelly.MightyMiner.baritone.automine.structures;
 
-import com.jelly.MightyMiner.baritone.automine.calculations.config.PathMode;
+import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

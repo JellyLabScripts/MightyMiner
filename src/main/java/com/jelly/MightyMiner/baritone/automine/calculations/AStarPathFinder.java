@@ -2,8 +2,8 @@ package com.jelly.MightyMiner.baritone.automine.calculations;
 
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.movement.Moves;
-import com.jelly.MightyMiner.baritone.automine.calculations.config.PathBehaviour;
-import com.jelly.MightyMiner.baritone.automine.calculations.config.PathMode;
+import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
+import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoBlockException;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.automine.structures.*;
@@ -23,25 +23,24 @@ import net.minecraft.util.BlockPos;
 
 public class AStarPathFinder {
     Minecraft mc = Minecraft.getMinecraft();
-
     GridEnvironment<Node> gridEnvironment = new GridEnvironment<>();
 
-    int step;
+    private final ArrayList<BlockPos> blackListedPos;
 
-    PathBehaviour pathBehaviour;
+    PathFinderBehaviour pathFinderBehaviour;
 
     List<Node> checkedNodes = new ArrayList<>();
-
     PriorityQueue<Node> openNodes;
 
-    private ArrayList<BlockPos> blackListedPos;
-
+    int step;
     PathMode mode = PathMode.MINE;
 
-    public AStarPathFinder(PathBehaviour options) {
+    BlockPos lastTarget;
+
+    public AStarPathFinder(PathFinderBehaviour options) {
         openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));
         blackListedPos = new ArrayList<>();
-        pathBehaviour = options;
+        pathFinderBehaviour = options;
     }
 
     public void addToBlackList(BlockPos... blackListedPos) {
@@ -52,19 +51,20 @@ public class AStarPathFinder {
         blackListedPos.remove(blockPos);
     }
 
-    public Path getPathWithPreference(Block... blockType) throws NoBlockException, NoPathException {
 
-        if(pathBehaviour.isStaticMode()){
+
+    public Path getPathWithPreference(PathMode mode, Block... blockType) throws NoBlockException, NoPathException {
+        initialize(PathMode.MINE);
+
+        if(pathFinderBehaviour.isStaticMode()){
             return calculateStaticPath(true, blockType);
         }
-        this.mode = PathMode.MINE;
-
         LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
-        if (BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType).isEmpty())
+        if (BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType).isEmpty())
             throw new NoBlockException();
 
         for (Block block : blockType) {
-            List<BlockPos> foundBlocks = BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), new Block[] { block });
+            List<BlockPos> foundBlocks = BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), new Block[] { block });
             for (int i = 0; i < Math.min(foundBlocks.size(), 20); i++) {
                 LinkedList<BlockNode> path = calculatePath(BlockUtils.getPlayerLoc(), foundBlocks.get(i));
                 if (!path.isEmpty())
@@ -72,6 +72,7 @@ public class AStarPathFinder {
             }
             if (!possiblePaths.isEmpty()) {
                 possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
+                setLastTarget(possiblePaths.getFirst());
                 return new Path(possiblePaths.getFirst(), mode);
             }
         }
@@ -80,12 +81,13 @@ public class AStarPathFinder {
     }
 
     public Path getPath(PathMode mode, Block... blockType) throws NoBlockException, NoPathException {
-        if(pathBehaviour.isStaticMode()){
+        initialize(mode);
+
+        if(pathFinderBehaviour.isStaticMode()){
             return calculateStaticPath(false, blockType);
         }
-        this.mode = mode;
 
-        List<BlockPos> foundBlocks = BlockUtils.findBlock(pathBehaviour.getSearchRadius() * 2, blackListedPos, pathBehaviour.getMinY(), pathBehaviour.getMaxY(), blockType);
+        List<BlockPos> foundBlocks = BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType);
         Logger.playerLog("Found blocks : " + foundBlocks.size());
         long pastTime = System.currentTimeMillis();
 
@@ -104,23 +106,36 @@ public class AStarPathFinder {
 
         Logger.playerLog("Total time | Time per path : " + (System.currentTimeMillis() - pastTime) + " ms | " + ((System.currentTimeMillis() - pastTime) * 1.0D / possiblePaths.size()) + " ms");
         possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
+        setLastTarget(possiblePaths.getFirst());
         return new Path(possiblePaths.getFirst(), mode);
     }
 
-    public Path getPath(Block... blockType) throws NoBlockException, NoPathException {
-        return getPath(PathMode.MINE, blockType);
-    }
 
-    public Path getPath(BlockPos blockPos, PathMode mode) throws NoPathException {
-        this.mode = mode;
+    public Path getPath(PathMode mode, BlockPos blockPos) throws NoPathException {
+        initialize(mode);
 
         LinkedList<BlockNode> path = calculatePath(BlockUtils.getPlayerLoc(), blockPos);
         if (path.isEmpty())
             throw new NoPathException();
+
+        setLastTarget(path);
         return new Path(path, mode);
     }
-    public Path getPath(BlockPos blockPos) throws NoPathException {
-        return getPath(blockPos, PathMode.MINE);
+
+
+    private void setLastTarget(LinkedList<BlockNode> blockList){
+        removeFromBlackList(lastTarget);
+        this.lastTarget = blockList.getFirst().getBlockPos();
+    }
+
+    private void initialize(PathMode mode){
+        this.addToBlackList(lastTarget);
+
+        Logger.log("-------Blacklisted blocks------");
+        blackListedPos.forEach(System.out::println);
+        Logger.log("-------------");
+
+        this.mode = mode;
     }
 
 
@@ -201,34 +216,34 @@ public class AStarPathFinder {
 
         if (!searchNode.blockPos.equals(endingBlockPos)) {
 
-            if(pathBehaviour.getForbiddenMiningBlocks() != null){
+            if(pathFinderBehaviour.getForbiddenMiningBlocks() != null){
                 switch (move){
                     case ASCEND_EAST: case ASCEND_NORTH: case ASCEND_SOUTH: case ASCEND_WEST:
-                        if(pathBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.blockPos.up(2))))
+                        if(pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.blockPos.up(2))))
                             return;
                         break;
                     case DESCEND_EAST: case DESCEND_NORTH: case DESCEND_SOUTH: case DESCEND_WEST:
-                        if(pathBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up(2))))
+                        if(pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up(2))))
                             return;
                         break;
                 }
-                if(pathBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) || pathBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())))
+                if(pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) || pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())))
                     return;
 
             }
 
-            if(pathBehaviour.getAllowedMiningBlocks() != null){
+            if(pathFinderBehaviour.getAllowedMiningBlocks() != null){
                 switch (move){
                     case ASCEND_EAST: case ASCEND_NORTH: case ASCEND_SOUTH: case ASCEND_WEST:
-                        if(!pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.blockPos.up(2))))
+                        if(!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.blockPos.up(2))))
                             return;
                         break;
                     case DESCEND_EAST: case DESCEND_NORTH: case DESCEND_SOUTH: case DESCEND_WEST:
-                        if(!pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up(2))))
+                        if(!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up(2))))
                             return;
                         break;
                 }
-                if(!pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) || !pathBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())))
+                if(!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) || !pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())))
                     return;
 
             }
@@ -324,7 +339,7 @@ public class AStarPathFinder {
             if ((blocksToMine.getLast()).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1 && (blocksToMine.get(blocksToMine.size() - 2)).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1)
                 blocksToMine.add(new BlockNode(BlockUtils.getPlayerLoc().up(2), getBlockType(BlockUtils.getPlayerLoc().up(2))));
         }
-        Logger.playerLog("Block count : " + blocksToMine.size());
+        Logger.log("Block count : " + blocksToMine.size());
         return blocksToMine;
     }
 

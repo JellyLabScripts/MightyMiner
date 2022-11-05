@@ -68,7 +68,6 @@ public class PathExecutor {
         this.config = config;
 
         minedBlocks.clear();
-        Logger.playerLog("Started executing");
 
         MinecraftForge.EVENT_BUS.register(this);
 
@@ -89,7 +88,6 @@ public class PathExecutor {
     }
 
     public void disable(){
-        Logger.playerLog("Finished executing");
         this.currentState = PlayerState.FINISHED;
         unregister();
     }

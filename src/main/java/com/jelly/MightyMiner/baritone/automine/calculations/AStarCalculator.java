@@ -19,6 +19,7 @@ import java.util.*;
 public class AStarCalculator{
 
 
+
     Minecraft mc = Minecraft.getMinecraft();
     GridEnvironment<Node> gridEnvironment = new GridEnvironment<>();
 

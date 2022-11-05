@@ -33,6 +33,7 @@ public class MithrilMacro extends Macro {
     @Override
     protected void onEnable() {
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");
+
         if(MightyMiner.config.mithPlayerFailsafe) {
             if(PlayerUtils.isNearPlayer(MightyMiner.config.mithPlayerRad)){
                 LogUtils.addMessage("Didnt start macro since therese a player near");
@@ -51,6 +52,7 @@ public class MithrilMacro extends Macro {
 
         if(phase != TickEvent.Phase.START)
             return;
+
         if(MightyMiner.config.mithPlayerFailsafe) {
             if(PlayerUtils.isNearPlayer(MightyMiner.config.mithPlayerRad)){
                 PlayerUtils.warpBackToIsland();
@@ -58,10 +60,13 @@ public class MithrilMacro extends Macro {
             }
         }
 
-        if(MightyMiner.config.mithShiftWhenMine) KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
+        if(MightyMiner.config.mithShiftWhenMine)
+            KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
-        if(!baritone.isEnabled()){
-            baritone.mineFor(priorityBlocks.get(MightyMiner.config.mithPriority1), priorityBlocks.get(MightyMiner.config.mithPriority2), priorityBlocks.get(MightyMiner.config.mithPriority3));
+        switch(baritone.getState()){
+            case IDLE: case FAILED:
+                baritone.mineFor(Blocks.stained_glass_pane, Blocks.stained_glass);
+                break;
         }
 
         useMiningSpeedBoost();

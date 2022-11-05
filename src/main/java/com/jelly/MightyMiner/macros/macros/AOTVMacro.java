@@ -125,8 +125,6 @@ public class AOTVMacro extends Macro {
                     case IDLE:
                         baritone.mineFor(MightyMiner.config.aotvMineGemstonePanes ? glassWithPanes : glassWithoutPanes);
                         break;
-                    case EXECUTING: case PATH_FINDING:
-                        break;
                     case FAILED:
                         currentState = State.NONE;
                         baritone.disableBaritone();
@@ -139,7 +137,6 @@ public class AOTVMacro extends Macro {
                             targetCoordIndex = 0;
                         }
                         break;
-
                 }
         }
         updateState();

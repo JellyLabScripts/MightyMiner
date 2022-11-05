@@ -43,7 +43,6 @@ public class GemstoneMacro extends Macro {
     };
 
     AutoMineBaritone baritone;
-    boolean minedNearbyGemstones;
     boolean haveTreasureChest;
     long treasureInitialTime;
 
@@ -53,7 +52,6 @@ public class GemstoneMacro extends Macro {
     @Override
     public void onEnable() {
         baritone = new AutoMineBaritone(getMineBehaviour());
-        minedNearbyGemstones = false;
     }
 
     @Override
@@ -78,9 +76,17 @@ public class GemstoneMacro extends Macro {
             haveTreasureChest = false;
         }
 
-        if(!baritone.isEnabled() && !minedNearbyGemstones && !haveTreasureChest && PlayerUtils.hasStoppedMoving()){
-            baritone.mineFor(Blocks.stained_glass_pane, Blocks.stained_glass);
 
+        if(!haveTreasureChest) {
+            switch(baritone.getState()){
+                case IDLE:
+                    baritone.mineFor(Blocks.stained_glass_pane, Blocks.stained_glass);
+                    break;
+                case FAILED:
+                    LogUtils.addMessage("Mined all gemstones nearby, disabling script");
+                    MacroHandler.disableScript();
+                    break;
+            }
         }
 
         useMiningSpeedBoost();
@@ -90,10 +96,6 @@ public class GemstoneMacro extends Macro {
     public void onLastRender(RenderWorldLastEvent event) {
         if(rotation.rotating)
             rotation.update();
-    }
-
-    @Override
-    public void onOverlayRenderEvent(RenderGameOverlayEvent event){
     }
 
 

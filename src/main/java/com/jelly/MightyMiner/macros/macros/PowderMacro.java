@@ -196,41 +196,51 @@ public class PowderMacro extends Macro {
                     case WALKING:
                         if(targetBlockPos == null) return;
 
-                        if(!mineBaritone.isEnabled() && !BlockUtils.getPlayerLoc().equals(targetBlockPos)) {
-                            mineBaritone.goTo(targetBlockPos);
-                        } else if(/*!mineBaritone.isEnabled() && */BlockUtils.getPlayerLoc().equals(targetBlockPos)){
-                            mineBaritone.disableBaritone();
-                            treasureState = TreasureState.SOLVING;
+                        switch(mineBaritone.getState()){
+                            case IDLE:
+                                if(BlockUtils.getPlayerLoc().equals(targetBlockPos))
+                                    treasureState = TreasureState.SOLVING;
+                                else
+                                    mineBaritone.goTo(targetBlockPos);
+                                break;
+                            case FAILED:
+                                mineBaritone.goTo(targetBlockPos);
+                                break;
+
                         }
                         break;
                     case RETURNING:
                         if(returnBlockPos == null) return;
 
-                        if(!mineBaritone.isEnabled() && !BlockUtils.getPlayerLoc().equals(returnBlockPos)) {
-                            mineBaritone.goTo(returnBlockPos);
+                        switch(mineBaritone.getState()){
+                            case IDLE:
+                                if(BlockUtils.getPlayerLoc().equals(returnBlockPos)){
+                                    ArrayList<BlockPos> prevChests = new ArrayList<BlockPos>(){{add(chest);}};
 
-                        } else if(BlockUtils.getPlayerLoc().equals(returnBlockPos)){
-                            mineBaritone.disableBaritone();
+                                    if(prevChest != null)
+                                        prevChests.add(prevChest);
 
-                            ArrayList<BlockPos> prevChests = new ArrayList<BlockPos>(){{add(chest);}};
+                                    if(!BlockUtils.findBlock(18, prevChests, Blocks.chest, Blocks.trapped_chest).isEmpty()){
+                                        prevChest = chest;
+                                        chest = BlockUtils.findBlock(18, prevChests, Blocks.chest, Blocks.trapped_chest).get(0);
 
-                            if(prevChest != null)
-                                prevChests.add(prevChest);
-
-                            if(!BlockUtils.findBlock(18, prevChests, Blocks.chest, Blocks.trapped_chest).isEmpty()){
-                                prevChest = chest;
-                                chest = BlockUtils.findBlock(18, prevChests, Blocks.chest, Blocks.trapped_chest).get(0);
-
-                                for(BlockPos blockPos : BlockUtils.getRasterizedBlocks(BlockUtils.getPlayerLoc(), chest)){
-                                    if(MathUtils.getDistanceBetweenTwoBlock(chest, blockPos) < 3.5f){
-                                        targetBlockPos = blockPos;
-                                        break;
+                                        for(BlockPos blockPos : BlockUtils.getRasterizedBlocks(BlockUtils.getPlayerLoc(), chest)){
+                                            if(MathUtils.getDistanceBetweenTwoBlock(chest, blockPos) < 3.5f){
+                                                targetBlockPos = blockPos;
+                                                break;
+                                            }
+                                            treasureState = MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) > 3.5f ? TreasureState.WALKING : TreasureState.SOLVING;
+                                        }
+                                    } else {
+                                        currentState = treasureCacheState;
                                     }
-                                    treasureState = MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), chest) > 3.5f ? TreasureState.WALKING : TreasureState.SOLVING;
-                                }
-                            } else {
-                                currentState = treasureCacheState;
-                            }
+                                } else
+                                    mineBaritone.goTo(returnBlockPos);
+                                break;
+                            case FAILED:
+                                mineBaritone.goTo(returnBlockPos);
+                                break;
+
                         }
                         break;
 

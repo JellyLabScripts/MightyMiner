@@ -1,8 +1,8 @@
 package com.jelly.MightyMiner.baritone.automine.movement;
 
+import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
-import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.baritone.automine.structures.Path;
@@ -21,6 +21,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.awt.*;
 import java.util.LinkedList;
 
 public class PathExecutor {
@@ -47,11 +48,11 @@ public class PathExecutor {
     BaritoneConfig config;
 
 
-    PlayerState currentState = PlayerState.NONE;
+    PlayerState currentState = PlayerState.IDLE;
     boolean shouldGoToFinalBlock;
 
     enum PlayerState {
-        NONE,
+        IDLE,
         WALKING,
         MINING,
         FAILED,
@@ -63,15 +64,33 @@ public class PathExecutor {
 
     public void executePath(Path path, BaritoneConfig config){
 
+        if(path == null || path.getBlocksInPath().isEmpty()){
+            fail();
+            return;
+        }
+
+        shouldGoToFinalBlock = path.getMode() == PathMode.GOTO;
+
         this.path = path;
         this.blocksToMine = path.getBlocksInPath();
         this.config = config;
 
+        currentState = PlayerState.IDLE;
+        stuckTickCount = 0;
+        deltaJumpTick = 0;
+        jumpCooldown = 0;
+        jumpFlag = false;
+
         minedBlocks.clear();
+        blockRenderer.renderMap.clear();
+
+
+        blockRenderer.renderMap.put(path.getBlocksInPath().getFirst().getBlockPos(), Color.RED);
+        for(int i = 1; i < path.getBlocksInPath().size(); i++){
+            blockRenderer.renderMap.put(path.getBlocksInPath().get(i).getBlockPos(), Color.ORANGE);
+        }
 
         MinecraftForge.EVENT_BUS.register(this);
-
-        currentState = PlayerState.NONE;
         updateState();
     }
 
@@ -87,8 +106,17 @@ public class PathExecutor {
         return currentState == PlayerState.FINISHED;
     }
 
+    public void reset(){
+        this.currentState = PlayerState.IDLE;
+        unregister();
+    }
+
     public void disable(){
         this.currentState = PlayerState.FINISHED;
+        unregister();
+    }
+    private void fail(){
+        currentState = PlayerState.FAILED;
         unregister();
     }
     public void unregister(){
@@ -112,8 +140,7 @@ public class PathExecutor {
         } else {
             stuckTickCount++;
             if(stuckTickCount > 20 * config.getRestartTimeThreshold()){
-                currentState = PlayerState.FAILED;
-                unregister();
+                fail();
                 return;
             }
         }
@@ -182,6 +209,7 @@ public class PathExecutor {
             deltaJumpTick--;
     }
 
+
     @SubscribeEvent
     public void onRenderEvent(RenderWorldLastEvent event){
         blockRenderer.renderAABB(event);
@@ -231,7 +259,7 @@ public class PathExecutor {
         }
 
         switch (currentState){
-            case NONE:
+            case IDLE:
                 currentState = blocksToMine.getLast().getBlockType().equals(BlockType.MINE) ? PlayerState.MINING : PlayerState.WALKING;
                 break;
             case WALKING:

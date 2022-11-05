@@ -220,7 +220,10 @@ public class PowderMacro extends Macro {
                                     if(prevChest != null)
                                         prevChests.add(prevChest);
 
+
                                     if(!BlockUtils.findBlock(18, prevChests, Blocks.chest, Blocks.trapped_chest).isEmpty()){
+                                        LogUtils.debugLog("Found another chest");
+
                                         prevChest = chest;
                                         chest = BlockUtils.findBlock(18, prevChests, Blocks.chest, Blocks.trapped_chest).get(0);
 
@@ -234,8 +237,10 @@ public class PowderMacro extends Macro {
                                     } else {
                                         currentState = treasureCacheState;
                                     }
-                                } else
+                                } else {
+                                    LogUtils.debugLog("Going back to original blockPos");
                                     mineBaritone.goTo(returnBlockPos);
+                                }
                                 break;
                             case FAILED:
                                 mineBaritone.goTo(returnBlockPos);

@@ -35,7 +35,6 @@ public class AutoMineBaritone{
     PathFindSetting pathSetting;
     BaritoneConfig config;
 
-
     AStarPathFinder pathFinder;
     PathExecutor executor;
     BlockPos playerFloorPos;
@@ -47,8 +46,6 @@ public class AutoMineBaritone{
 
 
 
-
-
     public AutoMineBaritone(BaritoneConfig config){
         this.config = config;
         executor = new PathExecutor();
@@ -57,8 +54,7 @@ public class AutoMineBaritone{
 
 
     public void mineFor(Block... blockType) {
-
-        Logger.playerLog("Starting to Mining");
+        Logger.playerLog("Starting to mine");
         registerEvent();
         pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.MINE, false);
         path = null;
@@ -83,9 +79,6 @@ public class AutoMineBaritone{
         return state;
     }
 
-    public boolean isEnabled(){
-        return state == BaritoneState.PATH_FINDING || state == BaritoneState.EXECUTING;
-    }
 
     private void registerEvent() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -95,52 +88,67 @@ public class AutoMineBaritone{
     }
 
     public void disableBaritone() {
-        Logger.playerLog("Baritone completed");
-        executor.disable();
+        Logger.playerLog("Disabled baritone");
         state = BaritoneState.IDLE;
-        KeybindHandler.resetKeybindState();
-        unregister();
+        executor.reset();
+        terminate();
     }
 
+    // failed = true -> Will actually terminate whole thing, otherwise just restart and pretend nothing has happened...
+    private void failBaritone(boolean failed) {
 
-
-
-    private void failBaritone() {
-        state = BaritoneState.FAILED;
-        KeybindHandler.resetKeybindState();
-
+        executor.reset();
         if(path != null)
             pathFinder.addToBlackList(path.getBlocksInPath().getFirst().getBlockPos());
 
+        if(failed) {
+            state = BaritoneState.FAILED;
+            terminate();
+        }
+        else
+            startPathFinding();
+
     }
 
+    private void terminate() {
+        unregister();
+        KeybindHandler.resetKeybindState();
+    }
 
+    // logic is bit intricate here, sorry
     @SubscribeEvent
     public void TickEvent(TickEvent.ClientTickEvent event){
         if(mc.thePlayer == null || mc.theWorld == null || state == BaritoneState.IDLE || state == BaritoneState.FAILED)
             return;
 
 
-        switch (state){
+        switch(state){
             case PATH_FINDING:
+                KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());
                 break;
             case EXECUTING:
-                if(executor.hasSuccessfullyFinished())
+                if (executor.hasSuccessfullyFinished()) {
                     disableBaritone();
+                    return;
+                }
 
-                if(executor.hasFailed())
-                    failBaritone();
+                if (executor.hasFailed()) {
+                    failBaritone(false);
+                    return;
+                }
 
-                if(!executor.isExecuting())
+                if (!executor.isExecuting()) {
                     executor.executePath(path, config);
-                break;
+                }
         }
     }
 
 
     private void startPathFinding(){
         state = BaritoneState.PATH_FINDING;
+
         KeybindHandler.resetKeybindState();
+        KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());
 
         new Thread(() -> {
 
@@ -165,7 +173,7 @@ public class AutoMineBaritone{
 
             }catch (NoBlockException | NoPathException e){
                 Logger.playerLog("Pathfind failed: " + e);
-                state = BaritoneState.FAILED;
+                failBaritone(true);
             }
         }).start();
     }

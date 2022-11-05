@@ -155,9 +155,7 @@ public class AutoMineBaritone{
             try {
                 switch (pathSetting.getPathMode()) {
                     case MINE:
-                        path = pathSetting.isMineWithPreference() ?
-                                (pathFinder.getPathWithPreference(PathMode.MINE, targetBlockType))
-                                :  (pathSetting.isFindWithBlockPos() ? pathFinder.getPath(PathMode.MINE, targetBlockPos) : pathFinder.getPath(PathMode.MINE, targetBlockType));
+                        path =  (pathSetting.isFindWithBlockPos() ? pathFinder.getPath(PathMode.MINE, targetBlockPos) : pathFinder.getPath(PathMode.MINE, pathSetting.isMineWithPreference(), targetBlockType));
                         break;
                     case GOTO: // can add more options later
                         path = pathFinder.getPath(PathMode.GOTO, targetBlockPos);

@@ -5,6 +5,7 @@ import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.coords.CoordsConfig;
 import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
 import com.jelly.MightyMiner.features.RGANuker;
+import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.SkyblockInfo;
@@ -43,14 +44,15 @@ public class MightyMiner {
     public void init(FMLInitializationEvent event) {
 
 
+        config = new Config();
+
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
+        MinecraftForge.EVENT_BUS.register(new YogKiller());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
-
-        config = new Config();
 
         ClientCommandHandler.instance.registerCommand(new Route());
 

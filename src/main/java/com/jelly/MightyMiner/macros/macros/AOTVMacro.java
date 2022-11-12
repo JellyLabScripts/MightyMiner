@@ -100,8 +100,7 @@ public class AOTVMacro extends Macro {
                             return;
                         }
                     }
-                }
-                else if(!rotation.rotating && rightClickCD == 2) {
+                } else if(!rotation.rotating && rightClickCD == 2) {
                     rotationFlag = false;
                     rotation.reset();
 

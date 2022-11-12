@@ -338,6 +338,14 @@ public class Config extends Vigilant {
     )
     public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Make glass panes as a full blocks",
+            category = "Core",
+            subcategory = "Additions"
+    )
+    public boolean glassPanesFullBlock = false;
+
    /* @Property(
             type = PropertyType.SWITCH,
             name = "Always show drawings",

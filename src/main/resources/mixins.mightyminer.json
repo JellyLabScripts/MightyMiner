@@ -4,6 +4,7 @@
   "package": "com.jelly.MightyMiner.mixins",
   "refmap": "mixins.mightyminer.refmap.json",
   "mixins": [
+    "client.MixinGlassPane",
     "client.MixinModList",
     "network.MixinNetworkManager"
   ],

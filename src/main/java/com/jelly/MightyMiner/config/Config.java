@@ -26,6 +26,21 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "Auto yog killer", category = "AOTV gemstone macro",
+            subcategory = "Yogs"
+    )
+    public boolean killYogs = true;
+
+    @Property(
+            type = PropertyType.SLIDER,
+            name = "Radius", category = "AOTV gemstone macro",
+            subcategory = "Yogs",
+            max = 50,
+            min = 1
+    )
+    public int yogsRadius = 15;
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Debug mode",
             category = "Core",
             subcategory = "Macro",
@@ -108,7 +123,7 @@ public class Config extends Vigilant {
     public int gemPlayerRad = 10;
 
 
-    
+
 
     @Property(type = PropertyType.SWITCH,
             name = "RGA hardstone aura",

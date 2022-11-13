@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
@@ -66,6 +67,9 @@ public class AOTVMacro extends Macro {
             return;
         }
         targetCoordinate = coords.get(targetCoordIndex);
+        if (MightyMiner.config.killYogs) {
+            YogKiller.enabled = true;
+        }
     }
 
     @Override

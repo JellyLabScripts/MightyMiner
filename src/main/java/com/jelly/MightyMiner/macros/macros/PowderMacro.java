@@ -10,6 +10,7 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
+import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -22,7 +23,9 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 
 public class PowderMacro extends Macro {
@@ -41,7 +44,7 @@ public class PowderMacro extends Macro {
     float playerYaw;
 
     Queue<BlockPos> targetChests = new LinkedList<>();
-    CircularFifoQueue<BlockPos> solvedChests = new CircularFifoQueue<>(3);
+    CircularFifoQueue<BlockPos> solveChests = new CircularFifoQueue<>(3);
 
     BlockPos uTurnCachePos;
 
@@ -57,14 +60,13 @@ public class PowderMacro extends Macro {
     float savedPitch;
     int savedItemIndex;
 
-
-
     int turnState = 0;
     AutoMineBaritone mineBaritone;
     BlockPos currentChest;
-    BlockPos prevChest;
     BlockPos returnBlockPos;
     BlockPos targetBlockPos;
+
+    BlockRenderer renderer = new BlockRenderer();
 
     enum State {
         NORMAL,
@@ -88,7 +90,7 @@ public class PowderMacro extends Macro {
 
         if(MightyMiner.config.powPlayerFailsafe) {
             if (PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)) {
-                LogUtils.addMessage("Not starting, there is a player near");
+                LogUtils.addMessage("Not starting, there is a player nearby");
                 this.toggle();
                 return;
             }
@@ -100,6 +102,7 @@ public class PowderMacro extends Macro {
         RGANuker.enabled = MightyMiner.config.powStoneAura;
 
         currentState = State.NORMAL;
+        treasureState = TreasureState.NONE;
         turnState = 1;
         treasureInitialTime = System.currentTimeMillis();
         playerYaw = AngleUtils.getClosest();
@@ -118,6 +121,10 @@ public class PowderMacro extends Macro {
         blocksAllowedToMine.add(Blocks.prismarine);
         blocksAllowedToMine.add(Blocks.chest);
         blocksAllowedToMine.add(Blocks.trapped_chest);
+
+        targetChests.clear();
+        solveChests.clear();
+        renderer.renderMap.clear();
         
 
         if(MightyMiner.config.powMineGemstone){
@@ -255,8 +262,10 @@ public class PowderMacro extends Macro {
     }
 
     private void updateState(){
+        System.out.println("current state " + currentState + " current treasure state: " + treasureState);
         if(!targetChests.isEmpty())
             currentState = State.TREASURE;
+
 
         switch (currentState) {
             case TREASURE:
@@ -269,7 +278,7 @@ public class PowderMacro extends Macro {
                 switch (treasureState){
                     case NONE:
                         treasureInitialTime = System.currentTimeMillis();
-                        currentChest = targetChests.element();
+                        currentChest = targetChests.poll();
                         for(BlockPos blockPos : BlockUtils.getRasterizedBlocks(BlockUtils.getPlayerLoc(), currentChest)){
                             if(MathUtils.getDistanceBetweenTwoBlock(currentChest, blockPos) < 3.5f){
                                 targetBlockPos = blockPos;
@@ -307,6 +316,11 @@ public class PowderMacro extends Macro {
     @Override
     public void onLastRender(RenderWorldLastEvent event) {
 
+        if(!targetChests.isEmpty())
+            targetChests.forEach(a -> renderer.renderAABB(a, Color.BLUE));
+        if(!solveChests.isEmpty())
+            solveChests.forEach(a -> renderer.renderAABB(a, Color.GREEN));
+
         if(rotation.rotating)
             rotation.update();
     }
@@ -319,7 +333,6 @@ public class PowderMacro extends Macro {
     public void onMessageReceived(String message){
         if(message.contains("You have successfully picked the lock on this chest")){
             treasureState = TreasureState.FINISHED;
-            solvedChests.add(targetChests.poll());
         }
         if(message.contains("You uncovered a treasure chest!")){
             KeybindHandler.resetKeybindState();
@@ -347,10 +360,12 @@ public class PowderMacro extends Macro {
     void addChestToQueue(){
         new Thread(() -> {
             ThreadUtils.sleep(200);
-            BlockPos chest = BlockUtils.findBlock(18, new ArrayList<>(solvedChests), Blocks.chest, Blocks.trapped_chest).get(0);
+            BlockPos chest = BlockUtils.findBlock(18, new ArrayList<>(solveChests), Blocks.chest, Blocks.trapped_chest).get(0);
+            solveChests.add(chest);
 
             Logger.log("Adding chest to queue");
-            if(targetChests.isEmpty()) {
+            if(currentState != State.TREASURE) {
+                treasureCacheState = currentState;
                 returnBlockPos = BlockUtils.getPlayerLoc();
                 for (int i = 0; i < 5; i++) {
                     if (BlockUtils.getRelativeBlockPos(0, 0, i).equals(chest) || BlockUtils.getRelativeBlockPos(0, 1, i).equals(chest)) {

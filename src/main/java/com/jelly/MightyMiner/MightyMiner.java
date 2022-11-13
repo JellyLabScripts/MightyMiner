@@ -11,6 +11,7 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.SkyblockInfo;
 import com.jelly.MightyMiner.waypoints.Waypoint;
+import com.jelly.MightyMiner.waypoints.WaypointHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -51,13 +52,14 @@ public class MightyMiner {
         config = new Config();
 
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
+        MinecraftForge.EVENT_BUS.register(new WaypointHandler());
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
         MinecraftForge.EVENT_BUS.register(new YogKiller());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
-
+        WaypointHandler.setupWaypoints();
         ClientCommandHandler.instance.registerCommand(new Route());
 
 

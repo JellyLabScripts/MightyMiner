@@ -48,14 +48,11 @@ public abstract class Macro {
 
     public void useMiningSpeedBoost() {
         if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
-            int pickSlot = PlayerUtils.getItemInHotbar("Pick", "Gauntlet", "Drill");
-            if (pickSlot == -1) {
-                LogUtils.addMessage("You don't have any mining tool in hotbar to use mining speed boost!");
-                toggle();
-                return;
-            }
-            mc.thePlayer.inventory.currentItem = pickSlot;
-            mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(pickSlot));
+            int slotCache = mc.thePlayer.inventory.currentItem;
+            int targetSlot = MightyMiner.config.blueCheeseOmeletteToggle ? MightyMiner.config.blueCheeseOmeletteSlot : PlayerUtils.getItemInHotbar("Pick", "Gauntlet", "Drill");
+            mc.thePlayer.inventory.currentItem = targetSlot;
+            mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(targetSlot));
+            mc.thePlayer.inventory.currentItem = slotCache;
             MacroHandler.pickaxeSkillReady = false;
         }
     }

@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
@@ -69,11 +70,14 @@ public class GemstoneMacro extends Macro {
     @Override
     public void onEnable() {
         baritone = new AutoMineBaritone(getMineBehaviour());
+
+        YogKiller.enabled = true;
     }
 
     @Override
     public void onDisable() {
         baritone.disableBaritone();
+        YogKiller.enabled = false;
     }
 
     @Override

@@ -101,6 +101,7 @@ public class AngleUtils {
 
         return  getRequiredYaw(deltaX, deltaZ);
     }
+
     public static float getRequiredYaw(double deltaX, double deltaZ) {
         if(deltaX == 0 && deltaZ < 0) // special case
             return -180f;

@@ -5,10 +5,14 @@ import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.coords.CoordsConfig;
 import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
 import com.jelly.MightyMiner.features.FuelFilling;
+import com.jelly.MightyMiner.config.waypoint.WaypointConfig;
 import com.jelly.MightyMiner.features.RGANuker;
+import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.SkyblockInfo;
+import com.jelly.MightyMiner.waypoints.Waypoint;
+import com.jelly.MightyMiner.waypoints.WaypointHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -27,15 +31,18 @@ public class MightyMiner {
 
     public static Config config;
 
+
     public static List<BlockPos> coords = new ArrayList<>();
 
     public static ConfigurationFactory configurationFactory = new ConfigurationFactory();
 
     public static CoordsConfig coordsConfig;
+    public static WaypointConfig waypointConfig;
     //thx pizza for fixing this
     public static void onStartGame(){
         coords.clear();
         coordsConfig = configurationFactory.create(CoordsConfig.class, new File("config/coords.json"));
+        waypointConfig = configurationFactory.create(WaypointConfig.class, new File("config/waypoints.json"));
     }
 
 
@@ -43,7 +50,10 @@ public class MightyMiner {
     public void init(FMLInitializationEvent event) {
 
 
+        config = new Config();
+
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
+        MinecraftForge.EVENT_BUS.register(new WaypointHandler());
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());

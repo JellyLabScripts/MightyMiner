@@ -65,19 +65,11 @@ public class MithrilMacro extends Macro {
 
         switch(baritone.getState()){
             case IDLE: case FAILED:
-                baritone.mineFor(Blocks.stained_glass_pane, Blocks.stained_glass);
+                baritone.mineFor(priorityBlocks.get(MightyMiner.config.mithPriority1), priorityBlocks.get(MightyMiner.config.mithPriority2), priorityBlocks.get(MightyMiner.config.mithPriority3));
                 break;
         }
 
         useMiningSpeedBoost();
-    }
-
-    @Override
-    public void onLastRender(RenderWorldLastEvent event) {
-    }
-
-    @Override
-    public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
     }
 
 

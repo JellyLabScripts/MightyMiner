@@ -20,25 +20,40 @@ public class Config extends Vigilant {
     @Property(
                 type = PropertyType.SWITCH,
                 name = "Use mining speed boost", category = "Core",
-                subcategory = "Macro"
+                subcategory = "Mining"
     )
     public boolean useMiningSpeedBoost = true;
 
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto yog killer", category = "AOTV gemstone macro",
-            subcategory = "Yogs"
-    )
-    public boolean killYogs = true;
 
     @Property(
-            type = PropertyType.SLIDER,
-            name = "Radius", category = "AOTV gemstone macro",
-            subcategory = "Yogs",
-            max = 50,
-            min = 1
+            type = PropertyType.SWITCH,
+            name = "Make glass panes as a full blocks",
+            category = "Core",
+            subcategory = "Mining"
     )
-    public int yogsRadius = 15;
+    public boolean glassPanesFullBlock = false;
+
+
+    @Property(
+            type = PropertyType.NUMBER,
+            name = "Blue cheese omelette pickaxe slot",
+            description = "Note that the first slot is 0",
+            category = "Core",
+            subcategory = "Mining",
+            max = 7
+    )
+    public int blueCheeseOmeletteSlot = 7;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Blue cheese omelette pickaxe switch",
+            description = "automatically switches to the pickaxe with blue cheese omelette when using mining speed boost",
+            category = "Core",
+            subcategory = "Mining"
+    )
+    public boolean blueCheeseOmeletteToggle = false;
+
+
     @Property(
             type = PropertyType.SWITCH,
             name = "Debug mode",
@@ -312,6 +327,25 @@ public class Config extends Vigilant {
     )
     public int aotvRestartTimeThreshold = 5;
 
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto yog killer",
+            category = "AOTV gemstone macro",
+            subcategory = "Yogs"
+    )
+    public boolean killYogs = true;
+
+    @Property(
+            type = PropertyType.SLIDER,
+            name = "Radius",
+            category = "AOTV gemstone macro",
+            subcategory = "Yogs",
+            max = 50,
+            min = 1
+    )
+    public int yogsRadius = 15;
+
     @Property(
             type = PropertyType.SWITCH,
             name = "Mine gemstone panes",
@@ -353,13 +387,6 @@ public class Config extends Vigilant {
     )
     public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
 
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Make glass panes as a full blocks",
-            category = "Core",
-            subcategory = "Additions"
-    )
-    public boolean glassPanesFullBlock = false;
 
    /* @Property(
             type = PropertyType.SWITCH,
@@ -381,6 +408,8 @@ public class Config extends Vigilant {
         this.initialize();
         this.markDirty();
         this.preload();
+
+
         this.addDependency("gemPlayerRad", "gemPlayerFailsafe");
         this.addDependency("powPlayerRad", "powPlayerFailsafe");
         this.addDependency("mithPlayerRad", "mithPlayerFailsafe");

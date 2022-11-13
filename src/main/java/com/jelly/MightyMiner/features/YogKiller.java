@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.inventory.Slot;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.PlayerUseItemEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -52,5 +53,11 @@ public class YogKiller {
 
         }
 
+    }
+
+    @SubscribeEvent
+    public void onLastRender(RenderWorldLastEvent event){
+        if(rotation.rotating)
+            rotation.update();
     }
 }

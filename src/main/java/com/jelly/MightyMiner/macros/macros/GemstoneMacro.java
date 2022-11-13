@@ -60,6 +60,7 @@ public class GemstoneMacro extends Macro {
     @Override
     public void onDisable() {
         baritone.disableBaritone();
+        YogKiller.enabled = false;
     }
 
     @Override

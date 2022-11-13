@@ -24,6 +24,9 @@ public class YogKiller {
 
     private final Rotation rotation = new Rotation();
 
+    private final String[] items = new String[]{"Juju"};
+
+
     // doesnt work idk why i gtg
     // NEED FIX someone help pls 
     @SubscribeEvent
@@ -34,6 +37,8 @@ public class YogKiller {
 
         if (!PlayerUtils.hasYogInRadius(MightyMiner.config.yogsRadius)) return;
 
+
+
         for (Entity entity : mc.theWorld.loadedEntityList) {
             if (!(entity instanceof EntityMagmaCube)) continue;
             float cacheYaw = mc.thePlayer.rotationYaw;
@@ -42,12 +47,12 @@ public class YogKiller {
             rotation.intLockAngle(
                     AngleUtils.getRequiredYaw(entity.posX - mc.thePlayer.posX, entity.posZ - mc.thePlayer.posZ),
                     AngleUtils.getRequiredPitch(entity.posX - mc.thePlayer.posX, entity.posY - (mc.thePlayer.posY + 1.62D), entity.posZ - mc.thePlayer.posZ),
-                    100);
+                    250);
             int slot = mc.thePlayer.inventory.currentItem;
-            mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Juju", "Terminator", "Bow");
+            mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Bow");
             KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
             LogUtils.debugLog("Clicked :)");
-            rotation.intLockAngle(cacheYaw, cachePitch, 100);
+            rotation.intLockAngle(cacheYaw, cachePitch, 250);
             mc.thePlayer.inventory.currentItem = slot;
             LogUtils.debugLog("Yog should be killed.");
 
@@ -57,6 +62,7 @@ public class YogKiller {
 
     @SubscribeEvent
     public void onLastRender(RenderWorldLastEvent event){
+        if (!enabled) return;
         if(rotation.rotating)
             rotation.update();
     }

@@ -178,6 +178,7 @@ public class AOTVMacro extends Macro {
     protected void onDisable() {
         baritone.disableBaritone();
         KeybindHandler.resetKeybindState();
+        YogKiller.enabled = false;
     }
 
 

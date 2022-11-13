@@ -4,11 +4,13 @@ import com.jelly.MightyMiner.command.Route;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.coords.CoordsConfig;
 import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
+import com.jelly.MightyMiner.config.waypoint.WaypointConfig;
 import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.SkyblockInfo;
+import com.jelly.MightyMiner.waypoints.Waypoint;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -33,10 +35,12 @@ public class MightyMiner {
     public static ConfigurationFactory configurationFactory = new ConfigurationFactory();
 
     public static CoordsConfig coordsConfig;
+    public static WaypointConfig waypointConfig;
     //thx pizza for fixing this
     public static void onStartGame(){
         coords.clear();
         coordsConfig = configurationFactory.create(CoordsConfig.class, new File("config/coords.json"));
+        waypointConfig = configurationFactory.create(WaypointConfig.class, new File("config/waypoints.json"));
     }
 
 

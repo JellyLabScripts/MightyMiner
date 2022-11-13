@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.Rotation;
+import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
@@ -34,15 +35,18 @@ public class YogKiller {
 
         for (Entity entity : mc.theWorld.loadedEntityList) {
             if (!(entity instanceof EntityMagmaCube)) continue;
-            float yaw = mc.thePlayer.rotationYaw;
-            float pitch = mc.thePlayer.rotationPitch;
+            float cacheYaw = mc.thePlayer.rotationYaw;
+            float cachePitch = mc.thePlayer.rotationPitch;
 
-            rotation.intLockAngle(entity.rotationYaw, entity.rotationPitch, 350);
+            rotation.intLockAngle(
+                    AngleUtils.getRequiredYaw(entity.posX - mc.thePlayer.posX, entity.posZ - mc.thePlayer.posZ),
+                    AngleUtils.getRequiredPitch(entity.posX - mc.thePlayer.posX, entity.posY - (mc.thePlayer.posY + 1.62D), entity.posZ - mc.thePlayer.posZ),
+                    100);
             int slot = mc.thePlayer.inventory.currentItem;
             mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Juju", "Terminator", "Bow");
             KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
             LogUtils.debugLog("Clicked :)");
-            rotation.intLockAngle(yaw, pitch, 350);
+            rotation.intLockAngle(cacheYaw, cachePitch, 100);
             mc.thePlayer.inventory.currentItem = slot;
             LogUtils.debugLog("Yog should be killed.");
 

@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.command.Route;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.coords.CoordsConfig;
 import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
+import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
@@ -26,7 +27,6 @@ public class MightyMiner {
 
     public static Config config;
 
-
     public static List<BlockPos> coords = new ArrayList<>();
 
     public static ConfigurationFactory configurationFactory = new ConfigurationFactory();
@@ -47,6 +47,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
+        MinecraftForge.EVENT_BUS.register(new FuelFilling());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 

@@ -65,6 +65,7 @@ public class PowderMacro extends Macro {
 
     enum State {
         NORMAL,
+        PAUSED,
         TREASURE,
         UTurn
     }
@@ -75,6 +76,26 @@ public class PowderMacro extends Macro {
         SOLVING,
         RETURNING
 
+    }
+
+    State prePauseState;
+
+
+    @Override
+    public boolean isPaused() {
+        return currentState == State.PAUSED;
+    }
+
+    @Override
+    public void Pause() {
+        prePauseState = currentState;
+        currentState = State.PAUSED;
+    }
+
+    @Override
+    public void Unpause() {
+        currentState = prePauseState;
+        prePauseState = null;
     }
 
 

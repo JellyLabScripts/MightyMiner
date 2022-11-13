@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.config.Config;
+import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.ReflectionUtils;
 import net.minecraft.client.Minecraft;

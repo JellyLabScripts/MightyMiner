@@ -24,6 +24,7 @@ public class AOTVMacro extends Macro {
 
     enum State{
         NONE,
+        PAUSED,
         Teleporting,
         Mining
     }
@@ -44,7 +45,25 @@ public class AOTVMacro extends Macro {
     List<BlockPos> coords;
 
 
+    State prePauseState;
 
+
+    @Override
+    public boolean isPaused() {
+        return currentState == State.PAUSED;
+    }
+
+    @Override
+    public void Pause() {
+        prePauseState = currentState;
+        currentState = State.PAUSED;
+    }
+
+    @Override
+    public void Unpause() {
+        currentState = prePauseState;
+        prePauseState = null;
+    }
 
     @Override
     protected void onEnable() {

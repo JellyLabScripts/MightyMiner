@@ -346,6 +346,45 @@ public class Config extends Vigilant {
     )
     public boolean glassPanesFullBlock = false;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Refuel with abiphone",
+            category = "Core",
+            subcategory = "Additions"
+    )
+    public boolean refuelWithAbiphone = false;
+
+    @Property(
+            type = PropertyType.NUMBER,
+            name = "Refuel if less than",
+            category = "Core",
+            subcategory = "Additions",
+            min = 0,
+            max = 1000,
+            increment = 50
+    )
+    public int refuelThreshold = 200;
+
+    @Property(
+            type = PropertyType.NUMBER,
+            name = "Index of the drill to refill the fuel",
+            description = "Slot index counting from 0, which means first slot",
+            category = "Core",
+            subcategory = "Additions",
+            min = 0,
+            max = 8
+    )
+    public int drillSlotIndex = 0;
+
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Type of fuel to use",
+            category = "Core",
+            subcategory = "Additions",
+            options = {"Goblin Egg", "Biofuel", "Volta", "Oil Barrel"}
+    )
+    public int typeOfFuelIndex = 0;
+
    /* @Property(
             type = PropertyType.SWITCH,
             name = "Always show drawings",
@@ -373,5 +412,8 @@ public class Config extends Vigilant {
         this.addDependency("powAuraType", "powStoneAura");
         this.addDependency("routeLineColor", "showRouteLines");
         this.addDependency("routeBlocksColor", "highlightRouteBlocks");
+        this.addDependency("refuelThreshold", "refuelWithAbiphone");
+        this.addDependency("drillSlotIndex", "refuelWithAbiphone");
+        this.addDependency("typeOfFuelIndex", "refuelWithAbiphone");
     }
 }

@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.command.Route;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.coords.CoordsConfig;
 import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
+import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.config.waypoint.WaypointConfig;
 import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.features.YogKiller;
@@ -56,10 +57,12 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
-        MinecraftForge.EVENT_BUS.register(new YogKiller());
+        MinecraftForge.EVENT_BUS.register(new FuelFilling());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
-        WaypointHandler.setupWaypoints();
+
+        config = new Config();
+
         ClientCommandHandler.instance.registerCommand(new Route());
 
 

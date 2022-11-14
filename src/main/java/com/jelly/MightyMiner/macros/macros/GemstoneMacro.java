@@ -50,6 +50,23 @@ public class GemstoneMacro extends Macro {
     Rotation rotation = new Rotation();
 
 
+
+    @Override
+    public boolean isPaused() {
+        return !enabled;
+    }
+
+    @Override
+    public void Pause() {
+        toggle();
+    }
+
+    @Override
+    public void Unpause() {
+        toggle();
+    }
+
+
     @Override
     public void onEnable() {
         baritone = new AutoMineBaritone(getMineBehaviour());

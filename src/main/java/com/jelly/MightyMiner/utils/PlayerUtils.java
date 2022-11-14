@@ -5,8 +5,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerUtils {
 
@@ -26,6 +30,15 @@ public class PlayerUtils {
             }
         }
         return 0;
+    }
+
+    public static ArrayList<String> getItemLore(ItemStack item) {
+        NBTTagList loreTag = item.getTagCompound().getCompoundTag("display").getTagList("Lore", 8);
+        ArrayList<String> loreList = new ArrayList<>();
+        for (int i = 0; i < loreTag.tagCount(); i++) {
+            loreList.add(loreTag.getStringTagAt(i));
+        }
+        return loreList;
     }
 
     public static boolean hasPlayerInsideRadius(int radius){

@@ -30,6 +30,23 @@ public class MithrilMacro extends Macro {
         }
     };
 
+
+
+    @Override
+    public boolean isPaused() {
+        return !enabled;
+    }
+
+    @Override
+    public void Pause() {
+        toggle();
+    }
+
+    @Override
+    public void Unpause() {
+        toggle();
+    }
+
     @Override
     protected void onEnable() {
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");

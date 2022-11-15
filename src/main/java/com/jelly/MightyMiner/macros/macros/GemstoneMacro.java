@@ -69,6 +69,9 @@ public class GemstoneMacro extends Macro {
 
     @Override
     public void onEnable() {
+        if (isPaused()) {
+            Unpause();
+        }
         baritone = new AutoMineBaritone(getMineBehaviour());
 
         YogKiller.enabled = true;

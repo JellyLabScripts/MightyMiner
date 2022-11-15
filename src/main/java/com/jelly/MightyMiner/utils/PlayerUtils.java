@@ -36,7 +36,7 @@ public class PlayerUtils {
         NBTTagList loreTag = item.getTagCompound().getCompoundTag("display").getTagList("Lore", 8);
         ArrayList<String> loreList = new ArrayList<>();
         for (int i = 0; i < loreTag.tagCount(); i++) {
-            loreList.add(loreTag.getStringTagAt(i));
+            loreList.add(StringUtils.stripControlCodes(loreTag.getStringTagAt(i)));
         }
         return loreList;
     }

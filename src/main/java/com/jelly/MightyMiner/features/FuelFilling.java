@@ -40,7 +40,6 @@ public class FuelFilling {
     public static states currentState = states.NONE;
 
     private void Reset() {
-        this.fuel = -1;
         currentState = states.NONE;
         waitTicks = 10;
     }
@@ -48,7 +47,7 @@ public class FuelFilling {
     @SubscribeEvent
     public void onTick(TickEvent event) {
         if (!MightyMiner.config.refuelWithAbiphone || mc.thePlayer == null) return;
-        if (MacroHandler.macros.stream().noneMatch(Macro::isEnabled)) {
+        if (MacroHandler.macros.stream().noneMatch(Macro::isEnabled) && lastMacro != null) {
             Reset();
             return;
         }
@@ -68,14 +67,15 @@ public class FuelFilling {
                     this.fuel = Integer.parseInt(fuel.replace(",", "").trim());
                     break;
                 }
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         }
     }
 
     @SubscribeEvent
     public void onTickSecond(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
-        if (MacroHandler.macros.stream().noneMatch(Macro::isEnabled)) return;
+        if (MacroHandler.macros.stream().noneMatch(Macro::isEnabled)  && lastMacro != null) return;
         if (!MightyMiner.config.refuelWithAbiphone || mc.thePlayer == null) return;
 
         if (!(fuel != -1 && fuel < MightyMiner.config.refuelThreshold)) return;

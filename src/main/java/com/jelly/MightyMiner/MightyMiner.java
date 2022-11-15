@@ -42,7 +42,7 @@ public class MightyMiner {
     public static void onStartGame(){
         coords.clear();
         coordsConfig = configurationFactory.create(CoordsConfig.class, new File("config/coords.json"));
-        waypointConfig = configurationFactory.create(WaypointConfig.class, new File("config/waypoints.json"));
+//        waypointConfig = configurationFactory.create(WaypointConfig.class, new File("config/waypoints.json"));
     }
 
 

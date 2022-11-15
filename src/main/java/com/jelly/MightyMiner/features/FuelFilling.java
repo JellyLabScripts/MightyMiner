@@ -47,7 +47,7 @@ public class FuelFilling {
     @SubscribeEvent
     public void onTick(TickEvent event) {
         if (!MightyMiner.config.refuelWithAbiphone || mc.thePlayer == null) return;
-        if (MacroHandler.macros.stream().noneMatch(Macro::isEnabled) && lastMacro != null) {
+        if (MacroHandler.macros.stream().noneMatch(Macro::isEnabled) && lastMacro == null) {
             Reset();
             return;
         }
@@ -75,7 +75,7 @@ public class FuelFilling {
     @SubscribeEvent
     public void onTickSecond(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
-        if (MacroHandler.macros.stream().noneMatch(Macro::isEnabled)  && lastMacro != null) return;
+        if (MacroHandler.macros.stream().noneMatch(Macro::isEnabled)  && lastMacro == null) return;
         if (!MightyMiner.config.refuelWithAbiphone || mc.thePlayer == null) return;
 
         if (!(fuel != -1 && fuel < MightyMiner.config.refuelThreshold)) return;

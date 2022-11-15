@@ -108,7 +108,9 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onEnable() {
-
+        if (isPaused()) {
+            Unpause();
+        }
         if(MightyMiner.config.powPlayerFailsafe) {
             if (PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)) {
                 LogUtils.addMessage("Not starting, there is a player nearby");

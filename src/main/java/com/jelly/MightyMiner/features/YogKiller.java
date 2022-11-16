@@ -24,7 +24,8 @@ public class YogKiller {
 
     private final Rotation rotation = new Rotation();
 
-    private final String[] items = new String[]{"Juju"};
+
+    private boolean killed;
 
 
     // doesnt work idk why i gtg
@@ -44,17 +45,21 @@ public class YogKiller {
             float cacheYaw = mc.thePlayer.rotationYaw;
             float cachePitch = mc.thePlayer.rotationPitch;
 
+            int currentSlot = mc.thePlayer.inventory.currentItem;
             rotation.intLockAngle(
                     AngleUtils.getRequiredYaw(entity.posX - mc.thePlayer.posX, entity.posZ - mc.thePlayer.posZ),
                     AngleUtils.getRequiredPitch(entity.posX - mc.thePlayer.posX, entity.posY - (mc.thePlayer.posY + 1.62D), entity.posZ - mc.thePlayer.posZ),
                     250);
-            int slot = mc.thePlayer.inventory.currentItem;
-            mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Bow");
+
+            int gunSlot = PlayerUtils.getItemInHotbar("Juju", "Terminator", "Bow");
+            mc.thePlayer.inventory.currentItem = gunSlot;
             KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
             LogUtils.debugLog("Clicked :)");
-            rotation.intLockAngle(cacheYaw, cachePitch, 250);
-            mc.thePlayer.inventory.currentItem = slot;
+            if (killed) return;
+            rotation.easeTo(cacheYaw, cachePitch, 250);
+            mc.thePlayer.inventory.currentItem = currentSlot;
             LogUtils.debugLog("Yog should be killed.");
+            killed = true;
 
         }
 

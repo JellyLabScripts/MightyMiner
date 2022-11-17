@@ -402,7 +402,7 @@ public class Config extends Vigilant {
             category = "Core",
             subcategory = "Additions",
             min = 0,
-            max = 1000,
+            max = 3000,
             increment = 50
     )
     public int refuelThreshold = 200;

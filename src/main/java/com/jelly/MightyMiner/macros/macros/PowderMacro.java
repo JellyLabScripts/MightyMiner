@@ -276,6 +276,9 @@ public class PowderMacro extends Macro {
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
                 useMiningSpeedBoost();
                 break;
+            case PAUSED:
+                KeybindHandler.resetKeybindState();
+                break;
         }
 
         if(rotation.rotating){

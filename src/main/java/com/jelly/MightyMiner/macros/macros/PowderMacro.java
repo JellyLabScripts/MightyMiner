@@ -43,8 +43,8 @@ public class PowderMacro extends Macro {
 
     float playerYaw;
 
-    Queue<BlockPos> targetChests = new LinkedList<>();
-    CircularFifoQueue<BlockPos> solveChests = new CircularFifoQueue<>(3);
+    Queue<BlockPos> chestQueue = new LinkedList<>();
+    CircularFifoQueue<BlockPos> solvedOrSolvingChests = new CircularFifoQueue<>(3);
 
     BlockPos uTurnCachePos;
 
@@ -143,8 +143,8 @@ public class PowderMacro extends Macro {
         blocksAllowedToMine.add(Blocks.chest);
         blocksAllowedToMine.add(Blocks.trapped_chest);
 
-        targetChests.clear();
-        solveChests.clear();
+        chestQueue.clear();
+        solvedOrSolvingChests.clear();
         renderer.renderMap.clear();
         
 
@@ -284,7 +284,7 @@ public class PowderMacro extends Macro {
 
     private void updateState(){
         System.out.println("current state " + currentState + " current treasure state: " + treasureState);
-        if(!targetChests.isEmpty())
+        if(!chestQueue.isEmpty())
             currentState = State.TREASURE;
 
 
@@ -293,13 +293,13 @@ public class PowderMacro extends Macro {
                 if(System.currentTimeMillis() - treasureInitialTime > 7000 && treasureState != TreasureState.RETURNING) {
                     treasureState = TreasureState.RETURNING;
                     LogUtils.debugLog("Completed treasure due to timeout");
-                    targetChests.poll();
+                    chestQueue.poll();
                     return;
                 }
                 switch (treasureState){
                     case NONE:
                         treasureInitialTime = System.currentTimeMillis();
-                        currentChest = targetChests.poll();
+                        currentChest = chestQueue.poll();
                         for(BlockPos blockPos : BlockUtils.getRasterizedBlocks(BlockUtils.getPlayerLoc(), currentChest)){
                             if(MathUtils.getDistanceBetweenTwoBlock(currentChest, blockPos) < 3.5f){
                                 targetBlockPos = blockPos;
@@ -309,7 +309,7 @@ public class PowderMacro extends Macro {
                         treasureState = TreasureState.WALKING;
                         break;
                     case FINISHED:
-                        treasureState = targetChests.isEmpty() ? TreasureState.RETURNING : TreasureState.NONE;
+                        treasureState = chestQueue.isEmpty() ? TreasureState.RETURNING : TreasureState.NONE;
                         break;
                 }
             case NORMAL:
@@ -337,10 +337,13 @@ public class PowderMacro extends Macro {
     @Override
     public void onLastRender(RenderWorldLastEvent event) {
 
-        if(!targetChests.isEmpty())
-            targetChests.forEach(a -> renderer.renderAABB(a, Color.BLUE));
-        if(!solveChests.isEmpty())
-            solveChests.forEach(a -> renderer.renderAABB(a, Color.GREEN));
+        if(!chestQueue.isEmpty())
+            chestQueue.forEach(a -> renderer.renderAABB(a, Color.BLUE));
+        if(!solvedOrSolvingChests.isEmpty())
+            solvedOrSolvingChests.forEach(a -> renderer.renderAABB(a, Color.GREEN));
+        if(targetBlockPos != null)
+            renderer.renderAABB(targetBlockPos, Color.BLACK);
+
 
         if(rotation.rotating)
             rotation.update();
@@ -348,6 +351,9 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
+        if(event.type == RenderGameOverlayEvent.ElementType.TEXT){
+            mc.fontRendererObj.drawString(currentState + " " + treasureState, 5 , 5, -1);
+        }
     }
 
     @Override
@@ -381,8 +387,8 @@ public class PowderMacro extends Macro {
     void addChestToQueue(){
         new Thread(() -> {
             ThreadUtils.sleep(200);
-            BlockPos chest = BlockUtils.findBlock(18, new ArrayList<>(solveChests), Blocks.chest, Blocks.trapped_chest).get(0);
-            solveChests.add(chest);
+            BlockPos chest = BlockUtils.findBlock(18, new ArrayList<>(solvedOrSolvingChests), Blocks.chest, Blocks.trapped_chest).get(0);
+            solvedOrSolvingChests.add(chest);
 
             Logger.log("Adding chest to queue");
             if(currentState != State.TREASURE) {
@@ -394,7 +400,7 @@ public class PowderMacro extends Macro {
                     }
                 }
             }
-            targetChests.add(chest);
+            chestQueue.add(chest);
         }).start();
     }
 

@@ -57,11 +57,8 @@ public class AStarPathFinder {
         if (withPreference) { // loop for EACH block type
             for (Block block : blockType) {
                 foundBlocks = BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), block);
-                for (int i = 0; i < Math.min(foundBlocks.size(), 20); i++) {
-                    LinkedList<BlockNode> path = pathFinderBehaviour.isStaticMode() ? calculator.calculateStaticPath(foundBlocks.get(i)) : calculator.calculatePath(BlockUtils.getPlayerLoc(), foundBlocks.get(i), pathFinderBehaviour, mode);
-                    if (!path.isEmpty())
-                        possiblePaths.add(path);
-                }
+                possiblePaths = getPossiblePaths(foundBlocks);
+
                 if (!possiblePaths.isEmpty()) {
                     Logger.playerLog("Total time | Time per path : " + (System.currentTimeMillis() - pastTime) + " ms | " + ((System.currentTimeMillis() - pastTime) * 1.0D / possiblePaths.size()) + " ms");
                     possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
@@ -72,11 +69,7 @@ public class AStarPathFinder {
 
         } else { // 1 loop for ALL block types
             foundBlocks = BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType);
-            for (int i = 0; i < Math.min(foundBlocks.size(), 20); i++) {
-                LinkedList<BlockNode> path = pathFinderBehaviour.isStaticMode() ? calculator.calculateStaticPath(foundBlocks.get(i)) : calculator.calculatePath(BlockUtils.getPlayerLoc(), foundBlocks.get(i), pathFinderBehaviour, mode);
-                if (!path.isEmpty())
-                    possiblePaths.add(path);
-            }
+            possiblePaths = getPossiblePaths(foundBlocks);
         }
 
         if(foundBlocks.isEmpty())
@@ -108,6 +101,21 @@ public class AStarPathFinder {
     private void setLastTarget(LinkedList<BlockNode> blockList){
         removeFromBlackList(lastTarget);
         this.lastTarget = blockList.getFirst().getBlockPos();
+    }
+
+    private LinkedList<LinkedList<BlockNode>> getPossiblePaths(List<BlockPos> targetBlocks){
+        LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
+        int limit = 3000;
+        for (int i = 0; i < Math.min(targetBlocks.size(), 20); i++) {
+            LinkedList<BlockNode> path = pathFinderBehaviour.isStaticMode() ? calculator.calculateStaticPath(targetBlocks.get(i)) : calculator.calculatePath(BlockUtils.getPlayerLoc(), targetBlocks.get(i), pathFinderBehaviour, mode, limit);
+            if (!path.isEmpty()) {
+                possiblePaths.add(path);
+                limit = calculator.getSteps();
+            }
+
+        }
+        return possiblePaths;
+
     }
 
     private void initialize(PathMode mode){

@@ -9,7 +9,9 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PlayerUtils {
@@ -20,7 +22,7 @@ public class PlayerUtils {
                 mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0 &&
                 mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ == 0;
     }
-    public static int getItemInHotbar(final String... itemName) {
+    public static int getItemInHotbar(boolean returnErrorCode, final String... itemName) {
         for (int i = 0; i < 8; ++i) {
             final ItemStack is = mc.thePlayer.inventory.getStackInSlot(i);
             for(String s : itemName) {
@@ -29,14 +31,61 @@ public class PlayerUtils {
                 }
             }
         }
-        return 0;
+        return returnErrorCode ? -1 : 0;
+    }
+    public static int getItemInHotbar(final String... itemName) {
+        return getItemInHotbar(false, itemName);
+    }
+
+    public static int getItemInHotbarWithBlackList(boolean returnErrorCode, String blackListedLore, final String... itemName) {
+        for (int i = 0; i < 8; ++i) {
+            final ItemStack is = mc.thePlayer.inventory.getStackInSlot(i);
+            if(containsLore(is, blackListedLore))
+                continue;
+            for(String s : itemName) {
+                if (is != null && StringUtils.stripControlCodes(is.getDisplayName()).contains(s)) {
+                    return i;
+                }
+            }
+        }
+        return returnErrorCode ? -1 : 0;
+    }
+    public static int getItemInHotbarWithBlackList(String blackListedLore, final String... itemName) {
+        return getItemInHotbarWithBlackList(false, blackListedLore, itemName);
+    }
+    public static int getItemInHotbarFromLore(boolean returnErrorCode, final String lore) {
+        for (int i = 0; i < 8; ++i) {
+            if(containsLore(mc.thePlayer.inventory.mainInventory[i], lore))
+                return i;
+        }
+        return returnErrorCode ? -1 : 0;
+    }
+    public static int getItemInHotbarFromLore(final String lore) {
+        return getItemInHotbarFromLore(false, lore);
+    }
+
+    public static boolean containsLore(ItemStack item, String lore) {
+        ArrayList<String> lores = new ArrayList<>();
+        if(item != null)
+            lores = getItemLore(item);
+
+        if(lores.isEmpty())
+            return false;
+
+        for(String s : lores) {
+            if (!s.isEmpty() && s.contains(lore)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static ArrayList<String> getItemLore(ItemStack item) {
         NBTTagList loreTag = item.getTagCompound().getCompoundTag("display").getTagList("Lore", 8);
         ArrayList<String> loreList = new ArrayList<>();
         for (int i = 0; i < loreTag.tagCount(); i++) {
-            loreList.add(loreTag.getStringTagAt(i));
+            loreList.add(StringUtils.stripControlCodes(loreTag.getStringTagAt(i)));
         }
         return loreList;
     }

@@ -39,6 +39,7 @@ public class MithrilMacro extends Macro {
 
     @Override
     public void Pause() {
+        KeybindHandler.resetKeybindState();
         toggle();
     }
 
@@ -49,6 +50,9 @@ public class MithrilMacro extends Macro {
 
     @Override
     protected void onEnable() {
+        if (isPaused()) {
+            Unpause();
+        }
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");
 
         if(MightyMiner.config.mithPlayerFailsafe) {

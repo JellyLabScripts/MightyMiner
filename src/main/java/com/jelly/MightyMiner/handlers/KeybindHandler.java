@@ -3,7 +3,9 @@ package com.jelly.MightyMiner.handlers;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.features.FuelFilling;
+import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.BlockUtils;
+import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.ReflectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
@@ -60,13 +62,12 @@ public class KeybindHandler {
 
 
 
-    static KeyBinding[] macroKeybinds = new KeyBinding[4];
+    static KeyBinding[] macroKeybinds = new KeyBinding[3];
 
     public static void initializeCustomKeybindings() {
-        macroKeybinds[0] = new KeyBinding("Start macro", Keyboard.KEY_F, "MightyMiner");
-        macroKeybinds[1] = new KeyBinding("Disable macro", Keyboard.KEY_Z, "MightyMiner");
-        macroKeybinds[2] = new KeyBinding("Debug", Keyboard.KEY_H, "MightyMiner");
-        macroKeybinds[3] = new KeyBinding("Open GUI", Keyboard.KEY_RSHIFT, "MightyMiner");
+        macroKeybinds[0] = new KeyBinding("Start/Stop macro", Keyboard.KEY_F, "MightyMiner");
+        macroKeybinds[1] = new KeyBinding("Debug", Keyboard.KEY_H, "MightyMiner");
+        macroKeybinds[2] = new KeyBinding("Open GUI", Keyboard.KEY_RSHIFT, "MightyMiner");
         for (KeyBinding customKeyBind : macroKeybinds) {
             ClientRegistry.registerKeyBinding(customKeyBind);
         }
@@ -76,16 +77,17 @@ public class KeybindHandler {
     public void onKeyPress(InputEvent.KeyInputEvent event) {
 
         if(macroKeybinds[0].isKeyDown()){
-            MacroHandler.startScript(MightyMiner.config.macroType);
+            if (MacroHandler.macros.stream().anyMatch(Macro::isEnabled))
+                MacroHandler.disableScript();
+            else
+                MacroHandler.startScript(MightyMiner.config.macroType);
         }
         if(macroKeybinds[1].isKeyDown()){
-            MacroHandler.disableScript();
-        }
-        if(macroKeybinds[2].isKeyDown()){
-            mc.thePlayer.rotationYaw = 180;
+         //   mc.thePlayer.rotationYaw = 180;
+          //  PlayerUtils.getItemLore(mc.thePlayer.inventory.mainInventory[0]).forEach(System.out::println);
 
         }
-        if(macroKeybinds[3].isKeyDown()){
+        if(macroKeybinds[2].isKeyDown()){
             mc.displayGuiScreen(MightyMiner.config.gui());
         }
 

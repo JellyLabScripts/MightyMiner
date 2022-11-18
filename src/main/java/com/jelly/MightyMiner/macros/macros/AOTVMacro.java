@@ -68,6 +68,9 @@ public class AOTVMacro extends Macro {
 
     @Override
     protected void onEnable() {
+        if (isPaused()) {
+            Unpause();
+        }
         baritone = new AutoMineBaritone(getAutoMineConfig());
         currentState = State.Mining;
 

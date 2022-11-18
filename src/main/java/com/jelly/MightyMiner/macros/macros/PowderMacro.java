@@ -108,7 +108,9 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onEnable() {
-
+        if (isPaused()) {
+            Unpause();
+        }
         if(MightyMiner.config.powPlayerFailsafe) {
             if (PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)) {
                 LogUtils.addMessage("Not starting, there is a player nearby");
@@ -273,6 +275,9 @@ public class PowderMacro extends Macro {
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
                 useMiningSpeedBoost();
+                break;
+            case PAUSED:
+                KeybindHandler.resetKeybindState();
                 break;
         }
 

@@ -408,17 +408,6 @@ public class Config extends Vigilant {
     public int refuelThreshold = 200;
 
     @Property(
-            type = PropertyType.NUMBER,
-            name = "Index of the drill to refill the fuel",
-            description = "Slot index counting from 0, which means first slot",
-            category = "Core",
-            subcategory = "Additions",
-            min = 0,
-            max = 8
-    )
-    public int drillSlotIndex = 0;
-
-    @Property(
             type = PropertyType.SELECTOR,
             name = "Type of fuel to use",
             category = "Core",
@@ -457,7 +446,6 @@ public class Config extends Vigilant {
         this.addDependency("routeLineColor", "showRouteLines");
         this.addDependency("routeBlocksColor", "highlightRouteBlocks");
         this.addDependency("refuelThreshold", "refuelWithAbiphone");
-        this.addDependency("drillSlotIndex", "refuelWithAbiphone");
         this.addDependency("typeOfFuelIndex", "refuelWithAbiphone");
     }
 }

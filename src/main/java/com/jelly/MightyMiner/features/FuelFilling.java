@@ -24,6 +24,8 @@ public class FuelFilling {
     public static int waitTicks = 10;
     public static int firstWaitTicks = 20;
 
+    public static int previousDrillIndex = 0;
+
     private Macro lastMacro;
 
     public enum states {
@@ -46,6 +48,7 @@ public class FuelFilling {
         waitTicks = 10;
         firstWaitTicks = 20;
         lastMacro = null;
+        previousDrillIndex = 0;
     }
 
     @SubscribeEvent
@@ -56,7 +59,7 @@ public class FuelFilling {
             return;
         }
 
-        ItemStack drill = mc.thePlayer.inventory.mainInventory[MightyMiner.config.drillSlotIndex];
+        ItemStack drill = mc.thePlayer.inventory.mainInventory[PlayerUtils.getItemInHotbar("Drill")];
 
         if (drill == null) return;
         if (!drill.getDisplayName().toLowerCase().contains("drill")) return;
@@ -172,12 +175,10 @@ public class FuelFilling {
 
                     if (waitTicks-- > 0) return;
 
-                    if (drillAnvil.getSlot(drillAnvil.inventorySlots.size() - 9 + MightyMiner.config.drillSlotIndex) != null && drillAnvil.getSlot(drillAnvil.inventorySlots.size() - 9 + MightyMiner.config.drillSlotIndex).getStack() == null) {
-                        LogUtils.addMessage("Drill slot is empty!");
-                        return;
-                    }
+                    int drillSlotIndex = PlayerUtils.getItemInHotbar("Drill");
+                    previousDrillIndex = drillSlotIndex;
 
-                    mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + MightyMiner.config.drillSlotIndex, 0, 1, mc.thePlayer);
+                    mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + drillSlotIndex, 0, 1, mc.thePlayer);
 
                     waitTicks = 10;
                     currentState = states.REFILLING_FUEL;
@@ -290,13 +291,13 @@ public class FuelFilling {
                     }
                     if (waitTicks-- > 0) return;
 
-                    mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + MightyMiner.config.drillSlotIndex, 0, 0, mc.thePlayer);
+                    mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + previousDrillIndex, 0, 0, mc.thePlayer);
 
                     if (mc.thePlayer.openContainer != null) {
                         mc.thePlayer.closeScreen();
                     }
 
-                    mc.thePlayer.inventory.currentItem = MightyMiner.config.drillSlotIndex;
+                    mc.thePlayer.inventory.currentItem = previousDrillIndex;
 
                     if (lastMacro != null)
                         lastMacro.Unpause();

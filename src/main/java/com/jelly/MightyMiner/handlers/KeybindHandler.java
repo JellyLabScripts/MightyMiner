@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.analytics.Analytics;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.macros.Macro;
@@ -85,6 +86,8 @@ public class KeybindHandler {
         if(macroKeybinds[1].isKeyDown()){
          //   mc.thePlayer.rotationYaw = 180;
           //  PlayerUtils.getItemLore(mc.thePlayer.inventory.mainInventory[0]).forEach(System.out::println);
+            Analytics.test();
+
 
         }
         if(macroKeybinds[2].isKeyDown()){

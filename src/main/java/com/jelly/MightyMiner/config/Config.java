@@ -35,16 +35,6 @@ public class Config extends Vigilant {
 
 
     @Property(
-            type = PropertyType.NUMBER,
-            name = "Blue cheese omelette pickaxe slot",
-            description = "Note that the first slot is 0",
-            category = "Core",
-            subcategory = "Mining",
-            max = 7
-    )
-    public int blueCheeseOmeletteSlot = 7;
-
-    @Property(
             type = PropertyType.SWITCH,
             name = "Blue cheese omelette pickaxe switch",
             description = "automatically switches to the pickaxe with blue cheese omelette when using mining speed boost",
@@ -402,21 +392,10 @@ public class Config extends Vigilant {
             category = "Core",
             subcategory = "Additions",
             min = 0,
-            max = 1000,
+            max = 3000,
             increment = 50
     )
     public int refuelThreshold = 200;
-
-    @Property(
-            type = PropertyType.NUMBER,
-            name = "Index of the drill to refill the fuel",
-            description = "Slot index counting from 0, which means first slot",
-            category = "Core",
-            subcategory = "Additions",
-            min = 0,
-            max = 8
-    )
-    public int drillSlotIndex = 0;
 
     @Property(
             type = PropertyType.SELECTOR,
@@ -427,13 +406,6 @@ public class Config extends Vigilant {
     )
     public int typeOfFuelIndex = 0;
 
-   /* @Property(
-            type = PropertyType.SWITCH,
-            name = "Always show drawings",
-            category = "Core",
-            subcategory = "Drawings"
-    )
-    public boolean showAlwaysDrawings = true;*/
 
     public Config() {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector(), new ConfigSorting());
@@ -457,7 +429,6 @@ public class Config extends Vigilant {
         this.addDependency("routeLineColor", "showRouteLines");
         this.addDependency("routeBlocksColor", "highlightRouteBlocks");
         this.addDependency("refuelThreshold", "refuelWithAbiphone");
-        this.addDependency("drillSlotIndex", "refuelWithAbiphone");
         this.addDependency("typeOfFuelIndex", "refuelWithAbiphone");
     }
 }

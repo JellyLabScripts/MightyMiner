@@ -27,6 +27,7 @@ public class AStarCalculator{
     PriorityQueue<Node> openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));;
 
     int step;
+    int stepLimit;
 
     PathFinderBehaviour pathFinderBehaviour;
     PathMode mode;
@@ -43,22 +44,32 @@ public class AStarCalculator{
         return new LinkedList<>();
     }
 
-    public LinkedList<BlockNode> calculatePath(BlockPos startingPos, BlockPos endingBlock, PathFinderBehaviour pathFinderBehaviour, PathMode mode) {
+    public LinkedList<BlockNode> calculatePath(BlockPos startingPos, BlockPos endingBlock, PathFinderBehaviour pathFinderBehaviour, PathMode mode){
+        return calculatePath(startingPos, endingBlock, pathFinderBehaviour, mode, 3000);
+    }
+
+
+    public LinkedList<BlockNode> calculatePath(BlockPos startingPos, BlockPos endingBlock, PathFinderBehaviour pathFinderBehaviour, PathMode mode, int stepLimit) {
 
         this.pathFinderBehaviour = pathFinderBehaviour;
         this.mode = mode;
+        this.stepLimit = stepLimit;
 
         gridEnvironment.clear();
         checkedNodes.clear();
         openNodes.clear();
 
+        step = 0;
 
-        if (BlockUtils.canSeeBlock(endingBlock) && BlockUtils.canReachBlock(endingBlock))
+
+        if (BlockUtils.canSeeBlock(endingBlock) && BlockUtils.canReachBlock(endingBlock)) {
+            step ++;
             return new LinkedList<BlockNode>() {
                 {
                     add(new BlockNode(endingBlock, BlockType.MINE));
                 }
             };
+        }
 
 
         int currentGridX = 0;
@@ -67,7 +78,7 @@ public class AStarCalculator{
 
         instantiateAnyNode(currentGridX, currentGridY, currentGridZ, new Node(startingPos));
         Node startNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
-        step = 0;
+
         openNodes.add(startNode);
 
         while (!openNodes.isEmpty()) {
@@ -79,7 +90,7 @@ public class AStarCalculator{
             }
             checkedNodes.add(currentNode);
             step++;
-            if (step > 3000)
+            if (step > stepLimit)
                 break;
             for (Moves move : Moves.values()) {
                 instantiateNode(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz, startNode);
@@ -88,10 +99,12 @@ public class AStarCalculator{
             if (currentNode.blockPos.equals(endingBlock))
                 return trackBackPath(currentNode, startNode);
         }
-
         return new LinkedList<>();
     }
 
+    public int getSteps(){
+        return step;
+    }
     private void checkNode(Moves move, Node searchNode, Node currentNode, BlockPos endingBlockPos) {
         if (checkedNodes.contains(searchNode) || BlockUtils.isPassable(searchNode.blockPos.down()))
             return;

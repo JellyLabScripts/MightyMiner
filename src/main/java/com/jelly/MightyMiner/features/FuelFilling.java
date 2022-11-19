@@ -22,8 +22,10 @@ public class FuelFilling {
     private int fuel = -1;
 
     public static int waitTicks = 10;
+    public static int firstWaitTicks = 20;
 
     private Macro lastMacro;
+    private int drillSlotIndex;
 
     public enum states {
         NONE,
@@ -31,7 +33,8 @@ public class FuelFilling {
         ABIPHONE_RCD,
         ABIPHONE_RCU,
         CALLING,
-        REFILLING,
+        REFILLING_DRILL,
+        REFILLING_FUEL,
         ACCEPTING,
         CLOSING,
         EXIT
@@ -42,6 +45,8 @@ public class FuelFilling {
     private void Reset() {
         currentState = states.NONE;
         waitTicks = 10;
+        firstWaitTicks = 20;
+        lastMacro = null;
     }
 
     @SubscribeEvent
@@ -52,11 +57,19 @@ public class FuelFilling {
             return;
         }
 
-        ItemStack itemHeld = mc.thePlayer.getHeldItem();
 
-        if (itemHeld == null) return;
-        if (!itemHeld.getDisplayName().toLowerCase().contains("drill")) return;
-        ArrayList<String> itemLore = PlayerUtils.getItemLore(itemHeld);
+        drillSlotIndex = PlayerUtils.getItemInHotbarWithBlackList(true, "Blue Cheese", "Drill");
+
+        if (drillSlotIndex == -1) {
+            drillSlotIndex = PlayerUtils.getItemInHotbar(true, "Drill");
+            if(drillSlotIndex == -1) return;
+
+        }
+        ItemStack drill = mc.thePlayer.inventory.mainInventory[drillSlotIndex];
+
+        if(drill == null) return;
+        if (!drill.getDisplayName().toLowerCase().contains("drill")) return;
+        ArrayList<String> itemLore = PlayerUtils.getItemLore(drill);
 
         for (String lore: itemLore) {
             try {
@@ -82,6 +95,7 @@ public class FuelFilling {
 
         switch (currentState) {
             case NONE: {
+                LogUtils.addMessage("Low fuel. Refilling now.");
                 MacroHandler.macros.forEach(macro -> {
                     if (macro.isEnabled()) {
                         lastMacro = macro;
@@ -93,7 +107,7 @@ public class FuelFilling {
             }
 
             case WAITING: {
-
+                if (firstWaitTicks-- > 0) return;
                 for (Macro macro : MacroHandler.macros) {
                     if (macro.isEnabled() && !macro.isPaused()) {
                         return;
@@ -105,6 +119,7 @@ public class FuelFilling {
             }
 
             case ABIPHONE_RCD: {
+                if (waitTicks-- > 0) return;
                 if (!mc.thePlayer.getHeldItem().getDisplayName().toLowerCase().contains("abiphone")) {
                     LogUtils.addMessage("You don't have abiphone!");
                     MightyMiner.config.refuelWithAbiphone = false;
@@ -112,12 +127,15 @@ public class FuelFilling {
                 }
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
                 currentState = states.ABIPHONE_RCU;
+                waitTicks = 2;
                 break;
             }
 
             case ABIPHONE_RCU: {
+                if (waitTicks-- > 0) return;
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
                 currentState = states.CALLING;
+                waitTicks = 10;
                 break;
             }
 
@@ -136,7 +154,7 @@ public class FuelFilling {
                         if (slot.getStack() != null && slot.getStack().getDisplayName() != null) {
                             if (slot.getStack().getDisplayName().toLowerCase().contains("jotraeline")) {
                                 mc.playerController.windowClick(abiphone.windowId, slot.slotNumber, 0, 0, mc.thePlayer);
-                                currentState = states.REFILLING;
+                                currentState = states.REFILLING_DRILL;
                                 waitTicks = 10;
                                 return;
                             }
@@ -151,7 +169,7 @@ public class FuelFilling {
                 break;
             }
 
-            case REFILLING: {
+            case REFILLING_DRILL: {
                 if (mc.thePlayer.openContainer instanceof ContainerChest) {
 
                     ContainerChest drillAnvil = (ContainerChest) mc.thePlayer.openContainer;
@@ -163,12 +181,30 @@ public class FuelFilling {
 
                     if (waitTicks-- > 0) return;
 
-                    if (drillAnvil.getSlot(drillAnvil.inventorySlots.size() - 9 + MightyMiner.config.drillSlotIndex) != null && drillAnvil.getSlot(drillAnvil.inventorySlots.size() - 9 + MightyMiner.config.drillSlotIndex).getStack() == null) {
+                    if (drillAnvil.getSlot(drillAnvil.inventorySlots.size() - 9 + drillSlotIndex) != null && drillAnvil.getSlot(drillAnvil.inventorySlots.size() - 9 + drillSlotIndex).getStack() == null) {
                         LogUtils.addMessage("Drill slot is empty!");
                         return;
                     }
 
-                    mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + MightyMiner.config.drillSlotIndex, 0, 1, mc.thePlayer);
+                    mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + drillSlotIndex, 0, 1, mc.thePlayer);
+
+                    waitTicks = 10;
+                    currentState = states.REFILLING_FUEL;
+                }
+                break;
+            }
+
+            case REFILLING_FUEL: {
+                if (waitTicks-- > 0) return;
+
+                if (mc.thePlayer.openContainer instanceof ContainerChest) {
+
+                    ContainerChest drillAnvil = (ContainerChest) mc.thePlayer.openContainer;
+                    IInventory inv = drillAnvil.getLowerChestInventory();
+                    if (!inv.getDisplayName().getFormattedText().toLowerCase().contains("drill anvil")) {
+                        //Not in drill anvil
+                        return;
+                    }
 
                     String fuelName = "";
 
@@ -199,6 +235,7 @@ public class FuelFilling {
                         if (slot.getStack().getDisplayName().toLowerCase().contains(fuelName)) {
                             mc.playerController.windowClick(drillAnvil.windowId, slot.slotNumber, 0, 1, mc.thePlayer);
                             currentState = states.ACCEPTING;
+                            waitTicks = 10;
                             return;
                         }
                     }
@@ -208,10 +245,11 @@ public class FuelFilling {
                     MightyMiner.config.refuelWithAbiphone = false;
                     Reset();
                 }
-                break;
             }
 
             case ACCEPTING: {
+                if (waitTicks-- > 0) return;
+
                 if (mc.thePlayer.openContainer instanceof ContainerChest) {
                     ContainerChest drillAnvil = (ContainerChest) mc.thePlayer.openContainer;
                     IInventory inv = drillAnvil.getLowerChestInventory();
@@ -241,8 +279,7 @@ public class FuelFilling {
                         return;
                     }
 
-                    if (drillAnvil.getSlot(29) != null && drillAnvil.getSlot(29).getStack() == null &&
-                            drillAnvil.getSlot(33) != null && drillAnvil.getSlot(33).getStack() == null) {
+                    if (drillAnvil.getSlot(29) != null && drillAnvil.getSlot(29).getStack() == null) {
                         mc.playerController.windowClick(drillAnvil.windowId, 13, 0, 0, mc.thePlayer);
                         currentState = states.EXIT;
                         waitTicks = 10;
@@ -262,17 +299,19 @@ public class FuelFilling {
                     }
                     if (waitTicks-- > 0) return;
 
-                    mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + MightyMiner.config.drillSlotIndex, 0, 0, mc.thePlayer);
+                    mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + drillSlotIndex, 0, 0, mc.thePlayer);
 
                     if (mc.thePlayer.openContainer != null) {
                         mc.thePlayer.closeScreen();
                     }
 
-                    Reset();
+                    mc.thePlayer.inventory.currentItem = drillSlotIndex;
 
                     if (lastMacro != null)
                         lastMacro.Unpause();
                     lastMacro = null;
+
+                    Reset();
                 }
                 break;
             }

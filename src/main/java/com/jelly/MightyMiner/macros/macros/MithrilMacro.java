@@ -43,6 +43,7 @@ public class MithrilMacro extends Macro {
 
     @Override
     public void Pause() {
+        KeybindHandler.resetKeybindState();
         toggle();
     }
 

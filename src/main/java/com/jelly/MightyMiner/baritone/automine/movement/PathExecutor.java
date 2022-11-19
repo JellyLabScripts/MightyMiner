@@ -284,10 +284,12 @@ public class PathExecutor {
 
     private boolean shouldWalkTo(BlockPos blockPos){
 
-        return  blockPos.getY() <= (mc.thePlayer.posY) + 1 &&
+        return  /*lockPos.getY() <= (mc.thePlayer.posY) + 1 &&*/
                 ((blockPos.getY() > Math.round(mc.thePlayer.posY) && BlockUtils.isPassable(BlockUtils.getPlayerLoc().up(2))) ||
                         (blockPos.getY() < Math.round(mc.thePlayer.posY) && BlockUtils.isPassable(blockPos.up(2))) ||
-                        (blockPos.getY() == Math.round(mc.thePlayer.posY))) && BlockUtils.fitsPlayer(blockPos.down()) && !BlockUtils.onTheSameXZ(blockPos, BlockUtils.getPlayerLoc());
+                        (blockPos.getY() == Math.round(mc.thePlayer.posY)))
+                && (BlockUtils.fitsPlayer(blockPos.down()) || BlockUtils.fitsPlayer(blockPos.down(2)))
+                && !BlockUtils.onTheSameXZ(blockPos, BlockUtils.getPlayerLoc());
     }
 
 

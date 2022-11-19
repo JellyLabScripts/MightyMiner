@@ -5,6 +5,7 @@ import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.AngleUtils;
+import com.jelly.MightyMiner.utils.DrawUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
@@ -15,6 +16,8 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.PlayerUseItemEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import java.awt.*;
 
 
 public class YogKiller {
@@ -29,7 +32,7 @@ public class YogKiller {
 
 
     // doesnt work idk why i gtg
-    // NEED FIX someone help pls 
+    // NEED FIX someone help pls
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent tickEvent) {
         if (mc.thePlayer == null) return;
@@ -45,6 +48,8 @@ public class YogKiller {
             float cacheYaw = mc.thePlayer.rotationYaw;
             float cachePitch = mc.thePlayer.rotationPitch;
 
+            DrawUtils.drawEntity(entity, 500, Color.PINK, 1f);
+
             int currentSlot = mc.thePlayer.inventory.currentItem;
             rotation.intLockAngle(
                     AngleUtils.getRequiredYaw(entity.posX - mc.thePlayer.posX, entity.posZ - mc.thePlayer.posZ),
@@ -55,11 +60,9 @@ public class YogKiller {
             mc.thePlayer.inventory.currentItem = gunSlot;
             KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
             LogUtils.debugLog("Clicked :)");
-            if (killed) return;
             rotation.easeTo(cacheYaw, cachePitch, 250);
             mc.thePlayer.inventory.currentItem = currentSlot;
             LogUtils.debugLog("Yog should be killed.");
-            killed = true;
 
         }
 

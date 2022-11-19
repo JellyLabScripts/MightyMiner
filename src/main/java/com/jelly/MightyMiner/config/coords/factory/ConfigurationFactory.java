@@ -1,11 +1,13 @@
 package com.jelly.MightyMiner.config.coords.factory;
 
 import com.jelly.MightyMiner.config.coords.serdes.CoordsSerdes;
+import com.jelly.MightyMiner.config.other.ColorSerdes;
 import com.jelly.MightyMiner.config.waypoint.serdes.WaypointSerdes;
 import com.jelly.MightyMiner.waypoints.Waypoint;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
+import net.minecraft.scoreboard.ScoreObjective;
 
 import java.io.File;
 

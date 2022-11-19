@@ -10,16 +10,19 @@ import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
+import com.jelly.MightyMiner.utils.DrawUtils;
 import com.jelly.MightyMiner.utils.SkyblockInfo;
 import com.jelly.MightyMiner.waypoints.Waypoint;
 import com.jelly.MightyMiner.waypoints.WaypointHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +45,7 @@ public class MightyMiner {
     public static void onStartGame(){
         coords.clear();
         coordsConfig = configurationFactory.create(CoordsConfig.class, new File("config/coords.json"));
-//        waypointConfig = configurationFactory.create(WaypointConfig.class, new File("config/waypoints.json"));
+        waypointConfig = configurationFactory.create(WaypointConfig.class, new File("config/waypoints.json"));
     }
 
 

@@ -64,7 +64,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Blue cheese omelette pickaxe switch",
-            description = "automatically switches to the pickaxe with blue cheese omelette when using mining speed boost",
+            description = "Automatically switches to the pickaxe with blue cheese omelette when using mining speed boost",
             category = "Core",
             subcategory = "Mining"
     )

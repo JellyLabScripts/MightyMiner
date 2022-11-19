@@ -356,6 +356,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Auto yog killer",
+            description = "Warning: Very early alpha",
             category = "AOTV gemstone macro",
             subcategory = "Yogs"
     )

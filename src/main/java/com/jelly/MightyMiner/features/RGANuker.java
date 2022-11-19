@@ -51,7 +51,7 @@ public class RGANuker {
         if(!enabled) return;
 
         ticks++;
-        if (MightyMiner.config.powAuraType == 0) {
+        if (MightyMiner.config.powNukerType == 0) {
             if (broken.size() > 10) {
                 broken.clear();
             }
@@ -101,14 +101,14 @@ public class RGANuker {
         BlockPos playerPos = mc.thePlayer.getPosition();
         playerPos.add(0, 1, 0);
         Vec3 playerVec = mc.thePlayer.getPositionVector();
-        Vec3i vec3i = new Vec3i(r, 1 + MightyMiner.config.powAuraHeight, r);
+        Vec3i vec3i = new Vec3i(r, 1 + MightyMiner.config.powNukerHeight, r);
         Vec3i vec3i2 = new Vec3i(r, 0, r);
         ArrayList<Vec3> stones = new ArrayList<>();
         ArrayList<Vec3> gemstones = new ArrayList<>();
 
         for (BlockPos blockPos : BlockPos.getAllInBox(playerPos.add(vec3i), playerPos.subtract(vec3i2))) {
             IBlockState blockState = mc.theWorld.getBlockState(blockPos);
-            if (MightyMiner.config.powAuraType == 0) {
+            if (MightyMiner.config.powNukerType == 0) {
                 if (blockState.getBlock() == Blocks.stone && !broken.contains(blockPos)) {
                     stones.add(new Vec3(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5));
                 }
@@ -117,7 +117,7 @@ public class RGANuker {
                 }
 
             }
-            if (MightyMiner.config.powAuraType == 1) {
+            if (MightyMiner.config.powNukerType == 1) {
                 EnumFacing dir = mc.thePlayer.getHorizontalFacing();
                 int x = (int) Math.floor(mc.thePlayer.posX);
                 int z = (int) Math.floor(mc.thePlayer.posZ);

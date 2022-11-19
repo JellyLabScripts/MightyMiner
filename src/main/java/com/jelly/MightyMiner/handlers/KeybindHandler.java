@@ -1,17 +1,10 @@
 package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.analytics.Analytics;
-import com.jelly.MightyMiner.config.Config;
-import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.macros.Macro;
-import com.jelly.MightyMiner.utils.BlockUtils;
-import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.ReflectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -84,9 +77,6 @@ public class KeybindHandler {
                 MacroHandler.startScript(MightyMiner.config.macroType);
         }
         if(macroKeybinds[1].isKeyDown()){
-         //   mc.thePlayer.rotationYaw = 180;
-          //  PlayerUtils.getItemLore(mc.thePlayer.inventory.mainInventory[0]).forEach(System.out::println);
-            Analytics.test();
 
 
         }

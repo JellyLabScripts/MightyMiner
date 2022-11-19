@@ -14,8 +14,6 @@ buildscript {
         classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
         classpath "com.github.debuggingss:MixinGradle:0.6-SNAPSHOT"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
-        classpath 'com.google.apis:google-api-services-sheets:v4-rev20220927-2.0.0'
     }
 
 }
@@ -78,18 +76,6 @@ dependencies {
 
     implementation('org.projectlombok:lombok:1.18.24')
     annotationProcessor('org.projectlombok:lombok:1.18.24')
-
-    implementation('com.google.api-client:google-api-client:2.0.1') {
-        exclude module: 'com.google.guava'
-        exclude group: 'com.google.guava'
-    }
-    annotationProcessor('com.google.api-client:google-api-client:2.0.1'){
-        exclude module: 'com.google.guava'
-        exclude group: 'com.google.guava'
-    }
-
-    include 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
-    include 'com.google.apis:google-api-services-sheets:v4-rev20220927-2.0.0'
 
     include 'eu.okaeri:okaeri-configs-json-gson:4.0.6'
     include(fileTree(dir: 'libs', include: '*.jar'))

@@ -108,27 +108,30 @@ public class BlockUtils {
     public static List<BlockPos> findBlock(int searchDiameter, Block... requiredBlock) {
         return findBlock(searchDiameter, null, 0, 256, requiredBlock);
     }
-    public static List<BlockPos> findBlock(int searchDiameter, ArrayList<BlockPos> forbiddenBlockPos, Block... requiredBlock) {
-        return findBlock(searchDiameter, forbiddenBlockPos, 0, 256, requiredBlock);
+    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlock) {
+        return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
+                ,forbiddenBlockPos, minY, maxY, requiredBlock);
     }
-    public static List<BlockPos> findBlock(int searchDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlock) {
+
+    public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlock) {
 
         List<Block> requiredBlocks = Arrays.asList(requiredBlock);
         List<BlockPos> foundBlocks = new ArrayList<>();
 
+        BlockPos currentBlock;
 
-        for (int i = 0; i < searchDiameter; i++) {
-            for (int j = 0; j < searchDiameter; j++) {
-                for (int k = 0; k < searchDiameter; k++) {
-                    if (requiredBlocks.contains(getBlock(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2)))) {
-
-                        if (forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2)))
+        for (int i = 0; i <= Math.abs(searchBox.dx_bound2 - searchBox.dx_bound1); i++) {
+            for (int j = 0; j <= Math.abs(searchBox.dy_bound2 - searchBox.dy_bound1); j++) {
+                for (int k = 0; k <= Math.abs(searchBox.dz_bound2 - searchBox.dz_bound1); k++) {
+                    //rectangular scan
+                    currentBlock = (getPlayerLoc().add(i + Math.min(searchBox.dx_bound2, searchBox.dx_bound1),  j + Math.min(searchBox.dy_bound2, searchBox.dy_bound1),  k + Math.min(searchBox.dz_bound2, searchBox.dz_bound1)));
+                    if(requiredBlocks.contains(getBlock(currentBlock))){
+                        if (forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(currentBlock))
                             continue;
-                        if ((int) mc.thePlayer.posY + (j - searchDiameter / 2) > maxY || (int) mc.thePlayer.posY + (j - searchDiameter / 2) < minY)
+                        if (j + Math.min(searchBox.dy_bound2, searchBox.dy_bound1)  > maxY || j + Math.min(searchBox.dy_bound2, searchBox.dy_bound1) < minY)
                             continue;
-                        foundBlocks.add(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2));
+                        foundBlocks.add(currentBlock);
                     }
-
                 }
             }
         }
@@ -136,28 +139,6 @@ public class BlockUtils {
         return foundBlocks;
     }
 
-    public static List<BlockPos> findBlockWithPreference(int searchDiameter, ArrayList<BlockPos> forbiddenBlockPos, Block... requiredBlock) {
-        List<BlockPos> foundBlocks = new ArrayList<>();
-        for (Block block : requiredBlock) {
-            List<BlockPos> foundCurrentBlocks = new ArrayList<>();
-            for (int i = 0; i < searchDiameter; i++) {
-                for (int j = 0; j < searchDiameter; j++) {
-                    for (int k = 0; k < searchDiameter; k++) {
-
-                        if (forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2)))
-                            continue;
-                        if ((getBlock(getPlayerLoc().add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2))).equals(block)) {
-                            foundCurrentBlocks.add(getRelativeBlockPos(0, 0, 0).add(i - searchDiameter / 2, j - searchDiameter / 2, k - searchDiameter / 2));
-                        }
-
-                    }
-                }
-            }
-            foundCurrentBlocks.sort(Comparator.comparingDouble(b -> MathUtils.getDistanceBetweenTwoPoints(b.getX() + 0.5d, b.getY() + 0.5d, b.getZ() + 0.5d, mc.thePlayer.posX, mc.thePlayer.posY + 1.62d, mc.thePlayer.posZ)));
-            foundBlocks.addAll(foundCurrentBlocks);
-        }
-        return foundBlocks;
-    }
 
 
     public static Block getRelativeBlock(float rightOffset, float upOffset, float frontOffset) {
@@ -324,8 +305,5 @@ public class BlockUtils {
     public static boolean inCenterOfBlock(){
         return Math.abs(mc.thePlayer.posX % 1) == 0.5 && Math.abs(mc.thePlayer.posZ % 1) == 0.5;
     }
-
-
-
 
 }

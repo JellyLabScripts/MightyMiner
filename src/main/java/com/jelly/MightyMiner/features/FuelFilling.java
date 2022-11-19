@@ -62,7 +62,10 @@ public class FuelFilling {
 
         if (drillSlotIndex == -1) {
             drillSlotIndex = PlayerUtils.getItemInHotbar(true, "Drill");
-            if(drillSlotIndex == -1) return;
+            if(drillSlotIndex == -1) {
+                drillSlotIndex = 0;
+                return;
+            }
 
         }
         ItemStack drill = mc.thePlayer.inventory.mainInventory[drillSlotIndex];

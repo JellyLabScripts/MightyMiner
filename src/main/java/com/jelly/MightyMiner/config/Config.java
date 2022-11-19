@@ -5,7 +5,6 @@ import gg.essential.vigilance.data.*;
 
 import java.awt.*;
 import java.io.File;
-import java.util.Comparator;
 
 public class Config extends Vigilant {
 
@@ -32,6 +31,34 @@ public class Config extends Vigilant {
             subcategory = "Mining"
     )
     public boolean glassPanesFullBlock = false;
+
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Refuel with abiphone",
+            category = "Core",
+            subcategory = "Refuel"
+    )
+    public boolean refuelWithAbiphone = false;
+
+    @Property(
+            type = PropertyType.NUMBER,
+            name = "Refuel if less than",
+            category = "Core",
+            subcategory = "Refuel",
+            max = 3000,
+            increment = 50
+    )
+    public int refuelThreshold = 200;
+
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Type of fuel to use",
+            category = "Core",
+            subcategory = "Refuel",
+            options = {"Goblin Egg", "Biofuel", "Volta", "Oil Barrel"}
+    )
+    public int typeOfFuelIndex = 0;
 
 
     @Property(
@@ -132,11 +159,11 @@ public class Config extends Vigilant {
 
     @Property(type = PropertyType.SWITCH,
             name = "RGA hardstone aura",
-            description = "Mines hard stone around you. USE WITH Center to block",
+            description = "Mines hard stone around you. USE WITH center to block and optionally make gemstones full block (Core)",
             category = "Powder macro",
             subcategory = "RGA Nuker"
     )
-    public boolean powStoneAura = false;
+    public boolean powNuker = false;
 
     @Property(
             type = PropertyType.SLIDER,
@@ -146,7 +173,7 @@ public class Config extends Vigilant {
             max = 4,
             min = 2
     )
-    public int powAuraHeight = 3;
+    public int powNukerHeight = 3;
 
     @Property(
             type = PropertyType.SELECTOR,
@@ -155,7 +182,7 @@ public class Config extends Vigilant {
             subcategory = "RGA Nuker",
             options = { "Blocks around", "Facing axis"}
     )
-    public int powAuraType = 1;
+    public int powNukerType = 0;
 
     @Property(type = PropertyType.SWITCH,
             name = "Center to block",
@@ -176,10 +203,18 @@ public class Config extends Vigilant {
 
     @Property(type = PropertyType.SWITCH,
             name = "Mine gemstones",
+            description = "Make sure you have a drill that is able to mine gemstones",
             category = "Powder macro",
             subcategory = "Miscellaneous"
     )
     public boolean powMineGemstone = true;
+
+    @Property(type = PropertyType.SWITCH,
+            name = "Use pickaxe to mine hardstone",
+            category = "Powder macro",
+            subcategory = "Miscellaneous"
+    )
+    public boolean powPickaxeSwitch = true;
 
     @Property(type = PropertyType.SLIDER,
             name = "Player detection radius",
@@ -378,33 +413,6 @@ public class Config extends Vigilant {
     public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
 
 
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Refuel with abiphone",
-            category = "Core",
-            subcategory = "Additions"
-    )
-    public boolean refuelWithAbiphone = false;
-
-    @Property(
-            type = PropertyType.NUMBER,
-            name = "Refuel if less than",
-            category = "Core",
-            subcategory = "Additions",
-            min = 0,
-            max = 3000,
-            increment = 50
-    )
-    public int refuelThreshold = 200;
-
-    @Property(
-            type = PropertyType.SELECTOR,
-            name = "Type of fuel to use",
-            category = "Core",
-            subcategory = "Additions",
-            options = {"Goblin Egg", "Biofuel", "Volta", "Oil Barrel"}
-    )
-    public int typeOfFuelIndex = 0;
 
 
     public Config() {
@@ -424,8 +432,8 @@ public class Config extends Vigilant {
         this.addDependency("gemPlayerRad", "gemPlayerFailsafe");
         this.addDependency("powPlayerRad", "powPlayerFailsafe");
         this.addDependency("mithPlayerRad", "mithPlayerFailsafe");
-        this.addDependency("powAuraHeight", "powStoneAura");
-        this.addDependency("powAuraType", "powStoneAura");
+        this.addDependency("powNukerHeight", "powNuker");
+        this.addDependency("powNukerType", "powNuker");
         this.addDependency("routeLineColor", "showRouteLines");
         this.addDependency("routeBlocksColor", "highlightRouteBlocks");
         this.addDependency("refuelThreshold", "refuelWithAbiphone");

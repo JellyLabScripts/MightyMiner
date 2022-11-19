@@ -121,9 +121,6 @@ public class PowderMacro extends Macro {
 
         mineBaritone = new AutoMineBaritone(getAutomineConfig());
 
-
-        RGANuker.enabled = MightyMiner.config.powStoneAura;
-
         currentState = State.NORMAL;
         treasureState = TreasureState.NONE;
         turnState = 1;
@@ -148,7 +145,7 @@ public class PowderMacro extends Macro {
         chestQueue.clear();
         solvedOrSolvingChests.clear();
         renderer.renderMap.clear();
-        
+
 
         if(MightyMiner.config.powMineGemstone){
             blocksAllowedToMine.add(Blocks.stained_glass_pane);
@@ -178,6 +175,12 @@ public class PowderMacro extends Macro {
                 return;
             }
         }
+
+
+        if(!RGANuker.enabled && MightyMiner.config.powNuker){
+            RGANuker.enabled = true;
+        }
+
 
         if(rotation.rotating){
             KeybindHandler.resetKeybindState();
@@ -267,10 +270,22 @@ public class PowderMacro extends Macro {
                 break;
 
             case NORMAL: case UTurn:
-                if(MightyMiner.config.powStoneAura) {
+                if(MightyMiner.config.powNuker) {
                     rotation.intLockAngle(playerYaw, (shouldLookDown() ? 60 : (frontShouldMineSlow() ? 27 : 0)), 200);
                 } else
                     rotation.intLockAngle(playerYaw, (shouldLookDown() ? 60 : 27), 200);
+
+                if(frontShouldMineSlow() && MightyMiner.config.powNuker){
+                    RGANuker.enabled = false;
+                    if(frontHaveObstacles() && notAtCenter() && MightyMiner.config.powCenter && MightyMiner.config.powMineGemstone)
+                        aote = true;
+                }
+
+                if(MightyMiner.config.powPickaxeSwitch)
+                    mc.thePlayer.inventory.currentItem = frontShouldMineSlow() ? PlayerUtils.getItemInHotbar("Drill", "Gauntlet") : PlayerUtils.getItemInHotbar("Pickaxe");
+                else
+                    mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pickaxe");
+
 
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
@@ -288,19 +303,17 @@ public class PowderMacro extends Macro {
     }
 
     private void updateState(){
-        System.out.println("current state " + currentState + " current treasure state: " + treasureState);
-        if(!chestQueue.isEmpty())
+
+        if(!chestQueue.isEmpty()) {
+            if(currentState != State.TREASURE)
+                treasureState = TreasureState.NONE;
+
             currentState = State.TREASURE;
+        }
 
 
         switch (currentState) {
             case TREASURE:
-                if(System.currentTimeMillis() - treasureInitialTime > 7000 && treasureState != TreasureState.RETURNING) {
-                    treasureState = TreasureState.RETURNING;
-                    LogUtils.debugLog("Completed treasure due to timeout");
-                    chestQueue.poll();
-                    return;
-                }
                 switch (treasureState){
                     case NONE:
                         treasureInitialTime = System.currentTimeMillis();
@@ -316,6 +329,12 @@ public class PowderMacro extends Macro {
                     case FINISHED:
                         treasureState = chestQueue.isEmpty() ? TreasureState.RETURNING : TreasureState.NONE;
                         break;
+                }
+                if(System.currentTimeMillis() - treasureInitialTime > 7000 && treasureState != TreasureState.RETURNING) {
+                    treasureState = TreasureState.RETURNING;
+                    LogUtils.debugLog("Completed treasure due to timeout");
+                    chestQueue.poll();
+                    return;
                 }
             case NORMAL:
                 if(!blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(0, 0, 1)) || !blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(0, 1, 1))) {
@@ -378,7 +397,7 @@ public class PowderMacro extends Macro {
         if(currentState == State.TREASURE && treasureState == TreasureState.SOLVING && treasureInitialTime > 200 && packet instanceof S2APacketParticles && currentChest != null){
             if(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT){
                 try {
-                    if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - currentChest.getX()) < 2 && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - currentChest.getY()) < 2 && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - currentChest.getZ()) < 2) {
+                    if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - currentChest.getX()) < 1.5f && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - currentChest.getY()) < 1.5f && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - currentChest.getZ()) < 1.5f) {
                         rotation.intLockAngle(
                                 AngleUtils.getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
                                 AngleUtils.getRequiredPitch(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, (((S2APacketParticles) packet).getYCoordinate()) - (mc.thePlayer.posY + 1.62d), ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
@@ -392,7 +411,12 @@ public class PowderMacro extends Macro {
     void addChestToQueue(){
         new Thread(() -> {
             ThreadUtils.sleep(200);
-            BlockPos chest = BlockUtils.findBlock(18, new ArrayList<>(solvedOrSolvingChests), Blocks.chest, Blocks.trapped_chest).get(0);
+            List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 4, 0, -7, 7), new ArrayList<>(solvedOrSolvingChests), 0, 256, Blocks.chest, Blocks.trapped_chest);
+            if(foundBlocks.isEmpty()){
+                LogUtils.debugLog("That chest was impossible to solve");
+            }
+            BlockPos chest = foundBlocks.get(0);
+
             solvedOrSolvingChests.add(chest);
 
             Logger.log("Adding chest to queue");
@@ -435,6 +459,19 @@ public class PowderMacro extends Macro {
                 || BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) ||  BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane) ;
     }
 
+    boolean frontHaveObstacles(){
+        return mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, 1)) ||
+                mineSlowBlocks.contains(BlockUtils.getRelativeBlock(1, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(1, 0, 1)) ||
+                mineSlowBlocks.contains(BlockUtils.getRelativeBlock(-1, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(-1, 0, 1))
+                || BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) ||  BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane) ;
+    }
+    boolean notAtCenter(){
+        // not at center
+        return !((AngleUtils.get360RotationYaw() % 180 == 0) ?
+                Math.abs(mc.thePlayer.posX) % 1 > 0.3f && Math.abs(mc.thePlayer.posX) % 1 < 0.7f : Math.abs(mc.thePlayer.posZ) % 1 > 0.3f && Math.abs(mc.thePlayer.posZ) % 1 < 0.7f);
+
+
+    }
 
     BaritoneConfig getAutomineConfig(){
         return new BaritoneConfig(

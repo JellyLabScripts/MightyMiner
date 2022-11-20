@@ -159,7 +159,8 @@ public class PowderMacro extends Macro {
     public void onDisable() {
         RGANuker.enabled = false;
         aote = false;
-        mineBaritone.disableBaritone();
+        if (mineBaritone != null) // nullpointerexception crash sometimes if detected player right after turning on the macro
+            mineBaritone.disableBaritone();
         KeybindHandler.resetKeybindState();
     }
 

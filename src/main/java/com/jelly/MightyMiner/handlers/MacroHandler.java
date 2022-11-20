@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.events.ReceivePacketEvent;
+import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.*;
 import com.jelly.MightyMiner.render.BlockRenderer;
@@ -136,6 +137,7 @@ public class MacroHandler {
        }
        pickaxeSkillReady = true;
        enabled = false;
+       YogKiller.Reset();
        if(flag)
            LogUtils.addMessage("Disabled script");
 

@@ -68,6 +68,7 @@ public class AOTVMacro extends Macro {
 
     @Override
     protected void onEnable() {
+        YogKiller.enabled = true;
         if (isPaused()) {
             Unpause();
         }
@@ -89,9 +90,6 @@ public class AOTVMacro extends Macro {
             return;
         }
         targetCoordinate = coords.get(targetCoordIndex);
-        if (MightyMiner.config.killYogs) {
-            YogKiller.enabled = true;
-        }
     }
 
     @Override

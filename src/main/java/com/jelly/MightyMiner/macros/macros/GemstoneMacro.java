@@ -19,7 +19,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -60,7 +59,7 @@ public class GemstoneMacro extends Macro {
     @Override
     public void Pause() {
         KeybindHandler.resetKeybindState();
-        toggle();
+        baritone.disableBaritone();
     }
 
     @Override
@@ -75,11 +74,13 @@ public class GemstoneMacro extends Macro {
             Unpause();
         }
         baritone = new AutoMineBaritone(getMineBehaviour());
+        YogKiller.enabled = true;
     }
 
     @Override
     public void onDisable() {
         baritone.disableBaritone();
+        YogKiller.enabled = false;
     }
 
     @Override

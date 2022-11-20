@@ -229,6 +229,14 @@ public class PowderMacro extends Macro {
             case TREASURE:
                 switch(treasureState){
                     case NONE: case SOLVING:
+                        if(MightyMiner.config.powBlueCheeseSwitch){
+                            if(PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese") == -1){
+                                LogUtils.addMessage("You don't have a blue cheese drill. Switch disabled");
+                                MightyMiner.config.powBlueCheeseSwitch = false;
+                            } else mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese");
+
+                        }
+
                         KeybindHandler.resetKeybindState();
                         break;
                     case WALKING:
@@ -461,8 +469,8 @@ public class PowderMacro extends Macro {
 
     boolean frontHaveObstacles(){
         return mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, 1)) ||
-                mineSlowBlocks.contains(BlockUtils.getRelativeBlock(1, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(1, 0, 1)) ||
-                mineSlowBlocks.contains(BlockUtils.getRelativeBlock(-1, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(-1, 0, 1))
+                mineSlowBlocks.contains(BlockUtils.getRelativeBlock(1, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(1, 1, 1)) ||
+                mineSlowBlocks.contains(BlockUtils.getRelativeBlock(-1, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(-1, 1, 1))
                 || BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) ||  BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane) ;
     }
     boolean notAtCenter(){

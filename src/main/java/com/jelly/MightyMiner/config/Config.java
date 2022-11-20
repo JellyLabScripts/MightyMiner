@@ -216,6 +216,14 @@ public class Config extends Vigilant {
     )
     public boolean powPickaxeSwitch = true;
 
+    @Property(type = PropertyType.SWITCH,
+            name = "Switch blue cheese drill when solving chest",
+            description = "Gives more powder, but make sure you have a blue cheese drill in your hotbar",
+            category = "Powder macro",
+            subcategory = "Miscellaneous"
+    )
+    public boolean powBlueCheeseSwitch = true;
+
     @Property(type = PropertyType.SLIDER,
             name = "Player detection radius",
             description = "Warp back to island if there is player inside the given radius of player",

@@ -15,7 +15,7 @@ public final class ConfigurationFactory {
 
     public <T extends OkaeriConfig> T create(Class<T> type, File file) {
         return ConfigManager.create(type, (config) -> {
-            config.withConfigurer(new JsonGsonConfigurer(), new CoordsSerdes(), new WaypointSerdes());
+            config.withConfigurer(new JsonGsonConfigurer(), new CoordsSerdes(), new WaypointSerdes(), new ColorSerdes());
             config.withBindFile(file);
             config.saveDefaults();
             config.load();

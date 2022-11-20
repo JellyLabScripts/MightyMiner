@@ -123,12 +123,13 @@ public class BlockUtils {
         for (int i = 0; i <= Math.abs(searchBox.dx_bound2 - searchBox.dx_bound1); i++) {
             for (int j = 0; j <= Math.abs(searchBox.dy_bound2 - searchBox.dy_bound1); j++) {
                 for (int k = 0; k <= Math.abs(searchBox.dz_bound2 - searchBox.dz_bound1); k++) {
+
                     //rectangular scan
                     currentBlock = (getPlayerLoc().add(i + Math.min(searchBox.dx_bound2, searchBox.dx_bound1),  j + Math.min(searchBox.dy_bound2, searchBox.dy_bound1),  k + Math.min(searchBox.dz_bound2, searchBox.dz_bound1)));
                     if(requiredBlocks.contains(getBlock(currentBlock))){
                         if (forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(currentBlock))
                             continue;
-                        if (j + Math.min(searchBox.dy_bound2, searchBox.dy_bound1)  > maxY || j + Math.min(searchBox.dy_bound2, searchBox.dy_bound1) < minY)
+                        if (currentBlock.getY() > maxY || currentBlock.getY() < minY)
                             continue;
                         foundBlocks.add(currentBlock);
                     }

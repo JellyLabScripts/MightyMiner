@@ -8,6 +8,7 @@ import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -36,35 +37,38 @@ public class YogKiller {
 
     private static States currentState = States.NONE;
 
-    private Macro lastMacro;
+    private static Macro lastMacro;
 
     public static boolean enabled = false;
 
     private int waitTicks = 0;
 
     public static void Reset() {
+        if (lastMacro != null) {
+            lastMacro.Unpause();
+        }
         target = null;
         yogsList.clear();
         currentState = States.NONE;
+        lastMacro = null;
     }
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        System.out.println(enabled);
         if (!enabled) return;
         if (event.phase != TickEvent.Phase.START)
             return;
         if (!MightyMiner.config.killYogs || mc.thePlayer == null || mc.theWorld == null) return;
 
         if (!PlayerUtils.hasYogInRadius(MightyMiner.config.yogsRadius)) {
-            Reset();
+            yogsList.clear();
             return;
         }
 
         for (Entity entity : mc.theWorld.getLoadedEntityList()) {
             if (!(entity instanceof EntityMagmaCube)) continue;
             if (NpcUtil.isNpc(entity)) continue;
-            if (yogsList.stream().noneMatch(entityMagmaCube -> entityMagmaCube.getEntityId() == entity.getEntityId() && (!entityMagmaCube.isDead || entityMagmaCube.getHealth() > 0f))) {
+            if (yogsList.stream().noneMatch(entityMagmaCube -> entityMagmaCube.getEntityId() == entity.getEntityId() && (!isTargetDead(entity)))) {
                 yogsList.add((EntityMagmaCube) entity);
             }
         }
@@ -79,7 +83,7 @@ public class YogKiller {
 
         switch (currentState) {
             case NONE: {
-                if (!yogsList.isEmpty()) {
+                if (hasAliveYogs() && PlayerUtils.hasYogInRadius(MightyMiner.config.yogsRadius)) {
                     MacroHandler.macros.forEach(macro -> {
                         if (macro.isEnabled()) {
                             lastMacro = macro;
@@ -87,6 +91,9 @@ public class YogKiller {
                         }
                     });
                     currentState = States.SEARCHING;
+                } else if (!hasAliveYogs() || yogsList.isEmpty()) {
+                    Reset();
+                    return;
                 }
                 break;
             }
@@ -94,12 +101,17 @@ public class YogKiller {
                 target = PlayerUtils.getClosestMob(yogsList);
                 if (target != null) {
                     currentState = States.KILLING;
+                    return;
+                }
+                if (!hasAliveYogs() || yogsList.isEmpty()) {
+                    Reset();
+                    return;
                 }
                 break;
             }
             case KILLING: {
 
-                if (target.isDead) {
+                if (isTargetDead(target)) {
                     currentState = States.KILLED;
                     target = null;
                     return;
@@ -129,32 +141,28 @@ public class YogKiller {
                     KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
                 } else {
                     LogUtils.addMessage("Something is blocking target, waiting for free shot...");
+                    KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
                     currentState = States.BLOCKED_VISION;
-                    waitTicks = 200;
+                    waitTicks = 50;
                 }
                 break;
             }
             case BLOCKED_VISION: {
-                if (target.isDead) {
+                if (isTargetDead(target)) {
                     currentState = States.KILLED;
                     target = null;
                     return;
                 }
                 // TODO: Move to a better position or just mind your own business idk.
-                // Temporary solution: Wait for 20 ticks and try again.
+                // Temporary solution: Wait for 50 ticks and try again.
                 if (waitTicks-- > 0) return;
                 currentState = States.KILLING;
                 break;
             }
             case KILLED: {
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
-                if (yogsList.isEmpty()) {
+                if (hasAliveYogs()) {
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pick");
-
-                    if (lastMacro != null)
-                        lastMacro.Unpause();
-                    lastMacro = null;
-                    currentState = States.NONE;
                     Reset();
                 } else {
                     currentState = States.SEARCHING;
@@ -162,7 +170,14 @@ public class YogKiller {
                 break;
             }
         }
+    }
 
+    private boolean isTargetDead(Entity target) {
+        return target == null || target.isDead || ((target instanceof EntityLiving) && ((EntityLiving) target).getHealth() <= 0);
+    }
+
+    private boolean hasAliveYogs() {
+        return yogsList.stream().anyMatch(entityMagmaCube -> !isTargetDead(entityMagmaCube));
     }
 
     @SubscribeEvent

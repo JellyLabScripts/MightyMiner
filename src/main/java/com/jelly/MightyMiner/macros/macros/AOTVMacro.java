@@ -58,6 +58,7 @@ public class AOTVMacro extends Macro {
     public void Pause() {
         prePauseState = currentState;
         currentState = State.PAUSED;
+        baritone.disableBaritone();
     }
 
     @Override

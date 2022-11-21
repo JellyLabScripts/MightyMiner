@@ -60,6 +60,7 @@ public class GemstoneMacro extends Macro {
     public void Pause() {
         KeybindHandler.resetKeybindState();
         baritone.disableBaritone();
+        enabled = false;
     }
 
     @Override
@@ -71,20 +72,21 @@ public class GemstoneMacro extends Macro {
     @Override
     public void onEnable() {
         if (isPaused()) {
+            System.out.println("Unpausing");
             Unpause();
         }
+        System.out.println("Enabled Gemstone macro checking if player is near");
         baritone = new AutoMineBaritone(getMineBehaviour());
-        YogKiller.enabled = true;
     }
 
     @Override
     public void onDisable() {
         baritone.disableBaritone();
-        YogKiller.enabled = false;
     }
 
     @Override
     public void onTick(TickEvent.Phase phase){
+        if (!enabled) return;
 
         if(phase != TickEvent.Phase.START)
             return;

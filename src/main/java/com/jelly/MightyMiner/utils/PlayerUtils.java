@@ -2,17 +2,14 @@ package com.jelly.MightyMiner.utils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.StringUtils;
+import net.minecraft.util.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class PlayerUtils {
 
@@ -119,6 +116,54 @@ public class PlayerUtils {
         return false;
     }
 
+    public static <T> T getClosestMob(ArrayList<T> list) {
+        T closest = null;
+
+        for (T element : list) {
+            Entity entity = (Entity) element;
+
+            if (entity instanceof EntityLiving) {
+                if (((EntityLiving) entity).getHealth() <= 0f) {
+                    continue;
+                }
+            }
+
+            if (entity.isDead) continue;
+
+            if (closest == null) {
+                closest = element;
+                continue;
+            }
+
+            if (mc.thePlayer.getDistanceToEntity(entity) < mc.thePlayer.getDistanceToEntity((Entity) closest)) {
+                closest = element;
+            }
+        }
+
+        return closest;
+    }
+
+    public static Entity entityIsVisible(Entity entityToCheck) {
+        Entity entity = null;
+
+        // Raycast to entityToCheck and check if any blocks are in the way
+        Vec3 playerPos = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
+        Vec3 entityPos = new Vec3(entityToCheck.posX, entityToCheck.posY + entityToCheck.getEyeHeight(), entityToCheck.posZ);
+        MovingObjectPosition raycast = mc.theWorld.rayTraceBlocks(playerPos, entityPos, false, true, false);
+        if (raycast != null) {
+            // If the raycast hits a block, check if the block is the entityToCheck
+            if (raycast.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
+                if (raycast.entityHit == entityToCheck) {
+                    entity = entityToCheck;
+                }
+            }
+        } else {
+            // If the raycast doesn't hit a block, the entity is visible
+            entity = entityToCheck;
+        }
+
+        return entity;
+    }
 
     public static void warpBackToIsland(){
         mc.thePlayer.sendChatMessage("/warp home");

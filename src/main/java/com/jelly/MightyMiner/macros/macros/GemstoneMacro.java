@@ -19,7 +19,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -60,7 +59,8 @@ public class GemstoneMacro extends Macro {
     @Override
     public void Pause() {
         KeybindHandler.resetKeybindState();
-        toggle();
+        baritone.disableBaritone();
+        enabled = false;
     }
 
     @Override
@@ -72,8 +72,10 @@ public class GemstoneMacro extends Macro {
     @Override
     public void onEnable() {
         if (isPaused()) {
+            System.out.println("Unpausing");
             Unpause();
         }
+        System.out.println("Enabled Gemstone macro checking if player is near");
         baritone = new AutoMineBaritone(getMineBehaviour());
     }
 
@@ -84,6 +86,7 @@ public class GemstoneMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase){
+        if (!enabled) return;
 
         if(phase != TickEvent.Phase.START)
             return;

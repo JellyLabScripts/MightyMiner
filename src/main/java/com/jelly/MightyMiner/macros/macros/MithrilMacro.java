@@ -75,6 +75,7 @@ public class MithrilMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase) {
+        if (!enabled) return;
 
         if(phase != TickEvent.Phase.START)
             return;

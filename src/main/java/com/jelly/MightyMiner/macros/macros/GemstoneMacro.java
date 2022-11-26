@@ -4,7 +4,6 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
-import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
@@ -80,6 +79,12 @@ public class GemstoneMacro extends Macro {
     }
 
     @Override
+    public void FailSafeDisable() {
+        PlayerUtils.warpBackToIsland();
+        MacroHandler.disableScript();
+    }
+
+    @Override
     public void onDisable() {
         baritone.disableBaritone();
     }
@@ -91,12 +96,6 @@ public class GemstoneMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-        if(MightyMiner.config.gemPlayerFailsafe) {
-            if(PlayerUtils.isNearPlayer(MightyMiner.config.gemPlayerRad)){
-                PlayerUtils.warpBackToIsland();
-                MacroHandler.disableScript();
-            }
-        }
 
         if(haveTreasureChest && System.currentTimeMillis() - treasureInitialTime > 7000) {
             haveTreasureChest = false;

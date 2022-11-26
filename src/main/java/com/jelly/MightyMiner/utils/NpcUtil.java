@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner.utils;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -21,7 +22,9 @@ public class NpcUtil {
 
         EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
 
-        return entity.getUniqueID().version() == 2 && entityLivingBase.getHealth() == 20.0F && !entityLivingBase.isPlayerSleeping() && !entity.isInvisible();
+        return (entity.getUniqueID().version() == 2 && entityLivingBase.getHealth() == 20.0F && !entityLivingBase.isPlayerSleeping() && !entity.isInvisible()) ||
+                // Watchdog NPC probably
+                (entity.getUniqueID().version() == 4 && !entityLivingBase.isPlayerSleeping() && entity.isInvisible() && (entity.getEntityId() == (Minecraft.getMinecraft().thePlayer.getEntityId() + 1)));
     }
 
     @SuppressWarnings("unused")

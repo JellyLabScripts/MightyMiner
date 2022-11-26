@@ -13,14 +13,11 @@ import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
 import com.jelly.MightyMiner.utils.ThreadUtils;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class AStarCalculator{
 
@@ -29,7 +26,7 @@ public class AStarCalculator{
     Minecraft mc = Minecraft.getMinecraft();
     GridEnvironment<Node> gridEnvironment = new GridEnvironment<>();
 
-    PriorityQueue<Node> openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));;
+    PriorityQueue<Node> openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));
 
     int step;
     int stepLimit;

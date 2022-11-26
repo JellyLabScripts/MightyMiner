@@ -7,18 +7,12 @@ import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
-import com.jelly.MightyMiner.utils.DrawUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,8 +53,8 @@ public class MithrilMacro extends Macro {
         }
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");
 
-        if(MightyMiner.config.mithPlayerFailsafe) {
-            if(PlayerUtils.isNearPlayer(MightyMiner.config.mithPlayerRad)){
+        if(MightyMiner.config.playerFailsafe) {
+            if(PlayerUtils.isNearPlayer(MightyMiner.config.playerRad)){
                 LogUtils.addMessage("Didnt start macro since therese a player near");
                 this.enabled = false;
                 onDisable();
@@ -69,7 +63,13 @@ public class MithrilMacro extends Macro {
         }
         LogUtils.debugLog("Didnt find any players nearby, continuing");
         baritone = new AutoMineBaritone(getMineBehaviour());
+    }
 
+    @Override
+    public void FailSafeDisable() {
+        if (baritone == null) return;
+        PlayerUtils.warpBackToIsland();
+        MacroHandler.disableScript();
     }
 
 
@@ -79,13 +79,6 @@ public class MithrilMacro extends Macro {
 
         if(phase != TickEvent.Phase.START)
             return;
-
-        if(MightyMiner.config.mithPlayerFailsafe) {
-            if(PlayerUtils.isNearPlayer(MightyMiner.config.mithPlayerRad)){
-                PlayerUtils.warpBackToIsland();
-                MacroHandler.disableScript();
-            }
-        }
 
         if(MightyMiner.config.mithShiftWhenMine)
             KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);

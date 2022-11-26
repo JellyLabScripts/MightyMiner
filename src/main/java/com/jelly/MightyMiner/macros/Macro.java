@@ -3,12 +3,9 @@ package com.jelly.MightyMiner.macros;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.handlers.MacroHandler;
-import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -78,5 +75,7 @@ public abstract class Macro {
     public void Unpause() {
 
     }
+
+    public void FailSafeDisable() {}
 
 }

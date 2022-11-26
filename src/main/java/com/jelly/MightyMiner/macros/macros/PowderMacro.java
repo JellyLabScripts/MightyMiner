@@ -442,14 +442,14 @@ public class PowderMacro extends Macro {
     }
 
     int getRotAmount(){
-        //check blacklisted blocks
+        //check blacklisted blocks on the sides
         if(!(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(-1, 0, 0))) || !(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(1, 0, 0)))
                 || !(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(-1, 1, 0))) || !(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(1, 1, 0)))){
 
             //check which side is possible to walk, if none, 180
             return  (blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(-1, 0, 0)) && blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(-1, 1, 0))) ? (-90)
                     : (blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(1, 0, 0)) && blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(1, 1, 0)) ? 90 : 180);
-        } else
+        } else // normal
             return turnState == 1 ? 90 : -90;
         // both sides can be walked, oscillate between 90 and -90 to increase area mined
     }

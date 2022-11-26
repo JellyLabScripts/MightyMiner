@@ -8,13 +8,19 @@ import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.baritone.automine.structures.GridEnvironment;
 import com.jelly.MightyMiner.baritone.automine.structures.Node;
+import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
+import com.jelly.MightyMiner.utils.ThreadUtils;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 
+import javax.swing.text.JTextComponent;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class AStarCalculator{
 
@@ -23,7 +29,6 @@ public class AStarCalculator{
     Minecraft mc = Minecraft.getMinecraft();
     GridEnvironment<Node> gridEnvironment = new GridEnvironment<>();
 
-    List<Node> checkedNodes = new ArrayList<>();
     PriorityQueue<Node> openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));;
 
     int step;
@@ -51,12 +56,12 @@ public class AStarCalculator{
 
     public LinkedList<BlockNode> calculatePath(BlockPos startingPos, BlockPos endingBlock, PathFinderBehaviour pathFinderBehaviour, PathMode mode, int stepLimit) {
 
+
         this.pathFinderBehaviour = pathFinderBehaviour;
         this.mode = mode;
         this.stepLimit = stepLimit;
 
         gridEnvironment.clear();
-        checkedNodes.clear();
         openNodes.clear();
 
         step = 0;
@@ -78,26 +83,39 @@ public class AStarCalculator{
 
         instantiateAnyNode(currentGridX, currentGridY, currentGridZ, new Node(startingPos));
         Node startNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
+        Node currentNode = null;
 
         openNodes.add(startNode);
 
+
         while (!openNodes.isEmpty()) {
-            Node currentNode = openNodes.poll();
+
+
+            currentNode = openNodes.poll();
+
+            if (currentNode != null && currentNode.blockPos.equals(endingBlock))
+                return trackBackPath(currentNode, startNode);
+
+            openNodes.remove(currentNode);
+
+
+            assert currentNode != null;
+            KeybindHandler.debugBlockRenderer.renderMap.put(currentNode.blockPos, Color.ORANGE);
             if (currentNode.lastNode != null) {
                 currentGridX = currentNode.blockPos.getX() - startNode.blockPos.getX();
                 currentGridY = currentNode.blockPos.getY();
                 currentGridZ = currentNode.blockPos.getZ() - startNode.blockPos.getZ();
             }
-            checkedNodes.add(currentNode);
             step++;
+
+
             if (step > stepLimit)
                 break;
             for (Moves move : Moves.values()) {
                 instantiateNode(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz, startNode);
                 checkNode(move, gridEnvironment.get(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz), currentNode, endingBlock);
             }
-            if (currentNode.blockPos.equals(endingBlock))
-                return trackBackPath(currentNode, startNode);
+
         }
         return new LinkedList<>();
     }
@@ -106,7 +124,7 @@ public class AStarCalculator{
         return step;
     }
     private void checkNode(Moves move, Node searchNode, Node currentNode, BlockPos endingBlockPos) {
-        if (checkedNodes.contains(searchNode) || BlockUtils.isPassable(searchNode.blockPos.down()))
+        if (BlockUtils.isPassable(searchNode.blockPos.down()))
             return;
 
         if (!searchNode.blockPos.equals(endingBlockPos)) {
@@ -156,15 +174,19 @@ public class AStarCalculator{
                 break;
         }
 
-        if (!openNodes.contains(searchNode)) {
+
+        double gCost = getMoveCost(move, searchNode.blockPos) + currentNode.gValue;
+
+        if(searchNode.gValue == -1 || gCost < searchNode.gValue){
+
             searchNode.lastNode = currentNode;
-            calculateCost(move, searchNode, endingBlockPos);
-            openNodes.add(searchNode);
-        } else if (currentNode.gValue + (move.cost + (BlockUtils.isPassable(searchNode.blockPos) ? 1 : 2)) < searchNode.gValue) {
-            searchNode.lastNode = currentNode;
-            calculateCost((move.cost + (BlockUtils.isPassable(searchNode.blockPos) ? 1 : 2)), searchNode, endingBlockPos);
-            openNodes.remove(searchNode);
-            openNodes.add(searchNode);
+            setCost(searchNode, gCost, getHeuristic(searchNode.blockPos, endingBlockPos));
+            if(!openNodes.contains(searchNode)){
+                openNodes.add(searchNode);
+            } else {
+                openNodes.remove(searchNode);
+                openNodes.add(searchNode);
+            }
         }
     }
 
@@ -205,7 +227,7 @@ public class AStarCalculator{
 
         if (currentTrackNode != null && currentTrackNode.lastNode != null) {
             do {
-
+                ThreadUtils.sleep(10);
                 if (currentTrackNode.lastNode.blockPos.getY() > currentTrackNode.blockPos.getY()) { // going down
 
                     blocksToMine.add(new BlockNode(currentTrackNode.blockPos, getBlockType(currentTrackNode.blockPos)));
@@ -231,7 +253,9 @@ public class AStarCalculator{
                 }
                 formerNode = currentTrackNode;
                 currentTrackNode = currentTrackNode.lastNode;
+                System.out.println(currentTrackNode.blockPos);
             } while (!startNode.equals(currentTrackNode) && currentTrackNode.lastNode.blockPos != null);
+
             if ((blocksToMine.getLast()).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1 && (blocksToMine.get(blocksToMine.size() - 2)).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1)
                 blocksToMine.add(new BlockNode(BlockUtils.getPlayerLoc().up(2), getBlockType(BlockUtils.getPlayerLoc().up(2))));
         }
@@ -239,24 +263,14 @@ public class AStarCalculator{
         return blocksToMine;
     }
 
-    private void calculateCost(Moves move, Node node, BlockPos endingBlock) {
-        node.hValue = getHeuristic(node.blockPos, endingBlock);
-        if (node.lastNode != null) {
-            node.lastNode.gValue += move.cost + (BlockUtils.isPassable(node.blockPos) ? 1 : 2);
-        } else {
-            node.gValue = 1.0D;
-        }
-        node.fValue = node.gValue + node.hValue;
+    private void setCost(Node node, double gCost, double hCost) {
+        node.gValue = gCost;
+        node.hValue = hCost;
+        node.fValue = gCost + hCost;
     }
 
-    private void calculateCost(double gCost, Node node, BlockPos endingBlock) {
-        node.hValue = getHeuristic(node.blockPos, endingBlock);
-        if (node.lastNode != null) {
-            node.lastNode.gValue += gCost;
-        } else {
-            node.gValue = 1.0D;
-        }
-        node.fValue = node.gValue + node.hValue;
+    private double getMoveCost(Moves move, BlockPos blockPos) {
+        return move.cost + (BlockUtils.isPassable(blockPos) ? 0 : 0.5f);
     }
 
 

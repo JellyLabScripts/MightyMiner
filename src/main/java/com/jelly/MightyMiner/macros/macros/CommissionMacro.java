@@ -1,21 +1,58 @@
 package com.jelly.MightyMiner.macros.macros;
 
+import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
+import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
+import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
+import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.utils.ScoreboardUtils;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockStone;
+import net.minecraft.init.Blocks;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommissionMacro extends Macro {
-    //AutoMineBaritone mineBaritone;
-
+    private AutoMineBaritone autoMineBaritone;
     public enum Quest {
         ROYAL_MINES,
-
+        LAVA_SPRINGS,
+        UPPER_MINES,
+        FAR_RESERVE,
+        RAMPART_QUARRY,
+        CLIFFSIDE_VEINS,
+        NONE
     }
+    public enum State {
+        GETTING_COMMISION,
+        SEARCHING,
+        TELEPORTING,
+        MINING,
+        NONE
+    }
+
+    private final List<Block> allowedBlocks = new ArrayList<>();
     @Override
     protected void onEnable() {
-       // mineBaritone.mineFor(new BlockPos(5, 1, -9));
-       // LogUtils.addMessage(BlockUtils.getRelativeBlock(0, 0, 1).toString());
-    }
+        allowedBlocks.clear();
 
-   /* @Override
+        allowedBlocks.add(Blocks.prismarine);
+        allowedBlocks.add(Blocks.wool);
+        allowedBlocks.add(Blocks.stained_hardened_clay);
+        allowedBlocks.add(Blocks.stone);
+
+        List<String> scoreboardLines = ScoreboardUtils.getScoreboardLines();
+
+        scoreboardLines.stream()
+                .forEach(s -> {
+                    if (s.equals(""))
+                });
+    }
+    @Override
     public void onTick(TickEvent.Phase phase) {
         mineBaritone.onTickEvent(phase);
     }
@@ -28,31 +65,24 @@ public class CommissionMacro extends Macro {
     @Override
     public void onLastRender(RenderWorldLastEvent event) {
         mineBaritone.onRenderEvent();
-    }*/
+    }
 
     @Override
     protected void onDisable() {
-       // mineBaritone.disableBaritone();
+        mineBaritone.disableBaritone();
 
     }
-    /*
-    private MineBehaviour getMineBehaviour(){
-        return new MineBehaviour(
-                AutoMineType.DYNAMIC,
-                false,
+
+    private BaritoneConfig baritoneConfig(){
+        return new BaritoneConfig(
+                AutoMineType.STATIC,
                 true,
-                false,
-                50,
+                true,
+                true,
+                350,
                 8,
-                new ArrayList<Block>(){
-                    {
-                        add(Blocks.chest);
-                        add(Blocks.trapped_chest);
-                    }
-                },
                 null,
-                256,
-                0
+
         );
-    }*/
+    }
 }

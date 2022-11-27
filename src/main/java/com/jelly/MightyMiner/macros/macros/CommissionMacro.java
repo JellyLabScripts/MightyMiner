@@ -3,6 +3,7 @@ package com.jelly.MightyMiner.macros.macros;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
@@ -74,6 +75,7 @@ public class CommissionMacro extends Macro {
 
         if (PlayerUtils.getItemInHotbar("Pickaxe", "Drill", "Gauntlet", "Juju", "Terminator", "Aspect of the Void", "Royal Pigeon") == -1) {
             LogUtils.addMessage("You dont have items dumbass");
+            MacroHandler.disableScript();
             return;
         }
 
@@ -131,6 +133,7 @@ public class CommissionMacro extends Macro {
                     currentQuest = null;
             }
         });
+
     }
 
     @Override

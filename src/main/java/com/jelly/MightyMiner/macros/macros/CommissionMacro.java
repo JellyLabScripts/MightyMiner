@@ -6,9 +6,11 @@ import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.LogUtils;
+import com.jelly.MightyMiner.utils.NpcUtil;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.TablistUtils;
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
@@ -78,6 +80,14 @@ public class CommissionMacro extends Macro {
             LogUtils.addMessage("You dont have items dumbass");
             MacroHandler.disableScript();
             return;
+        }
+
+        for (Entity entity : mc.theWorld.loadedEntityList) {
+            if (PlayerUtils.hasEntityInRadius(3)) {
+                if (!NpcUtil.isNpc(entity)){
+                    LogUtils.debugLog("no king, emissary dumbass");
+                }
+            }
         }
 
     }
@@ -176,5 +186,5 @@ public class CommissionMacro extends Macro {
         allowedBlocks.add(Blocks.stained_hardened_clay);
         allowedBlocks.add(Blocks.stone);
     }
-    
+
 }

@@ -10,6 +10,7 @@ import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.TablistUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -134,6 +135,8 @@ public class CommissionMacro extends Macro {
             }
         });
 
+
+
     }
 
     @Override
@@ -173,4 +176,5 @@ public class CommissionMacro extends Macro {
         allowedBlocks.add(Blocks.stained_hardened_clay);
         allowedBlocks.add(Blocks.stone);
     }
+    
 }

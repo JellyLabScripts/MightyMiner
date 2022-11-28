@@ -105,14 +105,21 @@ public class PowderMacro extends Macro {
         prePauseState = null;
     }
 
+    @Override
+    public void FailSafeDisable() {
+        if (mineBaritone == null) return;
+        PlayerUtils.warpBackToIsland();
+        MacroHandler.disableScript();
+    }
+
 
     @Override
     public void onEnable() {
         if (isPaused()) {
             Unpause();
         }
-        if(MightyMiner.config.powPlayerFailsafe) {
-            if (PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)) {
+        if(MightyMiner.config.playerFailsafe) {
+            if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad)) {
                 LogUtils.addMessage("Not starting, there is a player nearby");
                 this.toggle();
                 return;
@@ -169,13 +176,7 @@ public class PowderMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-        if(MightyMiner.config.powPlayerFailsafe) {
-            if(PlayerUtils.isNearPlayer(MightyMiner.config.powPlayerRad)){
-                PlayerUtils.warpBackToIsland();
-                MacroHandler.disableScript();
-                return;
-            }
-        }
+        if (!enabled) return;
 
 
         if(!RGANuker.enabled && MightyMiner.config.powNuker){

@@ -103,6 +103,16 @@ public class PlayerUtils {
         return false;
     }
 
+    public static boolean hasEntityInRadius(int radius){
+        for(Entity e :  mc.theWorld.getLoadedEntityList()){
+
+            if(e.getDistanceToEntity(mc.thePlayer) < radius) {
+                LogUtils.debugLog("Entity found");
+                return true;
+            }
+        }
+        return false;
+    }
     public static boolean hasYogInRadius(int radius) {
         for (Entity e : mc.theWorld.getLoadedEntityList()) {
             if (!(e instanceof EntityMagmaCube)) continue;

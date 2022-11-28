@@ -79,6 +79,12 @@ public class GemstoneMacro extends Macro {
     }
 
     @Override
+    public void FailSafeDisable() {
+        PlayerUtils.warpBackToIsland();
+        MacroHandler.disableScript();
+    }
+
+    @Override
     public void onDisable() {
         baritone.disableBaritone();
     }
@@ -90,12 +96,6 @@ public class GemstoneMacro extends Macro {
         if(phase != TickEvent.Phase.START)
             return;
 
-        if(MightyMiner.config.gemPlayerFailsafe) {
-            if(PlayerUtils.isNearPlayer(MightyMiner.config.gemPlayerRad)){
-                PlayerUtils.warpBackToIsland();
-                MacroHandler.disableScript();
-            }
-        }
 
         if(haveTreasureChest && System.currentTimeMillis() - treasureInitialTime > 7000) {
             haveTreasureChest = false;

@@ -139,22 +139,26 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.SWITCH,
             name = "Enable Player detection failsafe",
             description = "Teleports you to your island if there is a player nearby",
-            category = "Gemstone macro",
-            subcategory = "Failsafes"
+            category = "Failsafes"
     )
-    public boolean gemPlayerFailsafe = true;
+    public boolean playerFailsafe = true;
 
     @Property(type = PropertyType.SLIDER,
             name = "Player detection radius",
             description = "Warp back to island if there is player inside the given radius of player",
-            category = "Gemstone macro",
-            subcategory = "Failsafes",
+            category = "Failsafes",
             min = 1,
             max = 30
     )
-    public int gemPlayerRad = 10;
+    public int playerRad = 10;
 
 
+    @Property(type = PropertyType.CHECKBOX,
+            name = "Disable macro on world change",
+            description = "Disables the macro when you get teleported to another world",
+            category = "Failsafes"
+    )
+    public boolean disableOnWorldChange = false;
 
 
     @Property(type = PropertyType.SWITCH,
@@ -193,15 +197,6 @@ public class Config extends Vigilant {
     public boolean powCenter = false;
 
     @Property(type = PropertyType.SWITCH,
-            name = "Enable Player detection failsafe",
-            description = "Teleports you to your island if there is a player nearby",
-            category = "Powder macro",
-            subcategory = "Failsafes"
-    )
-    public boolean powPlayerFailsafe = true;
-
-
-    @Property(type = PropertyType.SWITCH,
             name = "Mine gemstones",
             description = "Make sure you have a drill that is able to mine gemstones",
             category = "Powder macro",
@@ -223,16 +218,6 @@ public class Config extends Vigilant {
             subcategory = "Miscellaneous"
     )
     public boolean powBlueCheeseSwitch = true;
-
-    @Property(type = PropertyType.SLIDER,
-            name = "Player detection radius",
-            description = "Warp back to island if there is player inside the given radius of player",
-            category = "Powder macro",
-            subcategory = "Failsafes",
-            min = 1,
-            max = 30
-    )
-    public int powPlayerRad = 10;
 
     @Property(type = PropertyType.SLIDER,
             name = "Width between each lane",
@@ -299,24 +284,6 @@ public class Config extends Vigilant {
             min = 2
     )
     public int mithRestartTimeThreshold = 5;
-
-    @Property(type = PropertyType.SWITCH,
-            name = "Enable Player detection failsafe",
-            description = "Teleports you to your island if there is a player nearby",
-            category = "Mithril macro",
-            subcategory = "Failsafes"
-    )
-    public boolean mithPlayerFailsafe = true;
-
-    @Property(type = PropertyType.SLIDER,
-            name = "Player detection radius",
-            description = "Warp back to island if there is player inside the given radius of player",
-            category = "Mithril macro",
-            subcategory = "Failsafes",
-            min = 1,
-            max = 30
-    )
-    public int mithPlayerRad = 10;
 
 
    /* @Property( type = PropertyType.SLIDER,
@@ -422,8 +389,6 @@ public class Config extends Vigilant {
     public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
 
 
-
-
     public Config() {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector(), new ConfigSorting());
         init();
@@ -438,9 +403,7 @@ public class Config extends Vigilant {
         this.preload();
 
 
-        this.addDependency("gemPlayerRad", "gemPlayerFailsafe");
-        this.addDependency("powPlayerRad", "powPlayerFailsafe");
-        this.addDependency("mithPlayerRad", "mithPlayerFailsafe");
+        this.addDependency("playerRad", "playerFailsafe");
         this.addDependency("powNukerHeight", "powNuker");
         this.addDependency("powNukerType", "powNuker");
         this.addDependency("routeLineColor", "showRouteLines");

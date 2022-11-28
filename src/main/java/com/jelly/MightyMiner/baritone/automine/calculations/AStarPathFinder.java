@@ -115,8 +115,8 @@ public class AStarPathFinder {
 
             if (!path.isEmpty()) {
 
-                if(!pathFinderBehaviour.isStaticMode())
-                    path.removeLast(); // remove last dummy blockNode, as this method call must be in chunk load limit
+                if(path.getLast().getBlockPos() == null)
+                    path.removeLast(); // remove last dummy blockNode as it is useless for find(BLock)
 
                 possiblePaths.add(path);
                 limit = calculator.getSteps();

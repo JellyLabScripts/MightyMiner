@@ -4,6 +4,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockStone;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
@@ -61,7 +64,10 @@ public class BlockUtils {
     }
 
     // ;p
-
+    private boolean isTitanium(BlockPos pos) {
+        IBlockState state = mc.theWorld.getBlockState(pos);
+        return (state.getBlock() == Blocks.stone && ((BlockStone.EnumType)state.getValue((IProperty)BlockStone.VARIANT)).equals(BlockStone.EnumType.DIORITE_SMOOTH));
+    }
 
     public static int getUnitX() {
         double modYaw = (mc.thePlayer.rotationYaw % 360 + 360) % 360;

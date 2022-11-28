@@ -3,7 +3,6 @@ package com.jelly.MightyMiner.baritone.automine.calculations;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.ChunkLoadException;
-import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.movement.Moves;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
@@ -14,22 +13,24 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
+import com.jelly.MightyMiner.utils.ThreadUtils;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ChunkProviderClient;
 import net.minecraft.util.BlockPos;
+
+import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
 
-public class AStarCalculator{
-
+public class AStarCalculator {
 
 
     Minecraft mc = Minecraft.getMinecraft();
     GridEnvironment<Node> gridEnvironment = new GridEnvironment<>();
 
-    PriorityQueue<Node> openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));;
+    PriorityQueue<Node> openNodes = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fValue));
+    ;
 
     int step;
     int stepLimit;
@@ -38,8 +39,7 @@ public class AStarCalculator{
     PathMode mode;
 
 
-
-    public LinkedList<BlockNode> calculateStaticPath(BlockPos goalBlock){
+    public LinkedList<BlockNode> calculateStaticPath(BlockPos goalBlock) {
 
         if (BlockUtils.canSeeBlock(goalBlock) && BlockUtils.canReachBlock(goalBlock))
             return new LinkedList<BlockNode>() {
@@ -77,13 +77,14 @@ public class AStarCalculator{
             };
         }
 
+
         int currentGridX = 0;
-        int currentGridY = (int)mc.thePlayer.posY;
+        int currentGridY = (int) mc.thePlayer.posY;
         int currentGridZ = 0;
 
         instantiateAnyNode(currentGridX, currentGridY, currentGridZ, new Node(startingPos));
         Node startNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
-        Node currentNode;
+        Node currentNode = null;
 
         openNodes.add(startNode);
 
@@ -100,7 +101,7 @@ public class AStarCalculator{
 
 
             assert currentNode != null;
-           // KeybindHandler.debugBlockRenderer.renderMap.put(currentNode.blockPos, Color.ORANGE);
+            //KeybindHandler.debugBlockRenderer.renderMap.put(currentNode.blockPos, Color.ORANGE);
             if (currentNode.lastNode != null) {
                 currentGridX = currentNode.blockPos.getX() - startNode.blockPos.getX();
                 currentGridY = currentNode.blockPos.getY();
@@ -112,11 +113,10 @@ public class AStarCalculator{
             if (step > stepLimit)
                 break;
             for (Moves move : Moves.values()) {
-
                 instantiateNode(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz, startNode);
                 try {
                     checkNode(move, gridEnvironment.get(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz), currentNode, endingBlock);
-                }catch (ChunkLoadException e){
+                } catch (ChunkLoadException e) {
                     return trackBackPath(false, currentNode, startNode);
                 }
             }
@@ -125,11 +125,13 @@ public class AStarCalculator{
         return new LinkedList<>();
     }
 
-    public int getSteps(){
+    public int getSteps() {
         return step;
     }
-    private void checkNode(Moves move, Node searchNode, Node currentNode, BlockPos endingBlockPos) throws ChunkLoadException{
-        if(!mc.theWorld.getChunkFromBlockCoords(searchNode.blockPos).isLoaded()){
+
+    private void checkNode(Moves move, Node searchNode, Node currentNode, BlockPos endingBlockPos) throws ChunkLoadException {
+
+        if (!mc.theWorld.getChunkFromBlockCoords(searchNode.blockPos).isLoaded()) {
             throw new ChunkLoadException();
         }
 
@@ -138,41 +140,56 @@ public class AStarCalculator{
 
         if (!searchNode.blockPos.equals(endingBlockPos)) {
 
-            if(pathFinderBehaviour.getForbiddenMiningBlocks() != null){
-                switch (move){
-                    case ASCEND_EAST: case ASCEND_NORTH: case ASCEND_SOUTH: case ASCEND_WEST:
-                        if(pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.blockPos.up(2))))
+            if (pathFinderBehaviour.getForbiddenMiningBlocks() != null) {
+                switch (move) {
+                    case ASCEND_EAST:
+                    case ASCEND_NORTH:
+                    case ASCEND_SOUTH:
+                    case ASCEND_WEST:
+                        if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.blockPos.up(2))))
                             return;
                         break;
-                    case DESCEND_EAST: case DESCEND_NORTH: case DESCEND_SOUTH: case DESCEND_WEST:
-                        if(pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up(2))))
+                    case DESCEND_EAST:
+                    case DESCEND_NORTH:
+                    case DESCEND_SOUTH:
+                    case DESCEND_WEST:
+                        if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up(2))))
                             return;
                         break;
                 }
-                if(pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) || pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())))
+                if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) || pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())))
                     return;
 
             }
 
-            if(pathFinderBehaviour.getAllowedMiningBlocks() != null){
-                switch (move){
-                    case ASCEND_EAST: case ASCEND_NORTH: case ASCEND_SOUTH: case ASCEND_WEST:
-                        if(!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.blockPos.up(2))))
+            if (pathFinderBehaviour.getAllowedMiningBlocks() != null) {
+                switch (move) {
+                    case ASCEND_EAST:
+                    case ASCEND_NORTH:
+                    case ASCEND_SOUTH:
+                    case ASCEND_WEST:
+                        if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.blockPos.up(2))))
                             return;
                         break;
-                    case DESCEND_EAST: case DESCEND_NORTH: case DESCEND_SOUTH: case DESCEND_WEST:
-                        if(!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up(2))))
+                    case DESCEND_EAST:
+                    case DESCEND_NORTH:
+                    case DESCEND_SOUTH:
+                    case DESCEND_WEST:
+                        if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up(2))))
                             return;
                         break;
                 }
-                if(!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) || !pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())))
+                if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos)) || !pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.blockPos.up())))
                     return;
 
             }
         }
 
         switch (move) {
-            case DIAGONAL_NORTHEAST: case DIAGONAL_NORTHWEST: case DIAGONAL_SOUTHEAST: case DIAGONAL_SOUTHWEST:
+            case DIAGONAL_NORTHEAST:
+            case DIAGONAL_NORTHWEST:
+            case DIAGONAL_SOUTHEAST:
+            case DIAGONAL_SOUTHWEST:
                 if (!BlockUtils.isPassable(new BlockPos(searchNode.blockPos.getX(), searchNode.blockPos.getY(), currentNode.blockPos.getZ())) || !BlockUtils.isPassable(new BlockPos(currentNode.blockPos.getX(), searchNode.blockPos.getY(), searchNode.blockPos.getZ())) ||
                         !BlockUtils.isPassable(new BlockPos(searchNode.blockPos.getX(), searchNode.blockPos.getY() + 1, currentNode.blockPos.getZ())) || !BlockUtils.isPassable(new BlockPos(currentNode.blockPos.getX(), searchNode.blockPos.getY() + 1, searchNode.blockPos.getZ())))
                     return;
@@ -186,11 +203,11 @@ public class AStarCalculator{
 
         double gCost = getMoveCost(move, searchNode.blockPos) + currentNode.gValue;
 
-        if(searchNode.gValue == -1 || gCost < searchNode.gValue){
+        if (searchNode.gValue == -1 || gCost < searchNode.gValue) {
 
             searchNode.lastNode = currentNode;
             setCost(searchNode, gCost, getHeuristic(searchNode.blockPos, endingBlockPos));
-            if(!openNodes.contains(searchNode)){
+            if (!openNodes.contains(searchNode)) {
                 openNodes.add(searchNode);
             } else {
                 openNodes.remove(searchNode);
@@ -208,13 +225,14 @@ public class AStarCalculator{
             gridEnvironment.set(gridX, gridY, gridZ, node);
     }
 
+
     // structure -> Actual blocks [][]...[][][] + [] last one which tells if the path is complete
     private LinkedList<BlockNode> trackBackPath(boolean isFullPath, Node goalNode, Node startNode) {
         LinkedList<BlockNode> blocksToMine = new LinkedList<>();
         Node formerNode = null;
         Node currentTrackNode = null;
 
-        if(mode == PathMode.MINE) {
+        if (mode == PathMode.MINE) {
             if (goalNode.lastNode != null && goalNode.lastNode.blockPos != null) {
                 blocksToMine.add(new BlockNode(goalNode.blockPos, getBlockType(goalNode.blockPos)));
                 if (goalNode.lastNode.blockPos.getY() > goalNode.blockPos.getY()) {
@@ -264,12 +282,10 @@ public class AStarCalculator{
                 currentTrackNode = currentTrackNode.lastNode;
             } while (!startNode.equals(currentTrackNode) && currentTrackNode.lastNode.blockPos != null);
 
-            if ((blocksToMine.getLast()).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1 && (blocksToMine.get(blocksToMine.size() - 2)).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1)
+            if ((blocksToMine.getLast()).getBlockPos().getY() >= (int) mc.thePlayer.posY + 1 && (blocksToMine.get(blocksToMine.size() - 2)).getBlockPos().getY() >= (int) mc.thePlayer.posY + 1)
                 blocksToMine.add(new BlockNode(BlockUtils.getPlayerLoc().up(2), getBlockType(BlockUtils.getPlayerLoc().up(2))));
         }
-
-        blocksToMine.add(new BlockNode(isFullPath)); // only as recognising function, NOT real blockNode!
-
+        blocksToMine.add(new BlockNode(isFullPath));
         Logger.log("Block count : " + blocksToMine.size());
         return blocksToMine;
     }

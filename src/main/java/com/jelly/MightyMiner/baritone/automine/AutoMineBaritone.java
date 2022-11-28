@@ -125,6 +125,7 @@ public class AutoMineBaritone{
             return;
 
 
+        System.out.println(state);
         switch(state){
             case PATH_FINDING:
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());

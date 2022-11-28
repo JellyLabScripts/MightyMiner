@@ -1,7 +1,7 @@
 package com.jelly.MightyMiner.baritone.automine;
 
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
-import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.config.PathFindSetting;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
@@ -11,6 +11,8 @@ import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoBlockEx
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.automine.movement.PathExecutor;
 import com.jelly.MightyMiner.baritone.automine.structures.Path;
+import com.jelly.MightyMiner.baritone.automine.structures.SemiPath;
+import com.jelly.MightyMiner.events.ChunkLoadEvent;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
@@ -43,6 +45,7 @@ public class AutoMineBaritone{
     BlockPos targetBlockPos;
 
     Path path;
+    //int chunkLoadCount;
 
 
 
@@ -128,19 +131,29 @@ public class AutoMineBaritone{
                 break;
             case EXECUTING:
                 if (executor.hasSuccessfullyFinished()) {
-                    disableBaritone();
-                    return;
-                }
-
-                if (executor.hasFailed()) {
+                    // TODO: Fix this
+                    if(path instanceof SemiPath)
+                        startSemiPathFinding();
+                    else
+                        disableBaritone();
+                } else if (executor.hasFailed())
                     failBaritone(false);
-                    return;
-                }
-
-                if (!executor.isExecuting()) {
+                 else if (!executor.isExecuting())
                     executor.executePath(path, config);
-                }
+                // else if(chunkLoadCount > 6 && path instanceof SemiPath)
+               //    startSemiPathFinding();
+
         }
+    }
+
+    @SubscribeEvent
+    public void ChunkLoadEvent(ChunkLoadEvent event){
+    }
+
+    private void startSemiPathFinding(){
+        //chunkLoadCount = 0;
+        startPathFinding();
+        executor.reset();
     }
 
 
@@ -181,12 +194,12 @@ public class AutoMineBaritone{
 
     private PathFinderBehaviour getPathBehaviour(){
         return new PathFinderBehaviour(
-                config.getForbiddenMiningBlocks() == null ? null : config.getForbiddenMiningBlocks(),
-                config.getAllowedMiningBlocks() == null ? null : config.getAllowedMiningBlocks(),
+                config.getForbiddenPathfindingBlocks() == null ? null : config.getForbiddenPathfindingBlocks(),
+                config.getAllowedPathfindingBlocks() == null ? null : config.getAllowedPathfindingBlocks(),
                 config.getMaxY(),
                 config.getMinY(),
-                config.getMineType() == AutoMineType.DYNAMIC ? 30 : 4,
-                config.getMineType() == AutoMineType.STATIC
+                config.getMineType() == MiningType.DYNAMIC ? 30 : 4,
+                config.getMineType() == MiningType.STATIC
         );
     }
 

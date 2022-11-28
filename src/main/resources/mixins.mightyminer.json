@@ -9,6 +9,7 @@
     "network.MixinNetworkManager"
   ],
   "client": [
+    "client.MixinChunkProviderClient",
     "client.MixinMinecraft"
   ]
 }

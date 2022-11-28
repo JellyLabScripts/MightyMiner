@@ -1,7 +1,7 @@
 package com.jelly.MightyMiner.baritone.automine.movement;
 
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
-import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
@@ -70,6 +70,7 @@ public class PathExecutor {
         }
 
         shouldGoToFinalBlock = path.getMode() == PathMode.GOTO;
+     //   pathSize = path.getBlocksInPath().size();
 
         this.path = path;
         this.blocksToMine = path.getBlocksInPath();
@@ -159,7 +160,7 @@ public class PathExecutor {
             case WALKING:
                 BlockPos targetWalkBlock = (blocksToMine.isEmpty() || blocksToMine.getLast().getBlockType() == BlockType.MINE) ? minedBlocks.getLast().getBlockPos() : blocksToMine.getLast().getBlockPos();
 
-                float reqYaw = AngleUtils.getRequiredYaw(targetWalkBlock);
+                float reqYaw = AngleUtils.getRequiredYawCenter(targetWalkBlock);
                 rotation.intLockAngle(reqYaw, mc.thePlayer.rotationPitch, 5); // camera angle
 
                 if(!jumpFlag && mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0 && jumpCooldown == 0 && mc.thePlayer.onGround){
@@ -196,9 +197,9 @@ public class PathExecutor {
                     // special cases for optimization
                     if(BlockUtils.isAdjacentXZ(targetMineBlock, BlockUtils.getPlayerLoc()) && !AngleUtils.shouldLookAtCenter(targetMineBlock) &&
                             (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetMineBlock.up()).equals(Blocks.air) )|| targetMineBlock.getY() - mc.thePlayer.posY == 1)){
-                        rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), 28, config.getRotationTime());
+                        rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), 28, config.getMineRotationTime());
                     } else if (!BlockUtils.isPassable(targetMineBlock) && !rotation.rotating)
-                        rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock), config.getRotationTime());
+                        rotation.intLockAngle(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock), config.getMineRotationTime());
 
                 }
                 break;
@@ -236,7 +237,7 @@ public class PathExecutor {
 
     private void updateState(){
 
-        if(config.getMineType() == AutoMineType.STATIC) {
+        if(config.getMineType() == MiningType.STATIC) {
             currentState = PlayerState.MINING;
             return;
         }

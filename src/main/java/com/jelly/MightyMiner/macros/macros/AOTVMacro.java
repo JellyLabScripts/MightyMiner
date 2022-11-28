@@ -2,7 +2,7 @@ package com.jelly.MightyMiner.macros.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
@@ -205,7 +205,7 @@ public class AOTVMacro extends Macro {
 
     private BaritoneConfig getAutoMineConfig(){
         return new BaritoneConfig(
-                AutoMineType.STATIC,
+                MiningType.STATIC,
                 true,
                 false,
                 false,

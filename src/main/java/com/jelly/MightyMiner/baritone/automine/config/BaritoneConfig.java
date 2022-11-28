@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 public class BaritoneConfig {
     @Getter
-    AutoMineType mineType;
+    MiningType mineType;
     @Getter
     boolean shiftWhenMine;
     @Getter
@@ -17,15 +17,16 @@ public class BaritoneConfig {
     @Getter
     boolean mineWithPreference;
     @Getter
-    int rotationTime;
+    int mineRotationTime;
     @Getter
     int restartTimeThreshold;
     @Getter
-    List<Block> forbiddenMiningBlocks;
+    List<Block> forbiddenPathfindingBlocks;
     @Getter
-    List<Block> allowedMiningBlocks;
+    List<Block> allowedPathfindingBlocks;
     @Getter
     int maxY;
     @Getter
     int minY;
+
 }

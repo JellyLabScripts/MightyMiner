@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class BlockUtils {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
-    private static final Block[] walkables = {
+    public static final Block[] walkables = {
             Blocks.air,
             Blocks.wall_sign,
             Blocks.reeds,
@@ -36,7 +36,7 @@ public class BlockUtils {
             Blocks.golden_rail,
             Blocks.carpet
     };
-    private static final Block[] cannotWalkOn = { // cannot be treated as full block
+    public static final Block[] cannotWalkOn = { // cannot be treated as full block
             Blocks.air,
             Blocks.water,
             Blocks.flowing_water,

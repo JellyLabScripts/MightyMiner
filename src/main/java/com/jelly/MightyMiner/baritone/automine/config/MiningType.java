@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.baritone.automine.config;
 
-public enum AutoMineType {
+public enum MiningType {
     STATIC,
-    DYNAMIC
+    DYNAMIC,
+    NONE
 }

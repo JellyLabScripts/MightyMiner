@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner.baritone.automine.calculations;
 
+import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.ChunkLoadException;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.movement.Moves;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
@@ -85,16 +86,18 @@ public class AStarPathFinder {
     }
 
 
-    public Path getPath(PathMode mode, BlockPos blockPos) throws NoPathException {
+    public Path getPath(PathMode mode, BlockPos blockPos) throws NoPathException { // from blockPos
         initialize(mode);
 
-        LinkedList<BlockNode> path = calculator.calculatePath(BlockUtils.getPlayerLoc(), blockPos, pathFinderBehaviour, mode);
+
+        LinkedList<BlockNode> path = calculator.calculatePath(BlockUtils.getPlayerLoc(), blockPos, pathFinderBehaviour, mode, 20000);
 
         if (path.isEmpty())
             throw new NoPathException();
 
         setLastTarget(path);
-        return new Path(path, mode);
+
+        return  path.pollLast().isFullPath()? new Path(path, mode) : new SemiPath(path, mode);
     }
 
 
@@ -104,15 +107,20 @@ public class AStarPathFinder {
     }
 
     private LinkedList<LinkedList<BlockNode>> getPossiblePaths(List<BlockPos> targetBlocks){
+
         LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
         int limit = 3000;
         for (int i = 0; i < Math.min(targetBlocks.size(), 20); i++) {
             LinkedList<BlockNode> path = pathFinderBehaviour.isStaticMode() ? calculator.calculateStaticPath(targetBlocks.get(i)) : calculator.calculatePath(BlockUtils.getPlayerLoc(), targetBlocks.get(i), pathFinderBehaviour, mode, limit);
+
             if (!path.isEmpty()) {
+
+                if(!pathFinderBehaviour.isStaticMode())
+                    path.removeLast(); // remove last dummy blockNode, as this method call must be in chunk load limit
+
                 possiblePaths.add(path);
                 limit = calculator.getSteps();
             }
-
         }
         return possiblePaths;
 

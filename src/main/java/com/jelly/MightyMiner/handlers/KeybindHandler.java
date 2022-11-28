@@ -1,13 +1,14 @@
 package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.calculations.AStarCalculator;
-import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
-import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
+import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.baritone.automine.config.WalkBaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.render.BlockRenderer;
-import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.ReflectionUtils;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -22,15 +23,13 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.input.Keyboard;
 
-import java.awt.*;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class KeybindHandler {
     static Minecraft mc = Minecraft.getMinecraft();
-    static int setmode = 0;
+
     public static KeyBinding keybindA = mc.gameSettings.keyBindLeft;
     public static KeyBinding keybindD =  mc.gameSettings.keyBindRight;
     public static KeyBinding keybindW = mc.gameSettings.keyBindForward;
@@ -42,6 +41,8 @@ public class KeybindHandler {
 
     private static Field mcLeftClickCounter;
     public static BlockRenderer debugBlockRenderer = new BlockRenderer();
+
+    AutoMineBaritone debugBaritone = new AutoMineBaritone(new WalkBaritoneConfig(0, 256, 5));
 
     static {
         mcLeftClickCounter = ReflectionHelper.findField(Minecraft.class, "field_71429_W", "leftClickCounter");
@@ -95,13 +96,8 @@ public class KeybindHandler {
         }
         if(macroKeybinds[1].isKeyDown()){
             debugBlockRenderer.renderMap.clear();
-            new Thread(() -> path = calculator.calculatePath(
-                    BlockUtils.getPlayerLoc(),
-                    new BlockPos(2, 55, 2),
-                    new PathFinderBehaviour(null, new ArrayList<Block>(){{add(Blocks.sandstone);add(Blocks.air);}}, 256, 0, 300, false),
-                    PathMode.MINE
-            )).start();
 
+            debugBaritone.goTo(new BlockPos(129, 187, 56));
         }
         if(macroKeybinds[2].isKeyDown()){
             mc.displayGuiScreen(MightyMiner.config.gui());
@@ -125,12 +121,12 @@ public class KeybindHandler {
     @SubscribeEvent
     public void renderEvent(RenderWorldLastEvent event){
         debugBlockRenderer.renderAABB(event);
-        if(path != null && !path.isEmpty()){
+       /* if(path != null && !path.isEmpty()){
             for(BlockNode blocknode : path){
                 if(blocknode.getBlockPos() != null)
                     debugBlockRenderer.renderAABB(blocknode.getBlockPos(), Color.BLUE);
             }
-        }
+        }*/
     }
 
     public static void setKeyBindState(KeyBinding key, boolean pressed) {

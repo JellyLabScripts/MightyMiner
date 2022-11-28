@@ -2,6 +2,8 @@ package com.jelly.MightyMiner.baritone.automine.calculations;
 
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
+import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.ChunkLoadException;
+import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.movement.Moves;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
@@ -12,13 +14,11 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
-import com.jelly.MightyMiner.utils.ThreadUtils;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ChunkProviderClient;
 import net.minecraft.util.BlockPos;
-
-import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
 
@@ -38,6 +38,7 @@ public class AStarCalculator{
     PathMode mode;
 
 
+
     public LinkedList<BlockNode> calculateStaticPath(BlockPos goalBlock){
 
         if (BlockUtils.canSeeBlock(goalBlock) && BlockUtils.canReachBlock(goalBlock))
@@ -49,7 +50,7 @@ public class AStarCalculator{
         return new LinkedList<>();
     }
 
-    public LinkedList<BlockNode> calculatePath(BlockPos startingPos, BlockPos endingBlock, PathFinderBehaviour pathFinderBehaviour, PathMode mode){
+    public LinkedList<BlockNode> calculatePath(BlockPos startingPos, BlockPos endingBlock, PathFinderBehaviour pathFinderBehaviour, PathMode mode) {
         return calculatePath(startingPos, endingBlock, pathFinderBehaviour, mode, 3000);
     }
 
@@ -68,7 +69,7 @@ public class AStarCalculator{
 
 
         if (BlockUtils.canSeeBlock(endingBlock) && BlockUtils.canReachBlock(endingBlock)) {
-            step ++;
+            step++;
             return new LinkedList<BlockNode>() {
                 {
                     add(new BlockNode(endingBlock, BlockType.MINE));
@@ -76,14 +77,13 @@ public class AStarCalculator{
             };
         }
 
-
         int currentGridX = 0;
         int currentGridY = (int)mc.thePlayer.posY;
         int currentGridZ = 0;
 
         instantiateAnyNode(currentGridX, currentGridY, currentGridZ, new Node(startingPos));
         Node startNode = gridEnvironment.get(currentGridX, currentGridY, currentGridZ);
-        Node currentNode = null;
+        Node currentNode;
 
         openNodes.add(startNode);
 
@@ -94,13 +94,13 @@ public class AStarCalculator{
             currentNode = openNodes.poll();
 
             if (currentNode != null && currentNode.blockPos.equals(endingBlock))
-                return trackBackPath(currentNode, startNode);
+                return trackBackPath(true, currentNode, startNode);
 
             openNodes.remove(currentNode);
 
 
             assert currentNode != null;
-            KeybindHandler.debugBlockRenderer.renderMap.put(currentNode.blockPos, Color.ORANGE);
+           // KeybindHandler.debugBlockRenderer.renderMap.put(currentNode.blockPos, Color.ORANGE);
             if (currentNode.lastNode != null) {
                 currentGridX = currentNode.blockPos.getX() - startNode.blockPos.getX();
                 currentGridY = currentNode.blockPos.getY();
@@ -112,8 +112,13 @@ public class AStarCalculator{
             if (step > stepLimit)
                 break;
             for (Moves move : Moves.values()) {
+
                 instantiateNode(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz, startNode);
-                checkNode(move, gridEnvironment.get(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz), currentNode, endingBlock);
+                try {
+                    checkNode(move, gridEnvironment.get(currentGridX + move.dx, currentGridY + move.dy, currentGridZ + move.dz), currentNode, endingBlock);
+                }catch (ChunkLoadException e){
+                    return trackBackPath(false, currentNode, startNode);
+                }
             }
 
         }
@@ -123,7 +128,11 @@ public class AStarCalculator{
     public int getSteps(){
         return step;
     }
-    private void checkNode(Moves move, Node searchNode, Node currentNode, BlockPos endingBlockPos) {
+    private void checkNode(Moves move, Node searchNode, Node currentNode, BlockPos endingBlockPos) throws ChunkLoadException{
+        if(!mc.theWorld.getChunkFromBlockCoords(searchNode.blockPos).isLoaded()){
+            throw new ChunkLoadException();
+        }
+
         if (BlockUtils.isPassable(searchNode.blockPos.down()))
             return;
 
@@ -199,7 +208,8 @@ public class AStarCalculator{
             gridEnvironment.set(gridX, gridY, gridZ, node);
     }
 
-    private LinkedList<BlockNode> trackBackPath(Node goalNode, Node startNode) {
+    // structure -> Actual blocks [][]...[][][] + [] last one which tells if the path is complete
+    private LinkedList<BlockNode> trackBackPath(boolean isFullPath, Node goalNode, Node startNode) {
         LinkedList<BlockNode> blocksToMine = new LinkedList<>();
         Node formerNode = null;
         Node currentTrackNode = null;
@@ -227,7 +237,6 @@ public class AStarCalculator{
 
         if (currentTrackNode != null && currentTrackNode.lastNode != null) {
             do {
-                ThreadUtils.sleep(10);
                 if (currentTrackNode.lastNode.blockPos.getY() > currentTrackNode.blockPos.getY()) { // going down
 
                     blocksToMine.add(new BlockNode(currentTrackNode.blockPos, getBlockType(currentTrackNode.blockPos)));
@@ -253,12 +262,14 @@ public class AStarCalculator{
                 }
                 formerNode = currentTrackNode;
                 currentTrackNode = currentTrackNode.lastNode;
-                System.out.println(currentTrackNode.blockPos);
             } while (!startNode.equals(currentTrackNode) && currentTrackNode.lastNode.blockPos != null);
 
             if ((blocksToMine.getLast()).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1 && (blocksToMine.get(blocksToMine.size() - 2)).getBlockPos().getY() >= (int)mc.thePlayer.posY + 1)
                 blocksToMine.add(new BlockNode(BlockUtils.getPlayerLoc().up(2), getBlockType(BlockUtils.getPlayerLoc().up(2))));
         }
+
+        blocksToMine.add(new BlockNode(isFullPath)); // only as recognising function, NOT real blockNode!
+
         Logger.log("Block count : " + blocksToMine.size());
         return blocksToMine;
     }

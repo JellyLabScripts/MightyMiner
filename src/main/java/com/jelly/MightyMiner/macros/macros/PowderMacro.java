@@ -2,7 +2,7 @@ package com.jelly.MightyMiner.macros.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.config.AutoMineType;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.features.RGANuker;
@@ -484,7 +484,7 @@ public class PowderMacro extends Macro {
 
     BaritoneConfig getAutomineConfig(){
         return new BaritoneConfig(
-                AutoMineType.DYNAMIC,
+                MiningType.DYNAMIC,
                 false,
                 true,
                 false,

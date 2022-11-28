@@ -14,7 +14,6 @@ import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
 import com.jelly.MightyMiner.utils.MathUtils;
 import com.jelly.MightyMiner.utils.ThreadUtils;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 

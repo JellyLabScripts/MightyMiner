@@ -101,7 +101,7 @@ public class AutoMineBaritone{
     private void failBaritone(boolean failed) {
 
         executor.reset();
-        if(path != null)
+        if(path != null && path.getBlocksInPath() != null && !path.getBlocksInPath().isEmpty())
             pathFinder.addToBlackList(path.getBlocksInPath().getFirst().getBlockPos());
 
         if(failed) {

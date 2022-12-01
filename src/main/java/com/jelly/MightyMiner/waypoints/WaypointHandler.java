@@ -29,12 +29,7 @@ public class WaypointHandler {
     }
 
     public void drawWaypoint(Waypoint waypoint, float partialTicks) {
-//         Triple viewerX, viewerY, viewerZ = DrawUtils.viewerPosition(partialTicks);
-//         BlockPos blockPos = new BlockPos(waypoint.getX(), waypoint.getY(), waypoint.getZ());
-//         DrawUtils.drawFilledBox(
-//                 new AxisAlignedBB(
-//
-//                 )
-//         );
+         Triple viewerX, viewerY, viewerZ = DrawUtils.viewerPosition(partialTicks);
+         BlockPos blockPos = new BlockPos(waypoint.getX(), waypoint.getY(), waypoint.getZ());
     }
 }

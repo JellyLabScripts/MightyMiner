@@ -5,10 +5,7 @@ import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
-import com.jelly.MightyMiner.utils.LogUtils;
-import com.jelly.MightyMiner.utils.NpcUtil;
-import com.jelly.MightyMiner.utils.PlayerUtils;
-import com.jelly.MightyMiner.utils.TablistUtils;
+import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
@@ -41,7 +38,7 @@ public class CommissionMacro extends Macro {
         GOBLIN_SLAYER("Goblin Slayer"),
         ICE_WALKER_SLAYER("Ice Walker Slayer");
 
-        private final String questName;
+        public final String questName;
 
         ComissionType(String questName) {
             this.questName = questName;
@@ -94,57 +91,7 @@ public class CommissionMacro extends Macro {
     @Override
     public void onTick(TickEvent.Phase phase) {
 
-        List<String> tablist = TablistUtils.getTabList();
-
-        tablist.forEach(s -> {
-            switch (StringUtils.stripControlCodes(s)) {
-                case "Goblin Slayer":
-                    currentQuest = ComissionType.GOBLIN_SLAYER;
-                    break;
-                case "Ice Walker Slayer":
-                    currentQuest = ComissionType.ICE_WALKER_SLAYER;
-                    break;
-                case "Mithril Miner":
-                    currentQuest = ComissionType.MITHRIL_MINER;
-                    break;
-                case "Titanium Miner":
-                    currentQuest = ComissionType.TITANIUM_MINER;
-                    break;
-                case "Upper Mines Mithril":
-                    currentQuest = ComissionType.UPPER_MINES_MITHRIL;
-                    break;
-                case "Royal Mines Mithril":
-                    currentQuest = ComissionType.ROYAL_MINES_MITHRIL;
-                    break;
-                case "Lava Springs Mithril":
-                    currentQuest = ComissionType.LAVA_SPRINGS_MITHRIL;
-                    break;
-                case "Rampart's Quarry Mithril":
-                    currentQuest = ComissionType.RAMPARTS_QUARRY_MITHRIL;
-                    break;
-                case "Cliffside Veins Mithril":
-                    currentQuest = ComissionType.CLIFFSIDE_VEINS_MITHRIL;
-                    break;
-                case "Upper Mines Titanium":
-                    currentQuest = ComissionType.UPPER_MINES_TITANIUM;
-                    break;
-                case "Royal Mines Titanium":
-                    currentQuest = ComissionType.ROYAL_MINES_TITANIUM;
-                    break;
-                case "Lava Springs Titanium":
-                    currentQuest = ComissionType.LAVA_SPRINGS_TITANIUM;
-                    break;
-                case "Rampart's Quarry Titanium":
-                    currentQuest = ComissionType.RAMPARTS_QUARRY_TITANIUM;
-                    break;
-                case "Cliffside Veins Titanium":
-                    currentQuest = ComissionType.CLIFFSIDE_VEINS_TITANIUM;
-                    break;
-                default:
-                    currentQuest = null;
-            }
-        });
-
+        currentQuest = ComissionUtils.determineComm().getKey();
 
 
     }

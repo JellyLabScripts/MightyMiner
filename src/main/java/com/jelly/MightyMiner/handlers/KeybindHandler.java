@@ -3,18 +3,16 @@ package com.jelly.MightyMiner.handlers;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.calculations.AStarCalculator;
-import com.jelly.MightyMiner.baritone.automine.config.MiningType;
-import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.config.WalkBaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
+import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.render.BlockRenderer;
+import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.ReflectionUtils;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -24,7 +22,6 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.input.Keyboard;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class KeybindHandler {
@@ -95,9 +92,17 @@ public class KeybindHandler {
                 MacroHandler.startScript(MightyMiner.config.macroType);
         }
         if(macroKeybinds[1].isKeyDown()){
-            debugBlockRenderer.renderMap.clear();
-
-            debugBaritone.goTo(new BlockPos(129, 187, 56));
+//            debugBlockRenderer.renderMap.clear();
+//
+//            debugBaritone.goTo(new BlockPos(129, 187, 56));
+            if (!MobKiller.enabled) {
+                MobKiller.MobClass = EntityZombie.class.getName();
+                LogUtils.addMessage("MobKiller: " + MobKiller.MobClass);
+                MobKiller.MobRange = 10;
+                MobKiller.enabled = true;
+            } else {
+                MobKiller.Disable();
+            }
         }
         if(macroKeybinds[2].isKeyDown()){
             mc.displayGuiScreen(MightyMiner.config.gui());

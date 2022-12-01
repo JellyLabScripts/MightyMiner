@@ -4,13 +4,14 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
-import com.jelly.MightyMiner.features.YogKiller;
+import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
+import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
@@ -69,7 +70,11 @@ public class AOTVMacro extends Macro {
 
     @Override
     protected void onEnable() {
-        YogKiller.enabled = true;
+        if (MightyMiner.config.killYogs) {
+            MobKiller.MobRange = MightyMiner.config.yogsRadius;
+            MobKiller.MobClass = EntityMagmaCube.class.getName();
+            MobKiller.enabled = true;
+        }
         if (isPaused()) {
             Unpause();
         }
@@ -199,7 +204,7 @@ public class AOTVMacro extends Macro {
     protected void onDisable() {
         baritone.disableBaritone();
         KeybindHandler.resetKeybindState();
-        YogKiller.enabled = false;
+        MobKiller.Disable();
     }
 
 

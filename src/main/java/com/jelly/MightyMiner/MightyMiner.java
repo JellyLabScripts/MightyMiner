@@ -7,8 +7,8 @@ import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
 import com.jelly.MightyMiner.config.locations.AOTVConfig;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.config.waypoint.WaypointConfig;
+import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.features.RGANuker;
-import com.jelly.MightyMiner.features.YogKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.SkyblockInfo;
@@ -60,7 +60,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
         MinecraftForge.EVENT_BUS.register(new FuelFilling());
-        MinecraftForge.EVENT_BUS.register(new YogKiller());
+        MinecraftForge.EVENT_BUS.register(new MobKiller());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 

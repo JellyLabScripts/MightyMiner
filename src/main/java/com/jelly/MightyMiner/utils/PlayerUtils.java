@@ -3,7 +3,6 @@ package com.jelly.MightyMiner.utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
@@ -113,13 +112,21 @@ public class PlayerUtils {
         }
         return false;
     }
-    public static boolean hasYogInRadius(int radius) {
+
+    public static boolean hasMobsInRadius(int radius, String mobClass) {
+        Class<?> type;
+        try {
+            type = Class.forName(mobClass);
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+
         for (Entity e : mc.theWorld.getLoadedEntityList()) {
-            if (!(e instanceof EntityMagmaCube)) continue;
+            if (!type.isInstance(e)) continue;
             if (NpcUtil.isNpc(e)) continue;
 
             if (e.getDistanceToEntity(mc.thePlayer) < radius) {
-                LogUtils.debugLog("Found yog.");
+                LogUtils.debugLog("Found mob.");
                 return true;
             }
         }

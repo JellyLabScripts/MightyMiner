@@ -89,8 +89,17 @@ public class MacroHandler {
             pickaxeSkillReady = true;
         }
 
+
+
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
+
+        if (message.contains("Your pass to the Crystal Hollows will expire in 1 minute")) {
+            if (MightyMiner.config.autoRenewCrystalHollowsPass) {
+                LogUtils.addMessage("Auto renewing Crystal Hollows pass");
+                mc.thePlayer.sendChatMessage("/purchasecrystallhollowspass");
+            }
+        }
 
         for (Macro process : macros) {
             if (process.isEnabled()) {

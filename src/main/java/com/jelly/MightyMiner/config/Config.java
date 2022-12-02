@@ -32,6 +32,15 @@ public class Config extends Vigilant {
     )
     public boolean glassPanesFullBlock = false;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto renew crystal hollows pass before expire",
+            category = "Core",
+            subcategory = "Crystal hollows",
+            description = "Will automatically renew the crystal hollows pass before it expires"
+    )
+    public boolean autoRenewCrystalHollowsPass = true;
+
 
     @Property(
             type = PropertyType.SWITCH,

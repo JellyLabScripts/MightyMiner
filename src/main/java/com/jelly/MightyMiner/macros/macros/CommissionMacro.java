@@ -13,6 +13,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.event.world.NoteBlockEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.lang.reflect.Array;
@@ -50,12 +51,14 @@ public class CommissionMacro extends Macro {
         FORGE_WARPING,
         NAVIGATING,
         COMMIT,
-        COMMITTING
+        COMMITTING,
+        NONE
     }
     public enum WarpState {
         SETUP,
         LOOK,
-        WARP
+        WARP,
+        NONE
     }
 
     private final List<Block> allowedBlocks = new ArrayList<>();
@@ -65,6 +68,8 @@ public class CommissionMacro extends Macro {
     private State comissionState = State.CLICK_PIGEON;
     private WarpState warpState = WarpState.SETUP;
 
+    private boolean hasPigeon;
+
     private Array[] quests;
     @Override
     protected void onEnable() {
@@ -73,16 +78,21 @@ public class CommissionMacro extends Macro {
         comissionState = State.CLICK_PIGEON;
         warpState = WarpState.SETUP;
 
-        if (PlayerUtils.getItemInHotbar("Pickaxe", "Drill", "Gauntlet", "Juju", "Terminator", "Aspect of the Void", "Royal Pigeon") == -1) {
+
+        if (PlayerUtils.getItemInHotbar("Pickaxe", "Drill", "Gauntlet", "Juju", "Terminator", "Aspect of the Void") == -1) {
             LogUtils.addMessage("You dont have items dumbass");
             MacroHandler.disableScript();
             return;
         }
 
-        for (Entity entity : mc.theWorld.loadedEntityList) {
-            if (PlayerUtils.hasEntityInRadius(3)) {
-                if (!NpcUtil.isNpc(entity)){
-                    LogUtils.debugLog("no king, emissary dumbass");
+        hasPigeon = PlayerUtils.getItemInHotbar("Royal Pigeon") != -1;
+
+        if (!hasPigeon) {
+            for (Entity entity : mc.theWorld.loadedEntityList) {
+                if (PlayerUtils.hasEmissaryInRadius(3)) {
+                    if (NpcUtil.isNpc(entity)) {
+                        LogUtils.debugLog("You dont have pigeon, and u are not around emissary mate.");
+                    }
                 }
             }
         }
@@ -92,8 +102,6 @@ public class CommissionMacro extends Macro {
     public void onTick(TickEvent.Phase phase) {
 
         currentQuest = ComissionUtils.determineComm().getKey();
-
-
     }
 
     @Override

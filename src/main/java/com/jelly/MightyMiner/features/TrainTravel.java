@@ -14,7 +14,7 @@ public class TrainTravel {
     public void findClosestWay(BlockPos from, BlockPos to) {
         CommissionMacro.ComissionType quest = ComissionUtils.determineComm().getKey();
 
-        
+
     }
 
 }

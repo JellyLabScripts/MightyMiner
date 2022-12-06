@@ -112,6 +112,16 @@ public class PlayerUtils {
         }
         return false;
     }
+    public static boolean hasEmissaryInRadius(int radius){
+        for(Entity e :  mc.theWorld.getLoadedEntityList()){
+            if (!NpcUtil.isNpc(e)) continue;
+            if(e.getDistanceToEntity(mc.thePlayer) < radius) {
+                LogUtils.debugLog("Emissary found");
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static boolean hasMobsInRadius(int radius, String mobClass) {
         Class<?> type;

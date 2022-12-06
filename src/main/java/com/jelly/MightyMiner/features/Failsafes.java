@@ -34,7 +34,12 @@ public class Failsafes {
         if (macros.stream().noneMatch(Macro::isEnabled)) return;
 
         LogUtils.addMessage("World changed, disabling macros");
-        DisableMacros();
+
+        for (Macro macro : macros) {
+            if (macro.isEnabled()) {
+                macro.toggle();
+            }
+        }
     }
 
     @SubscribeEvent

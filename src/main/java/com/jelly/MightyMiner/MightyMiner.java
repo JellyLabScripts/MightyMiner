@@ -5,6 +5,7 @@ import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.coords.CoordsConfig;
 import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
 import com.jelly.MightyMiner.config.locations.AOTVConfig;
+import com.jelly.MightyMiner.features.Failsafes;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.config.waypoint.WaypointConfig;
 import com.jelly.MightyMiner.features.MobKiller;
@@ -61,6 +62,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
         MinecraftForge.EVENT_BUS.register(new FuelFilling());
         MinecraftForge.EVENT_BUS.register(new MobKiller());
+        MinecraftForge.EVENT_BUS.register(new Failsafes());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 

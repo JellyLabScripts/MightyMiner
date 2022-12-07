@@ -31,6 +31,7 @@ public class MacroHandler {
 
     public static void initializeMacro(){
        macros.add(new GemstoneMacro());
+       macros.add(new OreMacro());
        macros.add(new PowderMacro());
        macros.add(new MithrilMacro());
         macros.add(new AOTVMacro());

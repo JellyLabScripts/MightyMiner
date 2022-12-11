@@ -11,6 +11,7 @@ import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class MithrilMacro extends Macro {
         }
     };
 
-
+    ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> mithPriority = new ArrayList<>();
 
     @Override
     public boolean isPaused() {
@@ -61,6 +62,12 @@ public class MithrilMacro extends Macro {
                 return;
             }
         }
+
+        mithPriority.clear();
+        mithPriority.addAll(getBlockDataBasedOnPriority(MightyMiner.config.mithPriority1));
+        mithPriority.addAll(getBlockDataBasedOnPriority(MightyMiner.config.mithPriority2));
+        mithPriority.addAll(getBlockDataBasedOnPriority(MightyMiner.config.mithPriority3));
+
         LogUtils.debugLog("Didnt find any players nearby, continuing");
         baritone = new AutoMineBaritone(getMineBehaviour());
     }
@@ -85,11 +92,32 @@ public class MithrilMacro extends Macro {
 
         switch(baritone.getState()){
             case IDLE: case FAILED:
-                baritone.mineFor(priorityBlocks.get(MightyMiner.config.mithPriority1), priorityBlocks.get(MightyMiner.config.mithPriority2), priorityBlocks.get(MightyMiner.config.mithPriority3));
+                baritone.mineFor(mithPriority);
                 break;
         }
 
         useMiningSpeedBoost();
+    }
+
+
+    public ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> getBlockDataBasedOnPriority(int priority) {
+        switch (priority) {
+            case 0:
+                return new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
+                    add(new AutoMineBaritone.BlockData<>(Blocks.stained_hardened_clay, null));
+                    add(new AutoMineBaritone.BlockData<>(Blocks.wool, EnumDyeColor.GRAY));
+                }};
+            case 1:
+                return new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
+                    add(new AutoMineBaritone.BlockData<>(Blocks.prismarine, null));
+                }};
+            case 2:
+                return new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
+                    add(new AutoMineBaritone.BlockData<>(Blocks.wool, EnumDyeColor.LIGHT_BLUE));
+                }};
+            default:
+                return null;
+        }
     }
 
 

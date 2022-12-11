@@ -17,10 +17,13 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import java.util.ArrayList;
 
 public class AutoMineBaritone{
 
@@ -41,11 +44,21 @@ public class AutoMineBaritone{
     PathExecutor executor;
     BlockPos playerFloorPos;
 
-    Block[] targetBlockType;
+    ArrayList<BlockData<EnumDyeColor>> targetBlockType;
     BlockPos targetBlockPos;
 
     Path path;
     //int chunkLoadCount;
+
+
+    public static class BlockData<T> {
+        public Block block;
+        public T requiredBlockStateValue;
+        public BlockData(Block block, T requiredBlockStateValue) {
+            this.block = block;
+            this.requiredBlockStateValue = requiredBlockStateValue;
+        }
+    }
 
 
 
@@ -56,7 +69,7 @@ public class AutoMineBaritone{
     }
 
 
-    public void mineFor(Block... blockType) {
+    public void mineFor(ArrayList<BlockData<EnumDyeColor>> blockType) {
         Logger.playerLog("Starting to mine");
         registerEvent();
         pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.MINE, false);

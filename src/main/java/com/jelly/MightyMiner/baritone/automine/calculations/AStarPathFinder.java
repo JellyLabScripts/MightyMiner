@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner.baritone.automine.calculations;
 
+import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.ChunkLoadException;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.movement.Moves;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 
 public class AStarPathFinder {
@@ -47,7 +49,7 @@ public class AStarPathFinder {
     }
 
 
-    public Path getPath(PathMode mode, boolean withPreference, Block... blockType) throws NoBlockException, NoPathException {
+    public Path getPath(PathMode mode, boolean withPreference, ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> blockType) throws NoBlockException, NoPathException {
         initialize(mode);
 
         long pastTime = System.currentTimeMillis();;
@@ -56,7 +58,7 @@ public class AStarPathFinder {
         List<BlockPos> foundBlocks = new ArrayList<>();
 
         if (withPreference) { // loop for EACH block type
-            for (Block block : blockType) {
+            for (AutoMineBaritone.BlockData<EnumDyeColor> block : blockType) {
                 foundBlocks = BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), block);
                 possiblePaths = getPossiblePaths(foundBlocks);
 

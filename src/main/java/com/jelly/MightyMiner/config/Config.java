@@ -244,7 +244,7 @@ public class Config extends Vigilant {
             name = "Mithril macro priority 1",
             category = "Mithril macro",
             subcategory = "Miscellaneous",
-            options = { "Clay", "Prismarine", "Wool"}
+            options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}
     )
     public int mithPriority1 = 1;
 
@@ -253,7 +253,7 @@ public class Config extends Vigilant {
             name = "Mithril macro priority 2",
             category = "Mithril macro",
             subcategory = "Miscellaneous",
-            options = { "Clay", "Prismarine", "Wool"}
+            options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}
     )
     public int mithPriority2 = 2;
 
@@ -262,7 +262,7 @@ public class Config extends Vigilant {
             name = "Mithril macro priority 3",
             category = "Mithril macro",
             subcategory = "Miscellaneous",
-            options = { "Clay", "Prismarine", "Wool"}
+            options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}
     )
     public int mithPriority3 = 0;
 
@@ -396,6 +396,9 @@ public class Config extends Vigilant {
             subcategory = "Drawings"
     )
     public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
+
+    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "AOTV gemstone macro", subcategory = "Miscellaneous", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
+    public int aotvGemstoneType = 0;
 
 
     public Config() {

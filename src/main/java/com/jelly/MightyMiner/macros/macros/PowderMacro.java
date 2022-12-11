@@ -14,6 +14,7 @@ import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
@@ -421,7 +422,10 @@ public class PowderMacro extends Macro {
     void addChestToQueue(){
         new Thread(() -> {
             ThreadUtils.sleep(200);
-            List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 4, 0, -7, 7), new ArrayList<>(solvedOrSolvingChests), 0, 256, Blocks.chest, Blocks.trapped_chest);
+            List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 4, 0, -7, 7), new ArrayList<>(solvedOrSolvingChests), 0, 256, new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
+                add(new AutoMineBaritone.BlockData<>(Blocks.chest, null));
+                add(new AutoMineBaritone.BlockData<>(Blocks.trapped_chest, null));
+            }});
             if(foundBlocks.isEmpty()){
                 LogUtils.debugLog("That chest was impossible to solve");
             }

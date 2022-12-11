@@ -3,12 +3,15 @@ package com.jelly.MightyMiner.utils;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -111,17 +114,22 @@ public class BlockUtils {
         return blockCache.getUnchecked(blockPos);
     }
 
-    public static List<BlockPos> findBlock(int searchDiameter, Block... requiredBlock) {
+    public static List<BlockPos> findBlock(int i, ArrayList<BlockPos> blackListedPos, int minY, int maxY, AutoMineBaritone.BlockData<EnumDyeColor> block) {
+        return findBlock(i, blackListedPos, minY, maxY, new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
+            add(block);
+        }});
+    }
+
+    public static List<BlockPos> findBlock(int searchDiameter, ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> requiredBlock) {
         return findBlock(searchDiameter, null, 0, 256, requiredBlock);
     }
-    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlock) {
+    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> requiredBlock) {
         return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
                 ,forbiddenBlockPos, minY, maxY, requiredBlock);
     }
 
-    public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlock) {
+    public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> requiredBlock) {
 
-        List<Block> requiredBlocks = Arrays.asList(requiredBlock);
         List<BlockPos> foundBlocks = new ArrayList<>();
 
         BlockPos currentBlock;
@@ -132,7 +140,13 @@ public class BlockUtils {
 
                     //rectangular scan
                     currentBlock = (getPlayerLoc().add(i + Math.min(searchBox.dx_bound2, searchBox.dx_bound1),  j + Math.min(searchBox.dy_bound2, searchBox.dy_bound1),  k + Math.min(searchBox.dz_bound2, searchBox.dz_bound1)));
-                    if(requiredBlocks.contains(getBlock(currentBlock))){
+                    BlockPos finalCurrentBlock = currentBlock;
+                    if(requiredBlock.stream().anyMatch(blockData -> {
+                        Block block = mc.theWorld.getBlockState(finalCurrentBlock).getBlock();
+                        if (!blockData.block.equals(block)) return false;
+                        if (blockData.requiredBlockStateValue == null) return true;
+                        return block.getMetaFromState(mc.theWorld.getBlockState(finalCurrentBlock)) == blockData.requiredBlockStateValue.getMetadata();
+                    })) {
                         if (forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(currentBlock))
                             continue;
                         if (currentBlock.getY() > maxY || currentBlock.getY() < minY)

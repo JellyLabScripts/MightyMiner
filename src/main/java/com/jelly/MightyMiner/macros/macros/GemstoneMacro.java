@@ -14,6 +14,7 @@ import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
@@ -105,7 +106,10 @@ public class GemstoneMacro extends Macro {
         if(!haveTreasureChest) {
             switch(baritone.getState()){
                 case IDLE:
-                    baritone.mineFor(Blocks.stained_glass_pane, Blocks.stained_glass);
+                    baritone.mineFor(new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
+                        add(new AutoMineBaritone.BlockData<>(Blocks.stained_glass_pane, null));
+                        add(new AutoMineBaritone.BlockData<>(Blocks.stained_glass, null));
+                    }});
                     break;
                 case FAILED:
                     LogUtils.addMessage("Mined all gemstones nearby, disabling script");
@@ -142,7 +146,10 @@ public class GemstoneMacro extends Macro {
         if(haveTreasureChest && packet instanceof S2APacketParticles){
             if(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT){
                 try {
-                    BlockPos closetChest = BlockUtils.findBlock(8, Blocks.chest, Blocks.trapped_chest).get(0);
+                    BlockPos closetChest = BlockUtils.findBlock(8, new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
+                        add(new AutoMineBaritone.BlockData<>(Blocks.chest, null));
+                        add(new AutoMineBaritone.BlockData<>(Blocks.trapped_chest, null));
+                    }}).get(0);
                     if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - closetChest.getX()) < 2 && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - closetChest.getY()) < 2 && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - closetChest.getZ()) < 2) {
                         rotation.intLockAngle(
                                 AngleUtils.getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - closetChest.getX(), ((S2APacketParticles) packet).getZCoordinate() - closetChest.getZ()),

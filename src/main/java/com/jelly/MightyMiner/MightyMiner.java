@@ -37,6 +37,8 @@ public class MightyMiner {
 
     public static ConfigurationFactory configurationFactory = new ConfigurationFactory();
 
+    public static MobKiller mobKiller = new MobKiller();
+
     public static CoordsConfig coordsConfig;
     public static WaypointConfig waypointConfig;
     public static AOTVConfig aotvConfig;
@@ -61,7 +63,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
         MinecraftForge.EVENT_BUS.register(new FuelFilling());
-        MinecraftForge.EVENT_BUS.register(new MobKiller());
+        MinecraftForge.EVENT_BUS.register(mobKiller);
         MinecraftForge.EVENT_BUS.register(new Failsafes());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();

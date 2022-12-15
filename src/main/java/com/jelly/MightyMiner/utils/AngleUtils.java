@@ -2,8 +2,10 @@ package com.jelly.MightyMiner.utils;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,6 +109,23 @@ public class AngleUtils {
             return -180f;
 
         return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) + ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
+    }
+
+    private static float wrapAngleTo180(double angle) {
+        return (float) (angle - Math.floor(angle / 360 + 0.5) * 360);
+    }
+
+    public static Tuple<Float, Float> getRequiredRotationToEntity(Entity entity) {
+        double diffX = entity.posX - Minecraft.getMinecraft().thePlayer.posX;
+        double diffY = entity.posY + (entity.height / 2) - Minecraft.getMinecraft().thePlayer.posY - Minecraft.getMinecraft().thePlayer.getEyeHeight();
+        double diffZ = entity.posZ - Minecraft.getMinecraft().thePlayer.posZ;
+        double dist = Math.sqrt(diffX * diffX + diffZ * diffZ);
+
+        float pitch = (float) -Math.atan2(dist, diffY);
+        float yaw = (float) Math.atan2(diffZ, diffX);
+        pitch = wrapAngleTo180(((pitch * 180f / Math.PI + 90)*-1));
+        yaw = wrapAngleTo180(((yaw * 180f / Math.PI) - 90));
+        return new Tuple<Float, Float>(yaw, pitch);
     }
 
     public static float getAngleDifference(float actualYaw1, float actualYaw2){

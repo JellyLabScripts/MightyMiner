@@ -10,8 +10,6 @@ import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
-import net.minecraft.block.Block;
-import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
@@ -51,6 +49,7 @@ public class AOTVMacro extends Macro {
     State prePauseState;
 
 
+
     @Override
     public boolean isPaused() {
         return currentState == State.PAUSED;
@@ -72,9 +71,10 @@ public class AOTVMacro extends Macro {
     @Override
     protected void onEnable() {
         if (MightyMiner.config.killYogs) {
-            MobKiller.MobRange = MightyMiner.config.yogsRadius;
-            MobKiller.MobClass = EntityMagmaCube.class.getName();
-            MobKiller.enabled = true;
+            MobKiller.scanRange = MightyMiner.config.yogsRadius;
+            MobKiller.setMobsNames(false, "Yog");
+            MightyMiner.mobKiller.Enable();
+            LogUtils.debugLog("Enabled mob killer");
         }
         if (isPaused()) {
             Unpause();
@@ -162,6 +162,8 @@ public class AOTVMacro extends Macro {
         }
         return filter;
     }
+
+
 
     @Override
     public void onTick(TickEvent.Phase phase) {
@@ -263,13 +265,15 @@ public class AOTVMacro extends Macro {
         if(rotation.rotating)
             rotation.update();
 
+
+
     }
 
     @Override
     protected void onDisable() {
         baritone.disableBaritone();
         KeybindHandler.resetKeybindState();
-        MobKiller.Disable();
+        MightyMiner.mobKiller.Disable();
     }
 
 

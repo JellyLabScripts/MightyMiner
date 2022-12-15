@@ -1,7 +1,5 @@
 package com.jelly.MightyMiner.features;
 
-import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
@@ -9,232 +7,256 @@ import com.jelly.MightyMiner.utils.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.util.StringUtils;
+import net.minecraft.util.Tuple;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.jelly.MightyMiner.handlers.KeybindHandler.rightClick;
 
 
 public class MobKiller {
 
-    public static String MobClass;
-    public static int MobRange = 10;
-
     private final Minecraft mc = Minecraft.getMinecraft();
+
+    private Target target;
+
+    private static boolean caseSensitive = false;
+    private static String[] mobsNames = null;
+
+    private final Timer attackDelay = new Timer();
+    private final Timer blockedVisionDelay = new Timer();
+    private States currentState = States.SEARCHING;
+
     private final Rotation rotation = new Rotation();
 
-    private static final ArrayList<Entity> mobsList = new ArrayList<>();
+    private final ArrayList<Target> potentialTargets = new ArrayList<>();
 
-    private static Entity target;
-
-    enum States {
-        NONE,
-        SEARCHING,
-        KILLING,
-        BLOCKED_VISION,
-        KILLED,
-    }
-
-    private static States currentState = States.NONE;
-
-    private static Macro lastMacro;
+    public static int scanRange = 15;
 
     public static boolean enabled = false;
 
-    private int waitTicks = 0;
+    private Macro lastMacro = null;
 
-    public static void Reset() {
-        if (lastMacro != null) {
-            lastMacro.Unpause();
+    private static class Target {
+        public EntityLiving entity;
+        public EntityArmorStand stand;
+
+        public double distance() {
+            return Minecraft.getMinecraft().thePlayer.getDistanceToEntity(entity);
         }
-        target = null;
-        mobsList.clear();
-        currentState = States.NONE;
-        lastMacro = null;
+
+        public Target(EntityLiving entity, EntityArmorStand stand) {
+            this.entity = entity;
+            this.stand = stand;
+        }
     }
 
-    public static void Disable() {
-        Reset();
+    private enum States {
+        SEARCHING,
+        ATTACKING,
+        BLOCKED_VISION,
+        KILLED
+    }
+
+    public void toggle() {
+        enabled = !enabled;
+        if (enabled) {
+            onEnable();
+        } else {
+            onDisable();
+        }
+    }
+
+    public void Enable() {
+        enabled = true;
+        onEnable();
+    }
+
+    public void Disable() {
         enabled = false;
-        MobClass = null;
-        MobRange = 0;
+        onDisable();
+    }
+
+    public void onEnable() {
+        blockedVisionDelay.reset();
+        attackDelay.reset();
+        currentState = States.SEARCHING;
+        target = null;
+        potentialTargets.clear();
+    }
+
+    public void onDisable() {
+        target = null;
+        potentialTargets.clear();
+        rotation.reset();
+    }
+
+    public static void setMobsNames(boolean caseSensitive, String... mobsNames) {
+        MobKiller.caseSensitive = caseSensitive;
+        MobKiller.mobsNames = mobsNames;
     }
 
     @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event) {
+    public void onTick(TickEvent.PlayerTickEvent event) {
         if (!enabled) return;
-        if (MobClass == null || MobClass.isEmpty()) return;
-
-        if (event.phase != TickEvent.Phase.START)
-            return;
         if (mc.thePlayer == null || mc.theWorld == null) return;
 
-        Class<?> type;
-        try {
-            type = Class.forName(MobClass);
-        } catch (ClassNotFoundException e) {
-            LogUtils.addMessage("Mob class not found: " + MobClass);
-            enabled = false;
-            return;
-        }
+        if (mobsNames == null || mobsNames.length == 0) return;
 
-        if (!PlayerUtils.hasMobsInRadius(MobRange, MobClass)) {
-            mobsList.clear();
+        if (mc.currentScreen != null && !(mc.currentScreen instanceof net.minecraft.client.gui.GuiChat))
             return;
-        }
-
-        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-            if (!type.isInstance(entity)) continue;
-            if (NpcUtil.isNpc(entity)) continue;
-            if (mobsList.stream().noneMatch(mob -> mob.getEntityId() == entity.getEntityId() && (!isTargetDead(entity)))) {
-                mobsList.add(entity);
-            } else if (mobsList.stream().anyMatch(mob -> mob.getEntityId() == entity.getEntityId() && (isTargetDead(entity) || entity.getDistanceToEntity(mc.thePlayer) > MobRange))) {
-                mobsList.remove(entity);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public void onTickSecond(TickEvent.ClientTickEvent event) {
-        if (!enabled) return;
-        if (MobClass == null || MobClass.isEmpty()) return;
-        if (mc.thePlayer == null || mc.theWorld == null) return;
-        if (event.phase != TickEvent.Phase.START)
-            return;
-
-        if (waitTicks > 0){
-            waitTicks--;
-            if (lastMacro != null && lastMacro.isPaused()) {
-                lastMacro.Unpause();
-            }
-            return;
-        }
 
         switch (currentState) {
-            case NONE: {
-                if (hasAliveMobsAround() && PlayerUtils.hasMobsInRadius(MobRange, MobClass)) {
-                    MacroHandler.macros.forEach(macro -> {
-                        if (macro.isEnabled()) {
-                            lastMacro = macro;
-                            macro.Pause();
+            case SEARCHING:
+                potentialTargets.clear();
+                List<Entity> entities = mc.theWorld.loadedEntityList.stream().filter(entity -> entity instanceof EntityArmorStand).collect(Collectors.toList());
+                List<Entity> filtered = entities.stream().filter(v -> (!v.getName().contains(mc.thePlayer.getName()) && Arrays.stream(mobsNames).anyMatch(mobsName -> {
+                    String mobsName1 = StringUtils.stripControlCodes(mobsName);
+                    String vName = StringUtils.stripControlCodes(v.getName());
+                    String vCustomNameTag = StringUtils.stripControlCodes(v.getCustomNameTag());
+                    if (caseSensitive) {
+                        return vName.contains(mobsName1) || vCustomNameTag.contains(mobsName1);
+                    } else {
+                        return vName.toLowerCase().contains(mobsName1.toLowerCase()) || vCustomNameTag.toLowerCase().contains(mobsName1.toLowerCase());
+                    }
+                }))).filter(PlayerUtils::entityIsVisible).collect(Collectors.toList());
+
+                if (filtered.size() > 0) {
+
+                    double distance = 9999;
+                    Target closestTarget = null;
+
+                    for (Entity entity : filtered) {
+                        double currentDistance;
+                        EntityArmorStand stand = (EntityArmorStand) entity;
+                        Entity target = NpcUtil.getEntityCuttingOtherEntity(stand, null);
+
+                        if (target == null) continue;
+
+                        if (NpcUtil.getEntityHp(stand) <= 0) continue;
+                        boolean entity1 = PlayerUtils.entityIsVisible(target);
+                        if (!entity1) continue;
+
+                        if (target instanceof EntityLiving) {
+
+                            Target target1 = new Target((EntityLiving) target, stand);
+
+                            if (closestTarget != null) {
+                                currentDistance = target.getDistanceToEntity(mc.thePlayer);
+                                if (currentDistance < distance) {
+                                    distance = currentDistance;
+                                    closestTarget = target1;
+                                }
+                            } else {
+                                distance = target.getDistanceToEntity(mc.thePlayer);
+                                closestTarget = target1;
+                            }
+
+                            potentialTargets.add(target1);
                         }
-                    });
-                    currentState = States.SEARCHING;
-                } else if (!hasAliveMobsAround() || mobsList.isEmpty()) {
-                    Reset();
-                    return;
-                }
-                break;
-            }
-            case SEARCHING: {
-                target = PlayerUtils.getClosestMob(mobsList);
-                if (target != null) {
-                    currentState = States.KILLING;
-                    KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, false);
-                    return;
-                }
-                if (!hasAliveMobsAround() || mobsList.isEmpty()) {
-                    Reset();
-                    return;
-                }
-                break;
-            }
-            case KILLING: {
+                    }
 
-                if (isTargetDead(target) || target.getDistanceToEntity(mc.thePlayer) > MobRange) {
+                    if (closestTarget != null && closestTarget.distance() <= scanRange) {
+                        target = closestTarget;
+                        currentState = States.ATTACKING;
+                        MacroHandler.macros.forEach(macro -> {
+                            if (macro.isEnabled()) {
+                                lastMacro = macro;
+                                macro.Pause();
+                            }
+                        });
+                    }
+                } else {
+                    if (lastMacro != null) {
+                        lastMacro.Unpause();
+                        lastMacro = null;
+                    }
+                    onDisable();
+                }
+                break;
+            case ATTACKING:
+
+                if (NpcUtil.getEntityHp(target.stand) <= 0 || target.distance() > scanRange) {
                     currentState = States.KILLED;
-                    target = null;
-                    return;
+                    break;
                 }
 
-                int weapon = PlayerUtils.getItemInHotbar(true,"Juju", "Terminator", "Bow", "Frozen Scythe");
+                int weapon = PlayerUtils.getItemInHotbar(true, "Juju", "Terminator", "Bow", "Frozen Scythe", "Glacial Scythe");
 
                 if (weapon == -1) {
-                    LogUtils.addMessage("You've got no weapon to shoot!");
-                    MightyMiner.config.killYogs = false;
-                    Reset();
+                    LogUtils.addMessage("No weapon found");
+                    currentState = States.SEARCHING;
+                    toggle();
                     return;
                 }
 
                 mc.thePlayer.inventory.currentItem = weapon;
 
+                Tuple<Float, Float> angles = AngleUtils.getRequiredRotationToEntity(target.entity);
 
-                rotation.intLockAngle(
-                    AngleUtils.getRequiredYaw(target.posX - mc.thePlayer.posX, target.posZ - mc.thePlayer.posZ),
-                    AngleUtils.getRequiredPitch(target.posX - mc.thePlayer.posX, (target.posY + (target.height/2)) - (mc.thePlayer.posY + mc.thePlayer.eyeHeight), target.posZ - mc.thePlayer.posZ),
-                    125);
+                rotation.intLockAngle(angles.getFirst(), angles.getSecond(), 300);
 
-                if (!rotation.completed) return;
+                if (rotation.rotating) return;
 
-                Entity pointedEntity = PlayerUtils.entityIsVisible(target);
-                if (pointedEntity != null && pointedEntity.getEntityId() == target.getEntityId()) {
-                    // Kill the mob
-                    KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
+                boolean pointedEntity = PlayerUtils.entityIsVisible(target.entity);
+                if (pointedEntity) {
+                    if (attackDelay.hasReached(120)) {
+                        rightClick();
+                        attackDelay.reset();
+                    }
                 } else {
                     LogUtils.addMessage("Something is blocking target, waiting for free shot...");
-                    KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
+                    blockedVisionDelay.reset();
                     currentState = States.BLOCKED_VISION;
-                    waitTicks = 50;
                 }
+
                 break;
-            }
-            case BLOCKED_VISION: {
-                if (isTargetDead(target)) {
+            case BLOCKED_VISION:
+
+                if (NpcUtil.getEntityHp(target.stand) <= 0 || target.distance() > scanRange) {
                     currentState = States.KILLED;
-                    target = null;
-                    return;
+                    break;
                 }
-                // TODO: Move to a better position or just mind your own business idk.
-                // Temporary solution: Wait for 50 ticks and try again.
-                currentState = States.KILLING;
-                break;
-            }
-            case KILLED: {
-                KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
-                if (!hasAliveMobsAround()) {
-                    mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pick");
-                    Reset();
-                } else {
-                    currentState = States.SEARCHING;
-                }
-                break;
-            }
-        }
-    }
 
-    private boolean isTargetDead(Entity target) {
-        if (target == null) return true;
-        if (target.isDead) return true;
-        if (target instanceof EntityLiving) {
-            EntityLiving entityLiving = (EntityLiving) target;
-            if (entityLiving.getHealth() <= 0) return true;
-            if (target instanceof EntitySlime) {
-                EntitySlime magmaCube = (EntitySlime) target;
-                if (magmaCube.getSlimeSize() <= 1) {
-                    return (magmaCube.getHealth() <= 0);
-                } else {
-                    return (magmaCube.getHealth() <= 1);
+                if (blockedVisionDelay.hasReached(5000)) {
+                    currentState = States.ATTACKING;
+                    break;
                 }
-            }
-        }
-        return false;
-    }
 
-    private boolean hasAliveMobsAround() {
-        return mobsList.stream().anyMatch(entity -> !isTargetDead(entity) && entity.getDistanceToEntity(mc.thePlayer) <= MobRange);
+                break;
+            case KILLED:
+                target = null;
+                currentState = States.SEARCHING;
+                break;
+        }
     }
 
     @SubscribeEvent
-    public void onLastRender(RenderWorldLastEvent event){
-        if (!enabled) return;
+    public void onLastRender(RenderWorldLastEvent event) {
         if(rotation.rotating)
             rotation.update();
+    }
+
+    @SubscribeEvent
+    public void onRenderWorldLast(RenderWorldLastEvent event) {
+        if (!enabled) return;
+        if (mc.thePlayer == null || mc.theWorld == null) return;
+
+        if (potentialTargets.size() > 0) {
+            potentialTargets.forEach(v -> DrawUtils.drawEntity(v.entity, new Color(100, 200, 100, 200), 2, event.partialTicks));
+        }
 
         if (target != null) {
-            DrawUtils.drawEntity(target, 3, new Color(93, 129, 246, 231), event.partialTicks);
+            DrawUtils.drawEntity(target.entity, new Color(200, 100, 100, 200), 2, event.partialTicks);
         }
     }
 }

@@ -12,7 +12,6 @@ import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.ReflectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.monster.EntityZombie;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -95,13 +94,14 @@ public class KeybindHandler {
 //            debugBlockRenderer.renderMap.clear();
 //
 //            debugBaritone.goTo(new BlockPos(129, 187, 56));
-            if (!MobKiller.enabled) {
-                MobKiller.MobClass = EntityZombie.class.getName();
-                LogUtils.addMessage("MobKiller: " + MobKiller.MobClass);
-                MobKiller.MobRange = 10;
-                MobKiller.enabled = true;
+
+            if (MobKiller.enabled) {
+                LogUtils.debugLog("MobKiller disabled");
+                MightyMiner.mobKiller.toggle();
             } else {
-                MobKiller.Disable();
+                LogUtils.debugLog("MobKiller enabled");
+                MobKiller.setMobsNames(false, "Dummy", "Yog");
+                MightyMiner.mobKiller.toggle();
             }
         }
         if(macroKeybinds[2].isKeyDown()){

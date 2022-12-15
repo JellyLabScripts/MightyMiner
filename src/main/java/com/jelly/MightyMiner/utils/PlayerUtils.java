@@ -170,26 +170,55 @@ public class PlayerUtils {
         return closest;
     }
 
-    public static Entity entityIsVisible(Entity entityToCheck) {
-        Entity entity = null;
+    public static boolean entityIsVisible(Entity entityToCheck) {
+        Vec3 startPos = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
+        Vec3 endPos = new Vec3(entityToCheck.posX, entityToCheck.posY + entityToCheck.height / 2, entityToCheck.posZ);
 
-        // Raycast to entityToCheck and check if any blocks are in the way
-        Vec3 playerPos = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
-        Vec3 entityPos = new Vec3(entityToCheck.posX, entityToCheck.posY + entityToCheck.getEyeHeight(), entityToCheck.posZ);
-        MovingObjectPosition raycast = mc.theWorld.rayTraceBlocks(playerPos, entityPos, false, true, false);
-        if (raycast != null) {
-            // If the raycast hits a block, check if the block is the entityToCheck
-            if (raycast.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
-                if (raycast.entityHit == entityToCheck) {
-                    entity = entityToCheck;
+        Vec3 direction = new Vec3(endPos.xCoord - startPos.xCoord, endPos.yCoord - startPos.yCoord, endPos.zCoord - startPos.zCoord);
+
+        double maxDistance = startPos.distanceTo(endPos);
+
+        double increment = 0.05;
+
+        Vec3 currentPos = startPos;
+
+        while (currentPos.distanceTo(startPos) < maxDistance) {
+
+            ArrayList<BlockPos> blocks = AnyBlockAroundVec3(currentPos, 0.1f);
+
+            boolean flag = false;
+
+            for (BlockPos pos : blocks) {
+                // Add the block to the list if it hasn't been added already
+                if (!mc.theWorld.isAirBlock(pos)) {
+                    flag = true;
                 }
             }
-        } else {
-            // If the raycast doesn't hit a block, the entity is visible
-            entity = entityToCheck;
-        }
 
-        return entity;
+            if (flag) {
+                return false;
+            }
+
+            // Move along the line by the specified increment
+            Vec3 scaledDirection = new Vec3(direction.xCoord * increment, direction.yCoord * increment, direction.zCoord * increment);
+            currentPos = currentPos.add(scaledDirection);
+        }
+        return true;
+    }
+
+    public static ArrayList<BlockPos> AnyBlockAroundVec3(Vec3 pos, float around) {
+        ArrayList<BlockPos> blocks = new ArrayList<>();
+        for (double x = (pos.xCoord - around); x <= pos.xCoord + around; x += around) {
+            for (double y = (pos.yCoord - around); y <= pos.yCoord + around; y += around) {
+                for (double z = (pos.zCoord - around); z <= pos.zCoord + around; z += around) {
+                    BlockPos blockPos = new BlockPos(x, y, z);
+                    if (!blocks.contains(blockPos)) {
+                        blocks.add(blockPos);
+                    }
+                }
+            }
+        }
+        return blocks;
     }
 
     public static void warpBackToIsland(){

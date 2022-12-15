@@ -401,6 +401,14 @@ public class Config extends Vigilant {
     public int aotvGemstoneType = 0;
 
 
+    @Property(type = PropertyType.SWITCH, name = "Draw blocks blocking AOTV vision", category = "AOTV gemstone macro", subcategory = "Blocking vision")
+    public boolean drawBlocksBlockingAOTV = true;
+
+
+    @Property(type = PropertyType.COLOR, name = "AOTV Vision blocks color", category = "AOTV gemstone macro", subcategory = "Blocking vision")
+    public Color aotvVisionBlocksColor = new Color(255, 0, 0, 120);
+
+
     public Config() {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector(), new ConfigSorting());
         init();
@@ -422,5 +430,6 @@ public class Config extends Vigilant {
         this.addDependency("routeBlocksColor", "highlightRouteBlocks");
         this.addDependency("refuelThreshold", "refuelWithAbiphone");
         this.addDependency("typeOfFuelIndex", "refuelWithAbiphone");
+        this.addDependency("aotvVisionBlocksColor", "drawBlocksBlockingAOTV");
     }
 }

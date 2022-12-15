@@ -7,7 +7,6 @@ import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
@@ -22,6 +21,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static com.jelly.MightyMiner.utils.PlayerUtils.AnyBlockAroundVec3;
 
 public class BlockUtils {
 
@@ -325,6 +326,43 @@ public class BlockUtils {
 
     public static boolean inCenterOfBlock(){
         return Math.abs(mc.thePlayer.posX % 1) == 0.5 && Math.abs(mc.thePlayer.posZ % 1) == 0.5;
+    }
+
+    public static ArrayList<BlockPos> GetAllBlocksInline(BlockPos pos1, BlockPos pos2) {
+        Vec3 startPos = new Vec3(pos1.getX() + 0.5, pos1.getY() + 1 + 1.6 - 0.125, pos1.getZ() + 0.5);
+        Vec3 endPos = new Vec3(pos2.getX() + 0.5, pos2.getY() + 0.5, pos2.getZ() + 0.5);
+
+        ArrayList<BlockPos> returnBlocks = new ArrayList<>();
+
+        Vec3 direction = new Vec3(endPos.xCoord - startPos.xCoord, endPos.yCoord - startPos.yCoord, endPos.zCoord - startPos.zCoord);
+
+        double maxDistance = startPos.distanceTo(endPos);
+
+        double increment = 0.05;
+
+        Vec3 currentPos = startPos;
+
+        while (currentPos.distanceTo(startPos) < maxDistance) {
+
+
+            ArrayList<BlockPos> blocks = AnyBlockAroundVec3(currentPos, 0.15f);
+
+            for (BlockPos pos : blocks) {
+
+                Block block = mc.theWorld.getBlockState(pos).getBlock();
+
+                // Add the block to the list if it hasn't been added already
+                if (!returnBlocks.contains(pos) && !mc.theWorld.isAirBlock(pos) && !pos.equals(pos1) && !pos.equals(pos2) && block != Blocks.stained_glass && block != Blocks.stained_glass_pane) {
+                    returnBlocks.add(pos);
+                }
+            }
+
+            // Move along the line by the specified increment
+            Vec3 scaledDirection = new Vec3(direction.xCoord * increment, direction.yCoord * increment, direction.zCoord * increment);
+            currentPos = currentPos.add(scaledDirection);
+        }
+
+        return returnBlocks;
     }
 
 }

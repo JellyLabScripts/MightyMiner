@@ -147,7 +147,7 @@ public class PathExecutor {
         }
 
         if(blocksToMine.isEmpty() || (BlockUtils.isPassable(blocksToMine.getFirst().getBlockPos()) && blocksToMine.getFirst().getBlockType() == BlockType.MINE)){
-            if(!shouldGoToFinalBlock || BlockUtils.getPlayerLoc().equals(minedBlocks.getLast().getBlockPos())) {
+            if(!shouldGoToFinalBlock || (!minedBlocks.isEmpty() && BlockUtils.getPlayerLoc().equals(minedBlocks.getLast().getBlockPos()))) {
                 disable();
                 return;
             }

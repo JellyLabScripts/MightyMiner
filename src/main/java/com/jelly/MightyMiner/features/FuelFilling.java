@@ -6,6 +6,7 @@ import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
+import com.jelly.MightyMiner.utils.Timer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
@@ -20,9 +21,7 @@ public class FuelFilling {
 
     private final Minecraft mc = Minecraft.getMinecraft();
     private int fuel = -1;
-
-    public static int waitTicks = 10;
-    public static int firstWaitTicks = 20;
+    public static Timer waitTimer = new Timer();
 
     private Macro lastMacro;
     private int drillSlotIndex;
@@ -44,14 +43,14 @@ public class FuelFilling {
 
     private void Reset() {
         currentState = states.NONE;
-        waitTicks = 10;
-        firstWaitTicks = 20;
         lastMacro = null;
+        waitTimer.reset();
     }
 
     @SubscribeEvent
     public void onTick(TickEvent event) {
         if (!MightyMiner.config.refuelWithAbiphone || mc.thePlayer == null) return;
+        if (currentState != states.NONE) return;
         if (MacroHandler.macros.stream().noneMatch(Macro::isEnabled) && lastMacro == null) {
             Reset();
             return;
@@ -106,39 +105,40 @@ public class FuelFilling {
                     }
                 });
                 currentState = states.WAITING;
+                waitTimer.reset();
                 break;
             }
 
             case WAITING: {
-                if (firstWaitTicks-- > 0) return;
-                for (Macro macro : MacroHandler.macros) {
-                    if (macro.isEnabled() && !macro.isPaused()) {
-                        return;
-                    }
+                if (!waitTimer.hasReached(300)) return;
+                int abiphoneIndex = PlayerUtils.getItemInHotbar(true, "Abiphone");
+                if (abiphoneIndex == -1) {
+                    LogUtils.addMessage("Abiphone not found. Stopping refuel.");
+                    currentState = states.NONE;
+                    MightyMiner.config.refuelWithAbiphone = false;
+                    Reset();
+                    return;
                 }
-                mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Abiphone");
+                mc.thePlayer.inventory.currentItem = abiphoneIndex;
                 currentState = states.ABIPHONE_RCD;
+                waitTimer.reset();
                 break;
             }
 
             case ABIPHONE_RCD: {
-                if (waitTicks-- > 0) return;
-                if (!mc.thePlayer.getHeldItem().getDisplayName().toLowerCase().contains("abiphone")) {
-                    LogUtils.addMessage("You don't have abiphone!");
-                    MightyMiner.config.refuelWithAbiphone = false;
-                    return;
-                }
+                if (!waitTimer.hasReached(300)) return;
+
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
                 currentState = states.ABIPHONE_RCU;
-                waitTicks = 2;
+                waitTimer.reset();
                 break;
             }
 
             case ABIPHONE_RCU: {
-                if (waitTicks-- > 0) return;
+                if (!waitTimer.hasReached(100)) return;
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
                 currentState = states.CALLING;
-                waitTicks = 10;
+                waitTimer.reset();
                 break;
             }
 
@@ -151,14 +151,14 @@ public class FuelFilling {
                         return;
                     }
 
-                    if (waitTicks-- > 0) return;
+                    if (!waitTimer.hasReached(500)) return;
 
                     for (Slot slot : abiphone.inventorySlots) {
                         if (slot.getStack() != null && slot.getStack().getDisplayName() != null) {
                             if (slot.getStack().getDisplayName().toLowerCase().contains("jotraeline")) {
                                 mc.playerController.windowClick(abiphone.windowId, slot.slotNumber, 0, 0, mc.thePlayer);
                                 currentState = states.REFILLING_DRILL;
-                                waitTicks = 10;
+                                waitTimer.reset();
                                 return;
                             }
                         }
@@ -182,7 +182,7 @@ public class FuelFilling {
                         return;
                     }
 
-                    if (waitTicks-- > 0) return;
+                    if (!waitTimer.hasReached(500)) return;
 
                     if (drillAnvil.getSlot(drillAnvil.inventorySlots.size() - 9 + drillSlotIndex) != null && drillAnvil.getSlot(drillAnvil.inventorySlots.size() - 9 + drillSlotIndex).getStack() == null) {
                         LogUtils.addMessage("Drill slot is empty!");
@@ -191,14 +191,14 @@ public class FuelFilling {
 
                     mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + drillSlotIndex, 0, 1, mc.thePlayer);
 
-                    waitTicks = 10;
+                    waitTimer.reset();
                     currentState = states.REFILLING_FUEL;
                 }
                 break;
             }
 
             case REFILLING_FUEL: {
-                if (waitTicks-- > 0) return;
+                if (!waitTimer.hasReached(500)) return;
 
                 if (mc.thePlayer.openContainer instanceof ContainerChest) {
 
@@ -238,7 +238,7 @@ public class FuelFilling {
                         if (slot.getStack().getDisplayName().toLowerCase().contains(fuelName)) {
                             mc.playerController.windowClick(drillAnvil.windowId, slot.slotNumber, 0, 1, mc.thePlayer);
                             currentState = states.ACCEPTING;
-                            waitTicks = 10;
+                            waitTimer.reset();
                             return;
                         }
                     }
@@ -251,7 +251,7 @@ public class FuelFilling {
             }
 
             case ACCEPTING: {
-                if (waitTicks-- > 0) return;
+                if (!waitTimer.hasReached(500)) return;
 
                 if (mc.thePlayer.openContainer instanceof ContainerChest) {
                     ContainerChest drillAnvil = (ContainerChest) mc.thePlayer.openContainer;
@@ -264,7 +264,7 @@ public class FuelFilling {
                     if (drillAnvil.getSlot(29) != null && drillAnvil.getSlot(29).getStack() != null &&
                     drillAnvil.getSlot(33) != null && drillAnvil.getSlot(33).getStack() != null) {
                         mc.playerController.windowClick(drillAnvil.windowId, 22, 0, 0, mc.thePlayer);
-                        waitTicks = 10;
+                        waitTimer.reset();
                         currentState = states.CLOSING;
                         return;
                     }
@@ -273,7 +273,8 @@ public class FuelFilling {
             }
 
             case CLOSING: {
-                if (waitTicks-- > 0) return;
+                if (!waitTimer.hasReached(500)) return;
+
                 if (mc.thePlayer.openContainer instanceof ContainerChest) {
                     ContainerChest drillAnvil = (ContainerChest) mc.thePlayer.openContainer;
                     IInventory inv = drillAnvil.getLowerChestInventory();
@@ -285,7 +286,7 @@ public class FuelFilling {
                     if (drillAnvil.getSlot(29) != null && drillAnvil.getSlot(29).getStack() == null) {
                         mc.playerController.windowClick(drillAnvil.windowId, 13, 0, 0, mc.thePlayer);
                         currentState = states.EXIT;
-                        waitTicks = 10;
+                        waitTimer.reset();
                     }
                 }
                 break;
@@ -300,7 +301,8 @@ public class FuelFilling {
                         //Not in drill anvil
                         return;
                     }
-                    if (waitTicks-- > 0) return;
+
+                    if (!waitTimer.hasReached(500)) return;
 
                     mc.playerController.windowClick(drillAnvil.windowId, drillAnvil.inventorySlots.size() - 9 + drillSlotIndex, 0, 0, mc.thePlayer);
 

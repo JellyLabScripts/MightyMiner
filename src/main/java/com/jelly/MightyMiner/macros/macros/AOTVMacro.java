@@ -26,13 +26,11 @@ public class AOTVMacro extends Macro {
 
     enum State{
         NONE,
-        PAUSED,
         Teleporting,
         Mining
     }
 
     private final ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> gemstonesFilter = new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>();
-
 
     State currentState = State.NONE;
 
@@ -46,26 +44,21 @@ public class AOTVMacro extends Macro {
     List<BlockPos> coords;
 
 
-    State prePauseState;
-
-
-
-    @Override
-    public boolean isPaused() {
-        return currentState == State.PAUSED;
-    }
-
     @Override
     public void Pause() {
-        prePauseState = currentState;
-        currentState = State.PAUSED;
-        baritone.disableBaritone();
+        paused = true;
+        if (baritone != null) {
+            baritone.disableBaritone();
+        }
+        KeybindHandler.resetKeybindState();
     }
 
     @Override
     public void Unpause() {
-        currentState = prePauseState;
-        prePauseState = null;
+        paused = false;
+        if (baritone != null) {
+            baritone.disableBaritone();
+        }
     }
 
     @Override
@@ -75,9 +68,6 @@ public class AOTVMacro extends Macro {
             MobKiller.setMobsNames(false, "Yog");
             MightyMiner.mobKiller.Enable();
             LogUtils.debugLog("Enabled mob killer");
-        }
-        if (isPaused()) {
-            Unpause();
         }
         baritone = new AutoMineBaritone(getAutoMineConfig());
         currentState = State.Mining;
@@ -167,6 +157,8 @@ public class AOTVMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase) {
+
+        if (paused) return;
 
         if(phase != TickEvent.Phase.START) return;
 

@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
+import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
@@ -15,12 +16,16 @@ public abstract class Macro {
     protected Minecraft mc = Minecraft.getMinecraft();
     protected boolean enabled = false;
 
+    protected boolean paused = false;
+
     public void toggle() {
         enabled = !enabled;
+        FuelFilling.currentState = FuelFilling.states.NONE;
         if (enabled) {
             onEnable();
         } else {
             onDisable();
+            paused = false;
         }
     }
 
@@ -50,12 +55,17 @@ public abstract class Macro {
 
         if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
             int slotCache = mc.thePlayer.inventory.currentItem;
-            int targetSlot = MightyMiner.config.blueCheeseOmeletteToggle ? PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese") : PlayerUtils.getItemInHotbar("Pick", "Gauntlet", "Drill");
+            int targetSlot = MightyMiner.config.blueCheeseOmeletteToggle ? PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese") : PlayerUtils.getItemInHotbar(true, "Pick", "Gauntlet", "Drill");
 
             if(targetSlot == -1) {
                 Logger.playerLog("Blue cheese drill not found. Disabled blue cheese swap");
                 MightyMiner.config.blueCheeseOmeletteToggle = false;
-                targetSlot = PlayerUtils.getItemInHotbar("Pick", "Gauntlet", "Drill");
+                targetSlot = PlayerUtils.getItemInHotbar(true, "Pick", "Gauntlet", "Drill");
+                if (targetSlot == -1) {
+                    Logger.playerLog("Pickaxe not found. Disabling mining speed boost");
+                    MightyMiner.config.useMiningSpeedBoost = false;
+                    return;
+                }
             }
             mc.thePlayer.inventory.currentItem = targetSlot;
             mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getStackInSlot(targetSlot));
@@ -65,15 +75,10 @@ public abstract class Macro {
         }
     }
 
-    public boolean isPaused() {
-        return false;
-    }
-
     public void Pause() {
     }
 
     public void Unpause() {
-
     }
 
     public void FailSafeDisable() {}

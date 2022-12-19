@@ -32,26 +32,24 @@ public class MithrilMacro extends Macro {
     ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> mithPriority = new ArrayList<>();
 
     @Override
-    public boolean isPaused() {
-        return !enabled;
-    }
-
-    @Override
     public void Pause() {
+        paused = true;
+        if (baritone != null) {
+            baritone.disableBaritone();
+        }
         KeybindHandler.resetKeybindState();
-        toggle();
     }
 
     @Override
     public void Unpause() {
-        toggle();
+        paused = false;
+        if (baritone != null) {
+            baritone.disableBaritone();
+        }
     }
 
     @Override
     protected void onEnable() {
-        if (isPaused()) {
-            Unpause();
-        }
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");
 
         if(MightyMiner.config.playerFailsafe) {
@@ -83,6 +81,8 @@ public class MithrilMacro extends Macro {
     @Override
     public void onTick(TickEvent.Phase phase) {
         if (!enabled) return;
+
+        if (paused) return;
 
         if(phase != TickEvent.Phase.START)
             return;

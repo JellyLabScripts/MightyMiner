@@ -71,7 +71,6 @@ public class PowderMacro extends Macro {
 
     enum State {
         NORMAL,
-        PAUSED,
         TREASURE,
         UTurn
     }
@@ -86,24 +85,21 @@ public class PowderMacro extends Macro {
 
     }
 
-    State prePauseState;
-
-
-    @Override
-    public boolean isPaused() {
-        return currentState == State.PAUSED;
-    }
-
     @Override
     public void Pause() {
-        prePauseState = currentState;
-        currentState = State.PAUSED;
+        paused = true;
+        if (mineBaritone != null) {
+            mineBaritone.disableBaritone();
+        }
+        KeybindHandler.resetKeybindState();
     }
 
     @Override
     public void Unpause() {
-        currentState = prePauseState;
-        prePauseState = null;
+        paused = false;
+        if (mineBaritone != null) {
+            mineBaritone.disableBaritone();
+        }
     }
 
     @Override
@@ -116,9 +112,6 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onEnable() {
-        if (isPaused()) {
-            Unpause();
-        }
         if(MightyMiner.config.playerFailsafe) {
             if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad)) {
                 LogUtils.addMessage("Not starting, there is a player nearby");
@@ -178,6 +171,10 @@ public class PowderMacro extends Macro {
             return;
 
         if (!enabled) return;
+
+        if (paused) {
+            return;
+        }
 
 
         if(!RGANuker.enabled && MightyMiner.config.powNuker){
@@ -301,9 +298,6 @@ public class PowderMacro extends Macro {
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
                 useMiningSpeedBoost();
-                break;
-            case PAUSED:
-                KeybindHandler.resetKeybindState();
                 break;
         }
 

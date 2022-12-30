@@ -203,7 +203,7 @@ public class MobKiller {
 
                 Tuple<Float, Float> angles = AngleUtils.getRequiredRotationToEntity(target.entity);
 
-                rotation.intLockAngle(angles.getFirst(), angles.getSecond(), 300);
+                rotation.initAngleLock(angles.getFirst(), angles.getSecond(), 300);
 
                 if (rotation.rotating) return;
 

@@ -175,7 +175,7 @@ public class AOTVMacro extends Macro {
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
                 if(rotationFlag)
-                    rotation.intLockAngle(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  300);
+                    rotation.initAngleLock(AngleUtils.getRequiredYawCenter(targetCoordinate), AngleUtils.getRequiredPitchCenter(targetCoordinate),  300);
 
 
                 if(rightClickCD == -1) {

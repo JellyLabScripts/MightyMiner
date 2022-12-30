@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 
 import java.util.LinkedList;
 
-public class SemiPath extends Path{
+public class SemiPath extends Path {
     public SemiPath(LinkedList<BlockNode> blocksInPath, PathMode mode) {
         super(blocksInPath, mode);
     }

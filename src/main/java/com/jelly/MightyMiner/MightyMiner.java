@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.jelly.MightyMiner.command.BaritoneDebug;
 import com.jelly.MightyMiner.command.Route;
 import com.jelly.MightyMiner.config.Config;
@@ -25,6 +26,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Mod(name = "MightyMiner", modid = MightyMiner.MODID, version = MightyMiner.VERSION)
 public class MightyMiner {
@@ -33,6 +36,7 @@ public class MightyMiner {
 
     public static Config config;
 
+    public static ExecutorService pathfindPool = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("PathFinderPool-%d").build());
 
     public static List<BlockPos> coords = new ArrayList<>();
 

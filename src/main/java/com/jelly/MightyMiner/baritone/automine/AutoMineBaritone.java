@@ -1,20 +1,22 @@
 package com.jelly.MightyMiner.baritone.automine;
 
-import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
-import com.jelly.MightyMiner.baritone.automine.config.MiningType;
-import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
-import com.jelly.MightyMiner.baritone.automine.config.PathFindSetting;
-import com.jelly.MightyMiner.baritone.automine.logging.Logger;
-import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
+import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.calculations.AStarPathFinder;
+import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
+import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoBlockException;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
+import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
+import com.jelly.MightyMiner.baritone.automine.config.PathFindSetting;
+import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.movement.PathExecutor;
 import com.jelly.MightyMiner.baritone.automine.structures.Path;
 import com.jelly.MightyMiner.baritone.automine.structures.SemiPath;
 import com.jelly.MightyMiner.events.ChunkLoadEvent;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
-import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.BlockUtils;
+import lombok.Getter;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.EnumDyeColor;
@@ -22,19 +24,24 @@ import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 
-public class AutoMineBaritone{
+public class AutoMineBaritone {
 
+    org.apache.logging.log4j.Logger logger = LogManager.getLogger("AutoMineBaritone");
 
     Minecraft mc = Minecraft.getMinecraft();
-    public enum BaritoneState{
+
+    public enum BaritoneState {
         PATH_FINDING,
         EXECUTING,
         IDLE,
         FAILED
     }
+
+    @Getter
     volatile BaritoneState state = BaritoneState.IDLE;
 
     PathFindSetting pathSetting;
@@ -54,6 +61,7 @@ public class AutoMineBaritone{
     public static class BlockData<T> {
         public Block block;
         public T requiredBlockStateValue;
+
         public BlockData(Block block, T requiredBlockStateValue) {
             this.block = block;
             this.requiredBlockStateValue = requiredBlockStateValue;
@@ -61,8 +69,7 @@ public class AutoMineBaritone{
     }
 
 
-
-    public AutoMineBaritone(BaritoneConfig config){
+    public AutoMineBaritone(BaritoneConfig config) {
         this.config = config;
         executor = new PathExecutor();
         pathFinder = new AStarPathFinder(getPathBehaviour());
@@ -71,7 +78,7 @@ public class AutoMineBaritone{
 
     public void mineFor(ArrayList<BlockData<EnumDyeColor>> blockType) {
         Logger.playerLog("Starting to mine");
-        registerEvent();
+        registerEventListener();
         pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.MINE, false);
         path = null;
 
@@ -79,8 +86,8 @@ public class AutoMineBaritone{
         startPathFinding();
     }
 
-    public void goTo(BlockPos blockPos){
-        registerEvent();
+    public void goTo(BlockPos blockPos) {
+        registerEventListener();
         pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.GOTO, true);
         path = null;
 
@@ -89,17 +96,11 @@ public class AutoMineBaritone{
     }
 
 
-
-
-    public BaritoneState getState(){
-        return state;
-    }
-
-
-    private void registerEvent() {
+    private void registerEventListener() {
         MinecraftForge.EVENT_BUS.register(this);
     }
-    private void unregister() {
+
+    private void unregisterEventListeners() {
         MinecraftForge.EVENT_BUS.unregister(this);
     }
 
@@ -114,74 +115,77 @@ public class AutoMineBaritone{
     private void failBaritone(boolean failed) {
 
         executor.reset();
-        if(path != null && path.getBlocksInPath() != null && !path.getBlocksInPath().isEmpty())
-            pathFinder.addToBlackList(path.getBlocksInPath().getFirst().getBlockPos());
+        if (path != null && path.getBlocksInPath() != null && !path.getBlocksInPath().isEmpty()) {
+            pathFinder.addToBlackList(path.getBlocksInPath().getFirst().getPos());
+        }
 
-        if(failed) {
+        if (failed) {
             state = BaritoneState.FAILED;
             terminate();
-        }
-        else
+        } else {
             startPathFinding();
+        }
 
     }
 
     private void terminate() {
-        unregister();
+        unregisterEventListeners();
         KeybindHandler.resetKeybindState();
     }
 
     // logic is bit intricate here, sorry
     @SubscribeEvent
-    public void TickEvent(TickEvent.ClientTickEvent event){
-        if(mc.thePlayer == null || mc.theWorld == null || state == BaritoneState.IDLE || state == BaritoneState.FAILED)
+    public void TickEvent(TickEvent.ClientTickEvent event) {
+        if (mc.thePlayer == null || state == BaritoneState.IDLE || state == BaritoneState.FAILED) {
             return;
+        }
 
-
-        System.out.println(state);
-        switch(state){
+        logger.info(state);
+        switch (state) {
             case PATH_FINDING:
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());
                 break;
             case EXECUTING:
                 if (executor.hasSuccessfullyFinished()) {
                     // TODO: Fix this
-                    if(path instanceof SemiPath)
+                    if (path instanceof SemiPath) {
                         startSemiPathFinding();
-                    else
+                    } else {
                         disableBaritone();
-                } else if (executor.hasFailed())
+                    }
+                } else if (executor.hasFailed()) {
                     failBaritone(false);
-                 else if (!executor.isExecuting())
+                } else if (!executor.isExecuting()) {
                     executor.executePath(path, config);
-                // else if(chunkLoadCount > 6 && path instanceof SemiPath)
-               //    startSemiPathFinding();
+                }
+//                 else if(chunkLoadCount > 6 && path instanceof SemiPath)
+//                   startSemiPathFinding();
 
         }
     }
 
     @SubscribeEvent
-    public void ChunkLoadEvent(ChunkLoadEvent event){
+    public void ChunkLoadEvent(ChunkLoadEvent event) {
     }
 
-    private void startSemiPathFinding(){
+    private void startSemiPathFinding() {
         //chunkLoadCount = 0;
         startPathFinding();
         executor.reset();
     }
 
 
-    private void startPathFinding(){
+    private void startPathFinding() {
         state = BaritoneState.PATH_FINDING;
 
         KeybindHandler.resetKeybindState();
         KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());
 
-        new Thread(() -> {
-
-            if(!config.isMineFloor()) {
-                if(playerFloorPos != null)
+        MightyMiner.pathfindPool.submit(() -> {
+            if (!config.isMineFloor()) {
+                if (playerFloorPos != null) {
                     pathFinder.removeFromBlackList(playerFloorPos);
+                }
 
                 playerFloorPos = BlockUtils.getPlayerLoc().down();
                 pathFinder.addToBlackList(playerFloorPos);
@@ -190,7 +194,11 @@ public class AutoMineBaritone{
             try {
                 switch (pathSetting.getPathMode()) {
                     case MINE:
-                        path =  (pathSetting.isFindWithBlockPos() ? pathFinder.getPath(PathMode.MINE, targetBlockPos) : pathFinder.getPath(PathMode.MINE, pathSetting.isMineWithPreference(), targetBlockType));
+                        if (pathSetting.isFindWithBlockPos()) {
+                            path = pathFinder.getPath(PathMode.MINE, targetBlockPos);
+                        } else {
+                            path = pathFinder.getPath(PathMode.MINE, pathSetting.isMineWithPreference(), targetBlockType);
+                        }
                         break;
                     case GOTO: // can add more options later
                         path = pathFinder.getPath(PathMode.GOTO, targetBlockPos);
@@ -198,15 +206,15 @@ public class AutoMineBaritone{
                 }
                 state = BaritoneState.EXECUTING;
 
-            }catch (NoBlockException | NoPathException e){
+            } catch (NoBlockException | NoPathException e) {
                 Logger.playerLog("Pathfind failed: " + e);
                 failBaritone(true);
             }
-        }).start();
+        });
     }
 
 
-    private PathFinderBehaviour getPathBehaviour(){
+    private PathFinderBehaviour getPathBehaviour() {
         return new PathFinderBehaviour(
                 config.getForbiddenPathfindingBlocks() == null ? null : config.getForbiddenPathfindingBlocks(),
                 config.getAllowedPathfindingBlocks() == null ? null : config.getAllowedPathfindingBlocks(),

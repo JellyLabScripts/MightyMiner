@@ -28,10 +28,23 @@ public class Rotation {
         getDifference();
     }
 
-    public void intLockAngle(float yaw, float pitch, int time) {
-        if ((AngleUtils.get360RotationYaw((float) Math.floor(mc.thePlayer.rotationYaw)) != AngleUtils.get360RotationYaw((float) Math.floor(yaw))
-                ||AngleUtils.get360RotationYaw((float) Math.floor(mc.thePlayer.rotationPitch)) != AngleUtils.get360RotationYaw((float) Math.floor(pitch))) && !rotating)
-            easeTo(yaw, pitch, time);
+    public void initAngleLock(float yaw, float pitch, int time) {
+        float playerYaw = (float) Math.floor(mc.thePlayer.rotationYaw);
+        float playerPitch = (float) Math.floor(mc.thePlayer.rotationPitch);
+        float targetYaw = (float) Math.floor(yaw);
+        float targetPitch = (float) Math.floor(pitch);
+
+        // "real" means that its in 360 format instead of -180 to 180
+        float realPlayerYaw = AngleUtils.get360RotationYaw(playerYaw);
+        float realPlayerPitch = AngleUtils.get360RotationYaw(targetPitch);
+        float realTargetYaw = AngleUtils.get360RotationYaw(targetYaw);
+        float realTargetPitch = AngleUtils.get360RotationYaw(playerPitch);
+
+        if (realPlayerYaw != realTargetYaw || realTargetPitch != realPlayerPitch) {
+            if (!rotating) {
+                easeTo(yaw, pitch, time);
+            }
+        }
     }
 
     public void update() {

@@ -1,9 +1,7 @@
 package com.jelly.MightyMiner.baritone.automine.calculations;
 
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.ChunkLoadException;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
-import com.jelly.MightyMiner.baritone.automine.movement.Moves;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoBlockException;
@@ -11,15 +9,12 @@ import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathExc
 import com.jelly.MightyMiner.baritone.automine.structures.*;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils;
-import com.jelly.MightyMiner.utils.MathUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
@@ -52,7 +47,7 @@ public class AStarPathFinder {
     public Path getPath(PathMode mode, boolean withPreference, ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> blockType) throws NoBlockException, NoPathException {
         initialize(mode);
 
-        long pastTime = System.currentTimeMillis();;
+        long pastTime = System.currentTimeMillis();
 
         LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
         List<BlockPos> foundBlocks = new ArrayList<>();
@@ -105,7 +100,7 @@ public class AStarPathFinder {
 
     private void setLastTarget(LinkedList<BlockNode> blockList){
         removeFromBlackList(lastTarget);
-        this.lastTarget = blockList.getFirst().getBlockPos();
+        this.lastTarget = blockList.getFirst().getPos();
     }
 
     private LinkedList<LinkedList<BlockNode>> getPossiblePaths(List<BlockPos> targetBlocks){
@@ -117,11 +112,11 @@ public class AStarPathFinder {
 
             if (!path.isEmpty()) {
 
-                if(path.getLast().getBlockPos() == null)
+                if(path.getLast().getPos() == null)
                     path.removeLast(); // remove last dummy blockNode as it is useless for find(BLock)
 
                 possiblePaths.add(path);
-                limit = calculator.getSteps();
+                limit = calculator.getStep();
             }
         }
         return possiblePaths;
@@ -145,10 +140,10 @@ public class AStarPathFinder {
         double cost = 0.0D;
         if (nodes.size() <= 2) {
             for (BlockNode node : nodes)
-                cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYaw(node.getBlockPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitch(node.getBlockPos()))) / 540.0d;
+                cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYaw(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitch(node.getPos()))) / 540.0d;
         } else {
             for (BlockNode node : nodes)
-                cost += (node.getBlockType() == BlockType.WALK) ? 1D : 1.5D;
+                cost += (node.getType() == BlockType.WALK) ? 1D : 1.5D;
         }
         return cost;
     }

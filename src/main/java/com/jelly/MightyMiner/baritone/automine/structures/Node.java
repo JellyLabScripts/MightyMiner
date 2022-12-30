@@ -3,12 +3,14 @@ package com.jelly.MightyMiner.baritone.automine.structures;
 import net.minecraft.util.BlockPos;
 
 public class Node {
-    public Node(BlockPos blockPos){
-        this.blockPos = blockPos;
+    public Node(BlockPos pos){
+        this.pos = pos;
     }
-    public double hValue;
-    public double gValue = -1;
-    public double fValue;
-    public Node lastNode;
-    public BlockPos blockPos;
+
+    public BlockPos pos;
+
+    public double hCost;
+    public double gCost = -1;
+    public double fCost;
+    public Node parentNode;
 }

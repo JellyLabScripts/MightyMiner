@@ -65,23 +65,18 @@ public class BaritoneDebug extends CommandBase {
                     return;
                 }
 
-                int x;
-                int y;
-                int z;
                 try {
-                    x = Integer.parseInt(args[1]);
-                    y = Integer.parseInt(args[2]);
-                    z = Integer.parseInt(args[3]);
+                    int x = Integer.parseInt(args[1]);
+                    int y = Integer.parseInt(args[2]);
+                    int z = Integer.parseInt(args[3]);
+
+                    AutoMineBaritone autoMineBaritone = new AutoMineBaritone(new WalkBaritoneConfig(0, 256, 5));
+
+                    autoMineBaritone.goTo(new BlockPos(x, y, z));
                 }catch (NumberFormatException e){
                     LogUtils.addMessage("Usage: " + CLEAN + "/baritone goto x y z");
                     return;
                 }
-
-
-                AutoMineBaritone autoMineBaritone = new AutoMineBaritone(new WalkBaritoneConfig(0, 256, 5));
-
-                autoMineBaritone.goTo(new BlockPos(x, y, z));
-
 
 
                 break;

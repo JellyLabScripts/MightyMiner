@@ -3,6 +3,7 @@ package com.jelly.MightyMiner.utils;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
@@ -27,7 +28,8 @@ import static com.jelly.MightyMiner.utils.PlayerUtils.AnyBlockAroundVec3;
 public class BlockUtils {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
-    public static final Block[] walkables = {
+
+    public static final List<Block> walkables = Arrays.asList(
             Blocks.air,
             Blocks.wall_sign,
             Blocks.reeds,
@@ -42,8 +44,9 @@ public class BlockUtils {
             Blocks.detector_rail,
             Blocks.golden_rail,
             Blocks.carpet
-    };
-    public static final Block[] cannotWalkOn = { // cannot be treated as full block
+    );
+
+    public static final List<Block> cannotWalkOn = Arrays.asList( // cannot be treated as full block
             Blocks.air,
             Blocks.water,
             Blocks.flowing_water,
@@ -55,7 +58,7 @@ public class BlockUtils {
             Blocks.golden_rail,
             Blocks.carpet,
             Blocks.slime_block
-    };
+    );
 
     public enum BlockSides {
         up,
@@ -70,7 +73,7 @@ public class BlockUtils {
     // ;p
     private boolean isTitanium(BlockPos pos) {
         IBlockState state = mc.theWorld.getBlockState(pos);
-        return (state.getBlock() == Blocks.stone && ((BlockStone.EnumType)state.getValue((IProperty)BlockStone.VARIANT)).equals(BlockStone.EnumType.DIORITE_SMOOTH));
+        return (state.getBlock() == Blocks.stone && (state.getValue(BlockStone.VARIANT)).equals(BlockStone.EnumType.DIORITE_SMOOTH));
     }
 
     public static int getUnitX() {
@@ -212,7 +215,7 @@ public class BlockUtils {
     }
 
     public static boolean isPassable(Block block) {
-        return Arrays.asList(walkables).contains(block);
+        return walkables.contains(block);
     }
 
     public static boolean isPassable(BlockPos block) {
@@ -220,7 +223,7 @@ public class BlockUtils {
     }
 
     public static boolean canWalkOn(Block groundBlock) {
-        return !Arrays.asList(cannotWalkOn).contains(groundBlock);
+        return !cannotWalkOn.contains(groundBlock);
     }
 
     public static boolean canWalkOn(BlockPos groundBlock) {

@@ -164,19 +164,19 @@ public class KeybindHandler {
         realSetKeyBindState(keyBindShift, shiftBool);
     }
 
-    public static void updateKeys(boolean wBool, boolean sBool, boolean aBool, boolean dBool, boolean atkBool, boolean useBool, boolean shiftBool, boolean jumpBool) {
+    public static void updateKeys(boolean goRight, boolean goLeft, boolean goForward, boolean goBack, boolean attack, boolean useItem, boolean shift, boolean jump) {
         if (mc.currentScreen != null) {
             resetKeybindState();
             return;
         }
-        realSetKeyBindState(keybindW, wBool);
-        realSetKeyBindState(keybindS, sBool);
-        realSetKeyBindState(keybindA, aBool);
-        realSetKeyBindState(keybindD, dBool);
-        realSetKeyBindState(keybindAttack, atkBool);
-        realSetKeyBindState(keybindUseItem, useBool);
-        realSetKeyBindState(keyBindShift, shiftBool);
-        realSetKeyBindState(keyBindJump, jumpBool);
+        realSetKeyBindState(keybindW, goRight);
+        realSetKeyBindState(keybindS, goLeft);
+        realSetKeyBindState(keybindA, goForward);
+        realSetKeyBindState(keybindD, goBack);
+        realSetKeyBindState(keybindAttack, attack);
+        realSetKeyBindState(keybindUseItem, useItem);
+        realSetKeyBindState(keyBindShift, shift);
+        realSetKeyBindState(keyBindJump, jump);
     }
 
     public static void updateKeys(boolean wBool, boolean sBool, boolean aBool, boolean dBool, boolean atkBool) {

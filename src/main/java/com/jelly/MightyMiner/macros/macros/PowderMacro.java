@@ -202,7 +202,7 @@ public class PowderMacro extends Macro {
 
             if(aoteTick > 0) {
                 aoteTick --;
-                rotation.intLockAngle(AngleUtils.get360RotationYaw(), 89, 500);
+                rotation.initAngleLock(AngleUtils.get360RotationYaw(), 89, 500);
                 return;
             }
 
@@ -279,9 +279,9 @@ public class PowderMacro extends Macro {
 
             case NORMAL: case UTurn:
                 if(MightyMiner.config.powNuker) {
-                    rotation.intLockAngle(playerYaw, (shouldLookDown() ? 60 : (frontShouldMineSlow() ? 27 : 0)), 200);
+                    rotation.initAngleLock(playerYaw, (shouldLookDown() ? 60 : (frontShouldMineSlow() ? 27 : 0)), 200);
                 } else
-                    rotation.intLockAngle(playerYaw, (shouldLookDown() ? 60 : 27), 200);
+                    rotation.initAngleLock(playerYaw, (shouldLookDown() ? 60 : 27), 200);
 
                 if(frontShouldMineSlow() && MightyMiner.config.powNuker){
                     RGANuker.enabled = false;
@@ -403,7 +403,7 @@ public class PowderMacro extends Macro {
             if(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT){
                 try {
                     if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - currentChest.getX()) < 1.5f && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - currentChest.getY()) < 1.5f && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - currentChest.getZ()) < 1.5f) {
-                        rotation.intLockAngle(
+                        rotation.initAngleLock(
                                 AngleUtils.getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
                                 AngleUtils.getRequiredPitch(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, (((S2APacketParticles) packet).getYCoordinate()) - (mc.thePlayer.posY + 1.62d), ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
                                 50);

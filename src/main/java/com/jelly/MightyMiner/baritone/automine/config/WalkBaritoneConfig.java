@@ -14,7 +14,7 @@ public class WalkBaritoneConfig extends BaritoneConfig{
                 200,
                 restartTimeThreshold,
                 null,
-                Arrays.asList(BlockUtils.walkables),
+                BlockUtils.walkables,
                 maxY,
                 minY);
     }

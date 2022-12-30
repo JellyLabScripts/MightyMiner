@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner;
 
+import com.jelly.MightyMiner.command.BaritoneDebug;
 import com.jelly.MightyMiner.command.Route;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.coords.CoordsConfig;
@@ -71,6 +72,7 @@ public class MightyMiner {
         config = new Config();
 
         ClientCommandHandler.instance.registerCommand(new Route());
+        ClientCommandHandler.instance.registerCommand(new BaritoneDebug());
 
 
         Minecraft.getMinecraft().gameSettings.gammaSetting = 100;

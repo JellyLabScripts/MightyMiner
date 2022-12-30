@@ -1,0 +1,94 @@
+package com.jelly.MightyMiner.command;
+
+import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
+import com.jelly.MightyMiner.baritone.automine.config.WalkBaritoneConfig;
+import com.jelly.MightyMiner.utils.LogUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.Vec3;
+
+import java.util.Arrays;
+
+import static com.jelly.MightyMiner.MightyMiner.coordsConfig;
+
+public class BaritoneDebug extends CommandBase {
+
+    private final String CLEAN = "" + EnumChatFormatting.RESET + EnumChatFormatting.AQUA + EnumChatFormatting.ITALIC;
+    @Override
+    public int getRequiredPermissionLevel() {
+        return 0;
+    }
+
+    @Override
+    public String getCommandName() {
+        return "baritone";
+    }
+
+    @Override
+    public String getCommandUsage(ICommandSender sender) {
+        return "Bill gates";
+    }
+
+    public void displayUsage(){
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.thePlayer.addChatMessage(new ChatComponentText((""+ EnumChatFormatting.DARK_AQUA + EnumChatFormatting.BOLD + "---------------------------------------------")));
+        LogUtils.addMessage("Usage: " + CLEAN + "/baritone < goto >");
+        LogUtils.addMessage("Start going somewhere using baritone " + CLEAN + "/baritone goto 0 5 0");
+        mc.thePlayer.addChatMessage(new ChatComponentText((""+EnumChatFormatting.DARK_AQUA + EnumChatFormatting.BOLD + "---------------------------------------------")));
+    }
+
+
+    @Override
+    public void processCommand(ICommandSender sender, String[] args) {
+
+        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
+            displayUsage();
+            return;
+        }
+
+        String name = args[0];
+
+        if (args.length == 1 && args[0].matches("goto")) {
+            LogUtils.addMessage("Usage: " + CLEAN + "/baritone" + name + " <goto-name>");
+            return;
+        }
+
+        switch (name) {
+            case "goto":
+                if(args.length < 4){
+                    LogUtils.addMessage("Usage: " + CLEAN + "/baritone goto x y z");
+                    return;
+                }
+
+                int x;
+                int y;
+                int z;
+                try {
+                    x = Integer.parseInt(args[1]);
+                    y = Integer.parseInt(args[2]);
+                    z = Integer.parseInt(args[3]);
+                }catch (NumberFormatException e){
+                    LogUtils.addMessage("Usage: " + CLEAN + "/baritone goto x y z");
+                    return;
+                }
+
+
+                AutoMineBaritone autoMineBaritone = new AutoMineBaritone(new WalkBaritoneConfig(0, 256, 5));
+
+                autoMineBaritone.goTo(new BlockPos(x, y, z));
+
+
+
+                break;
+            default:
+                displayUsage();
+
+        }
+
+    }
+}

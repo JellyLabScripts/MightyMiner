@@ -6,9 +6,17 @@ import net.minecraft.util.BlockPos;
 
 public class BlockNode {
 
-    @Setter @Getter
+    public BlockPos getPos() {
+        return pos;
+    }
+
+    public BlockType getType() {
+        return type;
+    }
+
+    @Setter
     BlockPos pos;
-    @Getter @Setter
+    @Setter
     BlockType type;
 
     @Getter

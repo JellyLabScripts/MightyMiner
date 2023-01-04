@@ -4,6 +4,8 @@ import net.minecraft.block.BlockSlab;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3i;
 
 import javax.vecmath.Vector3d;
 import java.util.Vector;
@@ -47,11 +49,8 @@ public class MathUtils {
         return new Vec3((double)(f1 * f2), (double)f3, (double)(f * f2));
     }
 
-
-
-
-
-
-
-
+    @NotNull
+    public static Vector3i BlockPosToVector3i(@NotNull final BlockPos pos){
+        return new Vector3i(pos.getX(), pos.getY(), pos.getZ());
+    }
 }

@@ -11,6 +11,7 @@ import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.PathFindSetting;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.movement.PathExecutor;
+import com.jelly.MightyMiner.baritone.automine.movementgrapth.Executor;
 import com.jelly.MightyMiner.baritone.automine.structures.Path;
 import com.jelly.MightyMiner.baritone.automine.structures.SemiPath;
 import com.jelly.MightyMiner.events.ChunkLoadEvent;
@@ -29,7 +30,6 @@ import org.apache.logging.log4j.LogManager;
 import java.util.ArrayList;
 
 public class AutoMineBaritone {
-
     org.apache.logging.log4j.Logger logger = LogManager.getLogger("AutoMineBaritone");
 
     Minecraft mc = Minecraft.getMinecraft();
@@ -48,15 +48,15 @@ public class AutoMineBaritone {
     BaritoneConfig config;
 
     AStarPathFinder pathFinder;
-    PathExecutor executor;
+//    PathExecutor executor;
+    Executor newExecutor;
+
     BlockPos playerFloorPos;
 
     ArrayList<BlockData<EnumDyeColor>> targetBlockType;
     BlockPos targetBlockPos;
 
     Path path;
-    //int chunkLoadCount;
-
 
     public static class BlockData<T> {
         public Block block;
@@ -71,7 +71,8 @@ public class AutoMineBaritone {
 
     public AutoMineBaritone(BaritoneConfig config) {
         this.config = config;
-        executor = new PathExecutor();
+//        executor = new PathExecutor();
+        newExecutor = new Executor();
         pathFinder = new AStarPathFinder(getPathBehaviour());
     }
 
@@ -107,14 +108,14 @@ public class AutoMineBaritone {
     public void disableBaritone() {
         Logger.playerLog("Disabled baritone");
         state = BaritoneState.IDLE;
-        executor.reset();
+        newExecutor.reset();
         terminate();
     }
 
     // failed = true -> Will actually terminate whole thing, otherwise just restart and pretend nothing has happened...
     private void failBaritone(boolean failed) {
 
-        executor.reset();
+        newExecutor.reset();
         if (path != null && path.getBlocksInPath() != null && !path.getBlocksInPath().isEmpty()) {
             pathFinder.addToBlackList(path.getBlocksInPath().getFirst().getPos());
         }
@@ -146,32 +147,28 @@ public class AutoMineBaritone {
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());
                 break;
             case EXECUTING:
-                if (executor.hasSuccessfullyFinished()) {
+                if (newExecutor.hasSuccessfullyFinished()) {
                     // TODO: Fix this
                     if (path instanceof SemiPath) {
                         startSemiPathFinding();
                     } else {
                         disableBaritone();
                     }
-                } else if (executor.hasFailed()) {
+                } else if (newExecutor.getHasFailed()) {
                     failBaritone(false);
-                } else if (!executor.isExecuting()) {
-                    executor.executePath(path, config);
+                } else if (!newExecutor.isExecuting()) {
+                    newExecutor.executePath(path, config);
                 }
-//                 else if(chunkLoadCount > 6 && path instanceof SemiPath)
-//                   startSemiPathFinding();
 
+                break;
+            default:
+                break;
         }
     }
 
-    @SubscribeEvent
-    public void ChunkLoadEvent(ChunkLoadEvent event) {
-    }
-
     private void startSemiPathFinding() {
-        //chunkLoadCount = 0;
         startPathFinding();
-        executor.reset();
+        newExecutor.reset();
     }
 
 

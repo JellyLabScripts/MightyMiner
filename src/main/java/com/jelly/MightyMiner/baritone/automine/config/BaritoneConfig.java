@@ -8,9 +8,16 @@ import java.util.List;
 
 @AllArgsConstructor
 public class BaritoneConfig {
-    @Getter
+    public MiningType getMineType() {
+        return mineType;
+    }
+
     MiningType mineType;
-    @Getter
+
+    public boolean isShiftWhenMine() {
+        return shiftWhenMine;
+    }
+
     boolean shiftWhenMine;
     @Getter
     boolean mineFloor;
@@ -18,7 +25,11 @@ public class BaritoneConfig {
     boolean mineWithPreference;
     @Getter
     int mineRotationTime;
-    @Getter
+
+    public int getRestartTimeThreshold() {
+        return restartTimeThreshold;
+    }
+
     int restartTimeThreshold;
     @Getter
     List<Block> forbiddenPathfindingBlocks;

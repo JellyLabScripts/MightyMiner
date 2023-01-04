@@ -1,12 +1,14 @@
 package com.jelly.MightyMiner.utils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.*;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
@@ -231,6 +233,12 @@ public class PlayerUtils {
             mc.thePlayer.setPosition(block.getX() + 0.5, mc.thePlayer.posY, block.getZ() + 0.5);
         }
     }
+
+    public static Vector3i getPosAsVector3i() {
+        EntityPlayerSP plr = mc.thePlayer;
+        return new Vector3i((int) plr.posX, (int) plr.posY, (int) plr.posZ);
+    }
+
 
     public static boolean isNearPlayer(int radius){
         return hasPlayerInsideRadius(radius);

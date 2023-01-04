@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.jelly.MightyMiner.baritone.automine.movementgrapth.debug.Visualiser;
 import com.jelly.MightyMiner.command.BaritoneDebug;
 import com.jelly.MightyMiner.command.Route;
 import com.jelly.MightyMiner.config.Config;
@@ -67,6 +68,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
         MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
+        MinecraftForge.EVENT_BUS.register(Visualiser.INSTANCE);
         MinecraftForge.EVENT_BUS.register(new FuelFilling());
         MinecraftForge.EVENT_BUS.register(mobKiller);
         MinecraftForge.EVENT_BUS.register(new Failsafes());

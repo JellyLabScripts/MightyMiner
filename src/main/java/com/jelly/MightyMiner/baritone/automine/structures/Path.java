@@ -8,9 +8,16 @@ import java.util.LinkedList;
 
 @AllArgsConstructor
 public class Path {
-    @Getter
+    public LinkedList<BlockNode> getBlocksInPath() {
+        return blocksInPath;
+    }
+
     LinkedList<BlockNode> blocksInPath;
-    @Getter
+
+    public PathMode getMode() {
+        return mode;
+    }
+
     PathMode mode;
 
 }

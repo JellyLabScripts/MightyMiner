@@ -91,6 +91,15 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "debugVisuliseGraph",
+            category = "Core",
+            subcategory = "Macro",
+            description = "Shows logs"
+    )
+    public boolean debugVisuliseGraph = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Toggle mouse ungrab",
             description = "May not work on some computers",
             category = "Core",

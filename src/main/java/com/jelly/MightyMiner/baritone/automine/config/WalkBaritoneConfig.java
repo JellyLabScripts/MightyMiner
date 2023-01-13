@@ -1,8 +1,6 @@
 package com.jelly.MightyMiner.baritone.automine.config;
 
-import com.jelly.MightyMiner.utils.BlockUtils;
-
-import java.util.Arrays;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 
 public class WalkBaritoneConfig extends BaritoneConfig{
 

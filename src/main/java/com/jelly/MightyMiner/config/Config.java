@@ -113,7 +113,7 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.SLIDER,
             name = "Max y level",
             category = "Gemstone macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Pathfinding",
             max = 256
     )
     public int gemMaxY = 256;
@@ -121,7 +121,7 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.SLIDER,
             name = "Min y level",
             category = "Gemstone macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Pathfinding",
             max = 256
     )
     public int gemMinY = 0;
@@ -137,11 +137,14 @@ public class Config extends Vigilant {
             name = "Rotation time (milliseconds)",
             description = "Time the macro takes for each rotation",
             category = "Gemstone macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Pathfinding",
             max = 500,
             min = 50
     )
     public int gemRotationTime = 300;
+
+    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "Gemstone macro", subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
+    public int gemGemstoneType = 0;
 
 
 
@@ -209,7 +212,7 @@ public class Config extends Vigilant {
             name = "Mine gemstones",
             description = "Make sure you have a drill that is able to mine gemstones",
             category = "Powder macro",
-            subcategory = "Miscellaneous"
+            subcategory = "Mining"
     )
     public boolean powMineGemstone = true;
 
@@ -231,7 +234,7 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.SLIDER,
             name = "Width between each lane",
             category = "Powder macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Mining",
             max = 15,
             min = 3
     )
@@ -243,7 +246,7 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Mithril macro priority 1",
             category = "Mithril macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Mining",
             options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}
     )
     public int mithPriority1 = 1;
@@ -252,7 +255,7 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Mithril macro priority 2",
             category = "Mithril macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Mining",
             options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}
     )
     public int mithPriority2 = 2;
@@ -261,7 +264,7 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Mithril macro priority 3",
             category = "Mithril macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Mining",
             options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}
     )
     public int mithPriority3 = 0;
@@ -277,7 +280,7 @@ public class Config extends Vigilant {
             name = "Rotation time (milliseconds)",
             description = "Time the macro takes for each rotation",
             category = "Mithril macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Pathfinding",
             max = 500,
             min = 50
     )
@@ -288,7 +291,7 @@ public class Config extends Vigilant {
             name = "Stuck time threshold (seconds)",
             description = "restarts macro when stuck time > threshold, depends on your mining speed",
             category = "Mithril macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Pathfinding",
             max = 20,
             min = 2
     )
@@ -319,7 +322,7 @@ public class Config extends Vigilant {
             name = "Rotation time (milliseconds)",
             description = "Time the macro takes for each rotation",
             category = "AOTV gemstone macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Pathfinding",
             max = 500,
             min = 20
     )
@@ -330,7 +333,7 @@ public class Config extends Vigilant {
             name = "Stuck time threshold (seconds)",
             description = "restarts macro when stuck time > threshold, depends on your mining speed",
             category = "AOTV gemstone macro",
-            subcategory = "Miscellaneous",
+            subcategory = "Pathfinding",
             max = 20,
             min = 2
     )
@@ -360,7 +363,7 @@ public class Config extends Vigilant {
             type = PropertyType.SWITCH,
             name = "Mine gemstone panes",
             category = "AOTV gemstone macro",
-            subcategory = "Miscellaneous"
+            subcategory = "Mining"
     )
     public boolean aotvMineGemstonePanes = true;
 
@@ -397,7 +400,7 @@ public class Config extends Vigilant {
     )
     public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
 
-    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "AOTV gemstone macro", subcategory = "Miscellaneous", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
+    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "AOTV gemstone macro", subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
     public int aotvGemstoneType = 0;
 
 
@@ -413,7 +416,6 @@ public class Config extends Vigilant {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector(), new ConfigSorting());
         init();
     }
-
 
 
 

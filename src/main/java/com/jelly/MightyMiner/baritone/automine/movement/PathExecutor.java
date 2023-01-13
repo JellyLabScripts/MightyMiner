@@ -10,7 +10,7 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.ContinuousRotator;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.AngleUtils;
-import com.jelly.MightyMiner.utils.BlockUtils;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
@@ -125,6 +125,7 @@ public class PathExecutor {
 
     @SubscribeEvent
     public void onTickEvent(TickEvent.ClientTickEvent event){
+
         if(mc.thePlayer == null
                 || event.phase != TickEvent.Phase.START
                 || currentState == PlayerState.FAILED

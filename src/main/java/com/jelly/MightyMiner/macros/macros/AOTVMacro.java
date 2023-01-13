@@ -10,15 +10,15 @@ import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumDyeColor;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
+import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
+import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AOTVMacro extends Macro {
@@ -29,9 +29,6 @@ public class AOTVMacro extends Macro {
         Teleporting,
         Mining
     }
-
-    private final ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> gemstonesFilter = new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>();
-
     State currentState = State.NONE;
 
     BlockPos targetCoordinate;
@@ -87,70 +84,7 @@ public class AOTVMacro extends Macro {
             return;
         }
 
-        gemstonesFilter.clear();
-        gemstonesFilter.addAll(getBlockDataBasedOnPriority(MightyMiner.config.aotvGemstoneType));
-
         targetCoordinate = coords.get(targetCoordIndex);
-    }
-
-    public ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> getBlockDataBasedOnPriority(int priority) {
-        ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> filter = new ArrayList<>();
-        switch (priority) {
-            case 0: {
-                filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass, null));
-                if (MightyMiner.config.aotvMineGemstonePanes) {
-                    filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass_pane, null));
-                }
-                break;
-            }
-            case 1: {
-                filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass, EnumDyeColor.RED));
-                if (MightyMiner.config.aotvMineGemstonePanes) {
-                    filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass_pane, EnumDyeColor.RED));
-                }
-                break;
-            }
-            case 2: {
-                filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass, EnumDyeColor.PURPLE));
-                if (MightyMiner.config.aotvMineGemstonePanes) {
-                    filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass_pane, EnumDyeColor.PURPLE));
-                }
-                break;
-            }
-            case 3: {
-                filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass, EnumDyeColor.LIME));
-                if (MightyMiner.config.aotvMineGemstonePanes) {
-                    filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass_pane, EnumDyeColor.LIME));
-                }
-                break;
-            }
-            case 4: {
-                filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass, EnumDyeColor.BLUE));
-                if (MightyMiner.config.aotvMineGemstonePanes) {
-                    filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass_pane, EnumDyeColor.BLUE));
-                }
-                break;
-            }
-            case 5: {
-                filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass, EnumDyeColor.ORANGE));
-                if (MightyMiner.config.aotvMineGemstonePanes) {
-                    filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass_pane, EnumDyeColor.ORANGE));
-                }
-                break;
-            }
-            case 6: {
-                filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass, EnumDyeColor.YELLOW));
-                if (MightyMiner.config.aotvMineGemstonePanes) {
-                    filter.add(new AutoMineBaritone.BlockData<EnumDyeColor>(Blocks.stained_glass_pane, EnumDyeColor.YELLOW));
-                }
-                break;
-            }
-            default: {
-                LogUtils.addMessage("Invalid priority for gemstone type!");
-                break;
-            }
-        }
-        return filter;
     }
 
 
@@ -211,7 +145,7 @@ public class AOTVMacro extends Macro {
 
                 switch(baritone.getState()){
                     case IDLE:
-                        baritone.mineFor(gemstonesFilter);
+                        baritone.mineFor(MineUtils.getGemListBasedOnPriority(MightyMiner.config.aotvGemstoneType));
                         break;
                     case FAILED:
                         currentState = State.NONE;

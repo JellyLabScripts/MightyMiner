@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.utils;
+package com.jelly.MightyMiner.utils.HypixelUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;

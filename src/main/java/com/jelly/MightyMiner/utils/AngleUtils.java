@@ -1,5 +1,7 @@
 package com.jelly.MightyMiner.utils;
 
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
+import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;

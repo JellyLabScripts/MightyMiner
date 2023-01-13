@@ -6,14 +6,14 @@ import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.HypixelUtils.ComissionUtils;
+import com.jelly.MightyMiner.utils.HypixelUtils.NpcUtil;
+import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.world.NoteBlockEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.lang.reflect.Array;

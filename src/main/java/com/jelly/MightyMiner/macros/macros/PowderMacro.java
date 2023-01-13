@@ -12,9 +12,13 @@ import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
+import com.jelly.MightyMiner.utils.BlockUtils.Box;
+import com.jelly.MightyMiner.utils.PlayerUtils;
+import com.jelly.MightyMiner.utils.Utils.MathUtils;
+import com.jelly.MightyMiner.utils.Utils.ThreadUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.BlockPos;
@@ -416,10 +420,7 @@ public class PowderMacro extends Macro {
     void addChestToQueue(){
         new Thread(() -> {
             ThreadUtils.sleep(200);
-            List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 4, 0, -7, 7), new ArrayList<>(solvedOrSolvingChests), 0, 256, new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
-                add(new AutoMineBaritone.BlockData<>(Blocks.chest, null));
-                add(new AutoMineBaritone.BlockData<>(Blocks.trapped_chest, null));
-            }});
+            List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 4, 0, -7, 7), new ArrayList<>(solvedOrSolvingChests), 0, 256, Blocks.chest, Blocks.trapped_chest);
             if(foundBlocks.isEmpty()){
                 LogUtils.debugLog("That chest was impossible to solve");
             }

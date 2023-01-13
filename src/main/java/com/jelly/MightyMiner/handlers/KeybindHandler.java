@@ -9,7 +9,7 @@ import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.LogUtils;
-import com.jelly.MightyMiner.utils.ReflectionUtils;
+import com.jelly.MightyMiner.utils.Utils.ReflectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.event.RenderWorldLastEvent;

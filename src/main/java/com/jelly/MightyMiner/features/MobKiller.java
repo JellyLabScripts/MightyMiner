@@ -4,6 +4,8 @@ import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.HypixelUtils.NpcUtil;
+import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;

@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.utils;
+package com.jelly.MightyMiner.utils.Utils;
 
 public class ThreadUtils {
     public static void sleep(int time){

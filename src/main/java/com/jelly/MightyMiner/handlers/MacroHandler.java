@@ -6,6 +6,8 @@ import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.*;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
+import com.jelly.MightyMiner.utils.HypixelUtils.SkyblockInfo;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;

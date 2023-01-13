@@ -15,7 +15,8 @@ import com.jelly.MightyMiner.baritone.automine.structures.Path;
 import com.jelly.MightyMiner.baritone.automine.structures.SemiPath;
 import com.jelly.MightyMiner.events.ChunkLoadEvent;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
-import com.jelly.MightyMiner.utils.BlockUtils;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import lombok.Getter;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -27,6 +28,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class AutoMineBaritone {
 
@@ -58,15 +61,6 @@ public class AutoMineBaritone {
     //int chunkLoadCount;
 
 
-    public static class BlockData<T> {
-        public Block block;
-        public T requiredBlockStateValue;
-
-        public BlockData(Block block, T requiredBlockStateValue) {
-            this.block = block;
-            this.requiredBlockStateValue = requiredBlockStateValue;
-        }
-    }
 
 
     public AutoMineBaritone(BaritoneConfig config) {
@@ -75,6 +69,15 @@ public class AutoMineBaritone {
         pathFinder = new AStarPathFinder(getPathBehaviour());
     }
 
+
+    public final void mineFor(Block... block) {
+        mineFor(BlockUtils.addData(Arrays.stream(block).collect(Collectors.toCollection(ArrayList::new))));
+    }
+
+    @SafeVarargs
+    public final void mineFor(BlockData<EnumDyeColor>... blockType) {
+        mineFor(Arrays.stream(blockType).collect(Collectors.toCollection(ArrayList::new)));
+    }
 
     public void mineFor(ArrayList<BlockData<EnumDyeColor>> blockType) {
         Logger.playerLog("Starting to mine");
@@ -181,7 +184,7 @@ public class AutoMineBaritone {
         KeybindHandler.resetKeybindState();
         KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());
 
-        MightyMiner.pathfindPool.submit(() -> {
+        new Thread(() -> {
             if (!config.isMineFloor()) {
                 if (playerFloorPos != null) {
                     pathFinder.removeFromBlackList(playerFloorPos);
@@ -210,7 +213,7 @@ public class AutoMineBaritone {
                 Logger.playerLog("Pathfind failed: " + e);
                 failBaritone(true);
             }
-        });
+        }).start();
     }
 
 

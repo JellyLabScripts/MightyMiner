@@ -1,7 +1,8 @@
-package com.jelly.MightyMiner.utils;
+package com.jelly.MightyMiner.utils.HypixelUtils;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.jelly.MightyMiner.utils.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;

@@ -7,6 +7,8 @@ import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
+import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
@@ -20,16 +22,7 @@ import java.util.List;
 public class MithrilMacro extends Macro {
 
     AutoMineBaritone baritone;
-
-    List<Block> priorityBlocks = new ArrayList<Block>(){
-        {
-            add(Blocks.stained_hardened_clay);
-            add(Blocks.prismarine);
-            add(Blocks.wool);
-        }
-    };
-
-    ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> mithPriority = new ArrayList<>();
+    ArrayList<BlockData<EnumDyeColor>> mithPriorityList = new ArrayList<>();
 
     @Override
     public void Pause() {
@@ -61,10 +54,10 @@ public class MithrilMacro extends Macro {
             }
         }
 
-        mithPriority.clear();
-        mithPriority.addAll(getBlockDataBasedOnPriority(MightyMiner.config.mithPriority1));
-        mithPriority.addAll(getBlockDataBasedOnPriority(MightyMiner.config.mithPriority2));
-        mithPriority.addAll(getBlockDataBasedOnPriority(MightyMiner.config.mithPriority3));
+        mithPriorityList.clear();
+        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1));
+        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2));
+        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3));
 
         LogUtils.debugLog("Didnt find any players nearby, continuing");
         baritone = new AutoMineBaritone(getMineBehaviour());
@@ -92,7 +85,7 @@ public class MithrilMacro extends Macro {
 
         switch(baritone.getState()){
             case IDLE: case FAILED:
-                baritone.mineFor(mithPriority);
+                baritone.mineFor(mithPriorityList);
                 break;
         }
 
@@ -100,25 +93,7 @@ public class MithrilMacro extends Macro {
     }
 
 
-    public ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> getBlockDataBasedOnPriority(int priority) {
-        switch (priority) {
-            case 0:
-                return new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
-                    add(new AutoMineBaritone.BlockData<>(Blocks.stained_hardened_clay, null));
-                    add(new AutoMineBaritone.BlockData<>(Blocks.wool, EnumDyeColor.GRAY));
-                }};
-            case 1:
-                return new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
-                    add(new AutoMineBaritone.BlockData<>(Blocks.prismarine, null));
-                }};
-            case 2:
-                return new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
-                    add(new AutoMineBaritone.BlockData<>(Blocks.wool, EnumDyeColor.LIGHT_BLUE));
-                }};
-            default:
-                return null;
-        }
-    }
+
 
 
 

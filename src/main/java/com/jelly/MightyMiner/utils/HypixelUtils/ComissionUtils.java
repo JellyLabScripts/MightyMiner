@@ -1,6 +1,7 @@
-package com.jelly.MightyMiner.utils;
+package com.jelly.MightyMiner.utils.HypixelUtils;
 
 import com.jelly.MightyMiner.macros.macros.CommissionMacro;
+import com.jelly.MightyMiner.utils.TablistUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;

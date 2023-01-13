@@ -1,5 +1,7 @@
 package com.jelly.MightyMiner.utils;
 
+import com.jelly.MightyMiner.utils.HypixelUtils.NpcUtil;
+import com.jelly.MightyMiner.utils.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;

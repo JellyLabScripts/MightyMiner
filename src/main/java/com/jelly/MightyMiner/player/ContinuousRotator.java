@@ -61,10 +61,10 @@ public class ContinuousRotator {
         float targetPitch = (float) Math.floor(pitch);
 
         // "real" means that its in 360 format instead of -180 to 180
-        float realPlayerYaw = AngleUtils.get360RotationYaw(playerYaw);
-        float realPlayerPitch = AngleUtils.get360RotationYaw(targetPitch);
+        float realPlayerYaw = AngleUtils.get360RotationYaw(playerYaw); // fix this
+        float realPlayerPitch = AngleUtils.get360RotationYaw(playerPitch);
         float realTargetYaw = AngleUtils.get360RotationYaw(targetYaw);
-        float realTargetPitch = AngleUtils.get360RotationYaw(playerPitch);
+        float realTargetPitch = AngleUtils.get360RotationYaw(targetPitch);
 
         if (realPlayerYaw != realTargetYaw || realTargetPitch != realPlayerPitch) {
             easeTo(yaw, pitch);

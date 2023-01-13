@@ -1,13 +1,14 @@
-package com.jelly.MightyMiner.utils;
+package com.jelly.MightyMiner.utils.BlockUtils;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
-import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
+import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.utils.AngleUtils;
+import com.jelly.MightyMiner.utils.LogUtils;
+import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
@@ -22,8 +23,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.jelly.MightyMiner.utils.PlayerUtils.AnyBlockAroundVec3;
+
 
 public class BlockUtils {
 
@@ -118,21 +121,38 @@ public class BlockUtils {
         return blockCache.getUnchecked(blockPos);
     }
 
-    public static List<BlockPos> findBlock(int i, ArrayList<BlockPos> blackListedPos, int minY, int maxY, AutoMineBaritone.BlockData<EnumDyeColor> block) {
-        return findBlock(i, blackListedPos, minY, maxY, new ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>>() {{
-            add(block);
-        }});
-    }
-
-    public static List<BlockPos> findBlock(int searchDiameter, ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> requiredBlock) {
+    public static List<BlockPos> findBlock(int searchDiameter, Block... requiredBlock) {
         return findBlock(searchDiameter, null, 0, 256, requiredBlock);
     }
-    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> requiredBlock) {
-        return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
-                ,forbiddenBlockPos, minY, maxY, requiredBlock);
+
+    public static ArrayList<BlockData<EnumDyeColor>> addData(ArrayList<Block> blocks){
+        ArrayList<BlockData<EnumDyeColor>> requiredBlocksList = new ArrayList<>();
+        for(Block block : blocks){
+            requiredBlocksList.add(new BlockData<>(block, null));
+        }
+        return requiredBlocksList;
     }
 
-    public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<AutoMineBaritone.BlockData<EnumDyeColor>> requiredBlock) {
+    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<BlockData<EnumDyeColor>> requiredBlocks) {
+        return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
+                ,forbiddenBlockPos, minY, maxY, requiredBlocks);
+    }
+    @SafeVarargs
+    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, BlockData<EnumDyeColor>... requiredBlocks) {
+        return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
+                ,forbiddenBlockPos, minY, maxY, Arrays.stream(requiredBlocks).collect(Collectors.toCollection(ArrayList::new)));
+    }
+    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlocks) {
+        return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
+                ,forbiddenBlockPos, minY, maxY, addData(Arrays.stream(requiredBlocks).collect(Collectors.toCollection(ArrayList::new))));
+    }
+    
+    public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlocks) {
+        return findBlock(searchBox, forbiddenBlockPos, minY, maxY, addData(Arrays.stream(requiredBlocks).collect(Collectors.toCollection(ArrayList::new))));
+    }
+
+
+    public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<BlockData<EnumDyeColor>> requiredBlock) {
 
         List<BlockPos> foundBlocks = new ArrayList<>();
 
@@ -330,6 +350,7 @@ public class BlockUtils {
     public static boolean inCenterOfBlock(){
         return Math.abs(mc.thePlayer.posX % 1) == 0.5 && Math.abs(mc.thePlayer.posZ % 1) == 0.5;
     }
+
 
     public static ArrayList<BlockPos> GetAllBlocksInline(BlockPos pos1, BlockPos pos2) {
         Vec3 startPos = new Vec3(pos1.getX() + 0.5, pos1.getY() + 1 + 1.6 - 0.125, pos1.getZ() + 0.5);

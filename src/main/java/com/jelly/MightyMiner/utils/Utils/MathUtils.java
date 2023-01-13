@@ -1,12 +1,10 @@
-package com.jelly.MightyMiner.utils;
+package com.jelly.MightyMiner.utils.Utils;
 
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-
-import javax.vecmath.Vector3d;
-import java.util.Vector;
 
 public class MathUtils {
 
@@ -46,12 +44,6 @@ public class MathUtils {
         float f3 = MathHelper.sin((float) (-pitch * Math.PI/180f));
         return new Vec3((double)(f1 * f2), (double)f3, (double)(f * f2));
     }
-
-
-
-
-
-
 
 
 }

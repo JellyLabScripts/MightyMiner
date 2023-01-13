@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.utils;
+package com.jelly.MightyMiner.utils.HypixelUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

@@ -14,7 +14,7 @@ import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
-import com.jelly.MightyMiner.utils.SkyblockInfo;
+import com.jelly.MightyMiner.utils.HypixelUtils.SkyblockInfo;
 import com.jelly.MightyMiner.waypoints.WaypointHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
@@ -36,7 +36,8 @@ public class MightyMiner {
 
     public static Config config;
 
-    public static ExecutorService pathfindPool = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("PathFinderPool-%d").build());
+    //TODO: fix executor service
+    //public static ExecutorService pathfindPool = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("PathFinderPool-%d").build());
 
     public static List<BlockPos> coords = new ArrayList<>();
 

@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.utils;
+package com.jelly.MightyMiner.utils.BlockUtils;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

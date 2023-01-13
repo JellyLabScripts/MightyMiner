@@ -1,4 +1,4 @@
-package com.jelly.MightyMiner.utils;
+package com.jelly.MightyMiner.utils.Utils;
 
 import java.lang.reflect.Method;
 

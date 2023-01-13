@@ -77,8 +77,12 @@ dependencies {
     implementation('org.projectlombok:lombok:1.18.24')
     annotationProcessor('org.projectlombok:lombok:1.18.24')
 
-    implementation('org.joml:joml:1.10.5')
+    include('org.joml:joml:1.10.5')
+   // implementation('org.joml:joml:1.10.5')
+  //  annotationProcessor('org.joml:joml:1.10.5')
+
     include 'eu.okaeri:okaeri-configs-json-gson:4.0.6'
+
     include(fileTree(dir: 'libs', include: '*.jar'))
     implementation(fileTree(dir: 'libs', include: '*.jar'))
 }

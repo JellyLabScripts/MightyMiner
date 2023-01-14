@@ -52,6 +52,7 @@ public class Failsafes {
         if (macros.stream().noneMatch(Macro::isEnabled)) return;
 
         if(PlayerUtils.isNearPlayer(MightyMiner.config.playerRad)){
+            LogUtils.addMessage("Players detected. Enabling failsafe");
             DisableMacros();
         }
     }

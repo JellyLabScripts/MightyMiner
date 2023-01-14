@@ -8,6 +8,7 @@ import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.baritone.automine.structures.Path;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.ContinuousRotator;
+import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
@@ -33,7 +34,8 @@ public class PathExecutor {
     boolean jumpFlag;
     int jumpCooldown;
 
-    ContinuousRotator rotatorContext = new ContinuousRotator();
+    //ContinuousRotator rotatorContext = new ContinuousRotator();
+    Rotation rotator = new Rotation();
 
     int deltaJumpTick = 0;
 
@@ -82,7 +84,6 @@ public class PathExecutor {
         minedBlocks.clear();
         blockRenderer.renderMap.clear();
 
-
         blockRenderer.renderMap.put(path.getBlocksInPath().getFirst().getPos(), Color.RED);
         for(int i = 1; i < path.getBlocksInPath().size(); i++){
             blockRenderer.renderMap.put(path.getBlocksInPath().get(i).getPos(), Color.ORANGE);
@@ -111,12 +112,10 @@ public class PathExecutor {
 
     public void disable(){
         this.currentState = PlayerState.FINISHED;
-        rotatorContext.canceled = true;
         unregister();
     }
     private void fail(){
         currentState = PlayerState.FAILED;
-        rotatorContext.canceled = true;
         unregister();
     }
     public void unregister(){
@@ -163,7 +162,7 @@ public class PathExecutor {
                 BlockPos targetWalkBlock = (blocksToMine.isEmpty() || blocksToMine.getLast().getType() == BlockType.MINE) ? minedBlocks.getLast().getPos() : blocksToMine.getLast().getPos();
 
                 float reqYaw = AngleUtils.getRequiredYawCenter(targetWalkBlock);
-                rotatorContext.changeGoal(reqYaw, mc.thePlayer.rotationPitch);
+                rotator.initAngleLock(reqYaw, mc.thePlayer.rotationPitch, 5);
 
                 if(!jumpFlag
                         // is not falling/jumping
@@ -207,9 +206,9 @@ public class PathExecutor {
                     // special cases for optimization
                     if(BlockUtils.isAdjacentXZ(targetMineBlock, BlockUtils.getPlayerLoc()) && !AngleUtils.shouldLookAtCenter(targetMineBlock) &&
                             (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetMineBlock.up()).equals(Blocks.air) )|| targetMineBlock.getY() - mc.thePlayer.posY == 1)){
-                        rotatorContext.changeGoal(AngleUtils.getRequiredYaw(targetMineBlock), 28);
+                        rotator.initAngleLock(AngleUtils.getRequiredYaw(targetMineBlock), 28, config.getMineRotationTime());
                     } else if (!BlockUtils.isPassable(targetMineBlock))
-                        rotatorContext.changeGoal(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock));
+                        rotator.initAngleLock(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock), config.getMineRotationTime());
 
                 }
                 break;
@@ -225,9 +224,8 @@ public class PathExecutor {
     @SubscribeEvent
     public void onRenderEvent(RenderWorldLastEvent event){
         blockRenderer.renderAABB(event);
-        if(!rotatorContext.canceled) {
-            rotatorContext.update();
-        }
+        if(rotator.rotating)
+            rotator.update();
     }
 
 

@@ -54,7 +54,7 @@ public class AStarCalculator {
         step = 0;
 
         // sanity check if we are at the destination already
-        if (BlockUtils.canSeeBlock(endingBlock) && BlockUtils.canReachBlock(endingBlock)) {
+        if (BlockUtils.canSeeBlock(endingBlock) && BlockUtils.canReachBlock(endingBlock) && this.mode == PathMode.MINE) {
             step++;
             LinkedList<BlockNode> blockNodes = new LinkedList<>();
 
@@ -122,6 +122,7 @@ public class AStarCalculator {
             return;
         }
 
+        // Cannot use getBlockCached() here because if blocks are updated it would cause the path to be un-walkable!
         if (!searchNode.pos.equals(endingBlockPos)) {
             if (pathFinderBehaviour.getForbiddenMiningBlocks() != null) {
                 switch (move) {
@@ -129,18 +130,18 @@ public class AStarCalculator {
                     case ASCEND_NORTH:
                     case ASCEND_SOUTH:
                     case ASCEND_WEST:
-                        if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.pos.up(2))))
+                        if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(currentNode.pos.up(2))))
                             return;
                         break;
                     case DESCEND_EAST:
                     case DESCEND_NORTH:
                     case DESCEND_SOUTH:
                     case DESCEND_WEST:
-                        if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.pos.up(2))))
+                        if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up(2))))
                             return;
                         break;
                 }
-                if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.pos)) || pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.pos.up())))
+                if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos)) || pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up())))
                     return;
 
             }
@@ -151,18 +152,18 @@ public class AStarCalculator {
                     case ASCEND_NORTH:
                     case ASCEND_SOUTH:
                     case ASCEND_WEST:
-                        if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(currentNode.pos.up(2))))
+                        if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(currentNode.pos.up(2))))
                             return;
                         break;
                     case DESCEND_EAST:
                     case DESCEND_NORTH:
                     case DESCEND_SOUTH:
                     case DESCEND_WEST:
-                        if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.pos.up(2))))
+                        if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up(2))))
                             return;
                         break;
                 }
-                if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.pos)) || !pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlockCached(searchNode.pos.up())))
+                if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos)) || !pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up())))
                     return;
 
             }
@@ -174,7 +175,7 @@ public class AStarCalculator {
             case DIAGONAL_SOUTHEAST:
             case DIAGONAL_SOUTHWEST:
                 BlockPos aboveSearch = new BlockPos(searchNode.pos.getX(), searchNode.pos.getY() + 1, currentNode.pos.getZ());
-                BlockPos block3 = new BlockPos(currentNode.pos.getX(), searchNode.pos.getY() + 1, searchNode.pos.getZ());
+                BlockPos block3 = new BlockPos(currentNode.pos.getX(), searchNode.pos.getY(), searchNode.pos.getZ());
                 if (!BlockUtils.isPassable(searchNode.pos) || !BlockUtils.isPassable(currentNode.pos) || !BlockUtils.isPassable(aboveSearch) || !BlockUtils.isPassable(block3)) {
                     return;
                 }

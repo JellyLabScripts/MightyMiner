@@ -62,6 +62,15 @@ public class PlayerUtils {
         return getItemInHotbarFromLore(false, lore);
     }
 
+    public static boolean notAtCenter(){
+        return notAtCenter(AngleUtils.get360RotationYaw());
+    }
+
+    public static boolean notAtCenter(float rotationYawAxis){
+        return !((rotationYawAxis % 180 == 0) ?
+                Math.abs(mc.thePlayer.posX) % 1 >= 0.3f && Math.abs(mc.thePlayer.posX) % 1 <= 0.7f : Math.abs(mc.thePlayer.posZ) % 1 >= 0.3f && Math.abs(mc.thePlayer.posZ) % 1 <= 0.7f);
+    }
+
     public static boolean containsLore(ItemStack item, String lore) {
         ArrayList<String> lores = new ArrayList<>();
         if(item != null)

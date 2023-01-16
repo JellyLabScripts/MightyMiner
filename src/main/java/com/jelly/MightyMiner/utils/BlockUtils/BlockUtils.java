@@ -80,7 +80,14 @@ public class BlockUtils {
     }
 
     public static int getUnitX() {
-        double modYaw = (mc.thePlayer.rotationYaw % 360 + 360) % 360;
+        return getUnitX((mc.thePlayer.rotationYaw % 360 + 360) % 360);
+    }
+
+    public static int getUnitZ() {
+        return getUnitZ((mc.thePlayer.rotationYaw % 360 + 360) % 360);
+    }
+
+    public static int getUnitX(double modYaw) {
         if (modYaw < 45 || modYaw > 315) {
             return 0;
         } else if (modYaw < 135) {
@@ -92,8 +99,8 @@ public class BlockUtils {
         }
     }
 
-    public static int getUnitZ() {
-        double modYaw = (mc.thePlayer.rotationYaw % 360 + 360) % 360;
+    public static int getUnitZ(double modYaw) {
+
         if (modYaw < 45 || modYaw > 315) {
             return 1;
         } else if (modYaw < 135) {
@@ -155,6 +162,8 @@ public class BlockUtils {
     public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<BlockData<EnumDyeColor>> requiredBlock) {
 
         List<BlockPos> foundBlocks = new ArrayList<>();
+        if(forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty())
+            forbiddenBlockPos.forEach(System.out::println);
 
         BlockPos currentBlock;
 
@@ -175,6 +184,7 @@ public class BlockUtils {
                             continue;
                         if (currentBlock.getY() > maxY || currentBlock.getY() < minY)
                             continue;
+
                         foundBlocks.add(currentBlock);
                     }
                 }
@@ -189,10 +199,23 @@ public class BlockUtils {
     public static Block getRelativeBlock(float rightOffset, float upOffset, float frontOffset) {
         return getBlock(getRelativeBlockPos(rightOffset, upOffset, frontOffset));
     }
+    public static Block getRelativeBlock(float rightOffset, float upOffset, float frontOffset, float rotationYawAxis) {
+        return getBlock(getRelativeBlockPos(rightOffset, upOffset, frontOffset, rotationYawAxis));
+    }
 
     public static BlockPos getRelativeBlockPos(float rightOffset, float upOffset, float frontOffset) {
         int unitX = getUnitX();
         int unitZ = getUnitZ();
+        return new BlockPos(
+                mc.thePlayer.posX + (unitX * frontOffset) + (unitZ * -1 * rightOffset),
+                mc.thePlayer.posY + upOffset,
+                mc.thePlayer.posZ + (unitZ * frontOffset) + (unitX * rightOffset)
+        );
+    }
+
+    public static BlockPos getRelativeBlockPos(float rightOffset, float upOffset, float frontOffset, float rotationYawAxis) {
+        int unitX = getUnitX(rotationYawAxis);
+        int unitZ = getUnitZ(rotationYawAxis);
         return new BlockPos(
                 mc.thePlayer.posX + (unitX * frontOffset) + (unitZ * -1 * rightOffset),
                 mc.thePlayer.posY + upOffset,

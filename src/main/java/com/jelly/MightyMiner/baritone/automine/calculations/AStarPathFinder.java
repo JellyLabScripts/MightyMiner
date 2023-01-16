@@ -10,11 +10,8 @@ import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
@@ -85,21 +82,20 @@ public class AStarPathFinder {
 
     public Path getPath(PathMode mode, BlockPos blockPos) throws NoPathException { // from blockPos
         initialize(mode);
-
-
         LinkedList<BlockNode> path = calculator.calculatePath(BlockUtils.getPlayerLoc(), blockPos, pathFinderBehaviour, mode, 20000);
 
         if (path.isEmpty())
             throw new NoPathException();
 
+        Logger.log("Path size: " + path.size());
         setLastTarget(path);
 
-        return  path.pollLast().isFullPath()? new Path(path, mode) : new SemiPath(path, mode);
+        return  Objects.requireNonNull(path.pollLast()).isFullPath()? new Path(path, mode) : new SemiPath(path, mode);
     }
 
 
     private void setLastTarget(LinkedList<BlockNode> blockList){
-        removeFromBlackList(lastTarget);
+        removeFromBlackList(lastTarget); //prevent it from finding again
         this.lastTarget = blockList.getFirst().getPos();
     }
 
@@ -125,11 +121,6 @@ public class AStarPathFinder {
 
     private void initialize(PathMode mode){
         this.addToBlackList(lastTarget);
-
-        Logger.log("-------Blacklisted blocks------");
-        blackListedPos.forEach(System.out::println);
-        Logger.log("-------------");
-
         this.mode = mode;
     }
 

@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 
 public class AutoMineBaritone {
 
-    org.apache.logging.log4j.Logger logger = LogManager.getLogger("AutoMineBaritone");
 
     Minecraft mc = Minecraft.getMinecraft();
 
@@ -44,7 +43,6 @@ public class AutoMineBaritone {
         FAILED
     }
 
-    @Getter
     volatile BaritoneState state = BaritoneState.IDLE;
 
     PathFindSetting pathSetting;
@@ -57,7 +55,7 @@ public class AutoMineBaritone {
     ArrayList<BlockData<EnumDyeColor>> targetBlockType;
     BlockPos targetBlockPos;
 
-    Path path;
+    volatile Path path;
     //int chunkLoadCount;
 
 
@@ -98,6 +96,10 @@ public class AutoMineBaritone {
         startPathFinding();
     }
 
+    public BaritoneState getState(){
+        return this.state;
+    }
+
 
     private void registerEventListener() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -126,6 +128,7 @@ public class AutoMineBaritone {
             state = BaritoneState.FAILED;
             terminate();
         } else {
+            Logger.log("Restarting pathfind");
             startPathFinding();
         }
 
@@ -143,13 +146,13 @@ public class AutoMineBaritone {
             return;
         }
 
-        logger.info(state);
         switch (state) {
             case PATH_FINDING:
                 KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());
                 break;
             case EXECUTING:
                 if (executor.hasSuccessfullyFinished()) {
+                    Logger.log("Executor has finished");
                     // TODO: Fix this
                     if (path instanceof SemiPath) {
                         startSemiPathFinding();
@@ -157,8 +160,10 @@ public class AutoMineBaritone {
                         disableBaritone();
                     }
                 } else if (executor.hasFailed()) {
+                    Logger.log("Executor has failed");
                     failBaritone(false);
                 } else if (!executor.isExecuting()) {
+                    Logger.log("Executor is starting to execute a path");
                     executor.executePath(path, config);
                 }
 //                 else if(chunkLoadCount > 6 && path instanceof SemiPath)
@@ -180,6 +185,7 @@ public class AutoMineBaritone {
 
     private void startPathFinding() {
         state = BaritoneState.PATH_FINDING;
+        Logger.playerLog("Started pathfinding");
 
         KeybindHandler.resetKeybindState();
         KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());

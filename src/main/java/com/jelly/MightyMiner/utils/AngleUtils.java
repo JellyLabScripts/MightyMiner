@@ -51,6 +51,11 @@ public class AngleUtils {
         return Math.min(clockwiseDifference(initialYaw360, targetYaw360), antiClockwiseDifference(initialYaw360, targetYaw360));
     }
 
+
+    public static boolean shouldRotateClockwise(float start, float target) {
+        return clockwiseDifference(get360RotationYaw(start), target) < 180;
+    }
+
     public static float getClosest() {
         if (get360RotationYaw() < 45 || get360RotationYaw() > 315) {
             return 0f;

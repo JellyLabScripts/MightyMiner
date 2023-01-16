@@ -202,7 +202,7 @@ public class Config extends Vigilant {
 
     @Property(type = PropertyType.SWITCH,
             name = "Center to block",
-            description = "Center to the middle of block using AOTE or AOTV when necessary",
+            description = "Center to the middle of block using AOTE or AOTV when necessary. Please turn this on if you're not using nuker.",
             category = "Powder macro",
             subcategory = "Miscellaneous"
     )
@@ -215,6 +215,26 @@ public class Config extends Vigilant {
             subcategory = "Mining"
     )
     public boolean powMineGemstone = true;
+
+    @Property(type = PropertyType.SLIDER,
+            name = "Rotation rate",
+            description = "The higher the rotation rate, the faster you'll rotate (depends on computer)",
+            category = "Powder macro",
+            subcategory = "Mining",
+            max = 15,
+            min = 1
+    )
+    public int powRotateRate = 7;
+
+    @Property(type = PropertyType.SLIDER,
+            name = "Rotation radius (Multiplied by 10)",
+            description = "The radius of the circle being dug out (e.g. 20 = 2 block radius)",
+            category = "Powder macro",
+            subcategory = "Mining",
+            max = 35,
+            min = 12
+    )
+    public int powRotateRadius = 20;
 
     @Property(type = PropertyType.SWITCH,
             name = "Use pickaxe to mine hardstone",

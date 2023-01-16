@@ -3,6 +3,7 @@ package com.jelly.MightyMiner.baritone.automine.movement;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.baritone.automine.structures.Path;
@@ -64,6 +65,7 @@ public class PathExecutor {
     public void executePath(Path path, BaritoneConfig config){
 
         if(path == null || path.getBlocksInPath().isEmpty()){
+            Logger.log("Path is empty!");
             fail();
             return;
         }

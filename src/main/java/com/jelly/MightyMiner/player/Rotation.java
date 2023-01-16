@@ -1,8 +1,11 @@
 package com.jelly.MightyMiner.player;
 
 import com.jelly.MightyMiner.utils.AngleUtils;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
+import static com.jelly.MightyMiner.utils.AngleUtils.*;
 
 public class Rotation {
     private final static Minecraft mc = Minecraft.getMinecraft();
@@ -11,6 +14,10 @@ public class Rotation {
 
     private long startTime;
     private long endTime;
+
+    private double previousTime;
+
+    private float phase;
 
     MutablePair<Float, Float> start = new MutablePair<>(0f, 0f);
     MutablePair<Float, Float> target = new MutablePair<>(0f, 0f);
@@ -47,9 +54,72 @@ public class Rotation {
         }
     }
 
+
+    public void updateInCircle(float radius, int blocksInFront, float rotationYawAxis, int rate){
+
+       // if(mc.thePlayer.lastTickPosY - mc.thePlayer.posY == 0) { // it will glitch if the player is falling / dropping
+
+
+        double deltaTime = (System.currentTimeMillis() - previousTime) / 1000.0f;
+        previousTime = System.currentTimeMillis();
+
+        if(deltaTime > 0.1)
+            return;
+
+        phase += (rate / 2.0f * deltaTime);
+        phase %= (2 * Math.PI);
+
+
+
+        // here we use parametric equations (We use a Limaçon here (https://en.wikipedia.org/wiki/Lima%C3%A7on))
+        // E.g. circle -> x = rcost, y = rsint, t = phase
+
+        // Limaçon polar form ->  r = b cos a
+        // cartesian form -> (x^2 + y^2 - ax)^2 = b^2 (x^2 + y^2)
+        // parametric form -> x = a/2 + b cos t + a/2 cos 2t, y = b sin t + a/2 sin 2t
+        // one which works is b = 0.3, a = 1
+
+        float a = 1;
+        float b = 0.35f;
+        float k = radius + 0.5f; // scale factor which scales up the whole loop (+0.5f is just an approximation)
+        float c = -1.2f; // translates the whole graph c units right (negative -> left)
+
+        double p = k * (a/2.0 + b * Math.cos(phase) + a/2.0 * Math.cos(2 * phase)) + c;
+        double q = k * (b * Math.sin(phase) + a/2.0 * Math.sin(2 * phase));
+
+        //Dürer folium also works
+        //double p = k * (Math.cos(phase) + Math.cos(3*phase));
+        //double q = k / 1.5f * (Math.sin(phase) + Math.sin(3*phase));
+
+        if (rotationYawAxis % 180 == 0) {
+            rotateInstantlyTo(
+                    getRequiredYaw(p, blocksInFront * BlockUtils.getUnitZ(rotationYawAxis)),
+                    getRequiredPitch(p, q, blocksInFront * BlockUtils.getUnitZ(rotationYawAxis))
+            );
+        } else {
+            rotateInstantlyTo(
+                    getRequiredYaw(blocksInFront * BlockUtils.getUnitX(rotationYawAxis), p),
+                    getRequiredPitch(blocksInFront * BlockUtils.getUnitX(rotationYawAxis), q, p)
+            ); //just need to input the corresponding parametric equations :)
+        }
+
+
+    }
+
+    public void rotateInstantlyTo(float yaw, float pitch){
+        float prevYaw = mc.thePlayer.rotationYaw;
+        if(shouldRotateClockwise(prevYaw, yaw)){
+            mc.thePlayer.rotationYaw += smallestAngleDifference(prevYaw, yaw);
+        } else {
+            mc.thePlayer.rotationYaw -= smallestAngleDifference(prevYaw, yaw);
+        }
+        mc.thePlayer.rotationPitch = pitch;
+
+    }
+
     public void update() {
         if (System.currentTimeMillis() <= endTime) {
-            if (shouldRotateClockwise()) {
+            if (shouldRotateClockwise(start.left, target.left)) {
                 mc.thePlayer.rotationYaw = start.left + interpolate(difference.left);
             } else {
                 mc.thePlayer.rotationYaw = start.left - interpolate(difference.left);
@@ -64,9 +134,7 @@ public class Rotation {
         }
     }
 
-    private boolean shouldRotateClockwise() {
-        return AngleUtils.clockwiseDifference(AngleUtils.get360RotationYaw(start.left), target.left) < 180;
-    }
+
 
     public void reset() {
         completed = false;

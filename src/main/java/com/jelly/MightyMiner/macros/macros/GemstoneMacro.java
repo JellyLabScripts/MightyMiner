@@ -112,7 +112,7 @@ public class GemstoneMacro extends Macro {
             }
         }
 
-        useMiningSpeedBoost();
+        checkMiningSpeedBoost();
     }
 
     @Override

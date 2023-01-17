@@ -11,13 +11,10 @@ import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MithrilMacro extends Macro {
 
@@ -89,7 +86,7 @@ public class MithrilMacro extends Macro {
                 break;
         }
 
-        useMiningSpeedBoost();
+        checkMiningSpeedBoost();
     }
 
 

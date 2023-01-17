@@ -123,60 +123,59 @@ public class AStarCalculator {
         }
 
         // Cannot use getBlockCached() here because if blocks are updated it would cause the path to be un-walkable!
-        if (!searchNode.pos.equals(endingBlockPos)) {
-            if (pathFinderBehaviour.getForbiddenMiningBlocks() != null) {
-                switch (move) {
-                    case ASCEND_EAST:
-                    case ASCEND_NORTH:
-                    case ASCEND_SOUTH:
-                    case ASCEND_WEST:
-                        if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(currentNode.pos.up(2))))
-                            return;
-                        break;
-                    case DESCEND_EAST:
-                    case DESCEND_NORTH:
-                    case DESCEND_SOUTH:
-                    case DESCEND_WEST:
-                        if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up(2))))
-                            return;
-                        break;
-                }
-                if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos)) || pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up())))
-                    return;
-
+        if (pathFinderBehaviour.getForbiddenMiningBlocks() != null) {
+            switch (move) {
+                case ASCEND_EAST:
+                case ASCEND_NORTH:
+                case ASCEND_SOUTH:
+                case ASCEND_WEST:
+                    if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(currentNode.pos.up(2))))
+                        return;
+                    break;
+                case DESCEND_EAST:
+                case DESCEND_NORTH:
+                case DESCEND_SOUTH:
+                case DESCEND_WEST:
+                    if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up(2))))
+                        return;
+                    break;
             }
+            if (pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos)) || pathFinderBehaviour.getForbiddenMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up())))
+                return;
 
-            if (pathFinderBehaviour.getAllowedMiningBlocks() != null) {
-                switch (move) {
-                    case ASCEND_EAST:
-                    case ASCEND_NORTH:
-                    case ASCEND_SOUTH:
-                    case ASCEND_WEST:
-                        if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(currentNode.pos.up(2))))
-                            return;
-                        break;
-                    case DESCEND_EAST:
-                    case DESCEND_NORTH:
-                    case DESCEND_SOUTH:
-                    case DESCEND_WEST:
-                        if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up(2))))
-                            return;
-                        break;
-                }
-                if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos)) || !pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up())))
-                    return;
-
-            }
         }
+
+        if (pathFinderBehaviour.getAllowedMiningBlocks() != null) {
+            switch (move) {
+                case ASCEND_EAST:
+                case ASCEND_NORTH:
+                case ASCEND_SOUTH:
+                case ASCEND_WEST:
+                    if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(currentNode.pos.up(2))))
+                        return;
+                    break;
+                case DESCEND_EAST:
+                case DESCEND_NORTH:
+                case DESCEND_SOUTH:
+                case DESCEND_WEST:
+                    if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up(2))))
+                        return;
+                    break;
+            }
+            if (!pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos)) || !pathFinderBehaviour.getAllowedMiningBlocks().contains(BlockUtils.getBlock(searchNode.pos.up())))
+                return;
+
+        }
+
 
         switch (move) {
             case DIAGONAL_NORTHEAST:
             case DIAGONAL_NORTHWEST:
             case DIAGONAL_SOUTHEAST:
             case DIAGONAL_SOUTHWEST:
-                BlockPos aboveSearch = new BlockPos(searchNode.pos.getX(), searchNode.pos.getY() + 1, currentNode.pos.getZ());
-                BlockPos block3 = new BlockPos(currentNode.pos.getX(), searchNode.pos.getY(), searchNode.pos.getZ());
-                if (!BlockUtils.isPassable(searchNode.pos) || !BlockUtils.isPassable(currentNode.pos) || !BlockUtils.isPassable(aboveSearch) || !BlockUtils.isPassable(block3)) {
+                BlockPos block3 = new BlockPos(searchNode.pos.getX(), searchNode.pos.getY(), currentNode.pos.getZ());
+                BlockPos block4 = new BlockPos(currentNode.pos.getX(), searchNode.pos.getY(), searchNode.pos.getZ());
+                if (!BlockUtils.fitsPlayer(searchNode.pos.down()) || !BlockUtils.fitsPlayer(currentNode.pos.down()) || !BlockUtils.fitsPlayer(block3.down()) || !BlockUtils.fitsPlayer(block4.down())) {
                     return;
                 }
                 break;

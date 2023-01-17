@@ -24,7 +24,7 @@ public class MacroHandler {
 
     public static boolean pickaxeSkillReady = true;
 
-    static boolean enabled = false;
+    public static boolean enabled = false;
     static BlockRenderer blockRenderer = new BlockRenderer();
 
     List<BlockPos> coords;

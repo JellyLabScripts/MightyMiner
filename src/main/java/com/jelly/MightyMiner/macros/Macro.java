@@ -51,7 +51,7 @@ public abstract class Macro {
         return enabled;
     }
 
-    public void useMiningSpeedBoost() {
+    public void checkMiningSpeedBoost() {
 
         if (MightyMiner.config.useMiningSpeedBoost && MacroHandler.pickaxeSkillReady) {
             int slotCache = mc.thePlayer.inventory.currentItem;

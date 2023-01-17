@@ -141,7 +141,7 @@ public class AOTVMacro extends Macro {
 
                 break;
             case Mining:
-                useMiningSpeedBoost();
+                checkMiningSpeedBoost();
 
                 switch(baritone.getState()){
                     case IDLE:

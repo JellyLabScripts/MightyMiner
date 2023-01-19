@@ -66,46 +66,43 @@ public class MacroHandler {
             return;
 
         if(SkyblockInfo.onCrystalHollows()) {
-
-        }
-
-        if (MightyMiner.config.macroType == 3) {
-            if (MightyMiner.coordsConfig.getSelectedRoute().valueList() != null)
-                drawRoutes(MightyMiner.coordsConfig.getSelectedRoute().valueList(), event);
-        }
-
-        if (MightyMiner.config.drawBlocksBlockingAOTV && blocksBlockingVision.size() > 0) {
-            for (BlockPos pos : blocksBlockingVision) {
-                DrawUtils.drawBlockBox(pos, MightyMiner.config.aotvVisionBlocksColor, 2f);
+            if (MightyMiner.config.macroType == 3) {
+                if (MightyMiner.coordsConfig.getSelectedRoute().valueList() != null)
+                    drawRoutes(MightyMiner.coordsConfig.getSelectedRoute().valueList(), event);
             }
-        }
 
-        if (MightyMiner.config.macroType == 4) {
-            if (MightyMiner.aotvWaypoints.getSelectedRoute() != null || MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
-                ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
-                for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
-                    DrawUtils.drawBlockBox(new BlockPos(waypoint.x, waypoint.y, waypoint.z), MightyMiner.config.routeBlocksColor, 2f);
+            if (MightyMiner.config.drawBlocksBlockingAOTV && blocksBlockingVision.size() > 0) {
+                for (BlockPos pos : blocksBlockingVision) {
+                    DrawUtils.drawBlockBox(pos, MightyMiner.config.aotvVisionBlocksColor, 2f);
                 }
+            }
 
-                if (MightyMiner.config.showRouteLines) {
-                    if (Waypoints.size() > 1) {
-                        ArrayList<BlockPos> coords = new ArrayList<>();
-                        for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
-                            coords.add(new BlockPos(waypoint.x, waypoint.y, waypoint.z));
-                        }
-                        DrawUtils.drawCoordsRoute(coords, event);
+            if (MightyMiner.config.macroType == 4) {
+                if (MightyMiner.aotvWaypoints.getSelectedRoute() != null || MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
+                    ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
+                    for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
+                        DrawUtils.drawBlockBox(new BlockPos(waypoint.x, waypoint.y, waypoint.z), MightyMiner.config.routeBlocksColor, 2f);
                     }
+
+                    if (MightyMiner.config.showRouteLines) {
+                        if (Waypoints.size() > 1) {
+                            ArrayList<BlockPos> coords = new ArrayList<>();
+                            for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
+                                coords.add(new BlockPos(waypoint.x, waypoint.y, waypoint.z));
+                            }
+                            DrawUtils.drawCoordsRoute(coords, event);
+                        }
+                    }
+
+                    for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
+                        BlockPos pos = new BlockPos(waypoint.x, waypoint.y, waypoint.z);
+                        DrawUtils.drawText("§l§3[§f " + waypoint.name + " §3]", pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, MightyMiner.config.showDistanceToBlocks);
+                    }
+
+
                 }
-
-                for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
-                    BlockPos pos = new BlockPos(waypoint.x, waypoint.y, waypoint.z);
-                    DrawUtils.drawText("§l§3[§f " + waypoint.name + " §3]", pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, MightyMiner.config.showDistanceToBlocks);
-                }
-
-
             }
         }
-
 
         if (!enabled)
             return;

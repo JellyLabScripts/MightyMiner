@@ -1,64 +1,70 @@
 package com.jelly.MightyMiner.features;
 
-import com.jelly.MightyMiner.handlers.MacroHandler;
-import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import com.jelly.MightyMiner.utils.HypixelUtils.NpcUtil;
-import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.StringUtils;
-import net.minecraft.util.Tuple;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import static com.jelly.MightyMiner.handlers.KeybindHandler.leftClick;
 import static com.jelly.MightyMiner.handlers.KeybindHandler.rightClick;
 
 
 public class MobKiller {
 
-    private final Minecraft mc = Minecraft.getMinecraft();
+    private static final Minecraft mc = Minecraft.getMinecraft();
 
-    private Target target;
+    public static Target target;
+    public static int scanRange = 20;
 
     private static boolean caseSensitive = false;
     private static String[] mobsNames = null;
 
     private final Timer attackDelay = new Timer();
     private final Timer blockedVisionDelay = new Timer();
-    private States currentState = States.SEARCHING;
+    private final Timer afterKillDelay = new Timer();
+    public static States currentState = States.SEARCHING;
+
+    public static boolean isToggled = false;
+
+    private final CopyOnWriteArrayList<Target> potentialTargets = new CopyOnWriteArrayList<>();
 
     private final Rotation rotation = new Rotation();
 
-    private final ArrayList<Target> potentialTargets = new ArrayList<>();
-
-    public static int scanRange = 15;
-
-    public static boolean enabled = false;
-
-    private Macro lastMacro = null;
-
     private static class Target {
-        public EntityLiving entity;
+        public EntityLivingBase entity;
         public EntityArmorStand stand;
-
+        public boolean worm;
         public double distance() {
-            return Minecraft.getMinecraft().thePlayer.getDistanceToEntity(entity);
+            if (entity != null)
+                return Minecraft.getMinecraft().thePlayer.getDistanceToEntity(entity);
+            else
+                return Minecraft.getMinecraft().thePlayer.getDistanceToEntity(stand);
         }
 
-        public Target(EntityLiving entity, EntityArmorStand stand) {
+        public Target(EntityLivingBase entity, EntityArmorStand stand) {
             this.entity = entity;
             this.stand = stand;
+        }
+
+        public Target(EntityLivingBase entity, EntityArmorStand stand, boolean worm) {
+            this.entity = entity;
+            this.stand = stand;
+            this.worm = worm;
         }
     }
 
@@ -69,37 +75,25 @@ public class MobKiller {
         KILLED
     }
 
-    public void toggle() {
-        enabled = !enabled;
-        if (enabled) {
-            onEnable();
+    public static boolean hasTarget() {
+        return currentState == States.ATTACKING && target != null;
+    }
+
+    public void Toggle() {
+        if (!isToggled) {
+            isToggled = true;
+            blockedVisionDelay.reset();
+            attackDelay.reset();
+            currentState = States.SEARCHING;
+            target = null;
+            potentialTargets.clear();
         } else {
-            onDisable();
+            isToggled = false;
+            target = null;
+            potentialTargets.clear();
+            rotation.reset();
+            isToggled = false;
         }
-    }
-
-    public void Enable() {
-        enabled = true;
-        onEnable();
-    }
-
-    public void Disable() {
-        enabled = false;
-        onDisable();
-    }
-
-    public void onEnable() {
-        blockedVisionDelay.reset();
-        attackDelay.reset();
-        currentState = States.SEARCHING;
-        target = null;
-        potentialTargets.clear();
-    }
-
-    public void onDisable() {
-        target = null;
-        potentialTargets.clear();
-        rotation.reset();
     }
 
     public static void setMobsNames(boolean caseSensitive, String... mobsNames) {
@@ -109,18 +103,17 @@ public class MobKiller {
 
     @SubscribeEvent
     public void onTick(TickEvent.PlayerTickEvent event) {
-        if (!enabled) return;
+        if (!isToggled) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;
+        if (PlayerUtils.hasOpenContainer()) return;
 
         if (mobsNames == null || mobsNames.length == 0) return;
 
-        if (mc.currentScreen != null && !(mc.currentScreen instanceof net.minecraft.client.gui.GuiChat))
-            return;
 
         switch (currentState) {
             case SEARCHING:
                 potentialTargets.clear();
-                List<Entity> entities = mc.theWorld.loadedEntityList.stream().filter(entity -> entity instanceof EntityArmorStand).collect(Collectors.toList());
+                List<Entity> entities = mc.theWorld.loadedEntityList.stream().filter(entity -> entity instanceof EntityArmorStand).filter(entity -> mc.thePlayer.getPositionEyes(1).distanceTo(entity.getPositionVector()) <= scanRange).collect(Collectors.toList());
                 List<Entity> filtered = entities.stream().filter(v -> (!v.getName().contains(mc.thePlayer.getName()) && Arrays.stream(mobsNames).anyMatch(mobsName -> {
                     String mobsName1 = StringUtils.stripControlCodes(mobsName);
                     String vName = StringUtils.stripControlCodes(v.getName());
@@ -130,101 +123,162 @@ public class MobKiller {
                     } else {
                         return vName.toLowerCase().contains(mobsName1.toLowerCase()) || vCustomNameTag.toLowerCase().contains(mobsName1.toLowerCase());
                     }
-                }))).filter(PlayerUtils::entityIsVisible).collect(Collectors.toList());
+                }))).collect(Collectors.toList());
 
-                if (filtered.size() > 0) {
+                if (filtered.isEmpty())
+                    break;
 
-                    double distance = 9999;
-                    Target closestTarget = null;
+                double distance = 9999;
+                Target closestTarget = null;
 
-                    for (Entity entity : filtered) {
-                        double currentDistance;
-                        EntityArmorStand stand = (EntityArmorStand) entity;
-                        Entity target = NpcUtil.getEntityCuttingOtherEntity(stand, null);
+                for (Entity entity : filtered) {
+                    double currentDistance;
+                    EntityArmorStand stand = (EntityArmorStand) entity;
 
-                        if (target == null) continue;
+                    if (stand.getCustomNameTag().contains("Scatha") || stand.getCustomNameTag().contains("Worm")) {
+                        Target target1 = new Target(null, stand, true);
 
-                        if (NpcUtil.getEntityHp(stand) <= 0) continue;
-                        boolean entity1 = PlayerUtils.entityIsVisible(target);
-                        if (!entity1) continue;
-
-                        if (target instanceof EntityLiving) {
-
-                            Target target1 = new Target((EntityLiving) target, stand);
-
-                            if (closestTarget != null) {
-                                currentDistance = target.getDistanceToEntity(mc.thePlayer);
-                                if (currentDistance < distance) {
-                                    distance = currentDistance;
-                                    closestTarget = target1;
-                                }
-                            } else {
-                                distance = target.getDistanceToEntity(mc.thePlayer);
+                        if (closestTarget != null) {
+                            currentDistance = stand.getDistanceToEntity(mc.thePlayer);
+                            if (currentDistance < distance) {
+                                distance = currentDistance;
                                 closestTarget = target1;
                             }
-
-                            potentialTargets.add(target1);
+                        } else {
+                            distance = stand.getDistanceToEntity(mc.thePlayer);
+                            closestTarget = target1;
                         }
+
+                        potentialTargets.add(target1);
+
+                        continue;
                     }
 
-                    if (closestTarget != null && closestTarget.distance() <= scanRange) {
-                        target = closestTarget;
-                        currentState = States.ATTACKING;
-                        MacroHandler.macros.forEach(macro -> {
-                            if (macro.isEnabled()) {
-                                lastMacro = macro;
-                                macro.Pause();
+                    Entity target = NpcUtil.getEntityCuttingOtherEntity(stand, null);
+
+                    if (target == null) continue;
+                    if (NpcUtil.getEntityHp(stand) <= 0) continue;
+
+                    boolean visible = PlayerUtils.entityIsVisible(target);
+
+                    if (!visible) continue;
+
+                    if (target instanceof EntityLivingBase) {
+
+                        Target target1 = new Target((EntityLivingBase) target, stand);
+
+                        if (closestTarget != null) {
+                            currentDistance = target.getDistanceToEntity(mc.thePlayer);
+                            if (currentDistance < distance) {
+                                distance = currentDistance;
+                                closestTarget = target1;
                             }
-                        });
+                        } else {
+                            distance = target.getDistanceToEntity(mc.thePlayer);
+                            closestTarget = target1;
+                        }
+
+                        potentialTargets.add(target1);
                     }
-                } else {
-                    if (lastMacro != null) {
-                        lastMacro.Unpause();
-                        lastMacro = null;
-                    }
-                    onDisable();
+                }
+
+                if (closestTarget != null && closestTarget.distance() < scanRange) {
+                    target = closestTarget;
+                    currentState = States.ATTACKING;
                 }
                 break;
             case ATTACKING:
 
-                if (NpcUtil.getEntityHp(target.stand) <= 0 || target.distance() > scanRange) {
+                if (NpcUtil.getEntityHp(target.stand) <= 0 || target.distance() > scanRange || target.stand == null || (target.entity != null && (target.entity.isDead || target.entity.getHealth() < 0.0))) {
                     currentState = States.KILLED;
+                    afterKillDelay.reset();
                     break;
                 }
 
-                int weapon = PlayerUtils.getItemInHotbar(true, "Juju", "Terminator", "Bow", "Frozen Scythe", "Glacial Scythe");
+                if (MightyMiner.config.useHyperionUnderPlayer) {
+                    int weapon = PlayerUtils.getItemInHotbar("Hyperion");
 
-                if (weapon == -1) {
-                    LogUtils.addMessage("No weapon found");
-                    currentState = States.SEARCHING;
-                    toggle();
-                    return;
-                }
+                    if (weapon == -1) {
+                        LogUtils.addMessage("MobKiller - No Hyperion found");
+                        return;
+                    }
 
-                mc.thePlayer.inventory.currentItem = weapon;
+                    mc.thePlayer.inventory.currentItem = weapon;
 
-                Tuple<Float, Float> angles = AngleUtils.getRequiredRotationToEntity(target.entity);
+                    if (target.distance() > 5.5) return;
 
-                rotation.initAngleLock(angles.getFirst(), angles.getSecond(), 300);
 
-                if (rotation.rotating) return;
+                    if (rotation.completed)
+                        rotation.initAngleLock(mc.thePlayer.rotationYaw, 89, MightyMiner.config.mobKillerCameraSpeed);
 
-                boolean pointedEntity = PlayerUtils.entityIsVisible(target.entity);
-                if (pointedEntity) {
-                    if (attackDelay.hasReached(120)) {
+                    if (AngleUtils.getAngleDifference(mc.thePlayer.rotationYaw, 89) > 1) {
+                        rotation.reset();
+                        rotation.completed = true;
+                    }
+
+                    if (!rotation.completed) return;
+
+                    if (attackDelay.hasReached(MightyMiner.config.mobKillerAttackDelay) && target.distance() <= 6) {
                         rightClick();
                         attackDelay.reset();
                     }
+
                 } else {
-                    LogUtils.addMessage("Something is blocking target, waiting for free shot...");
-                    blockedVisionDelay.reset();
-                    currentState = States.BLOCKED_VISION;
+
+                    int weapon;
+
+                    if (!MightyMiner.config.customItemToKill.isEmpty()) {
+                        weapon = PlayerUtils.getItemInHotbar(MightyMiner.config.customItemToKill);
+                    } else {
+                        weapon = PlayerUtils.getItemInHotbar("Juju", "Terminator", "Bow", "Frozen Scythe", "Glacial Scythe");
+                    }
+
+                    if (weapon == -1) {
+                        LogUtils.addMessage("MobKiller - No weapon found");
+                        return;
+                    }
+
+                    mc.thePlayer.inventory.currentItem = weapon;
+
+                    if (target.worm) {
+                        rotation.initAngleLock(AngleUtils.getRequiredYaw(target.stand.getPosition()), AngleUtils.getRequiredPitch(target.stand.getPosition()), MightyMiner.config.mobKillerCameraSpeed);
+                    } else {
+                        rotation.initAngleLock(AngleUtils.getRequiredYaw(target.entity.getPosition()), AngleUtils.getRequiredPitch(target.entity.getPosition()), MightyMiner.config.mobKillerCameraSpeed);
+
+                    }
+
+                    if (AngleUtils.getAngleDifference(mc.thePlayer.rotationYaw, 89) > 1) {
+                        rotation.reset();
+                        rotation.completed = true;
+                    }
+
+                    if (!rotation.completed) return;
+
+                    boolean visible = PlayerUtils.entityIsVisible(target.entity);
+
+                    if (!target.worm && !visible) {
+                        LogUtils.addMessage("MobKiller - Something is blocking target, waiting for free shot...");
+                        blockedVisionDelay.reset();
+                        currentState = States.BLOCKED_VISION;
+                    } else {
+                        if (attackDelay.hasReached(MightyMiner.config.mobKillerAttackDelay)) {
+                            if (MightyMiner.config.attackButton == 0) {
+                                if (target.distance() <= 4.5) {
+                                    leftClick();
+                                }
+                            } else {
+                                rightClick();
+                            }
+                            attackDelay.reset();
+                        }
+                    }
                 }
+
 
                 break;
             case BLOCKED_VISION:
 
-                if (NpcUtil.getEntityHp(target.stand) <= 0 || target.distance() > scanRange) {
+                if (NpcUtil.getEntityHp(target.stand) <= 0 || target.distance() > MightyMiner.config.mobKillerScanRange) {
                     currentState = States.KILLED;
                     break;
                 }
@@ -236,6 +290,10 @@ public class MobKiller {
 
                 break;
             case KILLED:
+
+                if (!afterKillDelay.hasReached(150))
+                    return;
+
                 target = null;
                 currentState = States.SEARCHING;
                 break;
@@ -243,22 +301,42 @@ public class MobKiller {
     }
 
     @SubscribeEvent
-    public void onLastRender(RenderWorldLastEvent event) {
-        if(rotation.rotating)
-            rotation.update();
-    }
-
-    @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-        if (!enabled) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;
 
         if (potentialTargets.size() > 0) {
-            potentialTargets.forEach(v -> DrawUtils.drawEntity(v.entity, new Color(100, 200, 100, 200), 2, event.partialTicks));
+            potentialTargets.forEach(v -> {
+                if (v != target)
+                    DrawUtils.drawEntity(v.worm ? v.stand : v.entity, new Color(100, 200, 100, 200), 2, event.partialTicks);
+            });
         }
 
         if (target != null) {
-            DrawUtils.drawEntity(target.entity, new Color(200, 100, 100, 200), 2, event.partialTicks);
+            DrawUtils.drawEntity(target.worm ? target.stand : target.entity, new Color(200, 100, 100, 200), 2, event.partialTicks);
         }
+    }
+
+    @SubscribeEvent
+    public void onRender2D(RenderGameOverlayEvent.Post event) {
+        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
+        if (mc.thePlayer == null || mc.theWorld == null) return;
+        if (!isToggled) return;
+
+        drawInfo();
+    }
+
+    public static Rectangle drawInfo() {
+        int x = MightyMiner.config.targetInfoLocationX;
+        int y = MightyMiner.config.targetInfoLocationY;
+
+        String[] text = new String[]{
+                "§c§lTarget:",
+                "§cName: §f" + (target != null ? target.stand.getCustomNameTag() : "None"),
+                "§cDistance: §f" + (target != null ? target.distance() : "No target"),
+                "§cHealth: §f" + (target != null ? (NpcUtil.getEntityHp(target.stand) + "❤️") : "No target"),
+                "§cState: §f" + currentState.name()
+        };
+
+        return DrawUtils.renderBoxedText(text, x, y, 1.0D);
     }
 }

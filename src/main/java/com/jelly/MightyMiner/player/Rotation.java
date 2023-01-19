@@ -4,6 +4,8 @@ import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.Tuple;
+import net.minecraft.util.Vec3;
 import org.apache.commons.lang3.tuple.MutablePair;
 import static com.jelly.MightyMiner.utils.AngleUtils.*;
 
@@ -33,6 +35,16 @@ public class Rotation {
         target.setLeft(AngleUtils.getActualYawFrom360(yaw));
         target.setRight(pitch);
         getDifference();
+    }
+
+    public void initAngleLock(BlockPos block, int time) {
+        Tuple<Float, Float> angles = AngleUtils.getRotation(new Vec3(block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5));
+        initAngleLock(angles.getFirst(), angles.getSecond(), time);
+    }
+
+    public void initAngleLock(Vec3 target, int time) {
+        Tuple<Float, Float> angles = AngleUtils.getRotation(target);
+        initAngleLock(angles.getFirst(), angles.getSecond(), time);
     }
 
     public void initAngleLock(float yaw, float pitch, int time) {

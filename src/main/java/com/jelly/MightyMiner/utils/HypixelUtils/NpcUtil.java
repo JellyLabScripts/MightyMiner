@@ -61,24 +61,25 @@ public class NpcUtil {
 
     public static int getEntityHp(EntityArmorStand aStand) {
         double mobHp = -1.0D;
-        Pattern pattern = Pattern.compile(".+? ([.\\d]+)[Mk]?/[.\\d]+[Mk]?");
+        Pattern pattern = Pattern.compile(".+? ([.\\d]+)[BMk]?/[.\\d]+[BMk]?");
         String stripped = stripString(aStand.getName());
         Matcher mat = pattern.matcher(stripped);
-        if (mat.matches()) {
+        if (mat.matches())
             try {
                 mobHp = Double.parseDouble(mat.group(1));
             } catch (NumberFormatException ignored) {
+
             }
-        } else {
-            pattern = Pattern.compile(".+? ([.\\d]+)[Mk]?.+?");
+        else {
+            pattern = Pattern.compile("\\[Lv(\\d+)]\\s+(\\w+)\\s+(\\d+)+[BMk]?");
             stripped = stripString(aStand.getName());
             mat = pattern.matcher(stripped);
-            if (mat.matches()) {
+            if (mat.matches())
                 try {
-                    mobHp = Double.parseDouble(mat.group(1));
+                    mobHp = Double.parseDouble(mat.group(3));
                 } catch (NumberFormatException ignored) {
+
                 }
-            }
         }
         return (int)Math.ceil(mobHp);
     }

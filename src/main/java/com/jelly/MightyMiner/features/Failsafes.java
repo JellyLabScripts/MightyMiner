@@ -15,7 +15,9 @@ public class Failsafes {
     private final Minecraft mc = Minecraft.getMinecraft();
 
     private void DisableMacros() {
-        MightyMiner.mobKiller.Disable();
+        if (MobKiller.isToggled) {
+            MightyMiner.mobKiller.Toggle();
+        }
 
         for (Macro macro : macros) {
             if (macro.isEnabled()) {

@@ -2,63 +2,79 @@ package com.jelly.MightyMiner.utils;
 
 import com.jelly.MightyMiner.MightyMiner;
 import lombok.val;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.*;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import org.apache.commons.lang3.tuple.Triple;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.Math.sqrt;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_LINE_STRIP;
 
 public class DrawUtils {
-    private static final Minecraft minecraft = Minecraft.getMinecraft();
+    private static final Minecraft mc = Minecraft.getMinecraft();
+
     public static void drawCoordsRoute(List<BlockPos> coords, RenderWorldLastEvent event) {
-        if (coords.size() > 1) {
-            GL11.glPushMatrix();
-            GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GL11.glLineWidth(5f);
+        if (coords.size() <= 1) return;
+        final Entity render = mc.getRenderViewEntity();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer bufferBuilder = tessellator.getWorldRenderer();
+        final double realX = render.lastTickPosX + (render.posX - render.lastTickPosX) * event.partialTicks;
+        final double realY = render.lastTickPosY + (render.posY - render.lastTickPosY) * event.partialTicks;
+        final double realZ = render.lastTickPosZ + (render.posZ - render.lastTickPosZ) * event.partialTicks;
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-realX, -realY, -realZ);
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableLighting();
+        GL11.glDisable(3553);
+        GL11.glLineWidth(3f);
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.disableDepth();
+        GlStateManager.depthMask(false);
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        bufferBuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
 
-            Minecraft mc = Minecraft.getMinecraft();
-
-            double x = mc.thePlayer.prevPosX + (mc.thePlayer.posX - mc.thePlayer.prevPosX) * (double)event.partialTicks;
-            double y = mc.thePlayer.prevPosY + (mc.thePlayer.posY - mc.thePlayer.prevPosY) * (double)event.partialTicks;
-            double z = mc.thePlayer.prevPosZ + (mc.thePlayer.posZ - mc.thePlayer.prevPosZ) * (double)event.partialTicks;
-            Vec3 pos = new Vec3(x, y, z);
-            GL11.glTranslated(-pos.xCoord, -pos.yCoord, -pos.zCoord);
-
-            GL11.glDisable(GL11.GL_DEPTH_TEST);
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-            GL11.glBegin(GL11.GL_LINE_STRIP);
-            GL11.glColor4f(MightyMiner.config.routeLineColor.getRed() / 255f, MightyMiner.config.routeLineColor.getGreen() / 255f, MightyMiner.config.routeLineColor.getBlue() / 255f, MightyMiner.config.routeLineColor.getAlpha() / 255f);
-
-            for (int i = 0; i < coords.size() - 1; i++) {
-                drawLineWithGL(coords.get(i), coords.get(i+1));
-            }
-            drawLineWithGL(coords.get(coords.size() - 1), coords.get(0));
-
-            GL11.glDisable(GL11.GL_BLEND);
-            GL11.glEnd();
-            GL11.glPopAttrib();
-            GL11.glPopMatrix();
+        for (int i = 0; i < coords.size() - 1; i++) {
+            BlockPos pos = coords.get(i);
+            BlockPos nextPos = coords.get(i + 1);
+            drawLine(bufferBuilder, pos, nextPos);
         }
+
+        BlockPos pos = coords.get(0);
+        BlockPos nextPos = coords.get(coords.size() - 1);
+        drawLine(bufferBuilder, pos, nextPos);
+
+        tessellator.draw();
+        GlStateManager.translate(realX, realY, realZ);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableDepth();
+        GlStateManager.depthMask(true);
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
+        GlStateManager.popMatrix();
+    }
+
+    private static void drawLine(WorldRenderer bufferBuilder, BlockPos pos, BlockPos nextPos) {
+        bufferBuilder.pos(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f).color(MightyMiner.config.routeLineColor.getRed() / 255f, MightyMiner.config.routeLineColor.getGreen() / 255f, MightyMiner.config.routeLineColor.getBlue() / 255f, MightyMiner.config.routeLineColor.getAlpha() / 255f).endVertex();
+        bufferBuilder.pos(nextPos.getX() + 0.5f, nextPos.getY() + 0.5f, nextPos.getZ() + 0.5f).color(MightyMiner.config.routeLineColor.getRed() / 255f, MightyMiner.config.routeLineColor.getGreen() / 255f, MightyMiner.config.routeLineColor.getBlue() / 255f, MightyMiner.config.routeLineColor.getAlpha() / 255f).endVertex();
     }
 
     public static void drawEntity(final Entity entity, final Color color, final int width, float partialTicks) {
@@ -85,166 +101,119 @@ public class DrawUtils {
         drawBlockBox(axisAlignedBB, color, width);
     }
 
-    public static void drawBlockBox(AxisAlignedBB bb, Color color, float lineWidth) {
-        GlStateManager.pushMatrix();
-        glLineWidth(lineWidth);
-        drawBlock(color, bb);
-    }
-
     public static void drawBlockBox(BlockPos blockPos, Color color, float lineWidth) {
-        GlStateManager.pushMatrix();
+        if (blockPos == null) return;
+        IBlockState blockState = mc.theWorld.getBlockState(blockPos);
+
+        if (blockState == null) return;
+        Block block = blockState.getBlock();
+        block.setBlockBoundsBasedOnState(mc.theWorld, blockPos);
+        double viewerPosX = mc.getRenderManager().viewerPosX;
+        double viewerPosY = mc.getRenderManager().viewerPosY;
+        double viewerPosZ = mc.getRenderManager().viewerPosZ;
+        drawFilledBoundingBox(block.getSelectedBoundingBox(mc.theWorld, blockPos).expand(0.002D, 0.002D, 0.002D).offset(-viewerPosX, -viewerPosY, -viewerPosZ), color, 0.7f, lineWidth);
+    }
+
+    public static void drawBlockBox(AxisAlignedBB bb, Color color, float lineWidth) {
+        double viewerPosX = mc.getRenderManager().viewerPosX;
+        double viewerPosY = mc.getRenderManager().viewerPosY;
+        double viewerPosZ = mc.getRenderManager().viewerPosZ;
+        drawFilledBoundingBox(bb.expand(0.002D, 0.002D, 0.002D).offset(-viewerPosX, -viewerPosY, -viewerPosZ), color, 0.7f, lineWidth);
+    }
+
+    public static void drawMiniBlockBox(Vec3 vec, Color color, float lineWidth) {
+
+        double viewerPosX = mc.getRenderManager().viewerPosX;
+        double viewerPosY = mc.getRenderManager().viewerPosY;
+        double viewerPosZ = mc.getRenderManager().viewerPosZ;
+
+        double x = vec.xCoord - viewerPosX;
+        double y = vec.yCoord - viewerPosY;
+        double z = vec.zCoord - viewerPosZ;
+
+        AxisAlignedBB aabb = new AxisAlignedBB(
+                x - 0.05,
+                y - 0.05,
+                z - 0.05,
+                x + 0.05,
+                y + 0.05,
+                z + 0.05
+        );
+
+        drawFilledBoundingBox(aabb, color, 0.7f, lineWidth);
+    }
+
+    public static void drawFilledBoundingBox(AxisAlignedBB aabb, Color color, float opacity, float lineWidth) {
+        GlStateManager.enableBlend();
+        GlStateManager.disableDepth();
+        GlStateManager.disableLighting();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.disableTexture2D();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+
+        float a = color.getAlpha() / 255.0F;
+        float r = color.getRed() / 255.0F;
+        float g = color.getGreen() / 255.0F;
+        float b = color.getBlue() / 255.0F;
+
+        GlStateManager.color(r, g, b, a * opacity);
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex();
+        tessellator.draw();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex();
+        tessellator.draw();
+        GlStateManager.color(r, g, b, a * opacity);
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex();
+        tessellator.draw();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex();
+        tessellator.draw();
+        GlStateManager.color(r, g, b, a * opacity);
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex();
+        tessellator.draw();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex();
+        tessellator.draw();
+        GlStateManager.color(r, g, b, a);
         GL11.glLineWidth(lineWidth);
-
-        AxisAlignedBB bb;
-        RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
-
-        if (Minecraft.getMinecraft().theWorld.getBlockState(blockPos).getBlock() != null) {
-            bb = Minecraft.getMinecraft().theWorld.getBlockState(blockPos).getBlock().getSelectedBoundingBox(Minecraft.getMinecraft().theWorld, blockPos);
-        } else {
-            bb = new AxisAlignedBB(blockPos, blockPos.add(1, 1, 1));
-        }
-
-        bb = bb.offset(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ);
-
-        drawBlock(color, bb);
-    }
-
-    private static void drawBlock(Color color, AxisAlignedBB bb) {
-        GlStateManager.color(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, (Math.max(color.getAlpha() - 100, 30)) / 255f);
-        drawSolidBox(bb);
-
-        GlStateManager.color(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, (Math.max(color.getAlpha(), 130)) / 255f);
-        drawOutlinedBox(bb);
-        GlStateManager.popMatrix();
-    }
-
-    public static void drawSolidBox(AxisAlignedBB bb) {
-        GlStateManager.enableBlend();
-        GlStateManager.disableDepth();
-        GlStateManager.disableLighting();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-        GlStateManager.disableTexture2D();
-        Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-
-        worldRenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(bb.minX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).endVertex();
-
-        worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).endVertex();
-
-        worldRenderer.pos(bb.minX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).endVertex();
-
-        worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).endVertex();
-
-        worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).endVertex();
-
-        worldRenderer.pos(bb.minX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).endVertex();
-        tessellator.draw();
+        RenderGlobal.drawSelectionBoundingBox(aabb);
+        GL11.glLineWidth(1.0f);
         GlStateManager.enableTexture2D();
         GlStateManager.enableDepth();
         GlStateManager.disableBlend();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    public static void drawOutlinedBox(AxisAlignedBB bb) {
-        GlStateManager.enableBlend();
-        GlStateManager.disableDepth();
-        GlStateManager.disableLighting();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-        GlStateManager.disableTexture2D();
-        Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-
-        // draw bottom face
-        worldRenderer.begin(GL_LINE_STRIP, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(bb.minX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.minY, bb.minZ).endVertex();
-        tessellator.draw();
-
-        // draw top face
-        worldRenderer.begin(GL_LINE_STRIP, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).endVertex();
-        tessellator.draw();
-
-        // draw front face
-        worldRenderer.begin(GL_LINE_STRIP, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(bb.minX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.minY, bb.minZ).endVertex();
-        tessellator.draw();
-
-        // draw back face
-        worldRenderer.begin(GL_LINE_STRIP, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).endVertex();
-        tessellator.draw();
-
-        // draw left face
-        worldRenderer.begin(GL_LINE_STRIP, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).endVertex();
-        tessellator.draw();
-
-        // draw right face
-        worldRenderer.begin(GL_LINE_STRIP, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).endVertex();
-        worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).endVertex();
-        tessellator.draw();
-
-        GlStateManager.enableTexture2D();
-        GlStateManager.enableDepth();
-        GlStateManager.disableBlend();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-    }
-
-    public static void drawLineWithGL(BlockPos blockA, BlockPos blockB) {
-        GL11.glVertex3d(blockA.getX() + 0.5,blockA.getY() + 0.5,blockA.getZ() + 0.5);
-        GL11.glVertex3d(blockB.getX() + 0.5,blockB.getY() + 0.5,blockB.getZ() + 0.5);
-    }
     // from skytils (kt -> java)
     public static void drawWaypointText(String string, double X, double Y, double Z, float partialTicks) {
         GlStateManager.alphaFunc(516, 0.1f);
         GlStateManager.pushMatrix();
-        Entity viewer = minecraft.getRenderViewEntity();
-        double x = X - minecraft.getRenderManager().viewerPosX;
-        double y = Y - minecraft.getRenderManager().viewerPosY - viewer.getEyeHeight();
-        double z = Z - minecraft.getRenderManager().viewerPosZ;
+        Entity viewer = mc.getRenderViewEntity();
+        double x = X - mc.getRenderManager().viewerPosX;
+        double y = Y - mc.getRenderManager().viewerPosY - viewer.getEyeHeight();
+        double z = Z - mc.getRenderManager().viewerPosZ;
         double distSq = x * x + y * y + z * z;
         double dist = sqrt(distSq);
         if (distSq > 144) {
@@ -255,25 +224,25 @@ public class DrawUtils {
         GlStateManager.translate(x, y, z);
         GlStateManager.translate(0f, viewer.getEyeHeight(), 0f);
         drawTag(string);
-        GlStateManager.rotate(-minecraft.getRenderManager().playerViewY, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotate(minecraft.getRenderManager().playerViewX, 1.0f, 0.0f, 0.0f);
+        GlStateManager.rotate(-mc.getRenderManager().playerViewY, 0.0f, 1.0f, 0.0f);
+        GlStateManager.rotate(mc.getRenderManager().playerViewX, 1.0f, 0.0f, 0.0f);
         GlStateManager.translate(0f, -0.25f, 0f);
-        GlStateManager.rotate(-minecraft.getRenderManager().playerViewX, 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotate(minecraft.getRenderManager().playerViewY, 0.0f, 1.0f, 0.0f);
+        GlStateManager.rotate(-mc.getRenderManager().playerViewX, 1.0f, 0.0f, 0.0f);
+        GlStateManager.rotate(mc.getRenderManager().playerViewY, 0.0f, 1.0f, 0.0f);
         drawTag(EnumChatFormatting.RED.toString() + ((int) dist) + " blocks");
         GlStateManager.popMatrix();
         GlStateManager.disableLighting();
     }
     // from skytils (kt -> java)
     public static void drawTag(String string) {
-        FontRenderer fontRenderer = minecraft.fontRendererObj;
+        FontRenderer fontRenderer = mc.fontRendererObj;
         float FLOAT_1 = 0.02666667f;
 
         GlStateManager.pushMatrix();
         GL11.glNormal3f(0.0f, 1.0f, 0.0f);
-        GlStateManager.rotate(-minecraft.getRenderManager().playerViewY, 0.0f, 1.0f, 0.0f);
+        GlStateManager.rotate(-mc.getRenderManager().playerViewY, 0.0f, 1.0f, 0.0f);
         GlStateManager.rotate(
-                minecraft.getRenderManager().playerViewX,
+                mc.getRenderManager().playerViewX,
                 1.0f,
                 0.0f,
                 0.0f
@@ -306,7 +275,7 @@ public class DrawUtils {
     }
 
     public static Triple<Double, Double, Double> viewerPosition(float partialTicks) {
-        final Entity viewer = minecraft.getRenderViewEntity();
+        final Entity viewer = mc.getRenderViewEntity();
         double viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks;
         double viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks;
         double viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * partialTicks;
@@ -375,5 +344,90 @@ public class DrawUtils {
         tessellator.draw();
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
+    }
+
+    public static Rectangle renderBoxedText(String[] text, int x, int y, Double scale) {
+        String longestString = Arrays.stream(text).max(Comparator.comparingInt(String::length)).get();
+        GlStateManager.pushMatrix();
+        GlStateManager.disableLighting();
+        GlStateManager.disableDepth();
+        GlStateManager.enableBlend();
+        GlStateManager.scale(scale, scale, scale);
+        GlStateManager.color(0, 0, 0, 1f);
+        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
+
+        Gui.drawRect(x, y, x + fontRenderer.getStringWidth(longestString) + 10, y + (text.length * 9) + 10, new Color(0, 0, 0, 153).getRGB());
+
+        for (int i = 0; i < text.length; i++) {
+            int yOffset = (y + 5 + (i * 9));
+            String[] textArray = text[i].split("\n");
+            for (String s : textArray) {
+                Minecraft.getMinecraft().fontRendererObj.drawString(s, Math.round(x + 5 / scale), Math.round(yOffset / scale), Color.white.getRGB(), true);
+            }
+        }
+
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+
+        return new Rectangle(x, y, fontRenderer.getStringWidth(longestString) + 10, text.length * 9 + 10);
+    }
+
+    public static void drawText(String str, double X, double Y, double Z) {
+        drawText(str, X, Y, Z, false);
+    }
+
+    public static void drawText(String str, double X, double Y, double Z, boolean showDistance) {
+        float lScale = 1.0f;
+        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
+
+        double renderPosX = X - Minecraft.getMinecraft().getRenderManager().viewerPosX;
+        double renderPosY = Y - Minecraft.getMinecraft().getRenderManager().viewerPosY;
+        double renderPosZ = Z - Minecraft.getMinecraft().getRenderManager().viewerPosZ;
+
+        double distance = Math.sqrt(renderPosX * renderPosX + renderPosY * renderPosY + renderPosZ * renderPosZ);
+        double multiplier = Math.max(distance / 150f, 0.1f);
+        lScale *= 0.45f * multiplier;
+
+        float xMultiplier = Minecraft.getMinecraft().gameSettings.thirdPersonView == 2 ? -1 : 1;
+
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(renderPosX, renderPosY, renderPosZ);
+        RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
+        GlStateManager.rotate(-renderManager.playerViewY, 0, 1, 0);
+        GlStateManager.rotate(renderManager.playerViewX * xMultiplier, 1, 0, 0);
+        GlStateManager.scale(-lScale, -lScale, lScale);
+        GlStateManager.disableLighting();
+        GlStateManager.depthMask(false);
+        GlStateManager.disableDepth();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+
+        int textWidth = fontRenderer.getStringWidth(StringUtils.stripControlCodes((str)));
+
+        float j = textWidth / 2f;
+        GlStateManager.disableTexture2D();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+        GlStateManager.color(0, 0, 0, 0.5f);
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(-j - 1, -1, 0).endVertex();
+        worldrenderer.pos(-j - 1, 8, 0).endVertex();
+        worldrenderer.pos(j + 1, 8, 0).endVertex();
+        worldrenderer.pos(j + 1, -1, 0).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+
+        fontRenderer.drawString(str, -textWidth / 2, 0, -1);
+
+        if (showDistance) {
+            textWidth = fontRenderer.getStringWidth(StringUtils.stripControlCodes((int) distance + " blocks"));
+            fontRenderer.drawString((int) distance + " blocks", -textWidth / 2, 10, -1);
+        }
+
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.popMatrix();
     }
 }

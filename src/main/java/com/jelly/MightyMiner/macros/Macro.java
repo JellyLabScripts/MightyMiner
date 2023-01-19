@@ -16,8 +16,6 @@ public abstract class Macro {
     protected Minecraft mc = Minecraft.getMinecraft();
     protected boolean enabled = false;
 
-    protected boolean paused = false;
-
     public void toggle() {
         enabled = !enabled;
         FuelFilling.currentState = FuelFilling.states.NONE;
@@ -25,7 +23,6 @@ public abstract class Macro {
             onEnable();
         } else {
             onDisable();
-            paused = false;
         }
     }
 
@@ -73,12 +70,6 @@ public abstract class Macro {
 
             MacroHandler.pickaxeSkillReady = false;
         }
-    }
-
-    public void Pause() {
-    }
-
-    public void Unpause() {
     }
 
     public void FailSafeDisable() {}

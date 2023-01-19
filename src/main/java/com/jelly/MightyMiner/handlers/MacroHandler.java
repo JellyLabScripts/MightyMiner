@@ -2,6 +2,8 @@ package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.events.ReceivePacketEvent;
+import com.jelly.MightyMiner.features.MobKiller;
+import com.jelly.MightyMiner.gui.AOTVWaypointsGUI;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.*;
 import com.jelly.MightyMiner.render.BlockRenderer;
@@ -12,6 +14,7 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -27,13 +30,18 @@ public class MacroHandler {
     public static boolean enabled = false;
     static BlockRenderer blockRenderer = new BlockRenderer();
 
+    public static boolean miningSpeedActive = false;
+
     List<BlockPos> coords;
 
     public static void initializeMacro(){
-       macros.add(new GemstoneMacro());
-       macros.add(new PowderMacro());
-       macros.add(new MithrilMacro());
+        macros.add(new GemstoneMacro());
+        macros.add(new PowderMacro());
+        macros.add(new MithrilMacro());
         macros.add(new AOTVMacro());
+        AOTVMacroExperimental aotvMacroExperimental = new AOTVMacroExperimental();
+        MinecraftForge.EVENT_BUS.register(aotvMacroExperimental);
+        macros.add(aotvMacroExperimental);
     }
 
     @SubscribeEvent
@@ -58,15 +66,46 @@ public class MacroHandler {
             return;
 
         if(SkyblockInfo.onCrystalHollows()) {
+
+        }
+
+        if (MightyMiner.config.macroType == 3) {
             if (MightyMiner.coordsConfig.getSelectedRoute().valueList() != null)
                 drawRoutes(MightyMiner.coordsConfig.getSelectedRoute().valueList(), event);
+        }
 
-            if (MightyMiner.config.drawBlocksBlockingAOTV && blocksBlockingVision.size() > 0) {
-                for (BlockPos pos : blocksBlockingVision) {
-                    DrawUtils.drawBlockBox(pos, MightyMiner.config.aotvVisionBlocksColor, 2f);
-                }
+        if (MightyMiner.config.drawBlocksBlockingAOTV && blocksBlockingVision.size() > 0) {
+            for (BlockPos pos : blocksBlockingVision) {
+                DrawUtils.drawBlockBox(pos, MightyMiner.config.aotvVisionBlocksColor, 2f);
             }
         }
+
+        if (MightyMiner.config.macroType == 4) {
+            if (MightyMiner.aotvWaypoints.getSelectedRoute() != null || MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
+                ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
+                for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
+                    DrawUtils.drawBlockBox(new BlockPos(waypoint.x, waypoint.y, waypoint.z), MightyMiner.config.routeBlocksColor, 2f);
+                }
+
+                if (MightyMiner.config.showRouteLines) {
+                    if (Waypoints.size() > 1) {
+                        ArrayList<BlockPos> coords = new ArrayList<>();
+                        for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
+                            coords.add(new BlockPos(waypoint.x, waypoint.y, waypoint.z));
+                        }
+                        DrawUtils.drawCoordsRoute(coords, event);
+                    }
+                }
+
+                for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
+                    BlockPos pos = new BlockPos(waypoint.x, waypoint.y, waypoint.z);
+                    DrawUtils.drawText("§l§3[§f " + waypoint.name + " §3]", pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, MightyMiner.config.showDistanceToBlocks);
+                }
+
+
+            }
+        }
+
 
         if (!enabled)
             return;
@@ -94,11 +133,18 @@ public class MacroHandler {
     @SubscribeEvent
     public void onMessageReceived(ClientChatReceivedEvent event) {
         String message = ChatFormatting.stripFormatting(event.message.getUnformattedText());
-        if(message.equals("You used your Mining Speed Boost Pickaxe Ability!")) {
-            pickaxeSkillReady = false;
-        } else if(message.equals("Mining Speed Boost is now available!")) {
-            pickaxeSkillReady = true;
-        }
+        try {
+            if (message.contains(":") || message.contains(">")) return;
+            if(message.startsWith("You used your Mining Speed Boost")) {
+                pickaxeSkillReady = false;
+                miningSpeedActive = true;
+            } else if(message.endsWith("is now available!")) {
+                pickaxeSkillReady = true;
+            }
+            if (message.endsWith("Speed Boost has expired!")) {
+                miningSpeedActive = false;
+            }
+        } catch (Exception ignored) {}
 
 
 
@@ -147,7 +193,6 @@ public class MacroHandler {
     }
 
     public static void disableScript() {
-
        boolean flag = false;
        for(Macro macro : macros){
            if(macro.isEnabled()) {
@@ -157,7 +202,9 @@ public class MacroHandler {
        }
        pickaxeSkillReady = true;
        enabled = false;
-       MightyMiner.mobKiller.Disable();
+        if (MobKiller.isToggled) {
+            MightyMiner.mobKiller.Toggle();
+        }
        if(flag)
            LogUtils.addMessage("Disabled script");
 
@@ -194,19 +241,38 @@ public class MacroHandler {
 
         if (!MightyMiner.config.drawBlocksBlockingAOTV) return;
 
-        if (coords != null && coords.size() > 1) {
+        if (MightyMiner.config.macroType == 3) {
+            if (coords != null && coords.size() > 1) {
 
-            for (int i = 0; i < coords.size() - 1; i++) {
-                BlockPos pos1 = new BlockPos(coords.get(i).getX(), coords.get(i).getY(), coords.get(i).getZ());
-                BlockPos pos2 = new BlockPos(coords.get(i + 1).getX(), coords.get(i + 1).getY(), coords.get(i + 1).getZ());
+                for (int i = 0; i < coords.size() - 1; i++) {
+                    BlockPos pos1 = new BlockPos(coords.get(i).getX(), coords.get(i).getY(), coords.get(i).getZ());
+                    BlockPos pos2 = new BlockPos(coords.get(i + 1).getX(), coords.get(i + 1).getY(), coords.get(i + 1).getZ());
+
+                    blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline(pos1, pos2));
+                }
+
+                BlockPos pos1 = new BlockPos(coords.get(coords.size() - 1).getX(), coords.get(coords.size() - 1).getY(), coords.get(coords.size() - 1).getZ());
+                BlockPos pos2 = new BlockPos(coords.get(0).getX(), coords.get(0).getY(), coords.get(0).getZ());
 
                 blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline(pos1, pos2));
             }
+        }
 
-            BlockPos pos1 = new BlockPos(coords.get(coords.size() - 1).getX(), coords.get(coords.size() - 1).getY(), coords.get(coords.size() - 1).getZ());
-            BlockPos pos2 = new BlockPos(coords.get(0).getX(), coords.get(0).getY(), coords.get(0).getZ());
+        if (MightyMiner.config.macroType == 4) {
+            if (MightyMiner.aotvWaypoints.getSelectedRoute() != null || MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
+                ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
+                for (int i = 0; i < Waypoints.size() - 1; i++) {
+                    BlockPos pos1 = new BlockPos(Waypoints.get(i).x, Waypoints.get(i).y, Waypoints.get(i).z);
+                    BlockPos pos2 = new BlockPos(Waypoints.get(i + 1).x, Waypoints.get(i + 1).y, Waypoints.get(i + 1).z);
 
-            blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline(pos1, pos2));
+                    blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline(pos1, pos2));
+                }
+
+                BlockPos pos1 = new BlockPos(Waypoints.get(Waypoints.size() - 1).x, Waypoints.get(Waypoints.size() - 1).y, Waypoints.get(Waypoints.size() - 1).z);
+                BlockPos pos2 = new BlockPos(Waypoints.get(0).x, Waypoints.get(0).y, Waypoints.get(0).z);
+
+                blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline(pos1, pos2));
+            }
         }
     }
 

@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +110,31 @@ public class AngleUtils {
         }
 
         return  getRequiredYaw(deltaX, deltaZ);
+    }
+
+    public static Tuple<Float, Float> getRotation(Vec3 vec3) {
+        double diffX = vec3.xCoord - mc.thePlayer.posX;
+        double diffY = vec3.yCoord - mc.thePlayer.posY - mc.thePlayer.getEyeHeight();
+        double diffZ = vec3.zCoord - mc.thePlayer.posZ;
+        return getRotationTo(diffX, diffY, diffZ);
+    }
+
+    public static Tuple<Float, Float> getRotation(Vec3 from, Vec3 to) {
+        double diffX = from.xCoord - to.xCoord;
+        double diffY = from.yCoord - to.yCoord;
+        double diffZ = from.zCoord - to.zCoord;
+        return getRotationTo(diffX, diffY, diffZ);
+    }
+
+    private static Tuple<Float, Float> getRotationTo(double diffX, double diffY, double diffZ) {
+        double dist = Math.sqrt(diffX * diffX + diffZ * diffZ);
+
+        float pitch = (float) -Math.atan2(dist, diffY);
+        float yaw = (float) Math.atan2(diffZ, diffX);
+        pitch = (float) wrapAngleTo180((pitch * 180F / Math.PI + 90) * -1);
+        yaw = (float) wrapAngleTo180((yaw * 180 / Math.PI) - 90);
+
+        return new Tuple<>(yaw, pitch);
     }
 
     public static float getRequiredYaw(double deltaX, double deltaZ) {

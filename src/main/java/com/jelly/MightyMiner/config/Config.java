@@ -1,5 +1,7 @@
 package com.jelly.MightyMiner.config;
 
+import com.jelly.MightyMiner.features.MobKiller;
+import com.jelly.MightyMiner.gui.ChangeLocationGUI;
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.*;
 
@@ -12,7 +14,7 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Macro", category = "Core",
             subcategory = "Macro",
-            options = { "Gemstone macro", "Powder macro", "Mithril macro", "AOTV Gemstone macro"}
+            options = { "Gemstone macro", "Powder macro", "Mithril macro", "AOTV Gemstone macro", "AOTV Macro (Experimental)" }
     )
     public int macroType = 0;
 
@@ -363,21 +365,11 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Auto yog killer",
-            description = "Warning: Very early alpha",
+            description = "Warning: Early alpha. For more configuration options go to MobKiller",
             category = "AOTV gemstone macro",
             subcategory = "Yogs"
     )
     public boolean killYogs = true;
-
-    @Property(
-            type = PropertyType.SLIDER,
-            name = "Radius",
-            category = "AOTV gemstone macro",
-            subcategory = "Yogs",
-            max = 50,
-            min = 1
-    )
-    public int yogsRadius = 15;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -403,6 +395,14 @@ public class Config extends Vigilant {
     )
     public boolean highlightRouteBlocks = true;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Show distance to blocks",
+            category = "AOTV gemstone macro",
+            subcategory = "Drawings"
+    )
+    public boolean showDistanceToBlocks = true;
+
 
     @Property(
             type = PropertyType.COLOR,
@@ -420,7 +420,7 @@ public class Config extends Vigilant {
     )
     public Color routeBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
 
-    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "AOTV gemstone macro", subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
+    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "AOTV gemstone macro", subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz", "Jasper", "Mithril"})
     public int aotvGemstoneType = 0;
 
 
@@ -431,6 +431,65 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.COLOR, name = "AOTV Vision blocks color", category = "AOTV gemstone macro", subcategory = "Blocking vision")
     public Color aotvVisionBlocksColor = new Color(255, 0, 0, 120);
 
+
+    @Property(type = PropertyType.SWITCH, name = "Use Hyperion under player", category = "MobKiller (Used in other macros)")
+    public boolean useHyperionUnderPlayer = true;
+
+    @Property(type = PropertyType.SLIDER, name = "MobKiller camera speed in ms", category = "MobKiller (Used in other macros)", max = 1000, min = 1)
+    public int mobKillerCameraSpeed = 100;
+
+    @Property(type = PropertyType.SLIDER, name = "MobKiller delay between attacks in ms", category = "MobKiller (Used in other macros)", max = 1000, min = 1)
+    public int mobKillerAttackDelay = 100;
+
+    @Property(type = PropertyType.TEXT, name = "Custom item to use for MobKiller", description = "Leave empty to use default weapons", category = "MobKiller (Used in other macros)")
+    public String customItemToKill = "";
+
+    @Property(type = PropertyType.SELECTOR, name = "Mouse button to use in MobKiller", category = "MobKiller (Used in other macros)", options = {"Left", "Right"})
+    public int attackButton = 0;
+
+    @Property(type = PropertyType.SLIDER, name = "MobKiller scan distance", category = "MobKiller (Used in other macros)", max = 30, min = 1)
+    public int mobKillerScanRange = 10;
+
+    @Property(type = PropertyType.NUMBER, name = "MobKiller info text X", category = "MobKiller (Used in other macros)", hidden = true)
+    public int targetInfoLocationX = 0;
+
+    @Property(type = PropertyType.NUMBER, name = "MobKiller info text Y", category = "MobKiller (Used in other macros)", hidden = true)
+    public int targetInfoLocationY = 0;
+
+    @Property(type = PropertyType.BUTTON, name = "Set target info location", category = "MobKiller (Used in other macros)")
+    public void setTargetInfoLocation() {
+        ChangeLocationGUI.open(MobKiller::drawInfo, this::saveTargetInfoLocation);
+    }
+
+    public Void saveTargetInfoLocation(int x, int y) {
+        targetInfoLocationX = x;
+        targetInfoLocationY = y;
+        return null;
+    }
+
+    @Property(type = PropertyType.SWITCH, name = "Stop if any cobblestone on the route has been destroyed", category = "AOTV Macro (Experimental)")
+    public boolean stopIfCobblestoneDestroyed = true;
+
+    @Property(type = PropertyType.SLIDER, name = "Max stuck time threshold in ms", category = "AOTV Macro (Experimental)", max = 3000, min = 1)
+    public int aotvStuckTimeThreshold = 1000;
+
+    @Property(type = PropertyType.SLIDER, name = "Camera speed to ore in ms", category = "AOTV Macro (Experimental)", max = 1500, min = 1)
+    public int aotvCameraSpeed = 100;
+
+    @Property(type = PropertyType.SLIDER, name = "Camera speed to waypoint in ms", category = "AOTV Macro (Experimental)", max = 1500, min = 1)
+    public int aotvWaypointTargetingTime = 100;
+
+    @Property(type = PropertyType.DECIMAL_SLIDER, name = "Seconds threshold to stop macro if teleported between routes too fast", description = "If there is no veins on the spot, macro will teleport to the next and to the next etc", category = "AOTV Macro (Experimental)", minF = 0f, maxF = 3f, decimalPlaces = 1)
+    public float teleportThreshold = 1.5f;
+
+    @Property(type = PropertyType.DECIMAL_SLIDER, name = "Space from edge block to the center for accuracy checks", subcategory = "Targeting", description = "Lower value means that macro will check closes to the block's edge if the block is visible", category = "AOTV Macro (Experimental)", minF = 0f, maxF = 0.5f, decimalPlaces = 2)
+    public float miningAccuracy = 0.1f;
+
+    @Property(type = PropertyType.SLIDER, name = "Accuracy checks per dimension", subcategory = "Targeting", description = "Higher value means that macro will check more times if the block is visible", category = "AOTV Macro (Experimental)", min = 1, max = 16)
+    public int miningAccuracyChecks = 8;
+
+    @Property(type = PropertyType.DECIMAL_SLIDER, name = "Space from cobblestone to the center", subcategory = "Targeting", description = "Increase if macro destroys cobblestone too often", category = "AOTV Macro (Experimental)", minF = 0f, maxF = 0.35f, decimalPlaces = 3)
+    public float miningCobblestoneAccuracy = 0.15f;
 
     public Config() {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector(), new ConfigSorting());

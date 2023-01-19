@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
@@ -40,30 +41,17 @@ public class AOTVMacro extends Macro {
 
     List<BlockPos> coords;
 
-
-    @Override
-    public void Pause() {
-        paused = true;
-        if (baritone != null) {
-            baritone.disableBaritone();
-        }
-        KeybindHandler.resetKeybindState();
-    }
-
-    @Override
-    public void Unpause() {
-        paused = false;
-        if (baritone != null) {
-            baritone.disableBaritone();
-        }
-    }
-
     @Override
     protected void onEnable() {
         if (MightyMiner.config.killYogs) {
-            MobKiller.scanRange = MightyMiner.config.yogsRadius;
+            MightyMiner.mobKiller.Toggle();
             MobKiller.setMobsNames(false, "Yog");
-            MightyMiner.mobKiller.Enable();
+            if (MightyMiner.config.useHyperionUnderPlayer) {
+                MobKiller.scanRange = 5;
+            } else {
+                MobKiller.scanRange = MightyMiner.config.mobKillerScanRange;
+            }
+            MobKiller.isToggled = true;
             LogUtils.debugLog("Enabled mob killer");
         }
         baritone = new AutoMineBaritone(getAutoMineConfig());
@@ -92,11 +80,28 @@ public class AOTVMacro extends Macro {
     @Override
     public void onTick(TickEvent.Phase phase) {
 
-        if (paused) return;
-
         if(phase != TickEvent.Phase.START) return;
 
         if(targetCoordIndex == -1) return;
+
+        if (MightyMiner.config.refuelWithAbiphone) {
+            if (FuelFilling.isRefueling()) {
+                if (baritone != null) {
+                    baritone.disableBaritone();
+                }
+                return;
+            }
+        }
+
+
+        if (MightyMiner.config.killYogs) {
+            if (MobKiller.hasTarget()) {
+                if (baritone != null) {
+                    baritone.disableBaritone();
+                }
+                return;
+            }
+        }
 
         switch(currentState) {
             case NONE:
@@ -199,7 +204,8 @@ public class AOTVMacro extends Macro {
     protected void onDisable() {
         baritone.disableBaritone();
         KeybindHandler.resetKeybindState();
-        MightyMiner.mobKiller.Disable();
+        if (MobKiller.isToggled)
+            MightyMiner.mobKiller.Toggle();
     }
 
 

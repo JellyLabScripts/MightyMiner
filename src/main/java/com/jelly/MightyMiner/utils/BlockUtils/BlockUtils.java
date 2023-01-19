@@ -5,7 +5,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.utils.AngleUtils;
-import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
@@ -15,13 +14,11 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -376,21 +373,27 @@ public class BlockUtils {
 
 
     public static ArrayList<BlockPos> GetAllBlocksInline(BlockPos pos1, BlockPos pos2) {
-        Vec3 startPos = new Vec3(pos1.getX() + 0.5, pos1.getY() + 1 + 1.6 - 0.125, pos1.getZ() + 0.5);
-        Vec3 endPos = new Vec3(pos2.getX() + 0.5, pos2.getY() + 0.5, pos2.getZ() + 0.5);
-
         ArrayList<BlockPos> returnBlocks = new ArrayList<>();
+
+        Vec3 startPos = new Vec3(pos1.getX() + 0.5, pos1.getY() + 1 + mc.thePlayer.getDefaultEyeHeight() - 0.125, pos1.getZ() + 0.5);
+        Vec3 endPos = new Vec3(pos2.getX() + 0.5, pos2.getY() + 0.5, pos2.getZ() + 0.5);
 
         Vec3 direction = new Vec3(endPos.xCoord - startPos.xCoord, endPos.yCoord - startPos.yCoord, endPos.zCoord - startPos.zCoord);
 
+        Tuple<Float, Float> rotation = AngleUtils.getRotation(endPos, startPos);
+
         double maxDistance = startPos.distanceTo(endPos);
 
-        double increment = 0.05;
+        double increment = 0.3f;
+
+        double x_offset = -Math.sin(Math.toRadians(rotation.getFirst())) * Math.cos(Math.toRadians(rotation.getSecond()));
+        double y_offset = -Math.sin(Math.toRadians(rotation.getSecond()));
+        double z_offset = Math.cos(Math.toRadians(rotation.getFirst())) * Math.cos(Math.toRadians(rotation.getSecond()));
 
         Vec3 currentPos = startPos;
 
-        while (currentPos.distanceTo(startPos) < maxDistance) {
 
+        while (currentPos.distanceTo(startPos) < maxDistance) {
 
             ArrayList<BlockPos> blocks = AnyBlockAroundVec3(currentPos, 0.15f);
 
@@ -405,11 +408,50 @@ public class BlockUtils {
             }
 
             // Move along the line by the specified increment
-            Vec3 scaledDirection = new Vec3(direction.xCoord * increment, direction.yCoord * increment, direction.zCoord * increment);
-            currentPos = currentPos.add(scaledDirection);
+            currentPos = currentPos.add(new Vec3(x_offset * increment, y_offset * increment, z_offset * increment));
+        }
+        return returnBlocks;
+    }
+
+    public static Vec3 getRandomVisibilityLine(BlockPos pos) {
+        BlockPos playerLoc = BlockUtils.getPlayerLoc();
+        boolean lowerY = (pos.getY() < playerLoc.getY() && Math.abs(pos.getX() - playerLoc.getX()) <= 1 && Math.abs(pos.getZ() - playerLoc.getZ()) <= 1);
+        ArrayList<Vec3> lines = getAllVisibilityLines(pos, mc.thePlayer.getPositionVector().add(new Vec3(0, mc.thePlayer.getEyeHeight(), 0)).subtract(new Vec3(0, lowerY ? MightyMiner.config.miningCobblestoneAccuracy : 0, 0)), lowerY);
+        if (lines.isEmpty()) {
+            return null;
+        } else {
+            return lines.get(new Random().nextInt(lines.size()));
+        }
+    }
+
+    public static ArrayList<Vec3> getAllVisibilityLines(BlockPos pos, Vec3 from) {
+        return getAllVisibilityLines(pos, from, false);
+    }
+
+    public static ArrayList<Vec3> getAllVisibilityLines(BlockPos pos, Vec3 from, boolean lowerY) {
+        ArrayList<Vec3> lines = new ArrayList<>();
+        int accuracyChecks = MightyMiner.config.miningAccuracyChecks;
+        float accuracy = 1f / accuracyChecks;
+        float spaceFromEdge = lowerY ? 0.1f : MightyMiner.config.miningAccuracy;
+        for (float x = pos.getX() + spaceFromEdge; x <= pos.getX() + (1f - spaceFromEdge); x += accuracy) {
+            for (float y = pos.getY() + spaceFromEdge; y <= pos.getY() + (1f - spaceFromEdge); y += accuracy) {
+                for (float z = pos.getZ() + spaceFromEdge; z <= pos.getZ() + (1f - spaceFromEdge); z += accuracy) {
+                    Vec3 target = new Vec3(x, y, z);
+                    if (from.distanceTo(target) > 4.5f) {
+                        continue;
+                    }
+                    BlockPos test = new BlockPos(target.xCoord, target.yCoord, target.zCoord);
+                    MovingObjectPosition movingObjectPosition = mc.theWorld.rayTraceBlocks(from, target, false, false, true);
+                    if (movingObjectPosition != null) {
+                        BlockPos obj = movingObjectPosition.getBlockPos();
+                        if (obj.equals(test))
+                            lines.add(target);
+                    }
+                }
+            }
         }
 
-        return returnBlocks;
+        return lines;
     }
 
 }

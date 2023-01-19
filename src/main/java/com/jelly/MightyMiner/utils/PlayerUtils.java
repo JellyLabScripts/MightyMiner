@@ -1,7 +1,6 @@
 package com.jelly.MightyMiner.utils;
 
 import com.jelly.MightyMiner.utils.HypixelUtils.NpcUtil;
-import com.jelly.MightyMiner.utils.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -20,6 +19,24 @@ public class PlayerUtils {
                 mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0 &&
                 mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ == 0;
     }
+
+    public static boolean hasOpenContainer() {
+        return mc.currentScreen != null && !(mc.currentScreen instanceof net.minecraft.client.gui.GuiChat);
+    }
+
+    public static void sendPingAlert() {
+        new Thread(() -> {
+            for (int i = 0; i < 15; i++) {
+                mc.theWorld.playSound(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, "random.orb", 10.0F, 1.0F, false);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     public static int getItemInHotbar(boolean returnErrorCode, final String... itemName) {
         for (int i = 0; i < 8; ++i) {
             final ItemStack is = mc.thePlayer.inventory.getStackInSlot(i);

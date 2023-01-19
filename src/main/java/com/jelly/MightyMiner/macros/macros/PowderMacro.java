@@ -98,24 +98,6 @@ public class PowderMacro extends Macro {
     double lastZ;
     final Timer cooldown = new Timer();
 
-
-    @Override
-    public void Pause() {
-        paused = true;
-        if (mineBaritone != null) {
-            mineBaritone.disableBaritone();
-        }
-        KeybindHandler.resetKeybindState();
-    }
-
-    @Override
-    public void Unpause() {
-        paused = false;
-        if (mineBaritone != null) {
-            mineBaritone.disableBaritone();
-        }
-    }
-
     @Override
     public void FailSafeDisable() {
         if (mineBaritone == null) return;
@@ -183,7 +165,7 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase){
-        if(phase != TickEvent.Phase.START || !enabled || paused)
+        if(phase != TickEvent.Phase.START || !enabled)
             return;
 
         if(!RGANuker.enabled && MightyMiner.config.powNuker){

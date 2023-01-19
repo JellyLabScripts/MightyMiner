@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
@@ -20,23 +21,6 @@ public class MithrilMacro extends Macro {
 
     AutoMineBaritone baritone;
     ArrayList<BlockData<EnumDyeColor>> mithPriorityList = new ArrayList<>();
-
-    @Override
-    public void Pause() {
-        paused = true;
-        if (baritone != null) {
-            baritone.disableBaritone();
-        }
-        KeybindHandler.resetKeybindState();
-    }
-
-    @Override
-    public void Unpause() {
-        paused = false;
-        if (baritone != null) {
-            baritone.disableBaritone();
-        }
-    }
 
     @Override
     protected void onEnable() {
@@ -72,7 +56,14 @@ public class MithrilMacro extends Macro {
     public void onTick(TickEvent.Phase phase) {
         if (!enabled) return;
 
-        if (paused) return;
+        if (MightyMiner.config.refuelWithAbiphone) {
+            if (FuelFilling.isRefueling()) {
+                if (baritone != null) {
+                    baritone.disableBaritone();
+                }
+                return;
+            }
+        }
 
         if(phase != TickEvent.Phase.START)
             return;

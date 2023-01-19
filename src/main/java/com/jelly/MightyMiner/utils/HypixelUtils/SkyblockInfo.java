@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class SkyblockInfo {
 
-    private static String map;
+    public static String map;
     private static JsonObject data;
 
     public static boolean onCrystalHollows()

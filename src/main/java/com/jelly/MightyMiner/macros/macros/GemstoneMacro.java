@@ -4,7 +4,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
-import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
@@ -51,23 +51,6 @@ public class GemstoneMacro extends Macro {
 
 
     @Override
-    public void Pause() {
-        paused = true;
-        if (baritone != null)
-            baritone.disableBaritone();
-        KeybindHandler.resetKeybindState();
-    }
-
-    @Override
-    public void Unpause() {
-        paused = false;
-        if (baritone != null) {
-            baritone.disableBaritone();
-        }
-    }
-
-
-    @Override
     public void onEnable() {
         System.out.println("Enabled Gemstone macro checking if player is near");
         baritone = new AutoMineBaritone(getMineBehaviour());
@@ -88,15 +71,21 @@ public class GemstoneMacro extends Macro {
     public void onTick(TickEvent.Phase phase){
         if (!enabled) return;
 
-        if (paused)
-            return;
-
         if(phase != TickEvent.Phase.START)
             return;
 
 
         if(haveTreasureChest && System.currentTimeMillis() - treasureInitialTime > 7000) {
             haveTreasureChest = false;
+        }
+
+        if (MightyMiner.config.refuelWithAbiphone) {
+            if (FuelFilling.isRefueling()) {
+                if (baritone != null) {
+                    baritone.disableBaritone();
+                }
+                return;
+            }
         }
 
 

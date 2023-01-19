@@ -95,13 +95,13 @@ public class KeybindHandler {
 //
 //            debugBaritone.goTo(new BlockPos(129, 187, 56));
 
-            if (MobKiller.enabled) {
+            if (MobKiller.isToggled) {
                 LogUtils.debugLog("MobKiller disabled");
-                MightyMiner.mobKiller.toggle();
+                MobKiller.isToggled = false;
             } else {
                 LogUtils.debugLog("MobKiller enabled");
                 MobKiller.setMobsNames(false, "Dummy", "Yog");
-                MightyMiner.mobKiller.toggle();
+                MobKiller.isToggled = true;
             }
         }
         if(macroKeybinds[2].isKeyDown()){

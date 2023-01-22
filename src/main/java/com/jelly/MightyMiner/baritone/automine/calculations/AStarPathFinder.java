@@ -131,7 +131,7 @@ public class AStarPathFinder {
         double cost = 0.0D;
         if (nodes.size() <= 2) {
             for (BlockNode node : nodes)
-                cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYaw(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitch(node.getPos()))) / 540.0d;
+                cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
         } else {
             for (BlockNode node : nodes)
                 cost += (node.getType() == BlockType.WALK) ? 1D : 1.5D;

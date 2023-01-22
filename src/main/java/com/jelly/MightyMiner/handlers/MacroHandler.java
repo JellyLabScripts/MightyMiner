@@ -245,30 +245,32 @@ public class MacroHandler {
                     BlockPos pos1 = new BlockPos(coords.get(i).getX(), coords.get(i).getY(), coords.get(i).getZ());
                     BlockPos pos2 = new BlockPos(coords.get(i + 1).getX(), coords.get(i + 1).getY(), coords.get(i + 1).getZ());
 
-                    blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline(pos1, pos2));
+                    blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline3d(pos1, pos2));
                 }
 
                 BlockPos pos1 = new BlockPos(coords.get(coords.size() - 1).getX(), coords.get(coords.size() - 1).getY(), coords.get(coords.size() - 1).getZ());
                 BlockPos pos2 = new BlockPos(coords.get(0).getX(), coords.get(0).getY(), coords.get(0).getZ());
 
-                blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline(pos1, pos2));
+                blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline3d(pos1, pos2));
             }
         }
 
         if (MightyMiner.config.macroType == 4) {
-            if (MightyMiner.aotvWaypoints.getSelectedRoute() != null || MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
+            if (MightyMiner.aotvWaypoints != null && MightyMiner.aotvWaypoints.getSelectedRoute() != null && MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
                 ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
-                for (int i = 0; i < Waypoints.size() - 1; i++) {
-                    BlockPos pos1 = new BlockPos(Waypoints.get(i).x, Waypoints.get(i).y, Waypoints.get(i).z);
-                    BlockPos pos2 = new BlockPos(Waypoints.get(i + 1).x, Waypoints.get(i + 1).y, Waypoints.get(i + 1).z);
+                if(!Waypoints.isEmpty()) {
+                    for (int i = 0; i < Waypoints.size() - 1; i++) {
+                        BlockPos pos1 = new BlockPos(Waypoints.get(i).x, Waypoints.get(i).y, Waypoints.get(i).z);
+                        BlockPos pos2 = new BlockPos(Waypoints.get(i + 1).x, Waypoints.get(i + 1).y, Waypoints.get(i + 1).z);
 
-                    blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline(pos1, pos2));
+                        blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline3d(pos1, pos2));
+                    }
+
+                    BlockPos pos1 = new BlockPos(Waypoints.get(Waypoints.size() - 1).x, Waypoints.get(Waypoints.size() - 1).y, Waypoints.get(Waypoints.size() - 1).z);
+                    BlockPos pos2 = new BlockPos(Waypoints.get(0).x, Waypoints.get(0).y, Waypoints.get(0).z);
+
+                    blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline3d(pos1, pos2));
                 }
-
-                BlockPos pos1 = new BlockPos(Waypoints.get(Waypoints.size() - 1).x, Waypoints.get(Waypoints.size() - 1).y, Waypoints.get(Waypoints.size() - 1).z);
-                BlockPos pos2 = new BlockPos(Waypoints.get(0).x, Waypoints.get(0).y, Waypoints.get(0).z);
-
-                blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline(pos1, pos2));
             }
         }
     }

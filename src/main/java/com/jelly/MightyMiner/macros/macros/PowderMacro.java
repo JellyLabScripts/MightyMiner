@@ -343,7 +343,7 @@ public class PowderMacro extends Macro {
                     case NONE:
                         treasureInitialTime = System.currentTimeMillis();
                         currentChest = chestQueue.poll();
-                        for(BlockPos blockPos : BlockUtils.getRasterizedBlocks(BlockUtils.getPlayerLoc(), currentChest)){
+                        for(BlockPos blockPos : BlockUtils.getAllBlocksInLine2d(BlockUtils.getPlayerLoc(), currentChest)){
                             if(MathUtils.getDistanceBetweenTwoBlock(currentChest, blockPos) < 3.3f && !BlockUtils.getBlock(blockPos).equals(Blocks.chest) && !BlockUtils.getBlock(blockPos.down()).equals(Blocks.air)){
                                 targetBlockPos = blockPos;
                                 break;

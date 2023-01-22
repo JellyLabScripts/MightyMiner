@@ -55,7 +55,7 @@ public class PlayerUtils {
     public static int getItemInHotbarWithBlackList(boolean returnErrorCode, String blackListedLore, final String... itemName) {
         for (int i = 0; i < 8; ++i) {
             final ItemStack is = mc.thePlayer.inventory.getStackInSlot(i);
-            if(containsLore(is, blackListedLore))
+            if(blackListedLore != null && containsLore(is, blackListedLore))
                 continue;
             for(String s : itemName) {
                 if (is != null && StringUtils.stripControlCodes(is.getDisplayName()).contains(s)) {

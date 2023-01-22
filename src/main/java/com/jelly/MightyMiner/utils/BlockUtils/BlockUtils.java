@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.utils.AngleUtils;
+import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
@@ -23,11 +23,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.jelly.MightyMiner.utils.PlayerUtils.AnyBlockAroundVec3;
+import static com.jelly.MightyMiner.utils.AngleUtils.*;
 
 
 public class BlockUtils {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
+    private static final Random rnd = new Random();
 
     public static final List<Block> walkables = Arrays.asList(
             Blocks.air,
@@ -69,6 +71,11 @@ public class BlockUtils {
         negZ,
         NONE
     }
+
+    private static final Comparator<Vec3> sortVec3ByRotation = (a, b) -> {
+        if(getRotationCost(getRotation(a).getFirst(), getRotation(a).getSecond()) == getRotationCost(getRotation(b).getFirst(), getRotation(b).getSecond())) return 0;
+        return (getRotationCost(getRotation(a).getFirst(), getRotation(a).getSecond()) > getRotationCost(getRotation(b).getFirst(), getRotation(b).getSecond())) ? 1 : -1;
+    };
 
     // ;p
     private boolean isTitanium(BlockPos pos) {
@@ -290,22 +297,10 @@ public class BlockUtils {
                 (b1.getZ() == b2.getZ() && Math.abs(b1.getX() - b2.getX()) == 1);
     }
 
-    public static boolean canSeeBlock(BlockPos blockChecked) {
-
-        Vec3 vec3 = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + (double) mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
-        //get required yaw have problems
-        Vec3 vec31 = MathUtils.getVectorForRotation(AngleUtils.getRequiredPitch(blockChecked), AngleUtils.getRequiredYaw(blockChecked));
-        Vec3 vec32 = vec3.addVector(vec31.xCoord * 4.5f, vec31.yCoord * 4.5f, vec31.zCoord * 4.5f);
-        MovingObjectPosition objectPosition = mc.theWorld.rayTraceBlocks(vec3, vec32, false, false, true);
-        return objectPosition.getBlockPos().equals(blockChecked);
+    public static boolean canMineBlock(BlockPos b){
+        return !BlockUtils.getAllVisibilityLines(b, mc.thePlayer.getPositionVector().add(new Vec3(0, mc.thePlayer.getEyeHeight(), 0))).isEmpty();
     }
 
-
-
-    public static boolean canReachBlock(BlockPos blockChecked) {
-        return MathUtils.getDistanceBetweenTwoPoints(
-                mc.thePlayer.posX, mc.thePlayer.posY + 1.62f, mc.thePlayer.posZ, blockChecked.getX() + 0.5f, blockChecked.getY() + 0.5f, blockChecked.getZ() + 0.5f) < 4.5f;
-    }
 
 
     public static ArrayList<BlockSides> getAdjBlocksNotCovered(BlockPos blockToSearch) {
@@ -329,14 +324,14 @@ public class BlockUtils {
 
 
     public static boolean hasBlockInterfere(BlockPos b1, BlockPos b2) {
-        for (BlockPos pos : getRasterizedBlocks(b1, b2)) {
+        for (BlockPos pos : getAllBlocksInLine2d(b1, b2)) {
             if (!BlockUtils.isPassable(pos))
                 return true;
         }
         return false;
     }
 
-    public static ArrayList<BlockPos> getRasterizedBlocks(BlockPos b1, BlockPos b2){
+    public static ArrayList<BlockPos> getAllBlocksInLine2d(BlockPos b1, BlockPos b2){
         ArrayList<BlockPos> lineBlock = new ArrayList<>();
         int x0 = b1.getX();
         int x1 = b2.getX();
@@ -372,7 +367,7 @@ public class BlockUtils {
     }
 
 
-    public static ArrayList<BlockPos> GetAllBlocksInline(BlockPos pos1, BlockPos pos2) {
+    public static ArrayList<BlockPos> GetAllBlocksInline3d(BlockPos pos1, BlockPos pos2) {
         ArrayList<BlockPos> returnBlocks = new ArrayList<>();
 
         Vec3 startPos = new Vec3(pos1.getX() + 0.5, pos1.getY() + 1 + mc.thePlayer.getDefaultEyeHeight() - 0.125, pos1.getZ() + 0.5);
@@ -380,7 +375,7 @@ public class BlockUtils {
 
         Vec3 direction = new Vec3(endPos.xCoord - startPos.xCoord, endPos.yCoord - startPos.yCoord, endPos.zCoord - startPos.zCoord);
 
-        Tuple<Float, Float> rotation = AngleUtils.getRotation(endPos, startPos);
+        Tuple<Float, Float> rotation = getRotation(endPos, startPos);
 
         double maxDistance = startPos.distanceTo(endPos);
 
@@ -413,6 +408,23 @@ public class BlockUtils {
         return returnBlocks;
     }
 
+    // 0 = always closet
+    public static Vec3 getCloserVisibilityLine(BlockPos pos, int randomness){
+        ArrayList<Vec3> lines = getAllVisibilityLines(pos, mc.thePlayer.getPositionVector().add(new Vec3(0, mc.thePlayer.getEyeHeight(), 0)));
+        if(lines.isEmpty()){
+            return null;
+        }
+        lines.sort(sortVec3ByRotation);
+        return lines.get(randomness == 0 ? 0 : Math.min(lines.size() - 1, rnd.nextInt(randomness))); // rnd.nextInt(0) will throw IllegalArgument Exception
+    }
+
+    public static Vec3 getClosetVisibilityLine(BlockPos pos){
+        return getCloserVisibilityLine(pos, 0);
+    }
+
+    private static float getRotationCost(float yaw, float pitch){
+        return Math.abs(getAngleDifference(getActualRotationYaw(yaw), getActualRotationYaw())) + Math.abs(mc.thePlayer.rotationPitch - pitch);
+    }
     public static Vec3 getRandomVisibilityLine(BlockPos pos) {
         BlockPos playerLoc = BlockUtils.getPlayerLoc();
         boolean lowerY = (pos.getY() < playerLoc.getY() && Math.abs(pos.getX() - playerLoc.getX()) <= 1 && Math.abs(pos.getZ() - playerLoc.getZ()) <= 1);
@@ -424,11 +436,11 @@ public class BlockUtils {
         }
     }
 
-    public static ArrayList<Vec3> getAllVisibilityLines(BlockPos pos, Vec3 from) {
-        return getAllVisibilityLines(pos, from, false);
+    public static ArrayList<Vec3> getAllVisibilityLines(BlockPos pos, Vec3 fromEye) {
+        return getAllVisibilityLines(pos, fromEye, false);
     }
 
-    public static ArrayList<Vec3> getAllVisibilityLines(BlockPos pos, Vec3 from, boolean lowerY) {
+    public static ArrayList<Vec3> getAllVisibilityLines(BlockPos pos, Vec3 fromEye, boolean lowerY) {
         ArrayList<Vec3> lines = new ArrayList<>();
         int accuracyChecks = MightyMiner.config.miningAccuracyChecks;
         float accuracy = 1f / accuracyChecks;
@@ -437,11 +449,11 @@ public class BlockUtils {
             for (float y = pos.getY() + spaceFromEdge; y <= pos.getY() + (1f - spaceFromEdge); y += accuracy) {
                 for (float z = pos.getZ() + spaceFromEdge; z <= pos.getZ() + (1f - spaceFromEdge); z += accuracy) {
                     Vec3 target = new Vec3(x, y, z);
-                    if (from.distanceTo(target) > 4.5f) {
+                    if (fromEye.distanceTo(target) > 4.5f) {
                         continue;
                     }
                     BlockPos test = new BlockPos(target.xCoord, target.yCoord, target.zCoord);
-                    MovingObjectPosition movingObjectPosition = mc.theWorld.rayTraceBlocks(from, target, false, false, true);
+                    MovingObjectPosition movingObjectPosition = mc.theWorld.rayTraceBlocks(fromEye, target, false, false, true);
                     if (movingObjectPosition != null) {
                         BlockPos obj = movingObjectPosition.getBlockPos();
                         if (obj.equals(test))

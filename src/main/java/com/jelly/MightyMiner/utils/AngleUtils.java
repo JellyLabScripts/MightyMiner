@@ -86,8 +86,7 @@ public class AngleUtils {
         return lookAtCenterBlocks.contains(block);
     }
 
-
-    public static float getRequiredYaw(BlockPos blockLookingAt) {
+    public static float getRequiredYawSide(BlockPos blockLookingAt) {
 
         double deltaX = blockLookingAt.getX() - mc.thePlayer.posX + 0.5d;
         double deltaZ = blockLookingAt.getZ() - mc.thePlayer.posZ + 0.5d;
@@ -169,7 +168,7 @@ public class AngleUtils {
         } else return Math.abs(actualYaw1 - actualYaw2);
     }
 
-    public static float getRequiredPitch(BlockPos blockLookingAt) {
+    public static float getRequiredPitchSide(BlockPos blockLookingAt) {
         double deltaX = blockLookingAt.getX() - mc.thePlayer.posX + 0.5d;
         double deltaZ = blockLookingAt.getZ() - mc.thePlayer.posZ + 0.5d;
         double deltaY = (blockLookingAt.getY() + 0.5d) - (mc.thePlayer.posY + 1.62d);

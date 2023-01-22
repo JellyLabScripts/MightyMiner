@@ -8,7 +8,6 @@ import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.baritone.automine.structures.Path;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
-import com.jelly.MightyMiner.player.ContinuousRotator;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.AngleUtils;
@@ -17,6 +16,7 @@ import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -190,7 +190,6 @@ public class PathExecutor {
                 if(jumpCooldown > 0) {
                     jumpCooldown --;
                 }
-
                 break;
             case MINING:
                 BlockPos targetMineBlock = blocksToMine.getLast().getPos();
@@ -203,16 +202,12 @@ public class PathExecutor {
                         config.isShiftWhenMine(),
                         false);
 
-
-                if(mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null){
-                    // special cases for optimization
-                    if(BlockUtils.isAdjacentXZ(targetMineBlock, BlockUtils.getPlayerLoc()) && !AngleUtils.shouldLookAtCenter(targetMineBlock) &&
-                            (( targetMineBlock.getY() - mc.thePlayer.posY == 0 && BlockUtils.getBlock(targetMineBlock.up()).equals(Blocks.air) )|| targetMineBlock.getY() - mc.thePlayer.posY == 1)){
-                        rotator.initAngleLock(AngleUtils.getRequiredYaw(targetMineBlock), 28, config.getMineRotationTime());
-                    } else if (!BlockUtils.isPassable(targetMineBlock))
-                        rotator.initAngleLock(AngleUtils.getRequiredYaw(targetMineBlock), AngleUtils.getRequiredPitch(targetMineBlock), config.getMineRotationTime());
-
+                Vec3 closerVisibilityLine = BlockUtils.getCloserVisibilityLine(targetMineBlock, 50);
+                if(closerVisibilityLine == null) {
+                    fail();
+                    return;
                 }
+                rotator.initAngleLock(AngleUtils.getRotation(closerVisibilityLine).getFirst(), AngleUtils.getRotation(closerVisibilityLine).getSecond(), config.getMineRotationTime());
                 break;
         }
 

@@ -241,9 +241,9 @@ public class MobKiller {
                     mc.thePlayer.inventory.currentItem = weapon;
 
                     if (target.worm) {
-                        rotation.initAngleLock(AngleUtils.getRequiredYaw(target.stand.getPosition()), AngleUtils.getRequiredPitch(target.stand.getPosition()), MightyMiner.config.mobKillerCameraSpeed);
+                        rotation.initAngleLock(AngleUtils.getRequiredYawSide(target.stand.getPosition()), AngleUtils.getRequiredPitchSide(target.stand.getPosition()), MightyMiner.config.mobKillerCameraSpeed);
                     } else {
-                        rotation.initAngleLock(AngleUtils.getRequiredYaw(target.entity.getPosition()), AngleUtils.getRequiredPitch(target.entity.getPosition()), MightyMiner.config.mobKillerCameraSpeed);
+                        rotation.initAngleLock(AngleUtils.getRequiredYawSide(target.entity.getPosition()), AngleUtils.getRequiredPitchSide(target.entity.getPosition()), MightyMiner.config.mobKillerCameraSpeed);
 
                     }
 

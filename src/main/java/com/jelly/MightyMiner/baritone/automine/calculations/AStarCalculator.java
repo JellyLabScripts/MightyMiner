@@ -37,7 +37,7 @@ public class AStarCalculator {
 
     public LinkedList<BlockNode> calculateStaticPath(BlockPos goalBlock) {
         LinkedList<BlockNode> path = new LinkedList<>();
-        if (BlockUtils.canSeeBlock(goalBlock) && BlockUtils.canReachBlock(goalBlock)) {
+        if (BlockUtils.canMineBlock(goalBlock)) {
             path.add(new BlockNode(goalBlock, BlockType.MINE));
         }
         return path;
@@ -54,7 +54,7 @@ public class AStarCalculator {
         step = 0;
 
         // sanity check if we are at the destination already
-        if (BlockUtils.canSeeBlock(endingBlock) && BlockUtils.canReachBlock(endingBlock) && this.mode == PathMode.MINE) {
+        if (BlockUtils.canMineBlock(endingBlock) && this.mode == PathMode.MINE) {
             step++;
             LinkedList<BlockNode> blockNodes = new LinkedList<>();
 

@@ -164,16 +164,16 @@ public class KeybindHandler {
         realSetKeyBindState(keyBindShift, shiftBool);
     }
 
-    public static void updateKeys(boolean goRight, boolean goLeft, boolean goForward, boolean goBack, boolean attack, boolean useItem, boolean shift, boolean jump) {
+    public static void updateKeys(boolean w, boolean s, boolean a, boolean d, boolean atk, boolean useItem, boolean shift, boolean jump) {
         if (mc.currentScreen != null) {
             resetKeybindState();
             return;
         }
-        realSetKeyBindState(keybindW, goRight);
-        realSetKeyBindState(keybindS, goLeft);
-        realSetKeyBindState(keybindA, goForward);
-        realSetKeyBindState(keybindD, goBack);
-        realSetKeyBindState(keybindAttack, attack);
+        realSetKeyBindState(keybindW, w);
+        realSetKeyBindState(keybindS, s);
+        realSetKeyBindState(keybindA, a);
+        realSetKeyBindState(keybindD, d);
+        realSetKeyBindState(keybindAttack, atk);
         realSetKeyBindState(keybindUseItem, useItem);
         realSetKeyBindState(keyBindShift, shift);
         realSetKeyBindState(keyBindJump, jump);

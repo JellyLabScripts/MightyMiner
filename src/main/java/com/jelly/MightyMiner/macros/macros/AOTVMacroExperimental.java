@@ -117,6 +117,7 @@ public class AOTVMacroExperimental extends Macro {
         timeBetweenLastWaypoint.reset();
         tooFastTp = false;
         baritone = new AutoMineBaritone(getAutoMineConfig());
+        currentState = State.MINING;
     }
 
     @Override
@@ -235,9 +236,17 @@ public class AOTVMacroExperimental extends Macro {
                         break;
                     case EXECUTING:
                         this.checkMiningSpeedBoost();
+                        break;
                     case FAILED:
+                        LogUtils.addMessage("No gemstones left. Teleporting to next vein");
+                        if (currentWaypoint == Waypoints.size() - 1) {
+                            currentWaypoint = 0;
+                        } else {
+                            currentWaypoint++;
+                        }
                         currentState = State.WARPING;
                         baritone.disableBaritone();
+                        break;
                 }
 
                 break;

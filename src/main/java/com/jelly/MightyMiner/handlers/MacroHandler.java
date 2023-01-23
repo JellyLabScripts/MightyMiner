@@ -78,7 +78,7 @@ public class MacroHandler {
             }
 
             if (MightyMiner.config.macroType == 4) {
-                if (MightyMiner.aotvWaypoints.getSelectedRoute() != null || MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
+                if (MightyMiner.aotvWaypoints != null && MightyMiner.aotvWaypoints.getSelectedRoute() != null && MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
                     ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
                     for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
                         DrawUtils.drawBlockBox(new BlockPos(waypoint.x, waypoint.y, waypoint.z), MightyMiner.config.routeBlocksColor, 2f);
@@ -262,6 +262,7 @@ public class MacroHandler {
                     for (int i = 0; i < Waypoints.size() - 1; i++) {
                         BlockPos pos1 = new BlockPos(Waypoints.get(i).x, Waypoints.get(i).y, Waypoints.get(i).z);
                         BlockPos pos2 = new BlockPos(Waypoints.get(i + 1).x, Waypoints.get(i + 1).y, Waypoints.get(i + 1).z);
+
 
                         blocksBlockingVision.addAll(BlockUtils.GetAllBlocksInline3d(pos1, pos2));
                     }

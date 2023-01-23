@@ -32,7 +32,7 @@ public class NpcUtil {
 
         return (entity.getUniqueID().version() == 2 && entityLivingBase.getHealth() == 20.0F && !entityLivingBase.isPlayerSleeping() && !entity.isInvisible()) ||
                 // Watchdog NPC probably
-                (entity.getUniqueID().version() == 4 && !entityLivingBase.isPlayerSleeping() && entity.isInvisible() && (entity.getEntityId() == (Minecraft.getMinecraft().thePlayer.getEntityId() + 1)));
+               (entity.getUniqueID().version() == 4 && !entityLivingBase.isPlayerSleeping() && entity.isInvisible() && (entity.getEntityId() == (Minecraft.getMinecraft().thePlayer.getEntityId() + 1)));
     }
 
     public static Entity getEntityCuttingOtherEntity(Entity e, Class<?> entityType) {

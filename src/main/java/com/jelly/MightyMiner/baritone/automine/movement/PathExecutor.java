@@ -47,6 +47,8 @@ public class PathExecutor {
 
     BaritoneConfig config;
 
+    Vec3 lookVector;
+
 
     PlayerState currentState = PlayerState.IDLE;
     boolean shouldGoToFinalBlock;
@@ -137,6 +139,7 @@ public class PathExecutor {
 
 
         if (!blocksToMine.isEmpty() && shouldRemoveFromList(blocksToMine.getLast())) {
+            lookVector = null;
             stuckTickCount = 0;
             minedBlocks.add(blocksToMine.getLast());
             blockRenderer.renderMap.remove(blocksToMine.getLast().getPos());
@@ -202,12 +205,15 @@ public class PathExecutor {
                         config.isShiftWhenMine(),
                         false);
 
-                Vec3 closerVisibilityLine = BlockUtils.getCloserVisibilityLine(targetMineBlock, 50);
-                if(closerVisibilityLine == null) {
-                    fail();
-                    return;
+
+                if(lookVector == null) {
+                    lookVector = BlockUtils.getCloserVisibilityLine(targetMineBlock, 50);
+                    if (lookVector == null) {
+                        fail();
+                        return;
+                    }
                 }
-                rotator.initAngleLock(AngleUtils.getRotation(closerVisibilityLine).getFirst(), AngleUtils.getRotation(closerVisibilityLine).getSecond(), config.getMineRotationTime());
+                rotator.initAngleLock(AngleUtils.getRotation(lookVector).getFirst(), AngleUtils.getRotation(lookVector).getSecond(), config.getMineRotationTime());
                 break;
         }
 

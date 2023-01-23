@@ -143,7 +143,7 @@ public class AOTVWaypointsGUI extends WindowScreen {
                 .setY(new PixelConstraint(40))
                 .setChildOf(topContainer);
 
-        new ButtonComponent("Import routes from previous version (0.7 and older)", this::importFromPreviousVersion)
+        new ButtonComponent("Import routes from previous version (0.7 and older)", this::importFromPreviousVersion) // import
                 .setX(new PixelConstraint(40))
                 .setY(new AdditiveConstraint(new PixelConstraint(getWindow().getHeight()), new PixelConstraint(-30)))
                 .setChildOf(getWindow());
@@ -224,6 +224,7 @@ public class AOTVWaypointsGUI extends WindowScreen {
     }
 
     private UIComponent addNewWaypointList(WaypointList wp) {
+
         UIComponent container = new UIContainer()
                 .setChildOf(scrollComponent)
                 .setX(new CenterConstraint())
@@ -610,6 +611,7 @@ public class AOTVWaypointsGUI extends WindowScreen {
     }
 
     private Unit AddNewWaypointListHandler() {
+
         WaypointList route = MightyMiner.aotvWaypoints.addRoute("Waypoint List " + (MightyMiner.aotvWaypoints.getRoutes() != null ? MightyMiner.aotvWaypoints.getRoutes().size() : 1));
         addNewWaypointList(route);
         return Unit.INSTANCE;

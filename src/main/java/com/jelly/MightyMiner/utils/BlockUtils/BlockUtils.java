@@ -236,6 +236,16 @@ public class BlockUtils {
     }
 
 
+    // x
+    //xXx  -> returns true
+    // x
+    public static boolean isAxisAdjacent(BlockPos bp){
+        return onTheSameXZ(bp.east(), BlockUtils.getPlayerLoc()) ||
+                onTheSameXZ(bp.south(), BlockUtils.getPlayerLoc()) ||
+                onTheSameXZ(bp.north(), BlockUtils.getPlayerLoc()) ||
+                onTheSameXZ(bp.west(), BlockUtils.getPlayerLoc()) || onTheSameXZ(bp, BlockUtils.getPlayerLoc());
+    }
+
     public static boolean isAStraightLine(BlockPos b1, BlockPos b2, BlockPos b3) {
         if ((b1.getX() - b2.getX()) == 0 || (b2.getX() - b3.getX()) == 0 || (b1.getX() - b3.getX()) == 0)
             return (b1.getX() - b2.getX()) == 0 && (b2.getX() - b3.getX()) == 0 && (b1.getX() - b3.getX()) == 0 && b1.getY() == b2.getY() && b2.getY() == b3.getY();

@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
+import com.jelly.MightyMiner.events.BlockChangeEvent;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.PlayerUtils;
@@ -47,6 +48,8 @@ public abstract class Macro {
     public boolean isEnabled(){
         return enabled;
     }
+
+    public void onBlockChange(BlockChangeEvent event){}
 
     public void checkMiningSpeedBoost() {
 

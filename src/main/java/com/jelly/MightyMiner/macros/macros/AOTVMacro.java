@@ -8,6 +8,7 @@ import com.jelly.MightyMiner.events.BlockChangeEvent;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.gui.AOTVWaypointsGUI;
+import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
@@ -30,11 +31,12 @@ public class AOTVMacro extends Macro {
 
     private int currentWaypoint = -1;
 
-    private final Timer stuckTimer = new Timer();
+    private final Timer tpStuckTimer = new Timer();
     private final Timer timeBetweenLastWaypoint = new Timer();
     private final Timer waitForVeinsTimer = new Timer();
     private boolean tooFastTp = false;
     private boolean firstTp = true;
+    private boolean tping = false;
 
     private boolean killing = false;
     private boolean refueling = false;
@@ -104,6 +106,8 @@ public class AOTVMacro extends Macro {
 
         timeBetweenLastWaypoint.reset();
         tooFastTp = false;
+        firstTp = true;
+        tping = false;
         baritone = new AutoMineBaritone(getAutoMineConfig());
         currentState = State.MINING;
     }
@@ -111,15 +115,13 @@ public class AOTVMacro extends Macro {
     @Override
     public void onDisable() {
         currentWaypoint = -1;
-        tooFastTp = false;
-        firstTp = true;
-        stuckTimer.reset();
+        tpStuckTimer.reset();
         timeBetweenLastWaypoint.reset();
         waitForVeinsTimer.reset();
         rotation.reset();
         rotation.completed = true;
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
+        KeybindHandler.resetKeybindState();
+        baritone.disableBaritone();
         if (MobKiller.isToggled)
             MightyMiner.mobKiller.Toggle();
         MobKiller.isToggled = false;
@@ -174,7 +176,7 @@ public class AOTVMacro extends Macro {
                 refueling = false;
                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
                 mc.mouseHelper.grabMouseCursor();
-                stuckTimer.reset();
+                tpStuckTimer.reset();
                 return;
             }
             if (FuelFilling.isRefueling()) {
@@ -220,8 +222,10 @@ public class AOTVMacro extends Macro {
                         } else {
                             currentWaypoint++;
                         }
+                        tpStuckTimer.reset();
                         currentState = State.WARPING;
                         baritone.disableBaritone();
+
                         break;
                 }
 
@@ -229,8 +233,16 @@ public class AOTVMacro extends Macro {
             }
 
             case WARPING: {
+                BlockPos waypoint = new BlockPos(Waypoints.get(currentWaypoint).x, Waypoints.get(currentWaypoint).y, Waypoints.get(currentWaypoint).z);
 
-                int voidTool = PlayerUtils.getItemInHotbarWithBlackList(true, null, "Void");
+                if(tping){
+                    if(BlockUtils.getPlayerLoc().down().equals(waypoint)){
+                        tping = false;
+                        currentState = State.MINING;
+                    }
+                    return;
+                }
+
 
                 if (MightyMiner.config.aotvTeleportThreshold > 0) {
                     if (!firstTp && !timeBetweenLastWaypoint.hasReached((long) (MightyMiner.config.aotvTeleportThreshold * 1000))) {
@@ -241,17 +253,11 @@ public class AOTVMacro extends Macro {
                     }
                 }
 
-                if (voidTool == -1) {
-                    LogUtils.addMessage("AOTV Macro (Experimental) - You don't have an Aspect of the Void!");
-                    this.toggle();
-                    return;
-                }
+
 
                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
+                mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarWithBlackList(true, null, "Void");
 
-                mc.thePlayer.inventory.currentItem = voidTool;
-
-                BlockPos waypoint = new BlockPos(Waypoints.get(currentWaypoint).x, Waypoints.get(currentWaypoint).y, Waypoints.get(currentWaypoint).z);
                 rotation.initAngleLock(waypoint, MightyMiner.config.aotvCameraWaypointSpeed);
 
                 if (AngleUtils.getAngleDifference(AngleUtils.getRequiredYawSide(waypoint), AngleUtils.getRequiredPitchSide(waypoint)) < 0.3) {
@@ -267,11 +273,11 @@ public class AOTVMacro extends Macro {
                     if (movingObjectPosition.getBlockPos().equals(waypoint)) {
                         mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem());
                         LogUtils.addMessage("AOTV Macro (Experimental) - Teleported to waypoint " + currentWaypoint);
-                        currentState = State.MINING;
+                        tping = true;
                         timeBetweenLastWaypoint.reset();
                         if (firstTp) firstTp = false;
                     } else {
-                        if (stuckTimer.hasReached(2000) && rotation.completed) {
+                        if (tpStuckTimer.hasReached(2000) && rotation.completed) {
                             LogUtils.addMessage("AOTV Macro (Experimental) - Path is not cleared. Block: " + movingObjectPosition.getBlockPos().toString() + " is on the way.");
                             this.toggle();
                             break;
@@ -297,7 +303,7 @@ public class AOTVMacro extends Macro {
     private BaritoneConfig getAutoMineConfig() {
         return new BaritoneConfig(
                 MiningType.STATIC,
-                true,
+                false,
                 false,
                 false,
                 MightyMiner.config.aotvCameraSpeed,

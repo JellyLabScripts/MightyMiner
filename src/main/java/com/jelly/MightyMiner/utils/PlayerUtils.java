@@ -259,6 +259,9 @@ public class PlayerUtils {
             mc.thePlayer.setPosition(block.getX() + 0.5, mc.thePlayer.posY, block.getZ() + 0.5);
         }
     }
+    public static boolean isNotMoving() {
+         return mc.thePlayer.posX - mc.thePlayer.lastTickPosX == 0 && mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0 && mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ == 0;
+    }
 
     public static boolean isNearPlayer(int radius){
         return hasPlayerInsideRadius(radius);

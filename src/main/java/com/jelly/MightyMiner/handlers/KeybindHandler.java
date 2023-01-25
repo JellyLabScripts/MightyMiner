@@ -78,9 +78,6 @@ public class KeybindHandler {
         }
     }
 
-
-    AStarCalculator calculator = new AStarCalculator();
-    LinkedList<BlockNode> path = new LinkedList<>();
     @SubscribeEvent
     public void onKeyPress(InputEvent.KeyInputEvent event) {
 
@@ -91,10 +88,6 @@ public class KeybindHandler {
                 MacroHandler.startScript(MightyMiner.config.macroType);
         }
         if(macroKeybinds[1].isKeyDown()){
-//            debugBlockRenderer.renderMap.clear();
-//
-//            debugBaritone.goTo(new BlockPos(129, 187, 56));
-
             if (MobKiller.isToggled) {
                 LogUtils.debugLog("MobKiller disabled");
                 MobKiller.isToggled = false;

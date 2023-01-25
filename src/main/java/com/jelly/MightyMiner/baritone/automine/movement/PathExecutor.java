@@ -40,8 +40,8 @@ public class PathExecutor {
 
     int deltaJumpTick = 0;
 
-    LinkedList<BlockNode> blocksToMine = new LinkedList<>();
-    LinkedList<BlockNode> minedBlocks = new LinkedList<>();
+    LinkedList<BlockNode> blocksInPath = new LinkedList<>();
+    LinkedList<BlockNode> finishedPath = new LinkedList<>();
 
     BlockRenderer blockRenderer = new BlockRenderer();
 
@@ -76,7 +76,7 @@ public class PathExecutor {
      //   pathSize = path.getBlocksInPath().size();
 
         this.path = path;
-        this.blocksToMine = path.getBlocksInPath();
+        this.blocksInPath = path.getBlocksInPath();
         this.config = config;
 
         currentState = PlayerState.IDLE;
@@ -85,7 +85,7 @@ public class PathExecutor {
         jumpCooldown = 0;
         jumpFlag = false;
 
-        minedBlocks.clear();
+        finishedPath.clear();
         blockRenderer.renderMap.clear();
 
         blockRenderer.renderMap.put(path.getBlocksInPath().getFirst().getPos(), Color.RED);
@@ -116,6 +116,7 @@ public class PathExecutor {
 
     public void disable(){
         this.currentState = PlayerState.FINISHED;
+        KeybindHandler.resetKeybindState();
         unregister();
     }
     private void fail(){
@@ -138,12 +139,12 @@ public class PathExecutor {
         }
 
 
-        if (!blocksToMine.isEmpty() && shouldRemoveFromList(blocksToMine.getLast())) {
+        if (!blocksInPath.isEmpty() && shouldRemoveFromList(blocksInPath.getLast())) {
             lookVector = null;
             stuckTickCount = 0;
-            minedBlocks.add(blocksToMine.getLast());
-            blockRenderer.renderMap.remove(blocksToMine.getLast().getPos());
-            blocksToMine.removeLast();
+            finishedPath.add(blocksInPath.getLast());
+            blockRenderer.renderMap.remove(blocksInPath.getLast().getPos());
+            blocksInPath.removeLast();
         } else {
             stuckTickCount++;
             if(stuckTickCount > 20 * config.getRestartTimeThreshold()){
@@ -152,8 +153,8 @@ public class PathExecutor {
             }
         }
 
-        if(blocksToMine.isEmpty() || (BlockUtils.isPassable(blocksToMine.getFirst().getPos()) && blocksToMine.getFirst().getType() == BlockType.MINE)){
-            if(!shouldGoToFinalBlock || (!minedBlocks.isEmpty() && BlockUtils.getPlayerLoc().equals(minedBlocks.getLast().getPos()))) {
+        if(blocksInPath.isEmpty() || (BlockUtils.isPassable(blocksInPath.getFirst().getPos()) && blocksInPath.getFirst().getType() == BlockType.MINE)){
+            if(!shouldGoToFinalBlock || (!finishedPath.isEmpty() && BlockUtils.getPlayerLoc().equals(finishedPath.getLast().getPos()))) {
                 disable();
                 return;
             }
@@ -164,7 +165,7 @@ public class PathExecutor {
 
         switch (currentState) {
             case WALKING:
-                BlockPos targetWalkBlock = (blocksToMine.isEmpty() || blocksToMine.getLast().getType() == BlockType.MINE) ? minedBlocks.getLast().getPos() : blocksToMine.getLast().getPos();
+                BlockPos targetWalkBlock = (blocksInPath.isEmpty() || blocksInPath.getLast().getType() == BlockType.MINE) ? finishedPath.getLast().getPos() : blocksInPath.getLast().getPos();
 
                 float reqYaw = AngleUtils.getRequiredYawCenter(targetWalkBlock);
                 rotator.initAngleLock(reqYaw, mc.thePlayer.rotationPitch, 5);
@@ -175,11 +176,10 @@ public class PathExecutor {
                         // is on ground
                         && mc.thePlayer.onGround
                         && jumpCooldown == 0
+                        && targetWalkBlock.getY() > mc.thePlayer.posY
                 ){
-                    if(targetWalkBlock.getY() > mc.thePlayer.posY){
-                        jumpFlag = true;
-                        jumpCooldown = 10;
-                    }
+                    jumpFlag = true;
+                    jumpCooldown = 10;
                 }
 
                 KeybindHandler.updateKeys(
@@ -195,7 +195,7 @@ public class PathExecutor {
                 }
                 break;
             case MINING:
-                BlockPos targetMineBlock = blocksToMine.getLast().getPos();
+                BlockPos targetMineBlock = blocksInPath.getLast().getPos();
                 mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Pick", "Drill", "Gauntlet");
                 KeybindHandler.updateKeys(
                         false, false, false, false,
@@ -206,14 +206,16 @@ public class PathExecutor {
                         false);
 
 
-                if(lookVector == null) {
+                if(lookVector == null && PlayerUtils.isNotMoving()) {
                     lookVector = BlockUtils.getCloserVisibilityLine(targetMineBlock, 50);
                     if (lookVector == null) {
                         fail();
                         return;
                     }
                 }
-                rotator.initAngleLock(AngleUtils.getRotation(lookVector).getFirst(), AngleUtils.getRotation(lookVector).getSecond(), config.getMineRotationTime());
+
+                if(lookVector != null)
+                    rotator.initAngleLock(AngleUtils.getRotation(lookVector).getFirst(), AngleUtils.getRotation(lookVector).getSecond(), config.getMineRotationTime());
                 break;
         }
 
@@ -235,10 +237,10 @@ public class PathExecutor {
     @SubscribeEvent
     public void onOverlayRenderEvent(RenderGameOverlayEvent event){
         if(event.type == RenderGameOverlayEvent.ElementType.TEXT){
-            if(blocksToMine != null){
-                if(!blocksToMine.isEmpty()){
-                    for(int i = 0; i < blocksToMine.size(); i++){
-                        mc.fontRendererObj.drawString(blocksToMine.get(i).getPos().toString() + " " + blocksToMine.get(i).getType().toString() , 5, 5 + 10 * i, -1);
+            if(blocksInPath != null){
+                if(!blocksInPath.isEmpty()){
+                    for(int i = 0; i < blocksInPath.size(); i++){
+                        mc.fontRendererObj.drawString(blocksInPath.get(i).getPos().toString() + " " + blocksInPath.get(i).getType().toString() , 5, 5 + 10 * i, -1);
                     }
                 }
             }
@@ -254,35 +256,37 @@ public class PathExecutor {
             currentState = PlayerState.MINING;
             return;
         }
-        if(shouldGoToFinalBlock && blocksToMine.isEmpty()){
+
+        if(blocksInPath.isEmpty()){
+            if(!shouldGoToFinalBlock) return;
+            currentState = PlayerState.WALKING;
+            return;
+        }
+        if(finishedPath.isEmpty()){
+            currentState =  blocksInPath.getLast().getType().equals(BlockType.MINE) ? PlayerState.MINING : PlayerState.WALKING;
+            return;
+        }
+
+        if(blocksInPath.getLast().getType() == BlockType.WALK) {
             currentState = PlayerState.WALKING;
             return;
         }
 
-        if(blocksToMine.isEmpty())
-            return;
-
-        if(minedBlocks.isEmpty()){
-            currentState =  blocksToMine.getLast().getType().equals(BlockType.MINE) ? PlayerState.MINING : PlayerState.WALKING;
-            return;
-        }
-
-        if(blocksToMine.getLast().getType() == BlockType.WALK) {
-            currentState = PlayerState.WALKING;
-            return;
-        }
 
         switch (currentState){
-            case IDLE:
-                currentState = blocksToMine.getLast().getType().equals(BlockType.MINE) ? PlayerState.MINING : PlayerState.WALKING;
-                break;
             case WALKING:
-                if((minedBlocks.getLast().getType() == BlockType.WALK && blocksToMine.getLast().getType() == BlockType.MINE) ||
-                        (minedBlocks.getLast().getType() == BlockType.MINE && BlockUtils.onTheSameXZ(minedBlocks.getLast().getPos(), BlockUtils.getPlayerLoc())))
-                    currentState = PlayerState.MINING;
+                if(finishedPath.getLast().getType() == BlockType.WALK) {
+                    if(!(blocksInPath.getLast().getType() == BlockType.MINE))
+                        return;
+                }
+                if(finishedPath.getLast().getType() == BlockType.MINE) {
+                    if(BlockUtils.fitsPlayer(finishedPath.getLast().getPos().down()) && !BlockUtils.onTheSameXZ(finishedPath.getLast().getPos(), BlockUtils.getPlayerLoc()))
+                        return;
+                }
+                currentState = PlayerState.MINING;
                 break;
             case MINING:
-                if (blocksToMine.getLast().getType() == BlockType.MINE && shouldWalkTo(minedBlocks.getLast().getPos()))
+                if (blocksInPath.getLast().getType() == BlockType.MINE && shouldWalkTo(finishedPath.getLast().getPos(), blocksInPath.getLast().getPos()))
                     currentState = PlayerState.WALKING;
                 break;
         }
@@ -296,14 +300,14 @@ public class PathExecutor {
     }
 
 
-    private boolean shouldWalkTo(BlockPos blockPos){
+    private boolean shouldWalkTo(BlockPos blockPos, BlockPos nextBlockPos){
 
-        return  /*lockPos.getY() <= (mc.thePlayer.posY) + 1 &&*/
-                ((blockPos.getY() > Math.round(mc.thePlayer.posY) && BlockUtils.isPassable(BlockUtils.getPlayerLoc().up(2))) ||
+        return ((blockPos.getY() > Math.round(mc.thePlayer.posY) && BlockUtils.isPassable(BlockUtils.getPlayerLoc().up(2))) || // It is possible to walk to there (no headhitters)
                         (blockPos.getY() < Math.round(mc.thePlayer.posY) && BlockUtils.isPassable(blockPos.up(2))) ||
                         (blockPos.getY() == Math.round(mc.thePlayer.posY)))
-                && (BlockUtils.fitsPlayer(blockPos.down()) || BlockUtils.fitsPlayer(blockPos.down(2)))
-                && !BlockUtils.onTheSameXZ(blockPos, BlockUtils.getPlayerLoc());
+                && (BlockUtils.fitsPlayer(blockPos.down()) || BlockUtils.fitsPlayer(blockPos.down(2))) // the block itself is walkable
+                && !BlockUtils.onTheSameXZ(blockPos, BlockUtils.getPlayerLoc()) // You are not at the target
+                && (nextBlockPos.getY() > blockPos.getY() || !BlockUtils.onTheSameXZ(nextBlockPos, blockPos)); // optimization, prevent it from jumping on blocks;
     }
 
 

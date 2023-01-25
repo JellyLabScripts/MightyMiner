@@ -73,8 +73,8 @@ public class DrawUtils {
     }
 
     private static void drawLine(WorldRenderer bufferBuilder, BlockPos pos, BlockPos nextPos) {
-        bufferBuilder.pos(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f).color(MightyMiner.config.routeLineColor.getRed() / 255f, MightyMiner.config.routeLineColor.getGreen() / 255f, MightyMiner.config.routeLineColor.getBlue() / 255f, MightyMiner.config.routeLineColor.getAlpha() / 255f).endVertex();
-        bufferBuilder.pos(nextPos.getX() + 0.5f, nextPos.getY() + 0.5f, nextPos.getZ() + 0.5f).color(MightyMiner.config.routeLineColor.getRed() / 255f, MightyMiner.config.routeLineColor.getGreen() / 255f, MightyMiner.config.routeLineColor.getBlue() / 255f, MightyMiner.config.routeLineColor.getAlpha() / 255f).endVertex();
+        bufferBuilder.pos(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f).color(MightyMiner.config.aotvRouteLineColor.getRed() / 255f, MightyMiner.config.aotvRouteLineColor.getGreen() / 255f, MightyMiner.config.aotvRouteLineColor.getBlue() / 255f, MightyMiner.config.aotvRouteLineColor.getAlpha() / 255f).endVertex();
+        bufferBuilder.pos(nextPos.getX() + 0.5f, nextPos.getY() + 0.5f, nextPos.getZ() + 0.5f).color(MightyMiner.config.aotvRouteLineColor.getRed() / 255f, MightyMiner.config.aotvRouteLineColor.getGreen() / 255f, MightyMiner.config.aotvRouteLineColor.getBlue() / 255f, MightyMiner.config.aotvRouteLineColor.getAlpha() / 255f).endVertex();
     }
 
     public static void drawEntity(final Entity entity, final Color color, final int width, float partialTicks) {

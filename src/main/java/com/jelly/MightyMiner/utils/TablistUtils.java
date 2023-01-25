@@ -12,10 +12,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class TablistUtils {
 
     private static final Ordering<NetworkPlayerInfo> playerOrdering = Ordering.from(new PlayerComparator());
+
+    private static Pattern pattern = Pattern.compile("§([0-9]|[a-z])");
 
     @SideOnly(Side.CLIENT)
     static class PlayerComparator implements Comparator<NetworkPlayerInfo> {
@@ -36,7 +39,7 @@ public class TablistUtils {
         }
     }
 
-    public static List<String> getTabList() {
+    public static List<String> getTabListPlayersUnprocessed() {
         List<NetworkPlayerInfo> players =
                 playerOrdering.sortedCopy(Minecraft.getMinecraft().thePlayer.sendQueue.getPlayerInfoMap());
 
@@ -48,4 +51,23 @@ public class TablistUtils {
         }
         return result;
     }
+    public static List<String> getTabListPlayersSkyblock() {
+        List<String> tabListPlayersFormatted = getTabListPlayersUnprocessed();
+        List<String> playerList = new ArrayList<>();
+        tabListPlayersFormatted.remove(0); // remove "Players (x)"
+        String firstPlayer = null;
+        for(String s : tabListPlayersFormatted) {
+            int a = s.indexOf("]");
+            if(a == -1) continue;
+
+            s = s.substring(a + 2).replaceAll("§([0-9]|[a-z])", "").replace("♲", "").trim();
+            if(firstPlayer == null)
+                firstPlayer = s;
+            else if(s.equals(firstPlayer)) // it returns two copy of the player list for some reason
+                break;
+            playerList.add(s);
+        }
+        return playerList;
+    }
+
 }

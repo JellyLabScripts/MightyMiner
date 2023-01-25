@@ -10,7 +10,7 @@ public class ComissionUtils {
     public static Pair<CommissionMacro.ComissionType, Boolean> determineComm() {
         CommissionMacro.ComissionType quest = null;
         boolean isDone = false;
-        List<String> tablist = TablistUtils.getTabList();
+        List<String> tablist = TablistUtils.getTabListPlayersUnprocessed();
         for (String s : tablist) {
             for (CommissionMacro.ComissionType value : CommissionMacro.ComissionType.values()) {
                 if (s.contains(value.questName)) {

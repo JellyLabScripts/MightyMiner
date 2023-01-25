@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
@@ -428,7 +427,7 @@ public class BlockUtils {
     public static Vec3 getRandomVisibilityLine(BlockPos pos) {
         BlockPos playerLoc = BlockUtils.getPlayerLoc();
         boolean lowerY = (pos.getY() < playerLoc.getY() && Math.abs(pos.getX() - playerLoc.getX()) <= 1 && Math.abs(pos.getZ() - playerLoc.getZ()) <= 1);
-        ArrayList<Vec3> lines = getAllVisibilityLines(pos, mc.thePlayer.getPositionVector().add(new Vec3(0, mc.thePlayer.getEyeHeight(), 0)).subtract(new Vec3(0, lowerY ? MightyMiner.config.miningCobblestoneAccuracy : 0, 0)), lowerY);
+        ArrayList<Vec3> lines = getAllVisibilityLines(pos, mc.thePlayer.getPositionVector().add(new Vec3(0, mc.thePlayer.getEyeHeight(), 0)).subtract(new Vec3(0, lowerY ? MightyMiner.config.aotvMiningCobblestoneAccuracy : 0, 0)), lowerY);
         if (lines.isEmpty()) {
             return null;
         } else {
@@ -442,9 +441,9 @@ public class BlockUtils {
 
     public static ArrayList<Vec3> getAllVisibilityLines(BlockPos pos, Vec3 fromEye, boolean lowerY) {
         ArrayList<Vec3> lines = new ArrayList<>();
-        int accuracyChecks = MightyMiner.config.miningAccuracyChecks;
+        int accuracyChecks = MightyMiner.config.aotvMiningAccuracyChecks;
         float accuracy = 1f / accuracyChecks;
-        float spaceFromEdge = lowerY ? 0.1f : MightyMiner.config.miningAccuracy;
+        float spaceFromEdge = lowerY ? 0.1f : MightyMiner.config.aotvMiningAccuracy;
         for (float x = pos.getX() + spaceFromEdge; x <= pos.getX() + (1f - spaceFromEdge); x += accuracy) {
             for (float y = pos.getY() + spaceFromEdge; y <= pos.getY() + (1f - spaceFromEdge); y += accuracy) {
                 for (float z = pos.getZ() + spaceFromEdge; z <= pos.getZ() + (1f - spaceFromEdge); z += accuracy) {

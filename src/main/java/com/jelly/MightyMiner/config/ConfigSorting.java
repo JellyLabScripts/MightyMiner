@@ -12,12 +12,18 @@ public class ConfigSorting extends SortingBehavior {
     @Override
     public Comparator<Category> getCategoryComparator() {
         return (b1, b2) -> {
-            if(b1.getName().equals("Core")) {
-                return -1;
-            } else if(b2.getName().equals("Core")) {
+            if(b1.getName().equals("Addons")){
                 return 1;
+            } else if(b2.getName().equals("Addons")){
+                return -1;
             } else {
-                return b1.getName().compareTo(b2.getName());
+                if (b1.getName().equals("Core")) {
+                    return -1;
+                } else if (b2.getName().equals("Core")) {
+                    return 1;
+                } else {
+                    return b1.getName().compareTo(b2.getName());
+                }
             }
         };
     }

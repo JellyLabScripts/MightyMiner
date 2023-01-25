@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner.utils.HypixelUtils;
 
+import com.jelly.MightyMiner.utils.TablistUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.entity.Entity;
@@ -16,23 +17,11 @@ import java.util.regex.Pattern;
 public class NpcUtil {
 
 
-    /**
-     * CREDIT: <a href="https://github.com/BiscuitDevelopment/SkyblockAddons/blob/7334393cc39010a37ebcb41f0beef5fc4bc7f447/src/main/java/codes/biscuit/skyblockaddons/core/npc/NPCUtils.java">...</a>
-     * Checks if the given entity is an NPC
-     *
-     * @param entity the entity to check
-     * @return {@code true} if the entity is an NPC, {@code false} otherwise
-     */
     public static boolean isNpc(Entity entity) {
         if (!(entity instanceof EntityOtherPlayerMP)) {
             return false;
         }
-
-        EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
-
-        return (entity.getUniqueID().version() == 2 && entityLivingBase.getHealth() == 20.0F && !entityLivingBase.isPlayerSleeping() && !entity.isInvisible()) ||
-                // Watchdog NPC probably
-               (entity.getUniqueID().version() == 4 && !entityLivingBase.isPlayerSleeping() && entity.isInvisible() && (entity.getEntityId() == (Minecraft.getMinecraft().thePlayer.getEntityId() + 1)));
+        return !TablistUtils.getTabListPlayersSkyblock().contains(entity.getName());
     }
 
     public static Entity getEntityCuttingOtherEntity(Entity e, Class<?> entityType) {

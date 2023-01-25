@@ -121,7 +121,8 @@ public class AOTVMacro extends Macro {
         rotation.reset();
         rotation.completed = true;
         KeybindHandler.resetKeybindState();
-        baritone.disableBaritone();
+        if (baritone != null) // Jelly, stop making the same mistake over and over 💀
+            baritone.disableBaritone();
         if (MobKiller.isToggled)
             MightyMiner.mobKiller.Toggle();
         MobKiller.isToggled = false;

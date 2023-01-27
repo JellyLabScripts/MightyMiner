@@ -20,9 +20,9 @@ import java.util.List;
 
 public class AOTVWaypointsCommands implements ICommand {
 
-    private final KeyBinding keyBinding = new KeyBinding("Open Waypoints Settings", Keyboard.KEY_NEXT, MightyMiner.MODID + " - General");
-    private final KeyBinding keyBinding2 = new KeyBinding("Add current position to selected waypoint list", Keyboard.KEY_EQUALS, MightyMiner.MODID + " - General");
-    private final KeyBinding keyBinding3 = new KeyBinding("Delete current position from selected waypoint list", Keyboard.KEY_MINUS, MightyMiner.MODID + " - General");
+    private final KeyBinding keyBinding = new KeyBinding("Open Waypoints Settings", Keyboard.KEY_NEXT, "MightyMiner - Waypoints");
+    private final KeyBinding keyBinding2 = new KeyBinding("Add current position to selected waypoint list", Keyboard.KEY_EQUALS, "MightyMiner - Waypoints");
+    private final KeyBinding keyBinding3 = new KeyBinding("Delete current position from selected waypoint list", Keyboard.KEY_MINUS, "MightyMiner - Waypoints");
 
 
     public AOTVWaypointsCommands() {

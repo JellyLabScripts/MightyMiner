@@ -240,6 +240,10 @@ public class AOTVMacro extends Macro {
                     if(BlockUtils.getPlayerLoc().down().equals(waypoint)){
                         tping = false;
                         currentState = State.MINING;
+                    } else if (!BlockUtils.getPlayerLoc().down().equals(waypoint) && tpStuckTimer.hasReached(2500)) {
+                        LogUtils.addMessage("AOTV Macro (Experimental) - You are not at a valid waypoint!");
+                        tping = false;
+                        tpStuckTimer.reset();
                     }
                     return;
                 }
@@ -259,9 +263,10 @@ public class AOTVMacro extends Macro {
                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
                 mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarWithBlackList(true, null, "Void");
 
-                rotation.initAngleLock(waypoint, MightyMiner.config.aotvCameraWaypointSpeed);
+                if (!rotation.rotating)
+                    rotation.initAngleLock(waypoint, MightyMiner.config.aotvCameraWaypointSpeed);
 
-                if (AngleUtils.getAngleDifference(AngleUtils.getRequiredYawSide(waypoint), AngleUtils.getRequiredPitchSide(waypoint)) < 0.3) {
+                if (AngleUtils.isDiffLowerThan(AngleUtils.getRequiredYawSide(waypoint), AngleUtils.getRequiredPitchSide(waypoint), 0.1f)) {
                     rotation.reset();
                     rotation.completed = true;
                 }
@@ -276,6 +281,7 @@ public class AOTVMacro extends Macro {
                         LogUtils.addMessage("AOTV Macro (Experimental) - Teleported to waypoint " + currentWaypoint);
                         tping = true;
                         timeBetweenLastWaypoint.reset();
+                        tpStuckTimer.reset();
                         if (firstTp) firstTp = false;
                     } else {
                         if (tpStuckTimer.hasReached(2000) && rotation.completed) {

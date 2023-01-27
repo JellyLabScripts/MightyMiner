@@ -211,7 +211,7 @@ public class MobKiller {
                     if (rotation.completed)
                         rotation.initAngleLock(mc.thePlayer.rotationYaw, 89, MightyMiner.config.mobKillerCameraSpeed);
 
-                    if (AngleUtils.getAngleDifference(mc.thePlayer.rotationYaw, 89) > 1) {
+                    if (AngleUtils.isDiffLowerThan(mc.thePlayer.rotationYaw, 89, 0.5f)) {
                         rotation.reset();
                         rotation.completed = true;
                     }
@@ -247,7 +247,7 @@ public class MobKiller {
 
                     }
 
-                    if (AngleUtils.getAngleDifference(mc.thePlayer.rotationYaw, 89) > 1) {
+                    if (AngleUtils.isDiffLowerThan(mc.thePlayer.rotationYaw, 89, 1f)) {
                         rotation.reset();
                         rotation.completed = true;
                     }
@@ -304,6 +304,8 @@ public class MobKiller {
     public void onRenderWorldLast(RenderWorldLastEvent event) {
         if (mc.thePlayer == null || mc.theWorld == null) return;
 
+
+
         if (potentialTargets.size() > 0) {
             potentialTargets.forEach(v -> {
                 if (v != target)
@@ -312,6 +314,9 @@ public class MobKiller {
         }
 
         if (target != null) {
+            if (rotation.rotating)
+                rotation.update();
+
             DrawUtils.drawEntity(target.worm ? target.stand : target.entity, new Color(200, 100, 100, 200), 2, event.partialTicks);
         }
     }

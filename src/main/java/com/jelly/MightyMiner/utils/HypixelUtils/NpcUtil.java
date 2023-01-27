@@ -50,27 +50,29 @@ public class NpcUtil {
 
     public static int getEntityHp(EntityArmorStand aStand) {
         double mobHp = -1.0D;
-        Pattern pattern = Pattern.compile(".+? ([.\\d]+)[BMk]?/[.\\d]+[BMk]?");
-        String stripped = stripString(aStand.getName());
+        Pattern pattern = Pattern.compile(".+?\\s([.\\d]+)[BMk]?/[.\\d]+[BMk]?.*");
+        String stripped = StringUtils.stripControlCodes(aStand.getName());
         Matcher mat = pattern.matcher(stripped);
-        if (mat.matches())
+        if (mat.matches()) {
             try {
                 mobHp = Double.parseDouble(mat.group(1));
+                return (int)Math.ceil(mobHp);
             } catch (NumberFormatException ignored) {
 
             }
-        else {
-            pattern = Pattern.compile("\\[Lv(\\d+)]\\s+(\\w+)\\s+(\\d+)+[BMk]?");
-            stripped = stripString(aStand.getName());
-            mat = pattern.matcher(stripped);
-            if (mat.matches())
-                try {
-                    mobHp = Double.parseDouble(mat.group(3));
-                } catch (NumberFormatException ignored) {
-
-                }
         }
-        return (int)Math.ceil(mobHp);
+
+        Pattern pattern2 = Pattern.compile(".+?\\s(\\d+)+[BMk]?.*");
+        Matcher mat2 = pattern2.matcher(stripped);
+        if (mat2.matches()) {
+            try {
+                mobHp = Double.parseDouble(mat2.group(1));
+                return (int)Math.ceil(mobHp);
+            } catch (NumberFormatException ignored) {
+
+            }
+        }
+        return -1;
     }
 
     @SuppressWarnings("unused")

@@ -232,6 +232,9 @@ public class Config extends Vigilant {
     public Color aotvVisionBlocksColor = new Color(255, 0, 0, 120);
 
 
+    @Property(type = PropertyType.SWITCH, name = "Rotation check", category = "Failsafes")
+    public boolean stopMacrosOnRotationCheck = true;
+
 
     public Config() {
         super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector(), new ConfigSorting());

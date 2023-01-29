@@ -32,11 +32,12 @@ public class Autosell {
             disable();
             return;
         }*/
-        itemsToBeSold.clear();
+
+        /*itemsToBeSold.clear();
         if(MightyMiner.config.sellAscensionRope)
             itemsToBeSold.add("Ascension Rope");
         if(MightyMiner.config.sellWishingCompass)
-            itemsToBeSold.add("Wishing Compass");
+            itemsToBeSold.add("Wishing Compass");*/
 
         LogUtils.debugLog("[AutoSell] Started inventory sell");
         originalSlot = mc.thePlayer.inventory.currentItem;

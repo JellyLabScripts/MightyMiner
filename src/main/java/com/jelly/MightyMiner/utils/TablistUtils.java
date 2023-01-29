@@ -59,6 +59,7 @@ public class TablistUtils {
         for(String s : tabListPlayersFormatted) {
             int a = s.indexOf("]");
             if(a == -1) continue;
+            if (s.length() < a + 2) continue;
 
             s = s.substring(a + 2).replaceAll("§([0-9]|[a-z])", "").replace("♲", "").trim();
             if(firstPlayer == null)

@@ -226,9 +226,14 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.COLOR, name = "Color of blocks blocking AOTV vision", category = "AOTV gemstone macro", subcategory = "Drawings")
     public Color aotvVisionBlocksColor = new Color(255, 0, 0, 120);
 
-
     @Property(type = PropertyType.SWITCH, name = "Rotation check", category = "Failsafes")
     public boolean stopMacrosOnRotationCheck = true;
+
+    @Property(type = PropertyType.SWITCH, name = "Player ESP", category = "Addons")
+    public boolean playerESP = true;
+
+    @Property(type = PropertyType.COLOR, name = "Player ESP color", category = "Addons")
+    public Color playerESPColor = new Color(255, 0, 0, 120);
 
 
     public Config() {
@@ -261,5 +266,6 @@ public class Config extends Vigilant {
         this.addDependency("aotvShowDistanceToBlocks", "aotvHighlightRouteBlocks");
         this.addDependency("aotvRouteBlocksColor", "aotvHighlightRouteBlocks");
         this.addDependency("aotvVisionBlocksColor", "drawBlocksBlockingAOTV");
+        this.addDependency("playerESPColor", "playerESP");
     }
 }

@@ -9,6 +9,7 @@ import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.gui.AOTVWaypointsGUI;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
@@ -50,6 +51,13 @@ public class AOTVMacro extends Macro {
 
     private State currentState = State.MINING;
     private final Rotation rotation = new Rotation();
+
+    @Override
+    public void FailSafeDisable() {
+        MacroHandler.disableScript();
+
+        // TODO: Make some fake moves to look legit
+    }
 
     @Override
     public void onEnable() {

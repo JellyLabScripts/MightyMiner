@@ -247,7 +247,7 @@ public class MobKiller {
 
                     }
 
-                    if (AngleUtils.isDiffLowerThan(mc.thePlayer.rotationYaw, 89, 1f)) {
+                    if (AngleUtils.isDiffLowerThan(AngleUtils.getRequiredYawSide(target.entity.getPosition()), AngleUtils.getRequiredPitchSide(target.entity.getPosition()), 1f)) {
                         rotation.reset();
                         rotation.completed = true;
                     }
@@ -336,9 +336,9 @@ public class MobKiller {
 
         String[] text = new String[]{
                 "§c§lTarget:",
-                "§cName: §f" + (target != null ? target.stand.getCustomNameTag() : "None"),
-                "§cDistance: §f" + (target != null ? target.distance() : "No target"),
-                "§cHealth: §f" + (target != null ? (NpcUtil.getEntityHp(target.stand) + "❤️") : "No target"),
+                "§cName: §f" + (target != null ? NpcUtil.stripString(target.stand.getCustomNameTag()) : "None"),
+                "§cDistance: §f" + (target != null ? (String.format("%.2f", target.distance()) + "m") : "No target"),
+                "§cHealth: §f" + (target != null ? (NpcUtil.getEntityHp(target.stand)) : "No target"),
                 "§cState: §f" + currentState.name()
         };
 

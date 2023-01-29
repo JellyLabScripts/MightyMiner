@@ -9,11 +9,8 @@ import com.jelly.MightyMiner.config.aotv.AOTVWaypoints;
 import com.jelly.MightyMiner.config.coords.CoordsConfig;
 import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
 import com.jelly.MightyMiner.config.locations.AOTVConfig;
-import com.jelly.MightyMiner.features.Failsafes;
-import com.jelly.MightyMiner.features.FuelFilling;
+import com.jelly.MightyMiner.features.*;
 import com.jelly.MightyMiner.config.waypoint.WaypointConfig;
-import com.jelly.MightyMiner.features.MobKiller;
-import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.gui.AOTVWaypointsGUI;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
@@ -114,6 +111,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(mobKiller);
         MinecraftForge.EVENT_BUS.register(new Failsafes());
         MinecraftForge.EVENT_BUS.register(new AOTVWaypointsCommands());
+        MinecraftForge.EVENT_BUS.register(new PlayerESP());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 

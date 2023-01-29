@@ -77,28 +77,28 @@ public class DrawUtils {
         bufferBuilder.pos(nextPos.getX() + 0.5f, nextPos.getY() + 0.5f, nextPos.getZ() + 0.5f).color(MightyMiner.config.aotvRouteLineColor.getRed() / 255f, MightyMiner.config.aotvRouteLineColor.getGreen() / 255f, MightyMiner.config.aotvRouteLineColor.getBlue() / 255f, MightyMiner.config.aotvRouteLineColor.getAlpha() / 255f).endVertex();
     }
 
-    public static void drawEntity(final Entity entity, final Color color, final int width, float partialTicks) {
-        if(width == 0) return;
-        final RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
+    public static void drawEntity(Entity entity, Color color, int width, float partialTicks) {
+        RenderManager renderManager = mc.getRenderManager();
 
-        final double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks
-                - renderManager.viewerPosX;
-        final double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks
-                - renderManager.viewerPosY;
-        final double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks
-                - renderManager.viewerPosZ;
+        double viewerPosX = renderManager.viewerPosX;
+        double viewerPosY = renderManager.viewerPosY;
+        double viewerPosZ = renderManager.viewerPosZ;
+
+        double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - viewerPosX;
+        double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks - viewerPosY;
+        double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks - viewerPosZ;
 
         final AxisAlignedBB entityBox = entity.getEntityBoundingBox();
-        final AxisAlignedBB axisAlignedBB = new AxisAlignedBB(
+        final AxisAlignedBB aabb = new AxisAlignedBB(
                 entityBox.minX - entity.posX + x - 0.05D,
                 entityBox.minY - entity.posY + y,
                 entityBox.minZ - entity.posZ + z - 0.05D,
                 entityBox.maxX - entity.posX + x + 0.05D,
-                entityBox.maxY - entity.posY + y + 0.15D,
+                entityBox.maxY - entity.posY + y,
                 entityBox.maxZ - entity.posZ + z + 0.05D
         );
 
-        drawBlockBox(axisAlignedBB, color, width);
+        drawFilledBoundingBox(aabb, color, 0.7f, width);
     }
 
     public static void drawBlockBox(BlockPos blockPos, Color color, float lineWidth) {
@@ -377,7 +377,10 @@ public class DrawUtils {
     }
 
     public static void drawText(String str, double X, double Y, double Z, boolean showDistance) {
-        float lScale = 1.0f;
+        drawText(str, X, Y, Z, false, 1.0f);
+    }
+
+    public static void drawText(String str, double X, double Y, double Z, boolean showDistance, float lScale) {
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
 
         double renderPosX = X - Minecraft.getMinecraft().getRenderManager().viewerPosX;

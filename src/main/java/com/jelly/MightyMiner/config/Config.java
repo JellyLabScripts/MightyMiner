@@ -167,6 +167,11 @@ public class Config extends Vigilant {
         ChangeLocationGUI.open(MobKiller::drawInfo, this::saveTargetInfoLocation);
     }
 
+    @Property(type = PropertyType.SWITCH, name = "Sell wishing compass to npc", description = "You need a booster cookie", category = "Addons", subcategory = "Autosell")
+    public boolean sellWishingCompass = true;
+
+    @Property(type = PropertyType.SWITCH, name = "Sell ascension rope to npc", description = "You need a booster cookie", category = "Addons", subcategory = "Autosell")
+    public boolean sellAscensionRope = true;
 
 
     @Property(type = PropertyType.SLIDER, name = "Camera speed to ore in ms", category = "AOTV gemstone macro", subcategory = "Mechanics", max = 1500, min = 1)

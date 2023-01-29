@@ -118,7 +118,6 @@ public class MightyMiner {
 
         config = new Config();
 
-        ClientCommandHandler.instance.registerCommand(new Route());
         ClientCommandHandler.instance.registerCommand(new BaritoneDebug());
 
 

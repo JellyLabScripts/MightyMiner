@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jelly.MightyMiner.command.AOTVWaypointsCommands;
 import com.jelly.MightyMiner.command.BaritoneDebug;
-import com.jelly.MightyMiner.command.Route;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.aotv.AOTVWaypoints;
 import com.jelly.MightyMiner.config.coords.CoordsConfig;

@@ -29,6 +29,8 @@ import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class AutoMineBaritone {
@@ -57,6 +59,8 @@ public class AutoMineBaritone {
 
     volatile Path path;
     //int chunkLoadCount;
+
+    ExecutorService exec = Executors.newCachedThreadPool();
 
 
 
@@ -95,6 +99,8 @@ public class AutoMineBaritone {
         targetBlockPos = blockPos;
         startPathFinding();
     }
+
+
 
     public BaritoneState getState(){
         return this.state;
@@ -190,36 +196,41 @@ public class AutoMineBaritone {
         KeybindHandler.resetKeybindState();
         KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());
 
-        new Thread(() -> {
-            if (!config.isMineFloor()) {
-                if (playerFloorPos != null) {
-                    pathFinder.removeFromBlackList(playerFloorPos);
-                }
+        if(getPathBehaviour().isStaticMode())
+            pathFind();
+        else exec.submit(this::pathFind);
 
-                playerFloorPos = BlockUtils.getPlayerLoc().down();
-                pathFinder.addToBlackList(playerFloorPos);
+    }
+
+    private void pathFind(){
+        if (!config.isMineFloor()) {
+            if (playerFloorPos != null) {
+                pathFinder.removeFromBlackList(playerFloorPos);
             }
 
-            try {
-                switch (pathSetting.getPathMode()) {
-                    case MINE:
-                        if (pathSetting.isFindWithBlockPos()) {
-                            path = pathFinder.getPath(PathMode.MINE, targetBlockPos);
-                        } else {
-                            path = pathFinder.getPath(PathMode.MINE, pathSetting.isMineWithPreference(), targetBlockType);
-                        }
-                        break;
-                    case GOTO: // can add more options later
-                        path = pathFinder.getPath(PathMode.GOTO, targetBlockPos);
-                        break;
-                }
-                state = BaritoneState.EXECUTING;
+            playerFloorPos = BlockUtils.getPlayerLoc().down();
+            pathFinder.addToBlackList(playerFloorPos);
+        }
 
-            } catch (NoBlockException | NoPathException e) {
-                Logger.playerLog("Pathfind failed: " + e);
-                failBaritone(true);
+        try {
+            switch (pathSetting.getPathMode()) {
+                case MINE:
+                    if (pathSetting.isFindWithBlockPos()) {
+                        path = pathFinder.getPath(PathMode.MINE, targetBlockPos);
+                    } else {
+                        path = pathFinder.getPath(PathMode.MINE, pathSetting.isMineWithPreference(), targetBlockType);
+                    }
+                    break;
+                case GOTO: // can add more options later
+                    path = pathFinder.getPath(PathMode.GOTO, targetBlockPos);
+                    break;
             }
-        }).start();
+            state = BaritoneState.EXECUTING;
+
+        } catch (NoBlockException | NoPathException e) {
+            Logger.playerLog("Pathfind failed: " + e);
+            failBaritone(true);
+        }
     }
 
 
@@ -229,7 +240,7 @@ public class AutoMineBaritone {
                 config.getAllowedPathfindingBlocks() == null ? null : config.getAllowedPathfindingBlocks(),
                 config.getMaxY(),
                 config.getMinY(),
-                config.getMineType() == MiningType.DYNAMIC ? 30 : 4,
+                config.getMineType() == MiningType.DYNAMIC ? 30 : 5,
                 config.getMineType() == MiningType.STATIC
         );
     }

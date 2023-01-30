@@ -105,9 +105,9 @@ public class AOTVMacro extends Macro {
             MightyMiner.mobKiller.Toggle();
             MobKiller.setMobsNames(false, "Yog");
             if (MightyMiner.config.useHyperionUnderPlayer) {
-                MobKiller.scanRange = 5;
+                MobKiller.scanRange = Math.min(5, MightyMiner.config.mobKillerScanRange);
             } else {
-                MobKiller.scanRange = 10;
+                MobKiller.scanRange = MightyMiner.config.mobKillerScanRange;
             }
             MobKiller.isToggled = true;
         }
@@ -179,6 +179,9 @@ public class AOTVMacro extends Macro {
 
         if (MightyMiner.config.refuelWithAbiphone) {
             if (FuelFilling.isRefueling() && !refueling) {
+                if (baritone != null && baritone.getState() != AutoMineBaritone.BaritoneState.IDLE) {
+                    baritone.disableBaritone();
+                }
                 refueling = true;
                 return;
             } else if (!FuelFilling.isRefueling() && refueling) {
@@ -189,6 +192,9 @@ public class AOTVMacro extends Macro {
                 return;
             }
             if (FuelFilling.isRefueling()) {
+                if (baritone != null && baritone.getState() != AutoMineBaritone.BaritoneState.IDLE) {
+                    baritone.disableBaritone();
+                }
                 return;
             }
         }
@@ -196,6 +202,10 @@ public class AOTVMacro extends Macro {
 
         if (MightyMiner.config.aotvKillYogs) {
             if (MobKiller.hasTarget()) {
+
+                if (baritone != null && baritone.getState() != AutoMineBaritone.BaritoneState.IDLE) {
+                    baritone.disableBaritone();
+                }
 
                 if (!killing) {
                     KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);

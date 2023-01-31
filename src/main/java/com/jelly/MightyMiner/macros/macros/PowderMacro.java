@@ -5,6 +5,7 @@ import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
+import com.jelly.MightyMiner.features.Autosell;
 import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
@@ -14,6 +15,7 @@ import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.*;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.Box;
+import com.jelly.MightyMiner.utils.BlockUtils.OffsetBox;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
@@ -34,6 +36,8 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import static com.jelly.MightyMiner.utils.AngleUtils.*;
+import static com.jelly.MightyMiner.utils.BlockUtils.BlockUtils.*;
 
 
 public class PowderMacro extends Macro {
@@ -56,7 +60,7 @@ public class PowderMacro extends Macro {
     //states
     State currentState;
     State treasureCacheState;
-    TreasureState treasureState = TreasureState.NONE;
+    TreasureState treasureState = TreasureState.INIT;
 
     enum State {
         NORMAL,
@@ -65,7 +69,7 @@ public class PowderMacro extends Macro {
     }
 
     enum TreasureState {
-        NONE,
+        INIT,
         WALKING,
         SOLVING,
         FINISHED,
@@ -115,13 +119,19 @@ public class PowderMacro extends Macro {
                 return;
             }
         }
+        if(MightyMiner.config.powBlueCheeseSwitch){
+            if(PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese") == -1){
+                LogUtils.addMessage("You don't have a blue cheese drill. Switch disabled");
+                MightyMiner.config.powBlueCheeseSwitch = false;
+            }
+        }
 
         mineBaritone = new AutoMineBaritone(getAutomineConfig());
 
         rotation.reset();
 
         currentState = State.NORMAL;
-        treasureState = TreasureState.NONE;
+        treasureState = TreasureState.INIT;
         turnState = 1;
         treasureInitialTime = System.currentTimeMillis();
         playerYaw = AngleUtils.getClosest();
@@ -157,6 +167,7 @@ public class PowderMacro extends Macro {
     @Override
     public void onDisable() {
         RGANuker.enabled = false;
+        Autosell.disable();
         aote = false;
         if (mineBaritone != null) // nullpointerexception crash sometimes if detected player right after turning on the macro
             mineBaritone.disableBaritone();
@@ -172,12 +183,21 @@ public class PowderMacro extends Macro {
             RGANuker.enabled = true;
         }
 
+        if(MightyMiner.config.powAutosell){
+            if(Autosell.isEnabled())
+                return;
+            if(Autosell.shouldStart()) {
+                mineBaritone.disableBaritone();
+                Autosell.enable();
+                return;
+            }
+        }
+
         if(rotation.rotating){
             KeybindHandler.resetKeybindState();
             return;
         }
 
-        // update state
         updateState();
 
         if(aote || (currentState != State.NORMAL && currentState != State.UTurn)){
@@ -226,15 +246,9 @@ public class PowderMacro extends Macro {
             case TREASURE:
 
                 switch(treasureState){
-                    case NONE: case SOLVING:
-                        if(MightyMiner.config.powBlueCheeseSwitch){
-                            if(PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese") == -1){
-                                LogUtils.addMessage("You don't have a blue cheese drill. Switch disabled");
-                                MightyMiner.config.powBlueCheeseSwitch = false;
-                            } else mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese");
-
-                        }
-
+                    case INIT: case SOLVING:
+                        if(MightyMiner.config.powBlueCheeseSwitch)
+                            mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese");
                         KeybindHandler.resetKeybindState();
                         break;
                     case WALKING:
@@ -244,41 +258,25 @@ public class PowderMacro extends Macro {
                             case IDLE:
                                 if(BlockUtils.getPlayerLoc().equals(targetBlockPos))
                                     treasureState = TreasureState.SOLVING;
-                                else
-                                    mineBaritone.goTo(targetBlockPos);
+                                else mineBaritone.goTo(targetBlockPos);
                                 break;
                             case FAILED:
-                                mineBaritone.disableBaritone();
-                                if(chestQueue.isEmpty()) {
-                                    currentState = treasureCacheState;
-                                } else {
-                                    treasureState = TreasureState.NONE;
-                                }
+                                terminateTreasureSolving();
                                 break;
-
                         }
                         break;
                     case RETURNING:
-                        if(returnBlockPos == null) return;
 
                         switch(mineBaritone.getState()){
                             case IDLE:
-                                if(BlockUtils.getPlayerLoc().equals(returnBlockPos)){
+                                if(returnBlockPos == null || BlockUtils.getPlayerLoc().equals(returnBlockPos)){
+                                    mineBaritone.disableBaritone();
                                     currentState = treasureCacheState;
-                                } else {
-                                    LogUtils.debugLog("Going back to original position");
-                                    mineBaritone.goTo(returnBlockPos);
-                                }
+                                } else mineBaritone.goTo(returnBlockPos);
                                 break;
                             case FAILED:
-                                mineBaritone.disableBaritone();
-                                if(chestQueue.isEmpty()) {
-                                    currentState = treasureCacheState;
-                                } else {
-                                    treasureState = TreasureState.NONE;
-                                }
+                                terminateTreasureSolving();
                                 break;
-
                         }
                         break;
 
@@ -331,7 +329,7 @@ public class PowderMacro extends Macro {
 
         if(!chestQueue.isEmpty()) {
             if(currentState != State.TREASURE)
-                treasureState = TreasureState.NONE;
+                treasureState = TreasureState.INIT;
 
             currentState = State.TREASURE;
         }
@@ -340,7 +338,7 @@ public class PowderMacro extends Macro {
         switch (currentState) {
             case TREASURE:
                 switch (treasureState){
-                    case NONE:
+                    case INIT:
                         treasureInitialTime = System.currentTimeMillis();
                         currentChest = chestQueue.poll();
                         for(BlockPos blockPos : BlockUtils.getAllBlocksInLine2d(BlockUtils.getPlayerLoc(), currentChest)){
@@ -349,32 +347,41 @@ public class PowderMacro extends Macro {
                                 break;
                             }
                         }
+
+                        returnBlockPos = null;
+                        for (int i = 0; i < 7; i++) {
+                            if (BlockUtils.getRelativeBlockPos(0, 0, i).equals(currentChest) || BlockUtils.getRelativeBlockPos(0, 1, i).equals(currentChest)) {
+                                returnBlockPos = BlockUtils.getRelativeBlockPos(0, 0, i + 1);
+                            }
+                        }
+                        if(returnBlockPos == null){
+                            if(!isInsideBox(new OffsetBox(1, -1, 1, 0, 7, 0), targetBlockPos, playerYaw))
+                                returnBlockPos = BlockUtils.getPlayerLoc();
+                        }
                         treasureState = TreasureState.WALKING;
+
                         break;
                     case FINISHED:
-                        treasureState = chestQueue.isEmpty() ? TreasureState.RETURNING : TreasureState.NONE;
+                        treasureState = chestQueue.isEmpty() ? TreasureState.RETURNING : TreasureState.INIT;
                         break;
                 }
-                if(System.currentTimeMillis() - treasureInitialTime > 7500 && treasureState != TreasureState.RETURNING) {
+                if((System.currentTimeMillis() - treasureInitialTime) / 1000f > 10 && treasureState != TreasureState.RETURNING) {
                     treasureState = TreasureState.RETURNING;
                     LogUtils.debugLog("Completed treasure due to timeout");
                     chestQueue.poll();
                     return;
                 }
             case NORMAL:
-                if(shouldTurn(3)) {
+                if(shouldTurn(5)) {
                     turnState = 1 - turnState;
-                    playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
-                    rotation.easeTo(playerYaw, 0, 500);
                     uTurnCachePos = BlockUtils.getPlayerLoc();
+                    playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
                     currentState = State.UTurn;
-                    KeybindHandler.resetKeybindState();
                 }
                 break;
             case UTurn:
-                if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), uTurnCachePos) > MightyMiner.config.powLaneWidth || shouldTurn(1)) {
+                if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), uTurnCachePos) > MightyMiner.config.powLaneWidth || shouldTurn(3)) {
                     playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
-                    rotation.easeTo(playerYaw, 0, 500);
                     currentState = State.NORMAL;
                 }
                 break;
@@ -393,7 +400,12 @@ public class PowderMacro extends Macro {
 
         if(rotation.rotating){
             rotation.update();
-        } else if(!frontShouldMineSlow() && !aote && (currentState == State.UTurn || currentState == State.NORMAL) && !MightyMiner.config.powNuker){
+        } else if(!frontShouldMineSlow()
+                && (currentState == State.UTurn || currentState == State.NORMAL)
+                && !aote
+                && !MightyMiner.config.powNuker
+                && !Autosell.isEnabled()
+                && !(mineBaritone.getState() == AutoMineBaritone.BaritoneState.EXECUTING)){
             rotation.updateInCircle(MightyMiner.config.powRotateRadius / 10.0f, 3, playerYaw, MightyMiner.config.powRotateRate);
         }
     }
@@ -402,7 +414,7 @@ public class PowderMacro extends Macro {
     public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
         if(event.type == RenderGameOverlayEvent.ElementType.TEXT){
             mc.fontRendererObj.drawString(currentState + " " + treasureState, 5 , 5, -1);
-            mc.fontRendererObj.drawString("Chests in waiting queue: " + chestQueue.size() + " / Chests in finished queue: " + solvedOrSolvingChests.size(), 5 , 17, -1);
+            mc.fontRendererObj.drawString("Chests in waiting queue: " + chestQueue.size() + " | Chests in finished queue: " + solvedOrSolvingChests.size() + "/3", 5 , 17, -1);
         }
     }
 
@@ -427,52 +439,42 @@ public class PowderMacro extends Macro {
                         rotation.initAngleLock(
                                 AngleUtils.getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
                                 AngleUtils.getRequiredPitch(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, (((S2APacketParticles) packet).getYCoordinate()) - (mc.thePlayer.posY + 1.62d), ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
-                                150);
+                                300);
                     }
                 }catch (Exception ignored){}
             }
         }
     }
 
-
-    Runnable addChestToQueue = new Runnable() {
-        @Override
-        public void run() {
-            ThreadUtils.sleep(200);
-            List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 3, 0, -7, 7), new ArrayList<>(solvedOrSolvingChests), 0, 256, Blocks.chest);
-
-            if(foundBlocks.isEmpty()){
-                LogUtils.addMessage("That chest was impossible to solve");
-                return;
-            }
-
-            BlockPos chest = foundBlocks.get(0);
-
-            solvedOrSolvingChests.add(chest);
-            Logger.log("Adding chest to queue");
-            if(currentState != State.TREASURE) {
-                treasureCacheState = currentState;
-                returnBlockPos = BlockUtils.getPlayerLoc();
-                for (int i = 0; i < 5; i++) {
-                    if (BlockUtils.getRelativeBlockPos(0, 0, i).equals(chest) || BlockUtils.getRelativeBlockPos(0, 1, i).equals(chest)) {
-                        returnBlockPos = BlockUtils.getRelativeBlockPos(0, 0, i + 1);
-                    }
-                }
-            }
-            chestQueue.add(chest);
+    void terminateTreasureSolving(){
+        mineBaritone.disableBaritone();
+        if(chestQueue.isEmpty()) {
+            currentState = treasureCacheState;
+        } else {
+            treasureState = TreasureState.INIT;
         }
-    };
+    }
 
-    Runnable antistuck = () -> {
-        ThreadUtils.sleep(20);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindD, true);
-        ThreadUtils.sleep(350);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindD, false);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindA, true);
-        ThreadUtils.sleep(350);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindA, false);
-    };
 
+    Runnable addChestToQueue = () -> {
+
+        ThreadUtils.sleep(200);
+        Logger.log("Adding chest to queue");
+        List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 3, 0, -7, 7), new ArrayList<>(solvedOrSolvingChests), 0, 256, Blocks.chest);
+
+        if(foundBlocks.isEmpty()){
+            LogUtils.addMessage("That chest was impossible to solve");
+            return;
+        }
+
+        BlockPos chest = foundBlocks.get(0);
+        solvedOrSolvingChests.add(chest);
+        chestQueue.add(chest);
+
+        if(currentState != State.TREASURE)
+            treasureCacheState = currentState;
+
+    };
 
     boolean shouldWalkForward(){
         int blocksEmpty = 0;
@@ -481,50 +483,60 @@ public class PowderMacro extends Macro {
                 if(mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, i, playerYaw)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, i, playerYaw)))
                     return true;
             }
-            if(BlockUtils.getRelativeBlock(0, 0, i, playerYaw).equals(Blocks.air) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, i, playerYaw)))
+            BlockPos check = BlockUtils.getRelativeBlockPos(0, 0, i, playerYaw);
+            if(getBlock(check).equals(Blocks.air) || mineSlowBlocks.contains(getBlock(check)))
                 ++blocksEmpty;
-            if(BlockUtils.getRelativeBlock(0, 1, i, playerYaw).equals(Blocks.air) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, i, playerYaw)))
+            if(getBlock(check.up()).equals(Blocks.air) || mineSlowBlocks.contains(getBlock(check.up())))
                 ++blocksEmpty;
         }
         return blocksEmpty >= 6;
     }
 
+
     int getRotAmount(){
-        //check blacklisted blocks on the sides
-        if(!(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(-1, 0, 0))) || !(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(1, 0, 0)))
-                || !(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(-1, 1, 0))) || !(blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(1, 1, 0)))){
-
-            //check which side is possible to walk, if none, 180
-            return  (blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(-1, 0, 0)) && blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(-1, 1, 0))) ? (-90)
-                    : (blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(1, 0, 0)) && blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(1, 1, 0)) ? 90 : 180);
-        } else // normal
-            return turnState == 1 ? 90 : -90;
-        // both sides can be walked, oscillate between 90 and -90 to increase area mined
+        // see if have obstacles sideways
+        if(scanBox(new OffsetBox(-3, 3, 1, 0, 0, 0), blocksAllowedToMine, null, playerYaw)){
+            if(scanBox(new OffsetBox(3, 0, 1, 0, 0, 0), blocksAllowedToMine, null, playerYaw))
+                return -90;
+            else if(scanBox(new OffsetBox(-3, 0, 1, 0, 0, 0), blocksAllowedToMine, null, playerYaw))
+                return 90 ;
+            else return 180;
+        } else
+            return turnState == 1 ? 90 : -90; // both sides can be walked, oscillate between 90 and -90 to increase area mined
     }
-
-
 
 
     boolean shouldLookDown(){
-        return (AngleUtils.shouldLookAtCenter(BlockUtils.getRelativeBlockPos(0, 0, 1)) && BlockUtils.isPassable(BlockUtils.getRelativeBlock(0, 1, 1)))
-        || (AngleUtils.shouldLookAtCenter(BlockUtils.getRelativeBlockPos(0, 0, 0)) && BlockUtils.isPassable(BlockUtils.getRelativeBlock(0, 1, 0)));
+        BlockPos front = getRelativeBlockPos(0, 0, 1);
+        return (shouldLookAtCenter(front) && isPassable(front.up())) || (shouldLookAtCenter(getPlayerLoc()) && isPassable(getPlayerLoc().up()));
     }
 
     boolean frontShouldMineSlow(){
-        return mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, 1))
-                || BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) ||  BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane);
+        BlockPos front = getRelativeBlockPos(0, 0, 1);
+        return mineSlowBlocks.contains(getBlock(front)) || mineSlowBlocks.contains(getBlock(front.up())) || getBlock(getPlayerLoc()).equals(Blocks.stained_glass_pane) ||  getBlock(getPlayerLoc().up()).equals(Blocks.stained_glass_pane);
     }
 
     boolean havePotentialObstacles(){
-        return mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, 1)) ||
-                mineSlowBlocks.contains(BlockUtils.getRelativeBlock(1, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(1, 1, 1)) ||
-                mineSlowBlocks.contains(BlockUtils.getRelativeBlock(-1, 0, 1)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(-1, 1, 1))
-                || BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) ||  BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane) ;
+        return scanBox(new OffsetBox(1, -1, 0, 1, 0, 1), null, mineSlowBlocks, playerYaw)
+                || getBlock(getPlayerLoc()).equals(Blocks.stained_glass_pane) || getBlock(getPlayerLoc().up()).equals(Blocks.stained_glass_pane);
     }
 
     boolean shouldTurn(int checkRadius){
-        return !blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(0, 0, checkRadius)) || !blocksAllowedToMine.contains(BlockUtils.getRelativeBlock(0, 1, checkRadius));
+        return scanBox(new OffsetBox(0, 0, 0, 1, 0, checkRadius), blocksAllowedToMine, null, playerYaw);
     }
+
+    Runnable antistuck = () -> {
+        ThreadUtils.sleep(20);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindS, true);
+        ThreadUtils.sleep(350);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindS, false);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindD, true);
+        ThreadUtils.sleep(350);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindD, false);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindA, true);
+        ThreadUtils.sleep(350);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindA, false);
+    };
 
 
     BaritoneConfig getAutomineConfig(){

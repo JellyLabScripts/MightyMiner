@@ -113,6 +113,10 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.SLIDER, name = "Width between each lane", category = "Powder macro", subcategory = "Mining", max = 15, min = 3)
     public int powLaneWidth = 6;
 
+    @Property(type = PropertyType.SWITCH, name = "Autosell junk items", description = "More configurations in Addons. Make sure you have cookie on", category = "Powder macro", subcategory = "Addons")
+    public boolean powAutosell = false;
+
+
     @Property(type = PropertyType.SELECTOR, name = "Mithril macro priority 1", category = "Mithril macro", subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"})
     public int mithPriority1 = 1;
 
@@ -130,7 +134,6 @@ public class Config extends Vigilant {
 
     @Property(type = PropertyType.SLIDER, name = "Stuck time threshold (seconds)", description = "restarts macro when stuck time > threshold, depends on your mining speed", category = "Mithril macro", subcategory = "Pathfinding", max = 20, min = 2)
     public int mithRestartTimeThreshold = 5;
-
 
     /*@Property( type = PropertyType.SLIDER, name = "Rotation time (milliseconds)", description = "Time the pathfinding AI takes for each rotation", category = "Commission macro", subcategory = "Miscellaneous", max = 5, min = 1)
     public int comBarRotationTime = 1;
@@ -167,11 +170,11 @@ public class Config extends Vigilant {
         ChangeLocationGUI.open(MobKiller::drawInfo, this::saveTargetInfoLocation);
     }
 
-   /* @Property(type = PropertyType.SWITCH, name = "Sell wishing compass to npc", description = "You need a booster cookie", category = "Addons", subcategory = "Autosell")
+    @Property(type = PropertyType.SWITCH, name = "Sell wishing compass to npc", description = "You need a booster cookie", category = "Addons", subcategory = "Autosell")
     public boolean sellWishingCompass = true;
 
     @Property(type = PropertyType.SWITCH, name = "Sell ascension rope to npc", description = "You need a booster cookie", category = "Addons", subcategory = "Autosell")
-    public boolean sellAscensionRope = true;*/
+    public boolean sellAscensionRope = true;
 
 
     @Property(type = PropertyType.SLIDER, name = "Camera speed to ore in ms", category = "AOTV gemstone macro", subcategory = "Mechanics", max = 1500, min = 1)
@@ -234,10 +237,10 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.SWITCH, name = "Rotation check", category = "Failsafes")
     public boolean stopMacrosOnRotationCheck = true;
 
-    @Property(type = PropertyType.SWITCH, name = "Player ESP", category = "Addons")
+    @Property(type = PropertyType.SWITCH, name = "Player ESP", category = "Addons", subcategory = "PlayerESP")
     public boolean playerESP = true;
 
-    @Property(type = PropertyType.COLOR, name = "Player ESP color", category = "Addons")
+    @Property(type = PropertyType.COLOR, name = "Player ESP color", category = "Addons", subcategory = "PlayerESP")
     public Color playerESPColor = new Color(255, 0, 0, 120);
 
 

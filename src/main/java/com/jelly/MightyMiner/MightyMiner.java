@@ -109,6 +109,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
         MinecraftForge.EVENT_BUS.register(new FuelFilling());
         MinecraftForge.EVENT_BUS.register(mobKiller);
+        MinecraftForge.EVENT_BUS.register(new Autosell());
         MinecraftForge.EVENT_BUS.register(new Failsafes());
         MinecraftForge.EVENT_BUS.register(new AOTVWaypointsCommands());
         MinecraftForge.EVENT_BUS.register(new PlayerESP());

@@ -165,10 +165,22 @@ public class PathExecutor {
 
         switch (currentState) {
             case WALKING:
+
                 BlockPos targetWalkBlock = (blocksInPath.isEmpty() || blocksInPath.getLast().getType() == BlockType.MINE) ? finishedPath.getLast().getPos() : blocksInPath.getLast().getPos();
 
+                if(finishedPath.isEmpty()){ // initialize
+                    float reqYaw = AngleUtils.getRequiredYawCenter(targetWalkBlock);
+                    if(rotator.rotating)
+                        return;
+                    if(AngleUtils.getAngleDifference(reqYaw, AngleUtils.getActualRotationYaw()) > 1f || Math.abs(mc.thePlayer.rotationPitch - 0) > 1f) {
+                        rotator.easeTo(reqYaw, 0, 250);
+                        return;
+                    }
+
+                }
+
                 float reqYaw = AngleUtils.getRequiredYawCenter(targetWalkBlock);
-                rotator.initAngleLock(reqYaw, mc.thePlayer.rotationPitch, 5);
+                rotator.initAngleLock(reqYaw, 5, 0, 200);
 
                 if(!jumpFlag
                         // is not falling/jumping
@@ -215,7 +227,7 @@ public class PathExecutor {
                 }
 
                 if(lookVector != null)
-                    rotator.initAngleLock(AngleUtils.getRotation(lookVector).getFirst(), AngleUtils.getRotation(lookVector).getSecond(), config.getMineRotationTime());
+                    rotator.initAngleLock(AngleUtils.getRotation(lookVector).getFirst(), AngleUtils.getRotation(lookVector).getSecond(), config.getRotationTime());
                 break;
         }
 

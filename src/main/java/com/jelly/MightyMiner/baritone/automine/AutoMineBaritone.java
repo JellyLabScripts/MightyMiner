@@ -92,6 +92,7 @@ public class AutoMineBaritone {
     }
 
     public void goTo(BlockPos blockPos) {
+        Logger.playerLog("Going to: " + blockPos.toString());
         registerEventListener();
         pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.GOTO, true);
         path = null;

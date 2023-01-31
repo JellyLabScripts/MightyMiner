@@ -117,6 +117,18 @@ public class InventoryUtils {
         return ret;
     }
 
+    public static boolean isPresentInInventory(List<String> names) {
+        for (int i = 9; i < 44; ++i) {
+            final ItemStack is = mc.thePlayer.inventoryContainer.inventorySlots.get(i).getStack();
+            for(String s : names){
+                if (is != null && is.getDisplayName().contains(s)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static int getAmountInHotbar(final String item) {
         for (int i = 0; i < 8; ++i) {
             final ItemStack is = InventoryUtils.mc.thePlayer.inventory.getStackInSlot(i);

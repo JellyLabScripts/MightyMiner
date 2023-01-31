@@ -11,6 +11,7 @@ import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.*;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.SkyblockInfo;
+import com.jelly.MightyMiner.world.GameState;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
@@ -34,6 +35,9 @@ public class MacroHandler {
 
     List<BlockPos> coords;
 
+    public static GameState gameState = new GameState();
+
+
     public static void initializeMacro(){
         macros.add(new GemstoneMacro());
         macros.add(new PowderMacro());
@@ -49,6 +53,8 @@ public class MacroHandler {
 
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
+
+        gameState.update();
 
         for (Macro macro : macros) {
             if (macro.isEnabled()) {

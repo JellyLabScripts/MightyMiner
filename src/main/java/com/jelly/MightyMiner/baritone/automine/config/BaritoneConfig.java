@@ -17,7 +17,7 @@ public class BaritoneConfig {
     @Getter
     boolean mineWithPreference;
     @Getter
-    int mineRotationTime;
+    int rotationTime;
     @Getter
     int restartTimeThreshold;
     @Getter

@@ -198,12 +198,11 @@ public class BlockUtils {
     }
 
 
-
     public static Block getRelativeBlock(float rightOffset, float upOffset, float frontOffset) {
         return getBlock(getRelativeBlockPos(rightOffset, upOffset, frontOffset));
     }
-    public static Block getRelativeBlock(float rightOffset, float upOffset, float frontOffset, float rotationYawAxis) {
-        return getBlock(getRelativeBlockPos(rightOffset, upOffset, frontOffset, rotationYawAxis));
+    public static Block getRelativeBlock(float rightOffset, float upOffset, float frontOffset, float closetPlayerYaw) {
+        return getBlock(getRelativeBlockPos(rightOffset, upOffset, frontOffset, closetPlayerYaw));
     }
 
     public static BlockPos getRelativeBlockPos(float rightOffset, float upOffset, float frontOffset) {
@@ -216,9 +215,47 @@ public class BlockUtils {
         );
     }
 
-    public static BlockPos getRelativeBlockPos(float rightOffset, float upOffset, float frontOffset, float rotationYawAxis) {
-        int unitX = getUnitX(rotationYawAxis);
-        int unitZ = getUnitZ(rotationYawAxis);
+    public static boolean scanBox(OffsetBox box, List<Block> blocksAllowed, List<Block> blocksForbidden, float closetPlayerYaw) {
+        BlockPos check;
+
+        for (int i = -1; i < Math.abs(box.right_bound1 - box.right_bound2); i++) {
+            for (int j = -1; j < Math.abs(box.up_bound1 - box.up_bound2); j++) {
+                for (int k = -1; k < Math.abs(box.front_bound1 - box.front_bound2); k++) {
+                    check = BlockUtils.getRelativeBlockPos(
+                            i + 1 + Math.min(box.right_bound2, box.right_bound1),
+                            j + 1 + Math.min(box.up_bound2, box.up_bound1),
+                            k + 1 + Math.min(box.front_bound2, box.front_bound1),
+                            closetPlayerYaw);
+                    if(blocksAllowed != null && (!blocksAllowed.contains(getBlock(check)) || !blocksAllowed.contains(getBlock(check.up()))))
+                        return true;
+                    if(blocksForbidden != null && (blocksForbidden.contains(getBlock(check)) || !blocksForbidden.contains(getBlock(check.up()))))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // yes I know there are better approaches than this :skull: but I'm just lazy
+    public static boolean isInsideBox(OffsetBox box, BlockPos pos, float closetPlayerYaw) {
+        for (int i = -1; i < Math.abs(box.right_bound1 - box.right_bound2); i++) {
+            for (int j = -1; j < Math.abs(box.up_bound1 - box.up_bound2); j++) {
+                for (int k = -1; k < Math.abs(box.front_bound1 - box.front_bound2); k++) {
+                    if(BlockUtils.getRelativeBlockPos(
+                            i + 1 + Math.min(box.right_bound2, box.right_bound1),
+                            j + 1 + Math.min(box.up_bound2, box.up_bound1),
+                            k + 1 + Math.min(box.front_bound2, box.front_bound1),
+                            closetPlayerYaw).equals(pos))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static BlockPos getRelativeBlockPos(float rightOffset, float upOffset, float frontOffset, float closetPlayerYaw) {
+        int unitX = getUnitX(closetPlayerYaw);
+        int unitZ = getUnitZ(closetPlayerYaw);
         return new BlockPos(
                 mc.thePlayer.posX + (unitX * frontOffset) + (unitZ * -1 * rightOffset),
                 mc.thePlayer.posY + upOffset,
@@ -236,8 +273,10 @@ public class BlockUtils {
     }
 
 
+
+    // blockpos at x/X (X represents player pos) -> returns true
     // x
-    //xXx  -> returns true
+    //xXx
     // x
     public static boolean isAxisAdjacent(BlockPos bp){
         return onTheSameXZ(bp.east(), BlockUtils.getPlayerLoc()) ||
@@ -474,5 +513,7 @@ public class BlockUtils {
 
         return lines;
     }
+
+
 
 }

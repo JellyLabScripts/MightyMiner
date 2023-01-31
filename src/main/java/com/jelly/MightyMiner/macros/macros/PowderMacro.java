@@ -334,7 +334,6 @@ public class PowderMacro extends Macro {
             currentState = State.TREASURE;
         }
 
-
         switch (currentState) {
             case TREASURE:
                 switch (treasureState){

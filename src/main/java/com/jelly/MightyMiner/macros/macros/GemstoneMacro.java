@@ -81,7 +81,7 @@ public class GemstoneMacro extends Macro {
 
         if (MightyMiner.config.refuelWithAbiphone) {
             if (FuelFilling.isRefueling()) {
-                if (baritone != null) {
+                if (baritone != null && baritone.getState() != AutoMineBaritone.BaritoneState.IDLE) {
                     baritone.disableBaritone();
                 }
                 return;

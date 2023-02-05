@@ -1,10 +1,10 @@
 package com.jelly.MightyMiner.features;
 
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.InventoryUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
+import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.world.GameState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.Slot;
@@ -23,6 +23,7 @@ public class Autosell {
     private static int originalSlot;
 
     private static final List<String> itemsToBeSold = new ArrayList<>();
+    private static final Timer waitTimer = new Timer();
 
     public static boolean isEnabled() {
         return enabled;
@@ -41,6 +42,7 @@ public class Autosell {
         LogUtils.debugLog("[AutoSell] Started inventory sell");
         originalSlot = mc.thePlayer.inventory.currentItem;
         enabled = true;
+        waitTimer.reset();
     }
 
     public static void disable() {
@@ -58,17 +60,13 @@ public class Autosell {
 
         if (!enabled) return;
 
+        if (!waitTimer.hasReached(250)) {
+            return;
+        }
+
         if (mc.currentScreen == null) {
-            LogUtils.debugLog("[AutoSell] Opening SB menu");
-            mc.thePlayer.inventory.currentItem = 8;
-            KeybindHandler.rightClick();
-        } else if (InventoryUtils.getInventoryName() != null && InventoryUtils.getInventoryName().contains("SkyBlock Menu")) {
-            LogUtils.debugLog("[AutoSell] Detected SB menu, opening trade menu");
-            final ItemStack emerald = InventoryUtils.getStackInOpenContainerSlot(22);
-            if (emerald != null) {
-                LogUtils.debugLog("[AutoSell] Found trade emerald, clicking");
-                InventoryUtils.clickOpenContainerSlot(22);
-            }
+            mc.thePlayer.sendChatMessage("/trades");
+            waitTimer.reset();
         } else if (InventoryUtils.getInventoryName() != null && InventoryUtils.getInventoryName().contains("Trades")) {
             LogUtils.debugLog("[AutoSell] Detected trade menu, selling item");
             List<Slot> sellList = InventoryUtils.getInventorySlots();
@@ -76,6 +74,7 @@ public class Autosell {
             System.out.println(sellList.size());
             if (sellList.size() > 0) {
                 InventoryUtils.clickOpenContainerSlot(45 + sellList.get(0).slotNumber);
+                waitTimer.reset();
             } else {
                 LogUtils.debugLog("[AutoSell] Out of items to sell!");
                 disable();

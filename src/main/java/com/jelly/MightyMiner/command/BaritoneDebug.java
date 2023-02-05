@@ -1,24 +1,31 @@
 package com.jelly.MightyMiner.command;
 
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
+import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.automine.config.WalkBaritoneConfig;
+import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.utils.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Vec3;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.util.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.jelly.MightyMiner.MightyMiner.coordsConfig;
 
 public class BaritoneDebug extends CommandBase {
 
     private final String CLEAN = "" + EnumChatFormatting.RESET + EnumChatFormatting.AQUA + EnumChatFormatting.ITALIC;
+    Minecraft mc = Minecraft.getMinecraft();
+
     @Override
     public int getRequiredPermissionLevel() {
         return 0;
@@ -80,6 +87,25 @@ public class BaritoneDebug extends CommandBase {
 
 
                 break;
+           /* case "kill":
+                AutoMineBaritone autoMineBaritone = new AutoMineBaritone(new WalkBaritoneConfig(0, 256, 5));
+                String[] mobNames = new String[]{"Villager"};
+                List<Entity> entities = mc.theWorld.loadedEntityList.stream().filter(entity -> entity instanceof EntityArmorStand).filter(entity -> mc.thePlayer.getPositionEyes(1).distanceTo(entity.getPositionVector()) <= 50).collect(Collectors.toList());
+                List<Entity> filtered = entities.stream().filter(v -> (!v.getName().contains(mc.thePlayer.getName()) && Arrays.stream(mobNames).anyMatch(mobsName -> {
+                    String mobsName1 = StringUtils.stripControlCodes(mobsName);
+                    String vName = StringUtils.stripControlCodes(v.getName());
+                    String vCustomNameTag = StringUtils.stripControlCodes(v.getCustomNameTag());
+                    return vName.toLowerCase().contains(mobsName1.toLowerCase()) || vCustomNameTag.toLowerCase().contains(mobsName1.toLowerCase());
+                }))).collect(Collectors.toList());
+
+                List<LinkedList<BlockNode>> paths = new ArrayList<>();
+                for(Entity e : filtered){
+                    try {
+                        paths.add(autoMineBaritone.getGotoPath(new BlockPos(e.posX, e.posY, e.posZ)).getBlocksInPath());
+                    }catch (NoPathException ignored){}
+                }
+                paths.sort("");*/
+
             default:
                 displayUsage();
 

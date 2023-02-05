@@ -1,6 +1,5 @@
 package com.jelly.MightyMiner.baritone.automine;
 
-import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.calculations.AStarPathFinder;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
@@ -17,7 +16,6 @@ import com.jelly.MightyMiner.events.ChunkLoadEvent;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
-import lombok.Getter;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.EnumDyeColor;
@@ -25,7 +23,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,8 +97,6 @@ public class AutoMineBaritone {
         targetBlockPos = blockPos;
         startPathFinding();
     }
-
-
 
     public BaritoneState getState(){
         return this.state;

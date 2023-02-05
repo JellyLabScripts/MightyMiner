@@ -1,10 +1,12 @@
 package com.jelly.MightyMiner.utils;
 
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.NpcUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.*;
@@ -251,6 +253,10 @@ public class PlayerUtils {
 
     public static void warpBackToIsland(){
         mc.thePlayer.sendChatMessage("/warp home");
+    }
+
+    public static boolean isPossibleToAOTE(){
+        return !BlockUtils.getBlock(BlockUtils.getPlayerLoc()).equals(Blocks.stained_glass_pane) && !BlockUtils.getBlock(BlockUtils.getPlayerLoc().up()).equals(Blocks.stained_glass_pane);
     }
 
     public static void centerToBlock() {

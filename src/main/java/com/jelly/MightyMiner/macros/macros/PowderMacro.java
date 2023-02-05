@@ -42,7 +42,22 @@ import static com.jelly.MightyMiner.utils.BlockUtils.BlockUtils.*;
 
 public class PowderMacro extends Macro {
 
-    List<Block> blocksAllowedToMine = new ArrayList<>();
+    List<Block> blocksAllowedToMine = new ArrayList<Block>() {
+        {
+            add(Blocks.stone);
+            add(Blocks.air);
+            add(Blocks.coal_ore);
+            add(Blocks.iron_ore);
+            add(Blocks.emerald_ore);
+            add(Blocks.gold_ore);
+            add(Blocks.redstone_ore);
+            add(Blocks.lapis_ore);
+            add(Blocks.lit_redstone_ore);
+            add(Blocks.diamond_ore);
+            add(Blocks.prismarine);
+            add(Blocks.chest);
+        }
+    };
     List<Block> mineSlowBlocks = new ArrayList<Block>(){
         {
             add(Blocks.prismarine);
@@ -137,18 +152,6 @@ public class PowderMacro extends Macro {
         playerYaw = AngleUtils.getClosest();
 
         blocksAllowedToMine.clear();
-        blocksAllowedToMine.add(Blocks.stone);
-        blocksAllowedToMine.add(Blocks.air);
-        blocksAllowedToMine.add(Blocks.coal_ore);
-        blocksAllowedToMine.add(Blocks.iron_ore);
-        blocksAllowedToMine.add(Blocks.emerald_ore);
-        blocksAllowedToMine.add(Blocks.gold_ore);
-        blocksAllowedToMine.add(Blocks.redstone_ore);
-        blocksAllowedToMine.add(Blocks.lapis_ore);
-        blocksAllowedToMine.add(Blocks.lit_redstone_ore);
-        blocksAllowedToMine.add(Blocks.diamond_ore);
-        blocksAllowedToMine.add(Blocks.prismarine);
-        blocksAllowedToMine.add(Blocks.chest);
 
         chestQueue.clear();
         solvedOrSolvingChests.clear();
@@ -156,11 +159,12 @@ public class PowderMacro extends Macro {
 
         aote = false;
 
-        if(MightyMiner.config.powMineGemstone){
+        if(MightyMiner.config.powMineGemstone && !blocksAllowedToMine.contains(Blocks.stained_glass)){
             blocksAllowedToMine.add(Blocks.stained_glass_pane);
             blocksAllowedToMine.add(Blocks.stained_glass);
+        } else if(!MightyMiner.config.powMineGemstone && blocksAllowedToMine.contains(Blocks.stained_glass)){
+            blocksAllowedToMine.removeIf(a -> a.equals(Blocks.stained_glass) || a.equals(Blocks.stained_glass_pane));
         }
-
 
     }
 
@@ -229,7 +233,7 @@ public class PowderMacro extends Macro {
             KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
 
 
-            if (BlockUtils.inCenterOfBlock()) {
+            if (BlockUtils.inCenterOfBlock() || !PlayerUtils.isPossibleToAOTE()) {
                 aote = false;
                 rotation.reset();
                 rotation.easeTo(AngleUtils.get360RotationYaw(), savedPitch, 500);
@@ -472,7 +476,6 @@ public class PowderMacro extends Macro {
 
         if(currentState != State.TREASURE)
             treasureCacheState = currentState;
-
     };
 
     boolean shouldWalkForward(){

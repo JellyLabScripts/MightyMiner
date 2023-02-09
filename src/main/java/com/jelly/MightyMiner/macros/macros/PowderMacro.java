@@ -262,7 +262,9 @@ public class PowderMacro extends Macro {
                             case IDLE:
                                 if(BlockUtils.getPlayerLoc().equals(targetBlockPos))
                                     treasureState = TreasureState.SOLVING;
-                                else mineBaritone.goTo(targetBlockPos);
+                                else
+                                    RGANuker.enabled = false;
+                                    mineBaritone.goTo(targetBlockPos);
                                 break;
                             case FAILED:
                                 terminateTreasureSolving();
@@ -282,6 +284,7 @@ public class PowderMacro extends Macro {
                                 terminateTreasureSolving();
                                 break;
                         }
+                        RGANuker.enabled = true;
                         break;
 
                 }

@@ -168,8 +168,6 @@ public class AutoMineBaritone {
                     Logger.log("Executor is starting to execute a path");
                     executor.executePath(path, config);
                 }
-//                 else if(chunkLoadCount > 6 && path instanceof SemiPath)
-//                   startSemiPathFinding();
 
         }
     }

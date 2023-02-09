@@ -9,9 +9,13 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockStone;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -36,11 +40,11 @@ public class MithrilMacro extends Macro {
         }
 
         mithPriorityList.clear();
+        //mithPriorityList.addAll(BlockUtils.addData(new ArrayList<Block>(){{add((Block) Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE));}}));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3));
 
-        LogUtils.debugLog("Didnt find any players nearby, continuing");
         baritone = new AutoMineBaritone(getMineBehaviour());
     }
 
@@ -67,9 +71,6 @@ public class MithrilMacro extends Macro {
 
         if(phase != TickEvent.Phase.START)
             return;
-
-        if(MightyMiner.config.mithShiftWhenMine)
-            KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, true);
 
         switch(baritone.getState()){
             case IDLE: case FAILED:

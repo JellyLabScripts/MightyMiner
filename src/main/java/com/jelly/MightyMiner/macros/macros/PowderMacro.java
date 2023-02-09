@@ -151,8 +151,6 @@ public class PowderMacro extends Macro {
         treasureInitialTime = System.currentTimeMillis();
         playerYaw = AngleUtils.getClosest();
 
-        blocksAllowedToMine.clear();
-
         chestQueue.clear();
         solvedOrSolvingChests.clear();
         renderer.renderMap.clear();

@@ -85,6 +85,8 @@ public class PathExecutor {
         jumpCooldown = 0;
         jumpFlag = false;
 
+        lookVector = null;
+
         finishedPath.clear();
         blockRenderer.renderMap.clear();
 
@@ -92,6 +94,7 @@ public class PathExecutor {
         for(int i = 1; i < path.getBlocksInPath().size(); i++){
             blockRenderer.renderMap.put(path.getBlocksInPath().get(i).getPos(), Color.ORANGE);
         }
+
 
         MinecraftForge.EVENT_BUS.register(this);
         updateState();
@@ -117,6 +120,7 @@ public class PathExecutor {
     public void disable(){
         this.currentState = PlayerState.FINISHED;
         KeybindHandler.resetKeybindState();
+        KeybindHandler.setKeyBindState(KeybindHandler.keyBindShift, config.isShiftWhenMine());
         unregister();
     }
     private void fail(){

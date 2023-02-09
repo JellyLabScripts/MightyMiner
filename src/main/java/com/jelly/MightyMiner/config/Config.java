@@ -74,10 +74,11 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.SLIDER, name = "Player detection radius", description = "Warp back to island if there is player inside the given radius of player", category = "Failsafes", min = 1, max = 30)
     public int playerRad = 10;
 
-
     @Property(type = PropertyType.CHECKBOX, name = "Disable macro on world change", description = "Disables the macro when you get teleported to another world", category = "Failsafes")
     public boolean disableOnWorldChange = false;
 
+    @Property(type = PropertyType.SWITCH, name = "Rotation check", description = "Do not use if it is laggy otherwise may give false positives", category = "Failsafes")
+    public boolean stopMacrosOnRotationCheck = true;
 
     @Property(type = PropertyType.SWITCH, name = "RGA hardstone aura", description = "Mines hard stone around you. USE WITH center to block and optionally make gemstones full block (Core)", category = "Powder macro", subcategory = "RGA Nuker")
     public boolean powNuker = false;
@@ -204,7 +205,7 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.SWITCH, name = "Auto yog killer", description = "Warning: Early alpha. For more configuration options go to MobKiller", category = "AOTV gemstone macro", subcategory = "Yogs")
     public boolean aotvKillYogs = true;
 
-    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "AOTV gemstone macro", subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz", "Jasper", "Mithril"})
+    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "AOTV gemstone macro", subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
     public int aotvGemstoneType = 0;
 
     @Property(type = PropertyType.SWITCH, name = "Stop if any cobblestone on the route has been destroyed", category = "AOTV gemstone macro", subcategory = "Mining")
@@ -234,8 +235,6 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.COLOR, name = "Color of blocks blocking AOTV vision", category = "AOTV gemstone macro", subcategory = "Drawings")
     public Color aotvVisionBlocksColor = new Color(255, 0, 0, 120);
 
-    @Property(type = PropertyType.SWITCH, name = "Rotation check", category = "Failsafes")
-    public boolean stopMacrosOnRotationCheck = true;
 
     @Property(type = PropertyType.SWITCH, name = "Player ESP", category = "Addons", subcategory = "PlayerESP")
     public boolean playerESP = true;

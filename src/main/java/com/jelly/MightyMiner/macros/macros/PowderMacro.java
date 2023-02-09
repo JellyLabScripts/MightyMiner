@@ -284,7 +284,7 @@ public class PowderMacro extends Macro {
                                 terminateTreasureSolving();
                                 break;
                         }
-                        RGANuker.enabled = true;
+                        if(MightyMiner.config.powNuker) RGANuker.enabled = true;
                         break;
 
                 }

@@ -2,7 +2,6 @@ package com.jelly.MightyMiner.waypoints;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.utils.DrawUtils;
-import gg.essential.api.commands.SubCommand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;

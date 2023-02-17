@@ -1,12 +1,11 @@
 package com.jelly.MightyMiner.utils;
 
+import cc.polyfrost.oneconfig.config.core.OneColor;
 import com.jelly.MightyMiner.MightyMiner;
-import lombok.val;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
@@ -20,8 +19,6 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.Math.sqrt;
@@ -77,6 +74,9 @@ public class DrawUtils {
         bufferBuilder.pos(nextPos.getX() + 0.5f, nextPos.getY() + 0.5f, nextPos.getZ() + 0.5f).color(MightyMiner.config.aotvRouteLineColor.getRed() / 255f, MightyMiner.config.aotvRouteLineColor.getGreen() / 255f, MightyMiner.config.aotvRouteLineColor.getBlue() / 255f, MightyMiner.config.aotvRouteLineColor.getAlpha() / 255f).endVertex();
     }
 
+    public static void drawEntity(Entity entity, OneColor color, int width, float partialTicks) {
+        drawEntity(entity, color.toJavaColor(), width, partialTicks);
+    }
     public static void drawEntity(Entity entity, Color color, int width, float partialTicks) {
         RenderManager renderManager = mc.getRenderManager();
 
@@ -101,6 +101,9 @@ public class DrawUtils {
         drawFilledBoundingBox(aabb, color, 0.7f, width);
     }
 
+    public static void drawBlockBox(BlockPos blockPos, OneColor color, float lineWidth) {
+        drawBlockBox(blockPos, color.toJavaColor(), lineWidth);
+    }
     public static void drawBlockBox(BlockPos blockPos, Color color, float lineWidth) {
         if (blockPos == null) return;
         IBlockState blockState = mc.theWorld.getBlockState(blockPos);
@@ -114,6 +117,10 @@ public class DrawUtils {
         drawFilledBoundingBox(block.getSelectedBoundingBox(mc.theWorld, blockPos).expand(0.002D, 0.002D, 0.002D).offset(-viewerPosX, -viewerPosY, -viewerPosZ), color, 0.7f, lineWidth);
     }
 
+    public static void drawBlockBox(AxisAlignedBB bb, OneColor color, float lineWidth) {
+        drawBlockBox(bb, color.toJavaColor(), lineWidth);
+    }
+
     public static void drawBlockBox(AxisAlignedBB bb, Color color, float lineWidth) {
         double viewerPosX = mc.getRenderManager().viewerPosX;
         double viewerPosY = mc.getRenderManager().viewerPosY;
@@ -121,6 +128,9 @@ public class DrawUtils {
         drawFilledBoundingBox(bb.expand(0.002D, 0.002D, 0.002D).offset(-viewerPosX, -viewerPosY, -viewerPosZ), color, 0.7f, lineWidth);
     }
 
+    public static void drawMiniBlockBox(Vec3 vec, OneColor color, float lineWidth) {
+        drawMiniBlockBox(vec, color.toJavaColor(), lineWidth);
+    }
     public static void drawMiniBlockBox(Vec3 vec, Color color, float lineWidth) {
 
         double viewerPosX = mc.getRenderManager().viewerPosX;
@@ -143,6 +153,9 @@ public class DrawUtils {
         drawFilledBoundingBox(aabb, color, 0.7f, lineWidth);
     }
 
+    public static void drawFilledBoundingBox(AxisAlignedBB aabb, OneColor color, float opacity, float lineWidth) {
+        drawFilledBoundingBox(aabb, color.toJavaColor(), opacity, lineWidth);
+    }
     public static void drawFilledBoundingBox(AxisAlignedBB aabb, Color color, float opacity, float lineWidth) {
         GlStateManager.enableBlend();
         GlStateManager.disableDepth();
@@ -280,96 +293,6 @@ public class DrawUtils {
         double viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks;
         double viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * partialTicks;
         return Triple.of(viewerX, viewerY, viewerZ);
-    }
-    public static void drawFilledBox(AxisAlignedBB aabb, Color c, float alphaMultiplier) {
-        GlStateManager.enableBlend();
-        GlStateManager.disableLighting();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-        GlStateManager.disableTexture2D();
-        val tessellator = Tessellator.getInstance();
-        val worldRenderer = tessellator.getWorldRenderer();
-        GlStateManager.color(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, c.getAlpha() / 255f * alphaMultiplier);
-
-        //vertical
-        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex();
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex();
-        tessellator.draw();
-        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex();
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex();
-        tessellator.draw();
-        GlStateManager.color(
-                c.getRed() / 255f * 0.8f,
-                c.getGreen() / 255f * 0.8f,
-                c.getBlue() / 255f * 0.8f,
-                c.getAlpha() / 255f * alphaMultiplier
-        );
-
-        //x
-        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex();
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex();
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex();
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex();
-        tessellator.draw();
-        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex();
-        tessellator.draw();
-        GlStateManager.color(
-                c.getRed() / 255f * 0.9f,
-                c.getGreen() / 255f * 0.9f,
-                c.getBlue() / 255f * 0.9f,
-                c.getAlpha() / 255f * alphaMultiplier
-        );
-        //z
-        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex();
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex();
-        tessellator.draw();
-        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex();
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex();
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex();
-        tessellator.draw();
-        GlStateManager.enableTexture2D();
-        GlStateManager.disableBlend();
-    }
-
-    public static Rectangle renderBoxedText(String[] text, int x, int y, Double scale) {
-        String longestString = Arrays.stream(text).max(Comparator.comparingInt(String::length)).get();
-        GlStateManager.pushMatrix();
-        GlStateManager.disableLighting();
-        GlStateManager.disableDepth();
-        GlStateManager.enableBlend();
-        GlStateManager.scale(scale, scale, scale);
-        GlStateManager.color(0, 0, 0, 1f);
-        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
-
-        Gui.drawRect(x, y, x + fontRenderer.getStringWidth(longestString) + 10, y + (text.length * 9) + 10, new Color(0, 0, 0, 153).getRGB());
-
-        for (int i = 0; i < text.length; i++) {
-            int yOffset = (y + 5 + (i * 9));
-            String[] textArray = text[i].split("\n");
-            for (String s : textArray) {
-                Minecraft.getMinecraft().fontRendererObj.drawString(s, Math.round(x + 5 / scale), Math.round(yOffset / scale), Color.white.getRGB(), true);
-            }
-        }
-
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
-
-        return new Rectangle(x, y, fontRenderer.getStringWidth(longestString) + 10, text.length * 9 + 10);
     }
 
     public static void drawText(String str, double X, double Y, double Z) {

@@ -7,7 +7,7 @@ import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.events.BlockChangeEvent;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.features.MobKiller;
-import com.jelly.MightyMiner.gui.AOTVWaypointsGUI;
+import com.jelly.MightyMiner.config.aotv.AOTVWaypointsStructs;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
@@ -67,7 +67,7 @@ public class AOTVMacro extends Macro {
             return;
         }
 
-        ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
+        ArrayList<AOTVWaypointsStructs.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
 
         BlockPos currentPos = BlockUtils.getPlayerLoc().down();
 
@@ -144,9 +144,9 @@ public class AOTVMacro extends Macro {
 
         if (event.old.getBlock() == Blocks.cobblestone) {
             if (event.update.getBlock() == Blocks.air) {
-                ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
+                ArrayList<AOTVWaypointsStructs.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
 
-                AOTVWaypointsGUI.Waypoint wp = Waypoints.stream().filter(waypoint -> waypoint.x == pos.getX() && waypoint.y == pos.getY() && waypoint.z == pos.getZ()).findFirst().orElse(null);
+                AOTVWaypointsStructs.Waypoint wp = Waypoints.stream().filter(waypoint -> waypoint.x == pos.getX() && waypoint.y == pos.getY() && waypoint.z == pos.getZ()).findFirst().orElse(null);
                 if (wp != null) {
                     LogUtils.addMessage("AOTV Macro (Experimental) - Cobblestone at waypoint " + EnumChatFormatting.BOLD + wp.name + EnumChatFormatting.RESET + EnumChatFormatting.RED + " has been destroyed!");
 
@@ -169,7 +169,7 @@ public class AOTVMacro extends Macro {
 
         if (PlayerUtils.hasOpenContainer()) return;
 
-        ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
+        ArrayList<AOTVWaypointsStructs.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
 
         if (tooFastTp && !waitForVeinsTimer.hasReached(10000)) {
             return;

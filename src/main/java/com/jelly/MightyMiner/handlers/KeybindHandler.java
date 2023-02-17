@@ -2,9 +2,7 @@ package com.jelly.MightyMiner.handlers;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.calculations.AStarCalculator;
 import com.jelly.MightyMiner.baritone.automine.config.WalkBaritoneConfig;
-import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.render.BlockRenderer;
@@ -21,7 +19,6 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.input.Keyboard;
 
 import java.lang.reflect.Field;
-import java.util.LinkedList;
 
 public class KeybindHandler {
     static Minecraft mc = Minecraft.getMinecraft();
@@ -98,7 +95,8 @@ public class KeybindHandler {
             }
         }
         if(macroKeybinds[2].isKeyDown()){
-            mc.displayGuiScreen(MightyMiner.config.gui());
+//            mc.displayGuiScreen(MightyMiner.config.gui());
+            MightyMiner.config.openGui();
         }
 
     }

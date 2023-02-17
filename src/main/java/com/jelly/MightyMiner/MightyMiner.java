@@ -11,7 +11,7 @@ import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
 import com.jelly.MightyMiner.config.locations.AOTVConfig;
 import com.jelly.MightyMiner.features.*;
 import com.jelly.MightyMiner.config.waypoint.WaypointConfig;
-import com.jelly.MightyMiner.gui.AOTVWaypointsGUI;
+import com.jelly.MightyMiner.config.aotv.AOTVWaypointsStructs;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.HypixelUtils.SkyblockInfo;
@@ -86,7 +86,7 @@ public class MightyMiner {
             System.out.println("aotvWaypoints is null");
             System.out.println("Creating new CoordsConfig");
             aotvWaypoints = new AOTVWaypoints();
-            AOTVWaypointsGUI.SaveWaypoints();
+            AOTVWaypointsStructs.SaveWaypoints();
             System.out.println(aotvWaypoints.getRoutes());
         }
     }
@@ -98,7 +98,6 @@ public class MightyMiner {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-
 
         config = new Config();
 
@@ -116,14 +115,8 @@ public class MightyMiner {
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 
-        config = new Config();
-
         ClientCommandHandler.instance.registerCommand(new BaritoneDebug());
 
-
         Minecraft.getMinecraft().gameSettings.gammaSetting = 100;
-
     }
-
-
 }

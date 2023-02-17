@@ -4,7 +4,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.events.BlockChangeEvent;
 import com.jelly.MightyMiner.events.ReceivePacketEvent;
 import com.jelly.MightyMiner.features.MobKiller;
-import com.jelly.MightyMiner.gui.AOTVWaypointsGUI;
+import com.jelly.MightyMiner.config.aotv.AOTVWaypointsStructs;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.*;
 import com.jelly.MightyMiner.render.BlockRenderer;
@@ -195,14 +195,14 @@ public class MacroHandler {
         if (!SkyblockInfo.onCrystalHollows() || !(MightyMiner.config.macroType == 3)) return;
 
         if (MightyMiner.aotvWaypoints != null && MightyMiner.aotvWaypoints.getSelectedRoute() != null && MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
-            ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
+            ArrayList<AOTVWaypointsStructs.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
 
             if (MightyMiner.config.aotvHighlightRouteBlocks) {
-                for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
+                for (AOTVWaypointsStructs.Waypoint waypoint : Waypoints) {
                     DrawUtils.drawBlockBox(new BlockPos(waypoint.x, waypoint.y, waypoint.z), MightyMiner.config.aotvRouteBlocksColor, 2f);
                 }
                 if (MightyMiner.config.aotvShowDistanceToBlocks) {
-                    for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
+                    for (AOTVWaypointsStructs.Waypoint waypoint : Waypoints) {
                         BlockPos pos = new BlockPos(waypoint.x, waypoint.y, waypoint.z);
                         DrawUtils.drawText("§l§3[§f " + waypoint.name + " §3]", pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, MightyMiner.config.aotvShowDistanceToBlocks);
                     }
@@ -211,7 +211,7 @@ public class MacroHandler {
             if (MightyMiner.config.aotvShowRouteLines) {
                 if (Waypoints.size() > 1) {
                     ArrayList<BlockPos> coords = new ArrayList<>();
-                    for (AOTVWaypointsGUI.Waypoint waypoint : Waypoints) {
+                    for (AOTVWaypointsStructs.Waypoint waypoint : Waypoints) {
                         coords.add(new BlockPos(waypoint.x, waypoint.y, waypoint.z));
                     }
                     DrawUtils.drawCoordsRoute(coords, event);
@@ -241,7 +241,7 @@ public class MacroHandler {
 
         if (MightyMiner.config.macroType == 3) {
             if (MightyMiner.aotvWaypoints != null && MightyMiner.aotvWaypoints.getSelectedRoute() != null && MightyMiner.aotvWaypoints.getSelectedRoute().waypoints != null) {
-                ArrayList<AOTVWaypointsGUI.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
+                ArrayList<AOTVWaypointsStructs.Waypoint> Waypoints = MightyMiner.aotvWaypoints.getSelectedRoute().waypoints;
                 if(!Waypoints.isEmpty()) {
                     for (int i = 0; i < Waypoints.size() - 1; i++) {
                         BlockPos pos1 = new BlockPos(Waypoints.get(i).x, Waypoints.get(i).y, Waypoints.get(i).z);

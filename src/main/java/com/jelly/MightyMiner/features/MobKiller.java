@@ -9,7 +9,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.StringUtils;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -321,27 +320,13 @@ public class MobKiller {
         }
     }
 
-    @SubscribeEvent
-    public void onRender2D(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (mc.thePlayer == null || mc.theWorld == null) return;
-        if (!isToggled) return;
-
-        drawInfo();
-    }
-
-    public static Rectangle drawInfo() {
-        int x = MightyMiner.config.targetInfoLocationX;
-        int y = MightyMiner.config.targetInfoLocationY;
-
-        String[] text = new String[]{
-                "§c§lTarget:",
-                "§cName: §f" + (target != null ? NpcUtil.stripString(target.stand.getCustomNameTag()) : "None"),
-                "§cDistance: §f" + (target != null ? (String.format("%.2f", target.distance()) + "m") : "No target"),
-                "§cHealth: §f" + (target != null ? (NpcUtil.getEntityHp(target.stand)) : "No target"),
-                "§cState: §f" + currentState.name()
+    public static String[] drawInfo() {
+        return new String[]{
+                "§r§lTarget:",
+                "§rName: §f" + (target != null ? NpcUtil.stripString(target.stand.getCustomNameTag()) : "None"),
+                "§rDistance: §f" + (target != null ? (String.format("%.2f", target.distance()) + "m") : "No target"),
+                "§rHealth: §f" + (target != null ? (NpcUtil.getEntityHp(target.stand)) : "No target"),
+                "§rState: §f" + currentState.name()
         };
-
-        return DrawUtils.renderBoxedText(text, x, y, 1.0D);
     }
 }

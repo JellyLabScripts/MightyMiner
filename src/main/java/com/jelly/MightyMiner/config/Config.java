@@ -1,139 +1,165 @@
 package com.jelly.MightyMiner.config;
 
-import com.jelly.MightyMiner.features.MobKiller;
-import com.jelly.MightyMiner.gui.ChangeLocationGUI;
-import gg.essential.vigilance.Vigilant;
-import gg.essential.vigilance.data.*;
+import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.core.OneColor;
+import cc.polyfrost.oneconfig.config.data.Mod;
+import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.config.data.PageLocation;
+import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator;
+import cc.polyfrost.oneconfig.config.migration.VigilanceName;
+import com.jelly.MightyMiner.gui.AOTVWaypointsPage;
+import com.jelly.MightyMiner.hud.MobKillerHUD;
 
-import java.awt.*;
-import java.io.File;
+public class Config extends cc.polyfrost.oneconfig.config.Config {
 
-public class Config extends Vigilant {
+    //region PAGES
 
-    @Property(
-            type = PropertyType.SELECTOR,
-            name = "Macro", category = "Core",
+    private transient static final String CORE = "Core";
+    private transient static final String GEMSTONE_MACRO = "Gemstone macro";
+    private transient static final String POWDER_MACRO = "Powder macro";
+    private transient static final String AOTV_MACRO = "AOTV macro";
+    private transient static final String MITHRIL_MACRO = "Mithril macro";
+    private transient static final String FAILSAFES = "Failsafes";
+    private transient static final String ADDONS = "Addons";
+
+    //endregion
+
+    @VigilanceName(name = "Macro", category = "Core", subcategory = "Macro")
+    @Dropdown(
+            name = "Macro", category = CORE,
             subcategory = "Macro",
             options = { "Gemstone macro", "Powder macro", "Mithril macro", "AOTV Gemstone macro"}
     )
     public int macroType = 0;
 
-    @Property(type = PropertyType.SWITCH, name = "Use mining speed boost", category = "Core", subcategory = "Mining")
+    @VigilanceName(name = "Use mining speed boost", category = "Core", subcategory = "Mining")
+    @Switch(name = "Use mining speed boost", category = CORE, subcategory = "Mining")
     public boolean useMiningSpeedBoost = true;
 
-
-    @Property(type = PropertyType.SWITCH, name = "Make glass panes as a full blocks", category = "Core", subcategory = "Mining")
-    public boolean glassPanesFullBlock = false;
-
-    @Property(type = PropertyType.SWITCH, name = "Auto renew crystal hollows pass before expire", category = "Core", subcategory = "Crystal hollows", description = "Will automatically renew the crystal hollows pass before it expires")
-    public boolean autoRenewCrystalHollowsPass = true;
-
-
-    @Property(type = PropertyType.SWITCH, name = "Refuel with abiphone", category = "Core", subcategory = "Refuel")
-    public boolean refuelWithAbiphone = false;
-
-    @Property(type = PropertyType.NUMBER, name = "Refuel if less than", category = "Core", subcategory = "Refuel", max = 3000, increment = 50)
-    public int refuelThreshold = 200;
-
-    @Property(type = PropertyType.SELECTOR, name = "Type of fuel to use", category = "Core", subcategory = "Refuel", options = {"Goblin Egg", "Biofuel", "Volta", "Oil Barrel"})
-    public int typeOfFuelIndex = 0;
-
-
-    @Property(type = PropertyType.SWITCH, name = "Blue cheese omelette pickaxe switch", description = "Automatically switches to the pickaxe with blue cheese omelette when using mining speed boost", category = "Core", subcategory = "Mining")
+    @VigilanceName(name = "Blue cheese omelette pickaxe switch", category = "Core", subcategory = "Mining")
+    @Switch(name = "Blue cheese omelette pickaxe switch", description = "Automatically switches to the pickaxe with blue cheese omelette when using mining speed boost", category = CORE, subcategory = "Mining")
     public boolean blueCheeseOmeletteToggle = false;
 
+    @VigilanceName(name = "Macro", category = "Core", subcategory = "Macro")
+    @Switch(name = "Make glass panes as a full blocks", category = CORE, subcategory = "Mining")
+    public boolean glassPanesFullBlock = false;
 
-    @Property(type = PropertyType.SWITCH, name = "Debug mode", category = "Core", subcategory = "Macro", description = "Shows logs")
+    @VigilanceName(name = "Auto renew crystal hollows pass before expire", category = "Core", subcategory = "Crystal hollows")
+    @Switch(name = "Auto renew crystal hollows pass before expire", category = CORE, subcategory = "Crystal hollows", description = "Will automatically renew the crystal hollows pass before it expires")
+    public boolean autoRenewCrystalHollowsPass = true;
+
+    @VigilanceName(name = "Refuel with abiphone", category = "Core", subcategory = "Refuel")
+    @Switch(name = "Refuel with abiphone", category = CORE, subcategory = "Refuel")
+    public boolean refuelWithAbiphone = false;
+
+    @VigilanceName(name = "Refuel if less than", category = "Core", subcategory = "Refuel")
+    @Slider(name = "Refuel if less than", category = CORE, subcategory = "Refuel", max = 3000, step = 50, min = 0.0F)
+    public int refuelThreshold = 200;
+
+    @VigilanceName(name = "Type of fuel to use", category = "Core", subcategory = "Refuel")
+    @Dropdown(name = "Type of fuel to use", category = CORE, subcategory = "Refuel", options = {"Goblin Egg", "Biofuel", "Volta", "Oil Barrel"})
+    public int typeOfFuelIndex = 0;
+
+    @VigilanceName(name = "Debug mode", category = "Core", subcategory = "Macro")
+    @Switch(name = "Debug mode", category = CORE, subcategory = "Macro", description = "Shows logs")
     public boolean debugLogMode = false;
 
-    @Property(type = PropertyType.SWITCH, name = "Toggle mouse ungrab", description = "May not work on some computers", category = "Core", subcategory = "Macro")
+    @VigilanceName(name = "Toggle mouse ungrab", category = "Core", subcategory = "Macro")
+    @Switch(name = "Toggle mouse ungrab", description = "May not work on some computers", category = CORE, subcategory = "Macro")
     public boolean mouseUngrab = false;
 
-    @Property(type = PropertyType.SLIDER, name = "Stuck time threshold (seconds)", description = "restarts macro when stuck time > threshold", category = "Gemstone macro", subcategory = "Miscellaneous", max = 20, min = 3)
+    @VigilanceName(name = "Stuck time threshold (seconds)", category = GEMSTONE_MACRO, subcategory = "Miscellaneous")
+    @Slider(name = "Stuck time threshold (seconds)", description = "restarts macro when stuck time > threshold", category = GEMSTONE_MACRO, subcategory = "Miscellaneous", max = 20, min = 3)
     public int gemRestartTimeThreshold = 8;
 
-
-    @Property(type = PropertyType.SLIDER, name = "Max y level", category = "Gemstone macro", subcategory = "Pathfinding", max = 256)
+    @VigilanceName(name = "Max y level", category = GEMSTONE_MACRO, subcategory = "Pathfinding")
+    @Slider(name = "Max y level", category = GEMSTONE_MACRO, subcategory = "Pathfinding", max = 256, min = 0)
     public int gemMaxY = 256;
 
-    @Property(type = PropertyType.SLIDER, name = "Min y level", category = "Gemstone macro", subcategory = "Pathfinding", max = 25)
+    @VigilanceName(name = "Min y level", category = GEMSTONE_MACRO, subcategory = "Pathfinding")
+    @Slider(name = "Min y level", category = GEMSTONE_MACRO, subcategory = "Pathfinding", max = 25, min = 0)
     public int gemMinY = 0;
 
-    @Property(type = PropertyType.SWITCH, name = "Auto open chest", category = "Gemstone macro", subcategory = "Miscellaneous")
+    @VigilanceName(name = "Auto open chest", category = GEMSTONE_MACRO, subcategory = "Miscellaneous")
+    @Switch(name = "Auto open chest", category = GEMSTONE_MACRO, subcategory = "Miscellaneous")
     public boolean gemOpenChest = false;
 
-    @Property(type = PropertyType.SLIDER, name = "Rotation time (milliseconds)", description = "Time the macro takes for each rotation", category = "Gemstone macro", subcategory = "Pathfinding", max = 500, min = 50)
+    @VigilanceName(name = "Rotation time (milliseconds)", category = GEMSTONE_MACRO, subcategory = "Pathfinding")
+    @Slider(name = "Rotation time (milliseconds)", description = "Time the macro takes for each rotation", category = GEMSTONE_MACRO, subcategory = "Pathfinding", max = 500, min = 50, step = 10)
     public int gemRotationTime = 300;
 
-    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "Gemstone macro", subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
+    @VigilanceName(name = "Type of gemstone to mine", category = GEMSTONE_MACRO, subcategory = "Mining")
+    @Dropdown(name = "Type of gemstone to mine", category = GEMSTONE_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
     public int gemGemstoneType = 0;
 
-    @Property(type = PropertyType.SWITCH, name = "Enable Player detection failsafe", description = "Teleports you to your island if there is a player nearby", category = "Failsafes")
-    public boolean playerFailsafe = true;
-
-    @Property(type = PropertyType.SLIDER, name = "Player detection radius", description = "Warp back to island if there is player inside the given radius of player", category = "Failsafes", min = 1, max = 30)
-    public int playerRad = 10;
-
-    @Property(type = PropertyType.CHECKBOX, name = "Disable macro on world change", description = "Disables the macro when you get teleported to another world", category = "Failsafes")
-    public boolean disableOnWorldChange = false;
-
-    @Property(type = PropertyType.SWITCH, name = "Rotation check", description = "Do not use if it is laggy otherwise may give false positives", category = "Failsafes")
-    public boolean stopMacrosOnRotationCheck = true;
-
-    @Property(type = PropertyType.SWITCH, name = "RGA hardstone aura", description = "Mines hard stone around you. USE WITH center to block and optionally make gemstones full block (Core)", category = "Powder macro", subcategory = "RGA Nuker")
+    @VigilanceName(name = "RGA hardstone aura", category = POWDER_MACRO, subcategory = "RGA Nuker")
+    @Switch(name = "RGA hardstone aura", description = "Mines hard stone around you. USE WITH center to block and optionally make gemstones full block (Core)", category = POWDER_MACRO, subcategory = "RGA Nuker")
     public boolean powNuker = false;
 
-    @Property(type = PropertyType.SLIDER, name = "Hardstone aura height", category = "Powder macro", subcategory = "RGA Nuker", max = 4, min = 2)
+    @VigilanceName(name = "Hardstone aura height", category = POWDER_MACRO, subcategory = "RGA Nuker")
+    @Slider(name = "Hardstone aura height", category = POWDER_MACRO, subcategory = "RGA Nuker", max = 4, min = 2)
     public int powNukerHeight = 3;
 
-    @Property(type = PropertyType.SELECTOR, name = "Hardstone aura ",
-            category = "Powder macro",
+    @VigilanceName(name = "Hardstone aura ", category = POWDER_MACRO, subcategory = "RGA Nuker")
+    @Dropdown(name = "Hardstone aura",
+            category = POWDER_MACRO,
             subcategory = "RGA Nuker",
             options = { "Blocks around", "Facing axis"}
     )
     public int powNukerType = 0;
 
-    @Property(type = PropertyType.SWITCH, name = "Center to block", description = "Center to the middle of block using AOTE or AOTV when necessary. Please turn this on if you're not using nuker.", category = "Powder macro", subcategory = "Miscellaneous")
-    public boolean powCenter = false;
-
-    @Property(type = PropertyType.SWITCH, name = "Mine gemstones", description = "Make sure you have a drill that is able to mine gemstones", category = "Powder macro", subcategory = "Mining")
+    @VigilanceName(name = "Mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
+    @Switch(name = "Mine gemstones", description = "Make sure you have a drill that is able to mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
     public boolean powMineGemstone = true;
 
-    @Property(type = PropertyType.SLIDER, name = "Rotation rate", description = "The higher the rotation rate, the faster you'll rotate (depends on computer)", category = "Powder macro", subcategory = "Mining", max = 15, min = 1)
+    @Slider(name = "Rotation rate", description = "The higher the rotation rate, the faster you'll rotate (depends on computer)", category = POWDER_MACRO, subcategory = "Mining", max = 15, min = 1)
     public int powRotateRate = 7;
 
-    @Property(type = PropertyType.SLIDER, name = "Rotation radius (Multiplied by 10)", description = "The radius of the circle being dug out (e.g. 20 = 2 block radius)", category = "Powder macro", subcategory = "Mining", max = 35, min = 12)
-    public int powRotateRadius = 20;
+    @Slider(name = "Rotation radius", description = "The radius of the circle being dug out (e.g. 20 = 2 block radius)", category = POWDER_MACRO, subcategory = "Mining", max = 3.5f, min = 1.2f)
+    public float powRotateRadius = 2f;
 
-    @Property(type = PropertyType.SWITCH, name = "Use pickaxe to mine hardstone", category = "Powder macro", subcategory = "Miscellaneous")
+    @VigilanceName(name = "Use pickaxe to mine hardstone", category = POWDER_MACRO, subcategory = "Miscellaneous")
+    @Switch(name = "Use pickaxe to mine hardstone", category = POWDER_MACRO, subcategory = "Miscellaneous")
     public boolean powPickaxeSwitch = true;
 
-    @Property(type = PropertyType.SWITCH, name = "Switch blue cheese drill when solving chest", description = "Gives more powder, but make sure you have a blue cheese drill in your hotbar", category = "Powder macro", subcategory = "Miscellaneous")
+    @VigilanceName(name = "Switch to blue cheese drill when solving chest", category = POWDER_MACRO, subcategory = "Miscellaneous")
+    @Switch(name = "Switch to blue cheese drill when solving chest", description = "Gives more powder, but make sure you have a blue cheese drill in your hotbar", category = POWDER_MACRO, subcategory = "Miscellaneous")
     public boolean powBlueCheeseSwitch = true;
 
-    @Property(type = PropertyType.SLIDER, name = "Width between each lane", category = "Powder macro", subcategory = "Mining", max = 15, min = 3)
+    @VigilanceName(name = "Center to block", category = POWDER_MACRO, subcategory = "Miscellaneous")
+    @Switch(name = "Center to block", description = "Center to the middle of block using AOTE or AOTV when necessary. Please turn this on if you're not using nuker.", category = POWDER_MACRO, subcategory = "Miscellaneous")
+    public boolean powCenter = false;
+
+    @VigilanceName(name = "Width between each lane", category = POWDER_MACRO, subcategory = "Mining")
+    @Slider(name = "Width between each lane", category = POWDER_MACRO, subcategory = "Mining", max = 15, min = 3)
     public int powLaneWidth = 6;
 
-    @Property(type = PropertyType.SWITCH, name = "Autosell junk items", description = "More configurations in Addons. Make sure you have cookie on", category = "Powder macro", subcategory = "Addons")
+    @VigilanceName(name = "Width between each lane", category = POWDER_MACRO, subcategory = ADDONS)
+    @Switch(name = "Width between each lane", description = "More configurations in Addons. Make sure you have cookie on", category = POWDER_MACRO, subcategory = ADDONS)
     public boolean powAutosell = false;
 
-
-    @Property(type = PropertyType.SELECTOR, name = "Mithril macro priority 1", category = "Mithril macro", subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"})
+    @VigilanceName(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining")
+    @Dropdown(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}, size = 2)
     public int mithPriority1 = 1;
 
-    @Property(type = PropertyType.SELECTOR, name = "Mithril macro priority 2", category = "Mithril macro", subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"})
+    @VigilanceName(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining")
+    @Dropdown(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}, size = 2)
     public int mithPriority2 = 2;
 
-    @Property(type = PropertyType.SELECTOR, name = "Mithril macro priority 3", category = "Mithril macro", subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"})
+    @VigilanceName(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining")
+    @Dropdown(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}, size = 2)
     public int mithPriority3 = 0;
 
-    @Property(type = PropertyType.SWITCH, name = "Shift when mining", category = "Mithril macro", subcategory = "Miscellaneous")
+    @VigilanceName(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")
+    @Switch(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")
     public boolean mithShiftWhenMine = true;
 
-    @Property(type = PropertyType.SLIDER, name = "Rotation time (milliseconds)", description = "Time the macro takes for each rotation", category = "Mithril macro", subcategory = "Pathfinding", max = 500, min = 50)
+    @VigilanceName(name = "Rotation time (milliseconds)", category = MITHRIL_MACRO, subcategory = "Pathfinding")
+    @Slider(name = "Rotation time (milliseconds)", description = "Time the macro takes for each rotation", category = MITHRIL_MACRO, subcategory = "Pathfinding", max = 500, min = 50)
     public int mithRotationTime = 300;
 
-    @Property(type = PropertyType.SLIDER, name = "Stuck time threshold (seconds)", description = "restarts macro when stuck time > threshold, depends on your mining speed", category = "Mithril macro", subcategory = "Pathfinding", max = 20, min = 2)
+    @VigilanceName(name = "Stuck time threshold (seconds)", category = MITHRIL_MACRO, subcategory = "Pathfinding")
+    @Slider(name = "Stuck time threshold (seconds)", description = "restarts macro when stuck time > threshold, depends on your mining speed", category = MITHRIL_MACRO, subcategory = "Pathfinding", max = 20, min = 2)
     public int mithRestartTimeThreshold = 5;
 
     /*@Property( type = PropertyType.SLIDER, name = "Rotation time (milliseconds)", description = "Time the pathfinding AI takes for each rotation", category = "Commission macro", subcategory = "Miscellaneous", max = 5, min = 1)
@@ -142,125 +168,144 @@ public class Config extends Vigilant {
     @Property(type = PropertyType.SLIDER, name = "Safewalk index", description = "Stops walking when there is a large rotation. TURN THIS UP IF you are using high speed", category = "Commission macro", subcategory = "Miscellaneous", max = 10)
     public int comBarSafeIndex = 5;*/
 
-    @Property(type = PropertyType.SWITCH, name = "Use Hyperion under player", category = "Addons", subcategory = "MobKiller")
-    public boolean useHyperionUnderPlayer = true;
+    @Page(name = "List of waypoints", location = PageLocation.TOP, category = AOTV_MACRO, subcategory = "Waypoints")
+    public AOTVWaypointsPage aotvWaypointsPage = new AOTVWaypointsPage();
 
-    @Property(type = PropertyType.SLIDER, name = "MobKiller camera speed in ms", category = "Addons", subcategory = "MobKiller", max = 1000, min = 1)
-    public int mobKillerCameraSpeed = 100;
-
-    @Property(type = PropertyType.SLIDER, name = "MobKiller delay between attacks in ms", category = "Addons", subcategory = "MobKiller", max = 1000, min = 1)
-    public int mobKillerAttackDelay = 100;
-
-    @Property(type = PropertyType.TEXT, name = "Custom item to use for MobKiller", description = "Leave empty to use default weapons", category = "Addons", subcategory = "MobKiller")
-    public String customItemToKill = "";
-
-    @Property(type = PropertyType.SELECTOR, name = "Mouse button to use in MobKiller", category = "Addons", subcategory = "MobKiller", options = {"Left", "Right"})
-    public int attackButton = 0;
-
-    @Property(type = PropertyType.SLIDER, name = "MobKiller scan distance", category = "Addons", subcategory = "MobKiller", max = 30, min = 1)
-    public int mobKillerScanRange = 10;
-
-    @Property(type = PropertyType.NUMBER, name = "MobKiller info text X", category = "Addons", subcategory = "MobKiller", hidden = true)
-    public int targetInfoLocationX = 0;
-
-    @Property(type = PropertyType.NUMBER, name = "MobKiller info text Y", category = "Addons", subcategory = "MobKiller", hidden = true)
-    public int targetInfoLocationY = 0;
-
-    @Property(type = PropertyType.BUTTON, name = "Set target info location", category = "Addons", subcategory = "MobKiller")
-    public void setTargetInfoLocation() {
-        ChangeLocationGUI.open(MobKiller::drawInfo, this::saveTargetInfoLocation);
-    }
-
-    @Property(type = PropertyType.SWITCH, name = "Sell wishing compass to npc", description = "You need a booster cookie", category = "Addons", subcategory = "Autosell")
-    public boolean sellWishingCompass = true;
-
-    @Property(type = PropertyType.SWITCH, name = "Sell ascension rope to npc", description = "You need a booster cookie", category = "Addons", subcategory = "Autosell")
-    public boolean sellAscensionRope = true;
-
-
-    @Property(type = PropertyType.SLIDER, name = "Camera speed to ore in ms", category = "AOTV gemstone macro", subcategory = "Mechanics", max = 1500, min = 1)
+    @VigilanceName(name = "Camera speed to ore in ms", category = AOTV_MACRO, subcategory = "Mechanics")
+    @Slider(name = "Camera speed to ore in ms", category = AOTV_MACRO, subcategory = "Mechanics", max = 1500, min = 1, step = 10)
     public int aotvCameraSpeed = 100;
 
-    @Property(type = PropertyType.SLIDER, name = "Camera speed to waypoint in ms", category = "AOTV gemstone macro", subcategory = "Mechanics", max = 1500, min = 1)
+    @VigilanceName(name = "Camera speed to waypoint in ms", category = AOTV_MACRO, subcategory = "Mechanics")
+    @Slider(name = "Camera speed to waypoint in ms", category = AOTV_MACRO, subcategory = "Mechanics", max = 1500, min = 1, step = 10)
     public int aotvCameraWaypointSpeed = 100;
 
-    @Property(type = PropertyType.DECIMAL_SLIDER, name = "Teleport time threshold (s)",
-            description = "Stops macro if it teleports between routes too fast. (If there is no veins on the spot, macro will teleport to the next and to the next etc)", category = "AOTV gemstone macro", subcategory = "Mechanics", minF = 0f, maxF = 3f, decimalPlaces = 1)
+    @VigilanceName(name = "Teleport time threshold (s)", category = AOTV_MACRO, subcategory = "Mechanics")
+    @Slider(name = "Teleport time threshold (s)",
+            description = "Stops macro if it teleports between routes too fast. (If there is no veins on the spot, macro will teleport to the next and to the next etc)", category = AOTV_MACRO, subcategory = "Mechanics", min = 0f, max = 3f)
     public float aotvTeleportThreshold = 1.5f;
 
-    @Property(type = PropertyType.SLIDER, name = "Stuck time threshold (seconds)", description = "Restarts macro when stuck time > threshold, depends on your mining speed", category = "AOTV gemstone macro", subcategory = "Mechanics", max = 20, min = 2)
+    @VigilanceName(name = "Stuck time threshold (seconds)", category = AOTV_MACRO, subcategory = "Mechanics")
+    @Slider(name = "Stuck time threshold (seconds)", description = "Restarts macro when stuck time > threshold, depends on your mining speed", category = AOTV_MACRO, subcategory = "Mechanics", max = 20, min = 2)
     public int aotvRestartTimeThreshold = 5;
 
-
-    @Property(type = PropertyType.DECIMAL_SLIDER, name = "Space from edge block to the center for accuracy checks", subcategory = "Targeting", description = "Lower value means that macro will check closes to the block's edge if the block is visible", category = "AOTV gemstone macro", minF = 0f, maxF = 0.5f, decimalPlaces = 2)
+    @VigilanceName(name = "Space from edge block to the center for accuracy checks", category = AOTV_MACRO, subcategory = "Targeting")
+    @Slider(name = "Space from edge block to the center for accuracy checks", subcategory = "Targeting", description = "Lower value means that macro will check closes to the block's edge if the block is visible", category = AOTV_MACRO, min = 0f, max = 0.5f)
     public float aotvMiningAccuracy = 0.1f;
 
-    @Property(type = PropertyType.SLIDER, name = "Accuracy checks per dimension", subcategory = "Targeting", description = "Higher value means that macro will check more times if the block is visible", category = "AOTV gemstone macro", min = 1, max = 16)
+    @VigilanceName(name = "Accuracy checks per dimension", category = AOTV_MACRO, subcategory = "Targeting")
+    @Slider(name = "Accuracy checks per dimension", subcategory = "Targeting", description = "Higher value means that macro will check more times if the block is visible", category = AOTV_MACRO, min = 1, max = 16)
     public int aotvMiningAccuracyChecks = 8;
 
-    @Property(type = PropertyType.DECIMAL_SLIDER, name = "Space from cobblestone to the center", subcategory = "Targeting", description = "Increase if macro destroys cobblestone too often", category = "AOTV gemstone macro", minF = 0f, maxF = 0.35f, decimalPlaces = 3)
+    @VigilanceName(name = "Space from cobblestone to the center", category = AOTV_MACRO, subcategory = "Targeting")
+    @Slider(name = "Space from cobblestone to the center", subcategory = "Targeting", description = "Increase if macro destroys cobblestone too often", category = AOTV_MACRO, min = 0f, max = 0.35f)
     public float aotvMiningCobblestoneAccuracy = 0.15f;
 
-
-    @Property(type = PropertyType.SWITCH, name = "Auto yog killer", description = "Warning: Early alpha. For more configuration options go to MobKiller", category = "AOTV gemstone macro", subcategory = "Yogs")
+    @VigilanceName(name = "Auto yog killer", category = AOTV_MACRO, subcategory = "Yogs")
+    @Switch(name = "Auto yog killer", description = "Warning: Early alpha. For more configuration options go to MobKiller", category = AOTV_MACRO, subcategory = "Yogs")
     public boolean aotvKillYogs = true;
 
-    @Property(type = PropertyType.SELECTOR, name = "Type of gemstone to mine", category = "AOTV gemstone macro", subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
+    @VigilanceName(name = "Type of gemstone to mine", category = AOTV_MACRO, subcategory = "Mining")
+    @Dropdown(name = "Type of gemstone to mine", category = AOTV_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
     public int aotvGemstoneType = 0;
 
-    @Property(type = PropertyType.SWITCH, name = "Stop if any cobblestone on the route has been destroyed", category = "AOTV gemstone macro", subcategory = "Mining")
+    @VigilanceName(name = "Stop if any cobblestone on the route has been destroyed", category = AOTV_MACRO, subcategory = "Mining")
+    @Switch(name = "Stop if any cobblestone on the route has been destroyed", category = AOTV_MACRO, subcategory = "Mining")
     public boolean stopIfCobblestoneDestroyed = true;
 
-    @Property(type = PropertyType.SWITCH, name = "Mine gemstone panes", category = "AOTV gemstone macro", subcategory = "Mining")
+    @VigilanceName(name = "Mine gemstone panes", category = AOTV_MACRO, subcategory = "Mining")
+    @Switch(name = "Mine gemstone panes", category = AOTV_MACRO, subcategory = "Mining")
     public boolean aotvMineGemstonePanes = true;
 
-    @Property(type = PropertyType.SWITCH, name = "Show route lines", category = "AOTV gemstone macro", subcategory = "Drawings")
-    public boolean aotvShowRouteLines = true;
-
-    @Property(type = PropertyType.COLOR, name = "Color of route line", category = "AOTV gemstone macro", subcategory = "Drawings")
-    public Color aotvRouteLineColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
-
-    @Property(type = PropertyType.SWITCH, name = "Highlight route blocks", category = "AOTV gemstone macro", subcategory = "Drawings")
-    public boolean aotvHighlightRouteBlocks = true;
-
-    @Property(type = PropertyType.COLOR, name = "Color of highlighted route blocks", category = "AOTV gemstone macro", subcategory = "Drawings")
-    public Color aotvRouteBlocksColor = new Color(217f / 255f, 55f / 255f, 55f / 255f, 200f / 255f);
-
-    @Property(type = PropertyType.SWITCH, name = "Show distance to blocks", category = "AOTV gemstone macro", subcategory = "Drawings")
-    public boolean aotvShowDistanceToBlocks = true;
-
-    @Property(type = PropertyType.SWITCH, name = "Draw blocks blocking AOTV vision", category = "AOTV gemstone macro", subcategory = "Drawings")
+    @VigilanceName(name = "Draw blocks blocking AOTV vision", category = AOTV_MACRO, subcategory = "Drawings")
+    @Switch(name = "Draw blocks blocking AOTV vision", category = AOTV_MACRO, subcategory = "Drawings")
     public boolean drawBlocksBlockingAOTV = true;
 
-    @Property(type = PropertyType.COLOR, name = "Color of blocks blocking AOTV vision", category = "AOTV gemstone macro", subcategory = "Drawings")
-    public Color aotvVisionBlocksColor = new Color(255, 0, 0, 120);
+    @VigilanceName(name = "Color of blocks blocking AOTV vision", category = AOTV_MACRO, subcategory = "Drawings")
+    @Color(name = "Color of blocks blocking AOTV vision", category = AOTV_MACRO, subcategory = "Drawings")
+    public OneColor aotvVisionBlocksColor = new OneColor(255, 0, 0, 120);
 
+    @VigilanceName(name = "Show route lines", category = AOTV_MACRO, subcategory = "Drawings")
+    @Switch(name = "Show route lines", category = AOTV_MACRO, subcategory = "Drawings")
+    public boolean aotvShowRouteLines = true;
 
-    @Property(type = PropertyType.SWITCH, name = "Player ESP", category = "Addons", subcategory = "PlayerESP")
+    @VigilanceName(name = "Color of route line", category = AOTV_MACRO, subcategory = "Drawings")
+    @Color(name = "Color of route line", category = AOTV_MACRO, subcategory = "Drawings")
+    public OneColor aotvRouteLineColor = new OneColor(217, 55, 55, 200);
+
+    @VigilanceName(name = "Highlight route blocks", category = AOTV_MACRO, subcategory = "Drawings")
+    @Switch(name = "Highlight route blocks", category = AOTV_MACRO, subcategory = "Drawings")
+    public boolean aotvHighlightRouteBlocks = true;
+
+    @VigilanceName(name = "Color of highlighted route blocks", category = AOTV_MACRO, subcategory = "Drawings")
+    @Color(name = "Color of highlighted route blocks", category = AOTV_MACRO, subcategory = "Drawings")
+    public OneColor aotvRouteBlocksColor = new OneColor(217, 55, 55, 200);
+
+    @VigilanceName(name = "Show distance to blocks", category = AOTV_MACRO, subcategory = "Drawings")
+    @Switch(name = "Show distance to blocks", category = AOTV_MACRO, subcategory = "Drawings", size = 2)
+    public boolean aotvShowDistanceToBlocks = true;
+
+    @VigilanceName(name = "MobKiller scan distance", category = ADDONS, subcategory = "MobKiller")
+    @Slider( name = "MobKiller scan distance", category = ADDONS, subcategory = "MobKiller", max = 30, min = 1)
+    public int mobKillerScanRange = 10;
+
+    @VigilanceName(name = "MobKiller camera speed in ms", category = ADDONS, subcategory = "MobKiller")
+    @Slider(name = "MobKiller camera speed in ms", category = ADDONS, subcategory = "MobKiller", max = 1000, min = 1)
+    public int mobKillerCameraSpeed = 100;
+
+    @VigilanceName(name = "MobKiller delay between attacks in ms", category = ADDONS, subcategory = "MobKiller")
+    @Slider(name = "MobKiller delay between attacks in ms", category = ADDONS, subcategory = "MobKiller", max = 1000, min = 1)
+    public int mobKillerAttackDelay = 100;
+
+    @VigilanceName(name = "Custom item to use for MobKiller", category = ADDONS, subcategory = "MobKiller")
+    @Text(name = "Custom item to use for MobKiller", description = "Leave empty to use default weapons", category = ADDONS, subcategory = "MobKiller")
+    public String customItemToKill = "";
+
+    @VigilanceName(name = "Mouse button to use in MobKiller", category = ADDONS, subcategory = "MobKiller")
+    @Dropdown(name = "Mouse button to use in MobKiller", category = ADDONS, subcategory = "MobKiller", options = {"Left", "Right"})
+    public int attackButton = 0;
+
+    @VigilanceName(name = "Use Hyperion under player", category = ADDONS, subcategory = "MobKiller")
+    @Switch(name = "Use Hyperion under player", category = ADDONS, subcategory = "MobKiller", size = 2)
+    public boolean useHyperionUnderPlayer = false;
+
+    @HUD(name = "MobKiller info", category = ADDONS, subcategory = "MobKiller")
+    public MobKillerHUD mobKillerHud = new MobKillerHUD();
+
+    @VigilanceName(name = "Use Hyperion under player", category = ADDONS, subcategory = "Autosell")
+    @Switch(name = "Use Hyperion under player", description = "You need a booster cookie", category = ADDONS, subcategory = "Autosell")
+    public boolean sellWishingCompass = true;
+
+    @VigilanceName(name = "Sell ascension rope to npc", category = ADDONS, subcategory = "Autosell")
+    @Switch(name = "Sell ascension rope to npc", description = "You need a booster cookie", category = ADDONS, subcategory = "Autosell")
+    public boolean sellAscensionRope = true;
+
+    @VigilanceName(name = "Player ESP", category = ADDONS, subcategory = "PlayerESP")
+    @Switch(name = "Player ESP", category = ADDONS, subcategory = "PlayerESP")
     public boolean playerESP = true;
 
-    @Property(type = PropertyType.COLOR, name = "Player ESP color", category = "Addons", subcategory = "PlayerESP")
-    public Color playerESPColor = new Color(255, 0, 0, 120);
+    @VigilanceName(name = "Player ESP color", category = ADDONS, subcategory = "PlayerESP")
+    @Color(name = "Player ESP color", category = ADDONS, subcategory = "PlayerESP")
+    public OneColor playerESPColor = new OneColor(255, 0, 0, 120);
 
+    @VigilanceName(name = "Enable Player detection failsafe", category = FAILSAFES, subcategory = "PlayerESP")
+    @Switch(name = "Enable Player detection failsafe", description = "Teleports you to your island if there is a player nearby", category = FAILSAFES, subcategory = "Player detection failsafe")
+    public boolean playerFailsafe = true;
+
+    @VigilanceName(name = "Player detection radius", category = FAILSAFES, subcategory = "PlayerESP")
+    @Slider(name = "Player detection radius", description = "Warp back to island if there is player inside the given radius of player", category = FAILSAFES, min = 1, max = 30, subcategory = "Player detection failsafe")
+    public int playerRad = 10;
+
+    @VigilanceName(name = "Disable macro on world change", category = FAILSAFES, subcategory = "World change failsafe")
+    @Switch(name = "Disable macro on world change", description = "Disables the macro when you get teleported to another world", category = FAILSAFES, subcategory = "World change failsafe")
+    public boolean disableOnWorldChange = false;
+
+    @VigilanceName(name = "Rotation check", category = FAILSAFES, subcategory = "Rotation failsafe")
+    @Switch(name = "Rotation check", description = "Do not use if it is laggy otherwise may give false positives", category = FAILSAFES, subcategory = "Rotation failsafe")
+    public boolean stopMacrosOnRotationCheck = true;
 
     public Config() {
-        super(new File("./config/mightyminer.toml"), "Mighty Miner", new JVMAnnotationPropertyCollector(), new ConfigSorting());
-        init();
-    }
-
-
-
-    public Void saveTargetInfoLocation(int x, int y) {
-        targetInfoLocationX = x;
-        targetInfoLocationY = y;
-        return null;
-    }
-
-    private void init() {
-        this.initialize();
-        this.markDirty();
-        this.preload();
-
+        super(new Mod("Mighty Miner", ModType.HYPIXEL, new VigilanceMigrator("mightyminer.toml")), "/mightyminer/config.json");
+        initialize();
 
         this.addDependency("playerRad", "playerFailsafe");
         this.addDependency("powNukerHeight", "powNuker");
@@ -274,5 +319,6 @@ public class Config extends Vigilant {
         this.addDependency("aotvRouteBlocksColor", "aotvHighlightRouteBlocks");
         this.addDependency("aotvVisionBlocksColor", "drawBlocksBlockingAOTV");
         this.addDependency("playerESPColor", "playerESP");
+        this.addDependency("blueCheeseOmeletteToggle", "useMiningSpeedBoost");
     }
 }

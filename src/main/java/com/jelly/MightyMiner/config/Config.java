@@ -89,7 +89,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     public int gemRotationTime = 300;
 
     @VigilanceName(name = "Type of gemstone to mine", category = GEMSTONE_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Type of gemstone to mine", category = GEMSTONE_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
+    @Dropdown(name = "Type of gemstone to mine", category = GEMSTONE_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz", "Jasper"})
     public int gemGemstoneType = 0;
 
     @VigilanceName(name = "RGA hardstone aura", category = POWDER_MACRO, subcategory = "RGA Nuker")
@@ -205,7 +205,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     public boolean aotvKillYogs = true;
 
     @VigilanceName(name = "Type of gemstone to mine", category = AOTV_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Type of gemstone to mine", category = AOTV_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz"})
+    @Dropdown(name = "Type of gemstone to mine", category = AOTV_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz", "Jasper"})
     public int aotvGemstoneType = 0;
 
     @VigilanceName(name = "Stop if any cobblestone on the route has been destroyed", category = AOTV_MACRO, subcategory = "Mining")
@@ -311,6 +311,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
         initialize();
 
         this.addDependency("playerRad", "playerFailsafe");
+        this.addDependency("playerDetectionThreshold", "playerFailsafe");
         this.addDependency("powNukerHeight", "powNuker");
         this.addDependency("powNukerType", "powNuker");
         this.addDependency("aotvRouteLineColor", "aotvShowRouteLines");

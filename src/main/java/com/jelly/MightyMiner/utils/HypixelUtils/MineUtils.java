@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class MineUtils {
 
-    public static EnumDyeColor[] gemPriority = {null, EnumDyeColor.RED, EnumDyeColor.PURPLE, EnumDyeColor.LIME, EnumDyeColor.LIGHT_BLUE, EnumDyeColor.ORANGE, EnumDyeColor.YELLOW};
+    public static EnumDyeColor[] gemPriority = {null, EnumDyeColor.RED, EnumDyeColor.PURPLE, EnumDyeColor.LIME, EnumDyeColor.LIGHT_BLUE, EnumDyeColor.ORANGE, EnumDyeColor.YELLOW, EnumDyeColor.MAGENTA};
     public static ArrayList<BlockData<EnumDyeColor>> getGemListBasedOnPriority(int priority) {
         ArrayList<BlockData<EnumDyeColor>> filter = new ArrayList<>();
         filter.add(new BlockData<>(Blocks.stained_glass, gemPriority[priority]));

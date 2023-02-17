@@ -50,6 +50,8 @@ public class Autosell {
         mc.thePlayer.closeScreen();
         mc.thePlayer.inventory.currentItem = originalSlot;
         enabled = false;
+        mc.inGameHasFocus = true;
+        mc.mouseHelper.grabMouseCursor();
     }
 
     @SubscribeEvent

@@ -140,6 +140,12 @@ public class PowderMacro extends Macro {
             }
         }
 
+        if (PlayerUtils.getItemInHotbar(true, "Drill", "Gauntlet", "Pickonimbus") == -1) {
+            LogUtils.addMessage("You don't have a drill, gauntlet or pickonimbus in your hotbar to mine gemstones (in case of pathing)");
+            this.toggle();
+            return;
+        }
+
         mineBaritone = new AutoMineBaritone(getAutomineConfig());
 
         rotation.reset();
@@ -259,7 +265,10 @@ public class PowderMacro extends Macro {
                             case IDLE:
                                 if(BlockUtils.getPlayerLoc().equals(targetBlockPos))
                                     treasureState = TreasureState.SOLVING;
-                                else mineBaritone.goTo(targetBlockPos);
+                                else {
+                                    mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pickonimbus");
+                                    mineBaritone.goTo(targetBlockPos);
+                                }
                                 break;
                             case FAILED:
                                 terminateTreasureSolving();

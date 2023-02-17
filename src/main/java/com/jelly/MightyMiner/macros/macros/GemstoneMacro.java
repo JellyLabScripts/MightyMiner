@@ -12,7 +12,6 @@ import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
-import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
@@ -58,7 +57,6 @@ public class GemstoneMacro extends Macro {
 
     @Override
     public void FailSafeDisable() {
-        PlayerUtils.warpBackToIsland();
         MacroHandler.disableScript();
     }
 

@@ -9,13 +9,9 @@ import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
-import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockStone;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -51,7 +47,6 @@ public class MithrilMacro extends Macro {
     @Override
     public void FailSafeDisable() {
         if (baritone == null) return;
-        PlayerUtils.warpBackToIsland();
         MacroHandler.disableScript();
     }
 

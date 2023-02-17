@@ -120,7 +120,6 @@ public class PowderMacro extends Macro {
     @Override
     public void FailSafeDisable() {
         if (mineBaritone == null) return;
-        PlayerUtils.warpBackToIsland();
         MacroHandler.disableScript();
     }
 

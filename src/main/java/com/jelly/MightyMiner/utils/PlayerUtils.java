@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
@@ -130,6 +131,21 @@ public class PlayerUtils {
             }
         }
         return false;
+    }
+
+    public static EntityPlayerMP getClosestPlayer(int radius) {
+        EntityPlayerMP closestPlayer = null;
+        for (EntityPlayer player : mc.theWorld.playerEntities) {
+            if (player == mc.thePlayer) continue;
+            if (closestPlayer == null) {
+                closestPlayer = (EntityPlayerMP) player;
+                continue;
+            }
+            if (mc.thePlayer.getDistanceToEntity(player) < mc.thePlayer.getDistanceToEntity(closestPlayer)) {
+                closestPlayer = (EntityPlayerMP) player;
+            }
+        }
+        return closestPlayer;
     }
 
     public static boolean hasEntityInRadius(int radius){

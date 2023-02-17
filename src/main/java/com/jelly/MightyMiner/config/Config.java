@@ -288,12 +288,15 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     public OneColor playerESPColor = new OneColor(255, 0, 0, 120);
 
     @VigilanceName(name = "Enable Player detection failsafe", category = FAILSAFES, subcategory = "PlayerESP")
-    @Switch(name = "Enable Player detection failsafe", description = "Teleports you to your island if there is a player nearby", category = FAILSAFES, subcategory = "Player detection failsafe")
+    @Switch(name = "Enable Player detection failsafe", description = "Stop macro if there is a player nearby", category = FAILSAFES, subcategory = "Player detection failsafe")
     public boolean playerFailsafe = true;
 
     @VigilanceName(name = "Player detection radius", category = FAILSAFES, subcategory = "PlayerESP")
-    @Slider(name = "Player detection radius", description = "Warp back to island if there is player inside the given radius of player", category = FAILSAFES, min = 1, max = 30, subcategory = "Player detection failsafe")
+    @Slider(name = "Player detection radius", description = "Trigger failsafe if there is player inside the given radius of player", category = FAILSAFES, min = 1, max = 30, subcategory = "Player detection failsafe")
     public int playerRad = 10;
+
+    @Slider(name = "Player detection threshold until disable", category = FAILSAFES, min = 1, max = 10, subcategory = "Player detection failsafe")
+    public int playerDetectionThreshold = 3;
 
     @VigilanceName(name = "Disable macro on world change", category = FAILSAFES, subcategory = "World change failsafe")
     @Switch(name = "Disable macro on world change", description = "Disables the macro when you get teleported to another world", category = FAILSAFES, subcategory = "World change failsafe")

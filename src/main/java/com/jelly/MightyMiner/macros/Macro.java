@@ -74,7 +74,4 @@ public abstract class Macro {
             MacroHandler.pickaxeSkillReady = false;
         }
     }
-
-    public void FailSafeDisable() {}
-
 }

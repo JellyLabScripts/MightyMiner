@@ -3,6 +3,7 @@ package com.jelly.MightyMiner.handlers;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.WalkBaritoneConfig;
+import com.jelly.MightyMiner.features.Failsafes;
 import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.render.BlockRenderer;
@@ -85,17 +86,17 @@ public class KeybindHandler {
                 MacroHandler.startScript(MightyMiner.config.macroType);
         }
         if(macroKeybinds[1].isKeyDown()){
-            if (MobKiller.isToggled) {
-                LogUtils.debugLog("MobKiller disabled");
-                MobKiller.isToggled = false;
-            } else {
-                LogUtils.debugLog("MobKiller enabled");
-                MobKiller.setMobsNames(false, "Dummy", "Yog");
-                MobKiller.isToggled = true;
-            }
+//            if (MobKiller.isToggled) {
+//                LogUtils.debugLog("MobKiller disabled");
+//                MobKiller.isToggled = false;
+//            } else {
+//                LogUtils.debugLog("MobKiller enabled");
+//                MobKiller.setMobsNames(false, "Dummy", "Yog");
+//                MobKiller.isToggled = true;
+//            }
+            Failsafes.fakeMovement();
         }
         if(macroKeybinds[2].isKeyDown()){
-//            mc.displayGuiScreen(MightyMiner.config.gui());
             MightyMiner.config.openGui();
         }
 

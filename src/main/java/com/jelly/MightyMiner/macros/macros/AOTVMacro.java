@@ -53,13 +53,6 @@ public class AOTVMacro extends Macro {
     private final Rotation rotation = new Rotation();
 
     @Override
-    public void FailSafeDisable() {
-        MacroHandler.disableScript();
-
-        // TODO: Make some fake moves to look legit
-    }
-
-    @Override
     public void onEnable() {
         if (MightyMiner.aotvWaypoints.getSelectedRoute() == null) {
             LogUtils.addMessage("No route selected!");

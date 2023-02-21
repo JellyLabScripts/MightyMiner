@@ -45,13 +45,6 @@ public class MithrilMacro extends Macro {
     }
 
     @Override
-    public void FailSafeDisable() {
-        if (baritone == null) return;
-        MacroHandler.disableScript();
-    }
-
-
-    @Override
     public void onTick(TickEvent.Phase phase) {
         if (!enabled) return;
 

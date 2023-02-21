@@ -55,10 +55,6 @@ public class GemstoneMacro extends Macro {
         baritone = new AutoMineBaritone(getMineBehaviour());
     }
 
-    @Override
-    public void FailSafeDisable() {
-        MacroHandler.disableScript();
-    }
 
     @Override
     public void onDisable() {

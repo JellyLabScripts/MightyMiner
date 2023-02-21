@@ -117,12 +117,6 @@ public class PowderMacro extends Macro {
     double lastZ;
     final Timer cooldown = new Timer();
 
-    @Override
-    public void FailSafeDisable() {
-        if (mineBaritone == null) return;
-        MacroHandler.disableScript();
-    }
-
 
     @Override
     public void onEnable() {

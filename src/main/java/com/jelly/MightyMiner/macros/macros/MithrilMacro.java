@@ -2,11 +2,10 @@ package com.jelly.MightyMiner.macros.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
-import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
@@ -26,8 +25,8 @@ public class MithrilMacro extends Macro {
     protected void onEnable() {
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");
 
-        if(MightyMiner.config.playerFailsafe) {
-            if(PlayerUtils.isNearPlayer(MightyMiner.config.playerRad)){
+        if (MightyMiner.config.playerFailsafe) {
+            if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad)) {
                 LogUtils.addMessage("Didnt start macro since therese a player near");
                 this.enabled = false;
                 onDisable();
@@ -36,10 +35,11 @@ public class MithrilMacro extends Macro {
         }
 
         mithPriorityList.clear();
-        //mithPriorityList.addAll(BlockUtils.addData(new ArrayList<Block>(){{add((Block) Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE));}}));
+//        mithPriorityList.addAll(BlockUtils.addData(new ArrayList<Block>(){{add((Block) Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE));}}));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3));
+        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4));
 
         baritone = new AutoMineBaritone(getMineBehaviour());
     }
@@ -57,11 +57,12 @@ public class MithrilMacro extends Macro {
             }
         }
 
-        if(phase != TickEvent.Phase.START)
+        if (phase != TickEvent.Phase.START)
             return;
 
-        switch(baritone.getState()){
-            case IDLE: case FAILED:
+        switch (baritone.getState()) {
+            case IDLE:
+            case FAILED:
                 baritone.mineFor(mithPriorityList);
                 break;
         }
@@ -70,17 +71,13 @@ public class MithrilMacro extends Macro {
     }
 
 
-
-
-
-
     @Override
     protected void onDisable() {
-        if(baritone != null) baritone.disableBaritone();
+        if (baritone != null) baritone.disableBaritone();
         KeybindHandler.resetKeybindState();
     }
 
-    private BaritoneConfig getMineBehaviour(){
+    private BaritoneConfig getMineBehaviour() {
         return new BaritoneConfig(
                 MiningType.STATIC,
                 MightyMiner.config.mithShiftWhenMine,
@@ -90,7 +87,7 @@ public class MithrilMacro extends Macro {
                 MightyMiner.config.mithRestartTimeThreshold,
                 null,
                 null,
-               256,
+                256,
                 0
         );
     }

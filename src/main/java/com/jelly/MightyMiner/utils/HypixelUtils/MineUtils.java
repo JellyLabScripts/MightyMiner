@@ -2,7 +2,6 @@ package com.jelly.MightyMiner.utils.HypixelUtils;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
-import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 
@@ -34,10 +33,6 @@ public class MineUtils {
             case 2:
                 return new ArrayList<BlockData<EnumDyeColor>>() {{
                     add(new BlockData<>(Blocks.wool, EnumDyeColor.LIGHT_BLUE));
-                }};
-            case 3:
-                return new ArrayList<BlockData<EnumDyeColor>>() {{
-                    add(new BlockData<>(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE).getBlock(), EnumDyeColor.LIME));
                 }};
             default:
                 return null;

@@ -139,16 +139,20 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     public boolean powAutosell = false;
 
     @VigilanceName(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}, size = 2)
+    @Dropdown(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
     public int mithPriority1 = 1;
 
     @VigilanceName(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}, size = 2)
+    @Dropdown(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
     public int mithPriority2 = 2;
 
     @VigilanceName(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}, size = 2)
+    @Dropdown(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
     public int mithPriority3 = 0;
+
+    @VigilanceName(name = "Mithril macro priority 4", category = MITHRIL_MACRO, subcategory = "Mining")
+    @Dropdown(name = "Mithril macro priority 4", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
+    public int mithPriority4 = 0;
 
     @VigilanceName(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")
     @Switch(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")

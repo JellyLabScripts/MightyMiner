@@ -35,10 +35,11 @@ public class MithrilMacro extends Macro {
         }
 
         mithPriorityList.clear();
-        //mithPriorityList.addAll(BlockUtils.addData(new ArrayList<Block>(){{add((Block) Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE));}}));
+//        mithPriorityList.addAll(BlockUtils.addData(new ArrayList<Block>(){{add((Block) Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH));}}));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3));
+        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4));
 
         baritone = new AutoMineBaritone(getMineBehaviour());
     }

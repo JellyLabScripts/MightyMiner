@@ -38,6 +38,7 @@ public class MineUtils {
             case 3:
                 return new ArrayList<BlockData<EnumDyeColor>>() {{
                     add(new BlockData<>(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE).getBlock(), null));
+                    add(new BlockData<>(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH).getBlock(), null));
                 }};
             default:
                 return null;

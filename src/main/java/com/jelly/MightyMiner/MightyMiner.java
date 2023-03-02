@@ -24,12 +24,15 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Mod(name = "MightyMiner", modid = MightyMiner.MODID, version = MightyMiner.VERSION)
 public class MightyMiner {
@@ -51,6 +54,7 @@ public class MightyMiner {
     public static CoordsConfig coordsConfig;
     public static WaypointConfig waypointConfig;
     public static AOTVConfig aotvConfig;
+
     //thx pizza for fixing this
     public static void onStartGame(){
         coords.clear();
@@ -98,8 +102,10 @@ public class MightyMiner {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-
         config = new Config();
+
+        if(System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).contains("mac") || System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).contains("darwin"))
+            registerInitNotification();
 
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
         MinecraftForge.EVENT_BUS.register(new WaypointHandler());
@@ -119,4 +125,19 @@ public class MightyMiner {
 
         Minecraft.getMinecraft().gameSettings.gammaSetting = 100;
     }
+
+    public static void registerInitNotification() {
+        new Thread(() -> {
+            TrayIcon trayIcon = new TrayIcon(new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR), "Farm Helper Failsafe Notification");
+            trayIcon.setToolTip("Farm Helper Failsafe Notification");
+            try {
+                SystemTray.getSystemTray().add(trayIcon);
+            } catch (AWTException e) {
+                throw new RuntimeException(e);
+            }
+            trayIcon.displayMessage("Farm Helper Failsafe Notification", "Register Notifications", TrayIcon.MessageType.INFO);
+            SystemTray.getSystemTray().remove(trayIcon);
+        }).start();
+    }
+
 }

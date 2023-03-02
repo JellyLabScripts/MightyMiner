@@ -151,10 +151,19 @@ public class Failsafes {
         if (fakeMovementThread != null) return;
 
         SystemTray tray = SystemTray.getSystemTray();
-        TrayIcon trayIcon = createNotification("ROTATION CHECKED!!!", tray);
+        TrayIcon trayIcon;
+        if(MightyMiner.config.notifications)
+            trayIcon = createNotification("ROTATION CHECKED!!!", tray);
+        else {
+            trayIcon = null;
+        }
+
         DisableMacros();
 
         fakeMovementThread = new Thread(() -> {
+            if(!MightyMiner.config.fakeMovements)
+                return;
+
             try {
                 int numberOfRepeats = new Random().nextInt(2) + 2;
                 Thread.sleep(new Random().nextInt(150) + 200);
@@ -188,13 +197,17 @@ public class Failsafes {
                 e.printStackTrace();
             }
         });
+
+
         fakeMovementThread.start();
         new Thread(() -> {
             try {
                 fakeMovementThread.join();
                 fakeMovementThread = null;
                 // With this, also the notification disappears, so maybe good idea would be to create the icon after loading the mc with logo/icon?
-                tray.remove(trayIcon);
+
+                if(MightyMiner.config.notifications)
+                     tray.remove(trayIcon);
                 if (resumeMacro) {
                     lastMacro.toggle();
                 }

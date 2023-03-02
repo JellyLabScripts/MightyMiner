@@ -60,10 +60,12 @@ public class MithrilMacro extends Macro {
             return;
 
         switch (baritone.getState()) {
-            case IDLE:
-            case FAILED:
+            case IDLE: case FAILED:
                 baritone.mineFor(mithPriorityList);
                 break;
+
+
+
         }
 
         checkMiningSpeedBoost();

@@ -275,8 +275,8 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @HUD(name = "MobKiller info", category = ADDONS, subcategory = "MobKiller")
     public MobKillerHUD mobKillerHud = new MobKillerHUD();
 
-    @VigilanceName(name = "Use Hyperion under player", category = ADDONS, subcategory = "Autosell")
-    @Switch(name = "Use Hyperion under player", description = "You need a booster cookie", category = ADDONS, subcategory = "Autosell")
+    @VigilanceName(name = "Sell wishing compass to npc", category = ADDONS, subcategory = "Autosell")
+    @Switch(name = "Sell wishing compass to npc", description = "You need a booster cookie", category = ADDONS, subcategory = "Autosell")
     public boolean sellWishingCompass = true;
 
     @VigilanceName(name = "Sell ascension rope to npc", category = ADDONS, subcategory = "Autosell")

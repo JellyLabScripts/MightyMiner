@@ -20,6 +20,7 @@ import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import com.jelly.MightyMiner.utils.Utils.ThreadUtils;
+import ibxm.Player;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
@@ -134,11 +135,18 @@ public class PowderMacro extends Macro {
             }
         }
 
-        if (PlayerUtils.getItemInHotbar(true, "Drill", "Gauntlet", "Pickonimbus") == -1) {
+        if(PlayerUtils.getItemInHotbar(true, "Drill", "Gauntlet", "Pickonimbus", "Pickaxe") == -1) {
+            LogUtils.addMessage("You don't have any mining tool!");
+            this.toggle();
+            return;
+        }
+
+        if (MightyMiner.config.powMineGemstone && PlayerUtils.getItemInHotbar(true, "Drill", "Gauntlet", "Pickonimbus") == -1) {
             LogUtils.addMessage("You don't have a drill, gauntlet or pickonimbus in your hotbar to mine gemstones (in case of pathing)");
             this.toggle();
             return;
         }
+
 
         mineBaritone = new AutoMineBaritone(getAutomineConfig());
 
@@ -409,7 +417,7 @@ public class PowderMacro extends Macro {
                 && !MightyMiner.config.powNuker
                 && !Autosell.isEnabled()
                 && !(mineBaritone.getState() == AutoMineBaritone.BaritoneState.EXECUTING)){
-            rotation.updateInCircle(MightyMiner.config.powRotateRadius / 10.0f, 3, playerYaw, MightyMiner.config.powRotateRate);
+            rotation.updateInCircle(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate);
         }
     }
 

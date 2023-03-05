@@ -135,20 +135,24 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     public int powLaneWidth = 6;
 
     @VigilanceName(name = "Width between each lane", category = POWDER_MACRO, subcategory = ADDONS)
-    @Switch(name = "Width between each lane", description = "More configurations in Addons. Make sure you have cookie on", category = POWDER_MACRO, subcategory = ADDONS)
+    @Switch(name = "Autosell junk items", description = "More configurations in Addons. Make sure you have cookie on", category = POWDER_MACRO, subcategory = ADDONS)
     public boolean powAutosell = false;
 
     @VigilanceName(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}, size = 2)
+    @Dropdown(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
     public int mithPriority1 = 1;
 
     @VigilanceName(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}, size = 2)
+    @Dropdown(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
     public int mithPriority2 = 2;
 
     @VigilanceName(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool"}, size = 2)
+    @Dropdown(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
     public int mithPriority3 = 0;
+
+    @VigilanceName(name = "Mithril macro priority 4", category = MITHRIL_MACRO, subcategory = "Mining")
+    @Dropdown(name = "Mithril macro priority 4", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
+    public int mithPriority4 = 0;
 
     @VigilanceName(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")
     @Switch(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")
@@ -303,8 +307,17 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     public boolean disableOnWorldChange = false;
 
     @VigilanceName(name = "Rotation check", category = FAILSAFES, subcategory = "Rotation failsafe")
-    @Switch(name = "Rotation check", description = "Do not use if it is laggy otherwise may give false positives", category = FAILSAFES, subcategory = "Rotation failsafe")
+    @Switch(name = "Rotation check", description = "May give false positives", category = FAILSAFES, subcategory = "Rotation failsafe")
     public boolean stopMacrosOnRotationCheck = true;
+
+    @Switch(name = "Show notifications on staff check", category = FAILSAFES, subcategory = "Miscellaneous")
+    public boolean notifications = true;
+
+    @Switch(name = "Play ping sound when macro is interrupted", category = FAILSAFES, subcategory = "Miscellaneous")
+    public boolean pingSound = true;
+
+    @Switch(name = "Fake movements when being staff checked", description = "You could disable this if you're always by your computer", category = FAILSAFES, subcategory = "Miscellaneous")
+    public boolean fakeMovements = true;
 
     public Config() {
         super(new Mod("Mighty Miner", ModType.HYPIXEL, new VigilanceMigrator("mightyminer.toml")), "/mightyminer/config.json");

@@ -80,9 +80,6 @@ public class Rotation {
 
 
     public void updateInCircle(float radius, int blocksInFront, float rotationYawAxis, int rate){
-
-       // if(mc.thePlayer.lastTickPosY - mc.thePlayer.posY == 0) { // it will glitch if the player is falling / dropping
-
         if(rotating) return;
 
 

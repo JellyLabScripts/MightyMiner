@@ -114,7 +114,6 @@ public class Failsafes {
                 PlayerUtils.sendPingAlert();
                 LogUtils.addMessage("You've got probably been rotation checked. Pausing macros and faking movement");
                 DisableMacros(true);
-                fakeMovement();
                 lastRotationCheck.reset();
                 fakeMovement(true);
                 rotationChecks++;

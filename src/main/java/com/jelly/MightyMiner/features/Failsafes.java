@@ -94,6 +94,8 @@ public class Failsafes {
         }
     }
 
+    private long firstRotationCheck = 0;
+
     @SubscribeEvent
     public void onPacket(ReceivePacketEvent event) {
         if (!MightyMiner.config.stopMacrosOnRotationCheck) return;
@@ -102,20 +104,31 @@ public class Failsafes {
         if (!(event.packet instanceof S08PacketPlayerPosLook)) return;
         if (mc.thePlayer.getHeldItem() != null && Arrays.stream(teleportItems).anyMatch(i -> mc.thePlayer.getHeldItem().getDisplayName().contains(i))) return;
 
-        if (lastRotationCheck.hasReached(15000) && rotationChecks > 2) {
+        if (rotationChecks > 2) {
             DisableMacros();
-            LogUtils.addMessage("You've got been rotation checked for 90%. Disabling macros. RIP [*]");
+            LogUtils.addMessage("You've got probably been rotation checked by staff, rotation packets since " + (firstRotationCheck / 1000) + " seconds = " + rotationChecks + ". Disabling macros.");
             PlayerUtils.sendPingAlert();
             fakeMovement(false);
             rotationChecks = 0;
+        } else if (rotationChecks > 1) {
+                PlayerUtils.sendPingAlert();
+                LogUtils.addMessage("You've got probably been rotation checked. Pausing macros and faking movement");
+                DisableMacros(true);
+                fakeMovement();
+                lastRotationCheck.reset();
+                fakeMovement(true);
+                rotationChecks++;
         } else {
             PlayerUtils.sendPingAlert();
-            LogUtils.addMessage("You've got probably been rotation checked. Pausing macros and faking movement");
-            DisableMacros(true);
-            fakeMovement();
+            LogUtils.addMessage("You've got probably been rotation checked or got a resync.");
             lastRotationCheck.reset();
-            fakeMovement(true);
             rotationChecks++;
+            firstRotationCheck = System.currentTimeMillis();
+        }
+
+        if (lastRotationCheck.hasReached(15_000)) {
+            rotationChecks = 0;
+            firstRotationCheck = 0;
         }
     }
 

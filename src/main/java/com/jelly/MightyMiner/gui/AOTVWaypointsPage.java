@@ -9,6 +9,8 @@ import cc.polyfrost.oneconfig.utils.InputHandler;
 import cc.polyfrost.oneconfig.utils.color.ColorPalette;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.config.aotv.AOTVWaypointsStructs;
+import kotlin.Triple;
+import net.minecraft.util.Tuple;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -17,11 +19,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AOTVWaypointsPage extends Page {
 
-    private static final CopyOnWriteArrayList<TextInputField> textInputFields = new CopyOnWriteArrayList<>();
-    private static final CopyOnWriteArrayList<TextInputField> nameInputFields = new CopyOnWriteArrayList<>();
-    private static final CopyOnWriteArrayList<TextInputField> xInputFields = new CopyOnWriteArrayList<>();
-    private static final CopyOnWriteArrayList<TextInputField> yInputFields = new CopyOnWriteArrayList<>();
-    private static final CopyOnWriteArrayList<TextInputField> zInputFields = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<Tuple<AOTVWaypointsStructs.WaypointList, TextInputField>> textInputFields = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<Triple<AOTVWaypointsStructs.WaypointList, AOTVWaypointsStructs.Waypoint, TextInputField>> nameInputFields = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<Triple<AOTVWaypointsStructs.WaypointList, AOTVWaypointsStructs.Waypoint, TextInputField>> xInputFields = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<Triple<AOTVWaypointsStructs.WaypointList, AOTVWaypointsStructs.Waypoint, TextInputField>> yInputFields = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<Triple<AOTVWaypointsStructs.WaypointList, AOTVWaypointsStructs.Waypoint, TextInputField>> zInputFields = new CopyOnWriteArrayList<>();
     private static final CopyOnWriteArrayList<Route> routes = new CopyOnWriteArrayList<>();
     private final BasicButton addNewList = new BasicButton(120, BasicButton.SIZE_36, "Add New List", null, null, BasicButton.ALIGNMENT_CENTER, ColorPalette.PRIMARY);
 
@@ -58,19 +60,19 @@ public class AOTVWaypointsPage extends Page {
                     RouteWaypoint routeWaypoint = new RouteWaypoint();
 
                     TextInputField nameField = new TextInputField(150, 40, waypoint.name, false, false);
-                    nameInputFields.add(nameField);
+                    nameInputFields.add(new Triple<>(list, waypoint, nameField));
                     routeWaypoint.nameField = nameField;
 
                     TextInputField xField = new TextInputField(60, 40, String.valueOf(waypoint.x), false, false);
-                    xInputFields.add(xField);
+                    xInputFields.add(new Triple<>(list, waypoint, xField));
                     routeWaypoint.xField = xField;
 
                     TextInputField yField = new TextInputField(60, 40, String.valueOf(waypoint.y), false, false);
-                    yInputFields.add(yField);
+                    yInputFields.add(new Triple<>(list, waypoint, yField));
                     routeWaypoint.yField = yField;
 
                     TextInputField zField = new TextInputField(60, 40, String.valueOf(waypoint.z), false, false);
-                    zInputFields.add(zField);
+                    zInputFields.add(new Triple<>(list, waypoint, zField));
                     routeWaypoint.zField = zField;
 
                     BasicButton deleteButton = new BasicButton(80, BasicButton.SIZE_36, "Delete", null, null, BasicButton.ALIGNMENT_CENTER, ColorPalette.PRIMARY_DESTRUCTIVE);
@@ -123,7 +125,7 @@ public class AOTVWaypointsPage extends Page {
             route.selected = selected;
 
             route.nameField = new TextInputField(300, 40, list.name, false, false);
-            textInputFields.add(route.nameField);
+            textInputFields.add(new Tuple<>(list, route.nameField));
 
             BasicButton expandButton = new BasicButton(80, BasicButton.SIZE_36, list.showCoords ? "Hide" : "Expand", null, null, BasicButton.ALIGNMENT_CENTER, list.showCoords ? ColorPalette.PRIMARY : ColorPalette.SECONDARY);
             expandButton.setToggleable(true);
@@ -229,53 +231,55 @@ public class AOTVWaypointsPage extends Page {
         return scrollHeight;
     }
 
+
+
     @Override
     public void keyTyped(char key, int keyCode) {
         super.keyTyped(key, keyCode);
-        textInputFields.forEach(textInputField -> {
-            textInputField.keyTyped(key, keyCode);
-            if (!textInputField.isToggled() && textInputField.getInput().length() > 0) {
-                MightyMiner.aotvWaypoints.getRoutes().get(textInputFields.indexOf(textInputField)).name = textInputField.getInput();
+        textInputFields.forEach(tuple -> {
+            tuple.getSecond().keyTyped(key, keyCode);
+            if (!tuple.getSecond().isToggled() && tuple.getSecond().getInput().length() > 0) {
+                tuple.getFirst().name = tuple.getSecond().getInput();
                 redrawRoutes();
             }
         });
-        xInputFields.forEach(textInputField -> {
-            textInputField.keyTyped(key, keyCode);
-            if (!textInputField.isToggled() && textInputField.getInput().length() > 0) {
+        xInputFields.forEach(tuple -> {
+            tuple.getThird().keyTyped(key, keyCode);
+            if (!tuple.getThird().isToggled() && tuple.getThird().getInput().length() > 0) {
                 try {
-                    MightyMiner.aotvWaypoints.getRoutes().get(xInputFields.indexOf(textInputField)).waypoints.get(xInputFields.indexOf(textInputField)).x = Integer.parseInt(textInputField.getInput());
+                    tuple.getFirst().waypoints.get(tuple.getFirst().waypoints.indexOf(tuple.getSecond())).x = Integer.parseInt(tuple.getThird().getInput());
                     redrawRoutes();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-        yInputFields.forEach(textInputField -> {
-            textInputField.keyTyped(key, keyCode);
-            if (!textInputField.isToggled() && textInputField.getInput().length() > 0) {
+        yInputFields.forEach(tuple -> {
+            tuple.getThird().keyTyped(key, keyCode);
+            if (!tuple.getThird().isToggled() && tuple.getThird().getInput().length() > 0) {
                 try {
-                    MightyMiner.aotvWaypoints.getRoutes().get(yInputFields.indexOf(textInputField)).waypoints.get(yInputFields.indexOf(textInputField)).y = Integer.parseInt(textInputField.getInput());
+                    tuple.getFirst().waypoints.get(tuple.getFirst().waypoints.indexOf(tuple.getSecond())).y = Integer.parseInt(tuple.getThird().getInput());
                     redrawRoutes();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-        zInputFields.forEach(textInputField -> {
-            textInputField.keyTyped(key, keyCode);
-            if (!textInputField.isToggled() && textInputField.getInput().length() > 0) {
+        zInputFields.forEach(tuple -> {
+            tuple.getThird().keyTyped(key, keyCode);
+            if (!tuple.getThird().isToggled() && tuple.getThird().getInput().length() > 0) {
                 try {
-                    MightyMiner.aotvWaypoints.getRoutes().get(zInputFields.indexOf(textInputField)).waypoints.get(zInputFields.indexOf(textInputField)).z = Integer.parseInt(textInputField.getInput());
+                    tuple.getFirst().waypoints.get(tuple.getFirst().waypoints.indexOf(tuple.getSecond())).y = Integer.parseInt(tuple.getThird().getInput());
                     redrawRoutes();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-        nameInputFields.forEach(textInputField -> {
-            textInputField.keyTyped(key, keyCode);
-            if (!textInputField.isToggled() && textInputField.getInput().length() > 0) {
-                MightyMiner.aotvWaypoints.getRoutes().get(nameInputFields.indexOf(textInputField)).waypoints.get(nameInputFields.indexOf(textInputField)).name = textInputField.getInput();
+        nameInputFields.forEach(tuple -> {
+            tuple.getThird().keyTyped(key, keyCode);
+            if (!tuple.getThird().isToggled() && tuple.getThird().getInput().length() > 0) {
+                tuple.getFirst().waypoints.get(tuple.getFirst().waypoints.indexOf(tuple.getSecond())).name = tuple.getThird().getInput();
                 redrawRoutes();
             }
         });

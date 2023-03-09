@@ -38,7 +38,7 @@ import java.util.Locale;
 public class MightyMiner {
     public static final String MODID = "mightyminer";
     public static final String VERSION = "1.0";
-    public static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
+    public static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().setLenient().create();
 
     public static Config config;
 

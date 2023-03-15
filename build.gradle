@@ -69,6 +69,7 @@ repositories {
 }
 
 dependencies {
+    implementation('com.google.code.gson:gson:2.10.1')
     implementation('org.spongepowered:mixin:0.7.11-SNAPSHOT')
     annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 
@@ -81,7 +82,8 @@ dependencies {
    // implementation('org.joml:joml:1.10.5')
   //  annotationProcessor('org.joml:joml:1.10.5')
 
-    include 'eu.okaeri:okaeri-configs-json-gson:4.0.6'
+//    include 'eu.okaeri:okaeri-configs-json-gson:4.0.6'
+
 
     include(fileTree(dir: 'libs', include: '*.jar'))
     implementation(fileTree(dir: 'libs', include: '*.jar'))

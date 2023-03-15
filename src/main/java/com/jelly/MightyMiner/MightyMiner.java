@@ -6,18 +6,13 @@ import com.jelly.MightyMiner.command.AOTVWaypointsCommands;
 import com.jelly.MightyMiner.command.BaritoneDebug;
 import com.jelly.MightyMiner.config.Config;
 import com.jelly.MightyMiner.config.aotv.AOTVWaypoints;
-import com.jelly.MightyMiner.config.coords.CoordsConfig;
-import com.jelly.MightyMiner.config.coords.factory.ConfigurationFactory;
-import com.jelly.MightyMiner.config.locations.AOTVConfig;
-import com.jelly.MightyMiner.features.*;
-import com.jelly.MightyMiner.config.waypoint.WaypointConfig;
 import com.jelly.MightyMiner.config.aotv.AOTVWaypointsStructs;
+import com.jelly.MightyMiner.features.*;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.HypixelUtils.SkyblockInfo;
 import com.jelly.MightyMiner.waypoints.WaypointHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -30,38 +25,20 @@ import java.io.File;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 @Mod(name = "MightyMiner", modid = MightyMiner.MODID, version = MightyMiner.VERSION)
 public class MightyMiner {
     public static final String MODID = "mightyminer";
     public static final String VERSION = "1.0";
-    public static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().setLenient().create();
+    public static Gson gson;
 
     public static Config config;
 
     //TODO: fix executor service
     //public static ExecutorService pathfindPool = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("PathFinderPool-%d").build());
 
-    public static List<BlockPos> coords = new ArrayList<>();
-
-    public static ConfigurationFactory configurationFactory = new ConfigurationFactory();
-
     public static MobKiller mobKiller = new MobKiller();
-
-    public static CoordsConfig coordsConfig;
-    public static WaypointConfig waypointConfig;
-    public static AOTVConfig aotvConfig;
-
-    //thx pizza for fixing this
-    public static void onStartGame(){
-        coords.clear();
-        coordsConfig = configurationFactory.create(CoordsConfig.class, new File("config/coords.json"));
-        waypointConfig = configurationFactory.create(WaypointConfig.class, new File("config/waypoints.json"));
-        aotvConfig = configurationFactory.create(AOTVConfig.class, new File("config/aotvlocations.json"));
-    }
 
     public static AOTVWaypoints aotvWaypoints;
 
@@ -97,6 +74,7 @@ public class MightyMiner {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
         createNewWaypointsConfig(event);
     }
 

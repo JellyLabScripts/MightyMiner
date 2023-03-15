@@ -1,7 +1,6 @@
 package com.jelly.MightyMiner.config.aotv;
 
 import com.google.gson.annotations.Expose;
-import com.jelly.MightyMiner.utils.LogUtils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

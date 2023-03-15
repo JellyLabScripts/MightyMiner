@@ -1,25 +1,14 @@
 package com.jelly.MightyMiner.command;
 
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.automine.config.WalkBaritoneConfig;
-import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.utils.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.util.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.jelly.MightyMiner.MightyMiner.coordsConfig;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 
 public class BaritoneDebug extends CommandBase {
 

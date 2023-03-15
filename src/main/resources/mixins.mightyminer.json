@@ -11,7 +11,6 @@
   ],
   "client": [
     "client.MixinChunkProviderClient",
-    "client.MixinMinecraft",
     "network.MixinNetHandlerPlayClient"
   ]
 }

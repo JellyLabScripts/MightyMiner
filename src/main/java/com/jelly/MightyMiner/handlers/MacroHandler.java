@@ -47,13 +47,9 @@ public class MacroHandler {
 
     @SubscribeEvent
     public void onTickPlayer(TickEvent.ClientTickEvent tickEvent) {
+        if (!enabled || mc.thePlayer == null || mc.theWorld == null) return;
 
-        coords = MightyMiner.coordsConfig.getSelectedRoute().valueList();
         scanBlockingVisionBlocks();
-
-        if (!enabled || mc.thePlayer == null || mc.theWorld == null)
-            return;
-
         gameState.update();
 
         for (Macro macro : macros) {

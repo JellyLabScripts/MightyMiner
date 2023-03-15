@@ -1,9 +1,7 @@
 package com.jelly.MightyMiner.waypoints;
 
-import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.utils.DrawUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -19,7 +17,6 @@ public class WaypointHandler {
     private final Minecraft mc = Minecraft.getMinecraft();
     public static void setupWaypoints() {
         waypoints.clear();
-        waypoints.addAll(MightyMiner.waypointConfig.waypoints);
     }
 
     @SubscribeEvent

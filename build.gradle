@@ -12,7 +12,7 @@ buildscript {
     dependencies {
         classpath "com.github.Skytils:ForgeGradle:41dfce0a70"
         classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
-        classpath "org.spongepowered:mixingradle:0.6-SNAPSHOT"
+        classpath "com.github.debuggingss:MixinGradle:0.6-SNAPSHOT"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 

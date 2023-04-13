@@ -5,8 +5,19 @@ import net.minecraft.block.BlockSlab;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MathUtils {
+    public static final Random random = new Random();
+
+    public static float randomFloat() {
+        return (System.currentTimeMillis() % 2L == 0L) ? random.nextFloat() : (-random.nextFloat());
+    }
+
+    public static int randomNum(int min, int max) {
+        return ThreadLocalRandom.current().nextInt(min, max + 1);
+    }
 
 
     public static double getDistanceBetweenTwoBlock(BlockPos b1, BlockPos b2){

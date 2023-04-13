@@ -524,6 +524,13 @@ public class CommissionMacro extends Macro {
             case NONE:
                 break;
         }
+        
+        // Out of Soulflow
+        if (MacroHandler.outOfSoulflow) {
+            MacroHandler.outOfSoulflow = false;
+            LogUtils.debugLog("Out of Soulflow");
+            MacroHandler.disableScript();
+        }
 
         // Limbo
         if (MacroHandler.kickOccurred) {

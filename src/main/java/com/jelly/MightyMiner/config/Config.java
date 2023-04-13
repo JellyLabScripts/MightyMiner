@@ -31,7 +31,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Dropdown(
             name = "Macro", category = CORE,
             subcategory = "Macro",
-            options = { "Gemstone macro", "Powder macro", "Mithril macro", "AOTV Gemstone macro", "Commission macro", "Meth", "Cum"}
+            options = { "Gemstone macro", "Powder macro", "Mithril macro", "AOTV Gemstone macro", "Commission macro"}
     )
     public int macroType = 0;
 

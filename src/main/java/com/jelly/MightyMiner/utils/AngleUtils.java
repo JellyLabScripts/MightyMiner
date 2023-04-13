@@ -143,8 +143,8 @@ public class AngleUtils {
         return  (float) (Math.atan(-deltaX / deltaZ) * 180 / Math.PI) + ((deltaX > 0 && deltaZ < 0) ? -180 : 0) + ((deltaX < 0 && deltaZ < 0) ? 180 : 0);
     }
 
-    private static float wrapAngleTo180(double angle) {
-        return (float) (angle - Math.floor(angle / 360 + 0.5) * 360);
+    public static float wrapAngleTo180(double angle) {
+        return (float) (angle - Math.floor(angle / 360.0f + 0.5) * 360.0);
     }
 
     public static boolean isDiffLowerThan(float neededChangeYaw, float neededChangePitch, float diff) {

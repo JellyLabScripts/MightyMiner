@@ -9,6 +9,7 @@ import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator;
 import cc.polyfrost.oneconfig.config.migration.VigilanceName;
 import com.jelly.MightyMiner.gui.AOTVWaypointsPage;
 import com.jelly.MightyMiner.hud.MobKillerHUD;
+import com.jelly.MightyMiner.macros.macros.CommissionMacro;
 
 public class Config extends cc.polyfrost.oneconfig.config.Config {
 
@@ -19,8 +20,10 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     private transient static final String POWDER_MACRO = "Powder macro";
     private transient static final String AOTV_MACRO = "AOTV macro";
     private transient static final String MITHRIL_MACRO = "Mithril macro";
+    private transient static final String COMMISSION_MACRO = "Commission macro";
     private transient static final String FAILSAFES = "Failsafes";
     private transient static final String ADDONS = "Addons";
+
 
     //endregion
 
@@ -28,7 +31,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Dropdown(
             name = "Macro", category = CORE,
             subcategory = "Macro",
-            options = { "Gemstone macro", "Powder macro", "Mithril macro", "AOTV Gemstone macro"}
+            options = { "Gemstone macro", "Powder macro", "Mithril macro", "AOTV Gemstone macro", "Commission macro", "Meth", "Cum"}
     )
     public int macroType = 0;
 
@@ -171,6 +174,39 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
 
     @Property(type = PropertyType.SLIDER, name = "Safewalk index", description = "Stops walking when there is a large rotation. TURN THIS UP IF you are using high speed", category = "Commission macro", subcategory = "Miscellaneous", max = 10)
     public int comBarSafeIndex = 5;*/
+    @VigilanceName(name = "Rotation time in ms", category = COMMISSION_MACRO, subcategory = "Mining")
+    @Slider(name = "Rotation time in ms", description = "Time the macro takes for each rotation", category = COMMISSION_MACRO, subcategory = "Mining", max = 1200, min = 50)
+    public int commRotationTime = 800;
+
+    @VigilanceName(name = "Stuck time threshold in s", category = COMMISSION_MACRO, subcategory = "Mining")
+    @Slider(name = "Stuck time threshold in s", description = "restarts macro when stuck time > threshold, depends on your mining speed", category = COMMISSION_MACRO, subcategory = "Mining", max = 10, min = 2)
+    public int commRestartTimeThreshold = 5;
+
+    @VigilanceName(name = "Shift when mining", category = COMMISSION_MACRO, subcategory = "Mining")
+    @Switch(name = "Shift when mining", category = COMMISSION_MACRO, subcategory = "Mining")
+    public boolean commShiftWhenMine = true;
+
+    @VigilanceName(name = "Camera speed to waypoint in ms", category = COMMISSION_MACRO, subcategory = "Warping")
+    @Slider(name = "Camera speed to waypoint in ms", category = COMMISSION_MACRO, subcategory = "Warping", max = 1500, min = 1, step = 10)
+    public int commCameraWaypointSpeed = 800;
+
+    @VigilanceName(name = "MobKiller camera speed in ms", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
+    @Slider(name = "MobKiller camera speed in ms", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer", max = 1000, min = 1)
+    public int commKillerCameraSpeed = 100;
+
+    @VigilanceName(name = "MobKiller delay between attacks in ms", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
+    @Slider(name = "MobKiller delay between attacks in ms", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer", max = 1000, min = 1)
+    public int commKillerAttackDelay = 150;
+
+    @VigilanceName(name = "MobKiller scan distance", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
+    @Slider( name = "MobKiller scan distance", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer", max = 30, min = 1)
+    public int commKillerScanRange = 10;
+
+    @VigilanceName(name = "Stop on limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")
+    @Switch(name = "Stop on limbo", description = "Stop macro when getting kicked to limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")
+    public boolean stopOnLimbo = true;
+
+
 
     @Page(name = "List of waypoints", location = PageLocation.TOP, category = AOTV_MACRO, subcategory = "Waypoints")
     public AOTVWaypointsPage aotvWaypointsPage = new AOTVWaypointsPage();
@@ -318,6 +354,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
 
     @Switch(name = "Fake movements when being staff checked", description = "You could disable this if you're always by your computer", category = FAILSAFES, subcategory = "Miscellaneous")
     public boolean fakeMovements = true;
+
 
     public Config() {
         super(new Mod("Mighty Miner", ModType.HYPIXEL, new VigilanceMigrator("mightyminer.toml")), "/mightyminer/config.json");

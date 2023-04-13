@@ -55,8 +55,6 @@ public class MacroHandler {
         macros.add(new MithrilMacro());
         macros.add(new AOTVMacro());
         macros.add(new CommissionMacro());
-        macros.add(new MithMac());
-        macros.add(new CommMacro());
     }
 
     @SubscribeEvent

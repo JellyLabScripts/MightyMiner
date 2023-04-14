@@ -16,10 +16,7 @@ import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
-import com.jelly.MightyMiner.utils.HypixelUtils.ComissionUtils;
-import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
-import com.jelly.MightyMiner.utils.HypixelUtils.NpcUtil;
-import com.jelly.MightyMiner.utils.HypixelUtils.WarpCoordinateUtils;
+import com.jelly.MightyMiner.utils.HypixelUtils.*;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
@@ -53,6 +50,7 @@ import net.minecraftforge.event.world.NoteBlockEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraft.entity.Entity;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.lwjgl.Sys;
 
 import java.awt.*;
@@ -227,6 +225,8 @@ public class CommissionMacro extends Macro {
         CHECK_SB,
         WARP_HUB,
         CHECK_HUB,
+        WARP_FORGE,
+        CHECK_FORGE,
         NONE
     }
 
@@ -373,6 +373,9 @@ public class CommissionMacro extends Macro {
         occupiedCounter = 0;
         disableOnLimbo = MightyMiner.config.stopOnLimbo;
 
+        // Resetting states
+        reWarpState = ReWarpState.WARP_FORGE;
+
         // Check if player has pigeon
         LogUtils.debugLog("Checking if player has Pigeon");
         if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Royal Pigeon") == -1) {
@@ -437,7 +440,7 @@ public class CommissionMacro extends Macro {
                     nextActionDelay.reset();
                     reWarpState = ReWarpState.CHECK_SB;
                 }
-                break;
+                return;
             case CHECK_SB:
                 if (nextActionDelay.hasReached(1000)) {
                     // Check if player arrived at skyblock
@@ -473,7 +476,7 @@ public class CommissionMacro extends Macro {
                         }
                     }
                 }
-                break;
+                return;
             case WARP_HUB:
                 if (nextActionDelay.hasReached(1000)) {
                     // Warping to hub
@@ -484,13 +487,57 @@ public class CommissionMacro extends Macro {
                     nextActionDelay.reset();
                     reWarpState = ReWarpState.CHECK_HUB;
                 }
-                break;
+                return;
             case CHECK_HUB:
                 if (nextActionDelay.hasReached(1000)) {
-                    // Check if player arrived at skyblock
+                    // Check if player arrived at hub
                     if (BlockUtils.getPlayerLoc().down().equals((Object) new BlockPos(-3, 69, -70))) {
-                        // Arrived at Skyblock
+                        // Arrived at hub
                         LogUtils.debugLog("Arrived at hub");
+
+                        // Resetting fail counter
+                        warpFailCounter = 0;
+
+                        // Switching to next action
+                        nextActionDelay.reset();
+                        reWarpState = ReWarpState.WARP_FORGE;
+                    } else {
+                        // Checking warp fail counter
+                        if (warpFailCounter < 5) {
+                            // Incrementing warp fail counter
+                            warpFailCounter++;
+
+                            // Did not arrive at hub
+                            LogUtils.debugLog("Did not arrive at hub");
+
+                            // Switching to previous action
+                            nextActionDelay.reset();
+                            reWarpState = ReWarpState.WARP_HUB;
+                        } else {
+                            // Failed to warp to often
+                            LogUtils.debugLog("Failed to warp to often");
+                            MacroHandler.disableScript();
+                        }
+                    }
+                }
+                return;
+            case WARP_FORGE:
+                if (nextActionDelay.hasReached(1000)) {
+                    // Warping to hub
+                    LogUtils.debugLog("Warping to forge");
+                    mc.thePlayer.sendChatMessage("/warpforge");
+
+                    // Switching to next action
+                    nextActionDelay.reset();
+                    reWarpState = ReWarpState.CHECK_FORGE;
+                }
+                return;
+            case CHECK_FORGE:
+                if (nextActionDelay.hasReached(1000)) {
+                    // Check if player arrived at forge
+                    if (BlockUtils.getPlayerLoc().down().equals((Object) new BlockPos(0, 148, -69))) {
+                        // Arrived at forge
+                        LogUtils.debugLog("Arrived at forge");
 
                         // Switching to next action
                         nextActionDelay.reset();
@@ -507,12 +554,12 @@ public class CommissionMacro extends Macro {
                             // Incrementing warp fail counter
                             warpFailCounter++;
 
-                            // Did not arrive at Skyblock
-                            LogUtils.debugLog("Did not arrive at hub");
+                            // Did not arrive at forge
+                            LogUtils.debugLog("Did not arrive at forge");
 
                             // Switching to previous action
                             nextActionDelay.reset();
-                            reWarpState = ReWarpState.WARP_HUB;
+                            reWarpState = ReWarpState.WARP_FORGE;
                         } else {
                             // Failed to warp to often
                             LogUtils.debugLog("Failed to warp to often");
@@ -520,9 +567,15 @@ public class CommissionMacro extends Macro {
                         }
                     }
                 }
-                break;
+                return;
             case NONE:
                 break;
+        }
+
+        // Goblin raid at forge
+        if (goblinRaidAtForge()) {
+            LogUtils.debugLog("There is a goblin raid at the forge");
+            reWarpState = ReWarpState.WARP_HUB;
         }
         
         // Out of Soulflow
@@ -610,8 +663,20 @@ public class CommissionMacro extends Macro {
                     // Resetting Timers
                     nextActionDelay.reset();
 
-                    // Switching to next action
-                    comissionState = State.OPEN_COMM_MENU;
+                    // Checking if any commission is done
+                    if (ComissionUtils.anyCommissionDone()) {
+                        // A commission is done
+                        LogUtils.debugLog("A commission is done");
+
+                        // Switching to next action
+                        comissionState = State.OPEN_COMM_MENU;
+                    } else {
+                        // No commission is done
+                        LogUtils.debugLog("No commission is done");
+
+                        // Switching to next action
+                        comissionState = State.GET_COMMISSION;
+                    }
                 }
                 break;
             case OPEN_COMM_MENU:
@@ -825,8 +890,20 @@ public class CommissionMacro extends Macro {
                                                 // Checking failed looking counter
                                                 if (failedLookingCounter > 5) {
                                                     // Failed to often
-                                                    LogUtils.debugLog("Failed looking to often (Probably to laggy)");
-                                                    MacroHandler.disableScript();
+                                                    LogUtils.debugLog("Failed looking to often");
+
+                                                    // Checking if player is still in spot
+                                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
+                                                        // Fell out of position
+                                                        LogUtils.debugLog("Fell out of warp position (Attacked by something)");
+
+                                                        // Re-Warping
+                                                        reWarpState = ReWarpState.WARP_HUB;
+                                                    } else {
+                                                        // Did not fall out of spot
+                                                        LogUtils.debugLog("Probably to low FPS");
+                                                        MacroHandler.disableScript();
+                                                    }
                                                 } else {
                                                     // Incrementing fail Counter
                                                     LogUtils.debugLog("Incrementing failed looking counter");
@@ -1045,8 +1122,20 @@ public class CommissionMacro extends Macro {
                                                 // Checking failed looking counter
                                                 if (failedLookingCounter > 5) {
                                                     // Failed to often
-                                                    LogUtils.debugLog("Failed looking to often (Probably to laggy)");
-                                                    MacroHandler.disableScript();
+                                                    LogUtils.debugLog("Failed looking to often");
+
+                                                    // Checking if player is still in spot
+                                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
+                                                        // Fell out of position
+                                                        LogUtils.debugLog("Fell out of warp position (Attacked by something)");
+
+                                                        // Re-Warping
+                                                        reWarpState = ReWarpState.WARP_HUB;
+                                                    } else {
+                                                        // Did not fall out of spot
+                                                        LogUtils.debugLog("Probably to low FPS");
+                                                        MacroHandler.disableScript();
+                                                    }
                                                 } else {
                                                     // Incrementing fail Counter
                                                     LogUtils.debugLog("Incrementing failed looking counter");
@@ -1147,6 +1236,14 @@ public class CommissionMacro extends Macro {
                                             LogUtils.debugLog("Failed opening Emissary to often");
                                             MacroHandler.disableScript();
                                         } else {
+                                            // Checking if a player is blocking emissary
+                                            if (PlayerUtils.isNearPlayer(4)) {
+                                                nextActionDelay.reset();
+
+                                                // Rewarping
+                                                reWarpState = ReWarpState.WARP_HUB;
+                                                return;
+                                            }
                                             // Increasing open Emissary fail counter
                                             LogUtils.debugLog("Increasing open Emissary fail counter");
                                             failedOpeningEmissaryCounter++;
@@ -1365,8 +1462,19 @@ public class CommissionMacro extends Macro {
                                 // Checking failed looking counter
                                 if (failedLookingCounter > 5) {
                                     // Failed to often
-                                    LogUtils.debugLog("Failed looking to often (Probably to laggy)");
-                                    MacroHandler.disableScript();
+                                    LogUtils.debugLog("Failed looking to often");
+                                    // Checking if player is still in spot
+                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
+                                        // Fell out of position
+                                        LogUtils.debugLog("Fell out of warp position (Attacked by something)");
+
+                                        // Re-Warping
+                                        reWarpState = ReWarpState.WARP_HUB;
+                                    } else {
+                                        // Did not fall out of spot
+                                        LogUtils.debugLog("Probably to low FPS");
+                                        MacroHandler.disableScript();
+                                    }
                                 } else {
                                     // Incrementing fail Counter
                                     LogUtils.debugLog("Incrementing failed looking counter");
@@ -1531,11 +1639,12 @@ public class CommissionMacro extends Macro {
                 }
                 break;
             case COMM_SETUP:
-                if (nextActionDelay.hasReached(500)) {
+                if (nextActionDelay.hasReached(1000)) {
                     // Checking commission type
                     if (currentQuest.contains("Mithril")) {
                         // Setting up Mithril Macro
                         LogUtils.debugLog("Setting up Mithril Macro");
+                        mc.thePlayer.inventory.currentItem = pickaxeSlot;
                         blacklistedBlocks.clear();
                         rotateTo = null;
                         chosenBlock = null;
@@ -1551,6 +1660,7 @@ public class CommissionMacro extends Macro {
                     } else if (currentQuest.contains("Titanium")) {
                         // Setting up Titanium Macro
                         LogUtils.debugLog("Setting up Titanium Macro");
+                        mc.thePlayer.inventory.currentItem = pickaxeSlot;
                         blacklistedBlocks.clear();
                         rotateTo = null;
                         chosenBlock = null;
@@ -1566,6 +1676,7 @@ public class CommissionMacro extends Macro {
                         typeOfCommission = TypeOfCommission.MINING_COMM;
                     } else if (currentQuest.contains("Slayer")) {
                         // Setting up Slayer Macro
+                        mc.thePlayer.inventory.currentItem = weaponSlot;
                         LogUtils.debugLog("Setting up Slayer Macro");
                         stuckAtShootCounter = 0;
                         blockedVisionCounter = 0;
@@ -1671,19 +1782,21 @@ public class CommissionMacro extends Macro {
                                     if (!blacklistedBlocks.contains((Object) blockPos)) {
                                         if (new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d).distanceTo(mc.thePlayer.getPositionEyes(1.0f)) < 4) {
                                             IBlockState blockState = mc.theWorld.getBlockState(blockPos);
-                                            if (!BlockUtils.getPlayerLoc().down().equals((Object) blockPos)) {
-                                                if (VectorUtils.getHittableHitVec(blockPos) != null) {
-                                                    if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.GRAY))
-                                                            || blockState.equals(Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.CYAN))) {
-                                                        greyBlocks.add(blockPos);
-                                                    } else if (blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.ROUGH))
-                                                            || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.DARK))
-                                                            || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.BRICKS))) {
-                                                        prismarineBlocks.add(blockPos);
-                                                    } else if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.LIGHT_BLUE))) {
-                                                        lightBlueBlocks.add(blockPos);
-                                                    } else if (blockState.equals(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH))) {
-                                                        titaniumBlocks.add(blockPos);
+                                            if (!(!mc.theWorld.getBlockState(blockPos.down()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.up()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.south()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.north()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.west()).getBlock().equals(Blocks.air)  && !mc.theWorld.getBlockState(blockPos.east()).getBlock().equals(Blocks.air))) {
+                                                if (!BlockUtils.getPlayerLoc().down().equals((Object) blockPos)) {
+                                                    if (VectorUtils.getHittableHitVec(blockPos) != null) {
+                                                        if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.GRAY))
+                                                                || blockState.equals(Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.CYAN))) {
+                                                            greyBlocks.add(blockPos);
+                                                        } else if (blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.ROUGH))
+                                                                || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.DARK))
+                                                                || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.BRICKS))) {
+                                                            prismarineBlocks.add(blockPos);
+                                                        } else if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.LIGHT_BLUE))) {
+                                                            lightBlueBlocks.add(blockPos);
+                                                        } else if (blockState.equals(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH))) {
+                                                            titaniumBlocks.add(blockPos);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -1705,42 +1818,37 @@ public class CommissionMacro extends Macro {
                                         }
                                     }
 
-                                    if (lastChosenBlock == null) {
-                                        Pair<Float, BlockPos> closest = Pair.of((float) (new Vec3(chosenBlockType.get(0).getX() + 0.5d, chosenBlockType.get(0).getY() + 0.5d, chosenBlockType.get(0).getZ() + 0.5d).distanceTo(mc.thePlayer.getPositionEyes(1.0f))), chosenBlockType.get(0));
-                                        for (BlockPos blockPos: chosenBlockType) {
-                                            Vec3 blockVec = new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d);
-                                            Vec3 playerVec = mc.thePlayer.getPositionEyes(1.0f);
-                                            float distance = (float) blockVec.distanceTo(playerVec);
-                                            if (distance < closest.getLeft()) {
-                                                closest = Pair.of(distance, blockPos);
-                                            }
+                                    Pair<Float, BlockPos> closestDistanceToLast = Pair.of((float) (new Vec3(chosenBlockType.get(0).getX() + 0.5d, chosenBlockType.get(0).getY() + 0.5d, chosenBlockType.get(0).getZ() + 0.5d).distanceTo(new Vec3(mc.thePlayer.rayTrace(5, 1).getBlockPos()))), chosenBlockType.get(0));
+                                    for (BlockPos blockPos: chosenBlockType) {
+                                        Vec3 blockVec = new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d);
+                                        Vec3 lastChosenBlockVec = new Vec3(mc.thePlayer.rayTrace(5, 1).getBlockPos());
+                                        float distance = (float) blockVec.distanceTo(lastChosenBlockVec);
+                                        if (distance < closestDistanceToLast.getLeft()) {
+                                            closestDistanceToLast = Pair.of(distance, blockPos);
                                         }
-                                        chosenBlock = closest.getRight();
-                                        lastChosenBlock = chosenBlock;
+                                    }
+                                    chosenBlock = closestDistanceToLast.getRight();
+                                    Vec3 lookVec = VectorUtils.getVeryAccurateHittableHitVec(chosenBlock);
+                                    if (lookVec != null) {
+                                        rotateTo = VectorUtils.vec3ToRotation(lookVec);
+
+                                        if (rotateTo.getLeft() >= 180 || rotateTo.getLeft() <= -180) {
+                                            rotateTo = Pair.of((float) 179, rotateTo.getRight());
+                                        }
+                                        if (rotateTo.getRight() >= 90) {
+                                            rotateTo = Pair.of(rotateTo.getLeft(), (float) 89);
+                                        } else if (rotateTo.getRight() <= -90) {
+                                            rotateTo = Pair.of(rotateTo.getLeft(), (float) -89);
+                                        }
+                                        LogUtils.debugLog("Rotating to Yaw: " + rotateTo.getLeft() + ", Pitch: " + rotateTo.getRight());
+                                        miningState = MiningState.LOOK;
+                                        lookingFor.reset();
+                                        rotation.completed = false;
+                                        lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
                                     } else {
-                                        Pair<Float, BlockPos> closestDistanceToLast = Pair.of((float) (new Vec3(chosenBlockType.get(0).getX() + 0.5d, chosenBlockType.get(0).getY() + 0.5d, chosenBlockType.get(0).getZ() + 0.5d).distanceTo(new Vec3(lastChosenBlock.getX() + 0.5d, lastChosenBlock.getY() + 0.5d, lastChosenBlock.getZ() + 0.5d))), chosenBlockType.get(0));
-                                        for (BlockPos blockPos: chosenBlockType) {
-                                            Vec3 blockVec = new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d);
-                                            Vec3 lastChosenBlockVec = new Vec3(lastChosenBlock.getX() + 0.5d, lastChosenBlock.getY() + 0.5d, lastChosenBlock.getZ() + 0.5d);
-                                            float distance = (float) blockVec.distanceTo(lastChosenBlockVec);
-                                            if (distance < closestDistanceToLast.getLeft()) {
-                                                closestDistanceToLast = Pair.of(distance, blockPos);
-                                            }
-                                        }
-                                        lastChosenBlock = chosenBlock;
-                                        chosenBlock = closestDistanceToLast.getRight();
+                                        LogUtils.debugLog("No look found");
+                                        blacklistedBlocks.add(chosenBlock);
                                     }
-                                    rotateTo = VectorUtils.vec3ToRotation(VectorUtils.getVeryAccurateHittableHitVec(chosenBlock));
-                                    if (rotateTo.getLeft() > 180 || rotateTo.getLeft() < -180) {
-                                        rotateTo = Pair.of((float) 180, rotateTo.getRight());
-                                    }
-                                    if (rotateTo.getRight() > 90 || rotateTo.getRight() < -90) {
-                                        rotateTo = Pair.of(rotateTo.getLeft(), (float) 90);
-                                    }
-                                    miningState = MiningState.LOOK;
-                                    lookingFor.reset();
-                                    rotation.completed = false;
-                                    lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
                                     return;
                                 }
                                 LogUtils.addMessage("No Mithril found");
@@ -1752,7 +1860,7 @@ public class CommissionMacro extends Macro {
                                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                                     miningState = MiningState.SEARCH;
                                 }
-                                if (AngleUtils.isDiffLowerThan(rotateTo.getLeft(), rotateTo.getRight(), 0.5f)) {
+                                if (AngleUtils.isDiffLowerThan(rotateTo.getLeft(), rotateTo.getRight(), 0.25f)) {
                                     rotation.reset();
                                     rotation.completed = true;
                                 }
@@ -1780,16 +1888,16 @@ public class CommissionMacro extends Macro {
                                 }
                                 break;
                             case MINE:
-                                KeyBinding.onTick(mc.gameSettings.keyBindAttack.getKeyCode());
-                                KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), true);
+                                KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, true);
                                 if (miningFor.hasReached(MightyMiner.config.commRestartTimeThreshold * 1000L)) {
                                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                                     LogUtils.debugLog("Mining for to long. Looking for another Block");
+                                    UngrabUtils.ungrabMouse();
                                     blacklistedBlocks.add(chosenBlock);
                                     miningState = MiningState.SEARCH;
                                     return;
                                 }
-                                mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarWithBlackList(true, null, "Pick", "Drill", "Gauntlet");
+                                mc.thePlayer.inventory.currentItem = pickaxeSlot;
                                 MovingObjectPosition bedrockCheck = mc.thePlayer.rayTrace(4, 1);
                                 if (bedrockCheck.getBlockPos().equals((Object) chosenBlock) && mc.theWorld.getBlockState(bedrockCheck.getBlockPos()).equals(Blocks.bedrock.getDefaultState())) {
                                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
@@ -2068,6 +2176,19 @@ public class CommissionMacro extends Macro {
         } else {
             return false;
         }
+    }
+
+    public boolean goblinRaidAtForge() {
+        for (String s: ScoreboardUtils.getScoreboardLines()) {
+            if (s != null && s.contains("Event") && s.toLowerCase().contains("goblin raid")) {
+                for (String s2: ScoreboardUtils.getScoreboardLines()) {
+                    if (s2.contains("Zone") && s2.toLowerCase().contains("forge")) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public boolean playerFellOutOfSpot(BlockPos spot) {

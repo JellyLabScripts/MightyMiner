@@ -617,7 +617,7 @@ public class CommissionMacro extends Macro {
 
         switch (comissionState) {
             case SETUP:
-                if (nextActionDelay.hasReached(500)) {
+                if (nextActionDelay.hasReached(1500)) {
                     // Reset all Keybindings
                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
@@ -1892,7 +1892,8 @@ public class CommissionMacro extends Macro {
                                 if (miningFor.hasReached(MightyMiner.config.commRestartTimeThreshold * 1000L)) {
                                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                                     LogUtils.debugLog("Mining for to long. Looking for another Block");
-                                    UngrabUtils.ungrabMouse();
+                                    mc.inGameHasFocus = true;
+                                    mc.mouseHelper.grabMouseCursor();
                                     blacklistedBlocks.add(chosenBlock);
                                     miningState = MiningState.SEARCH;
                                     return;

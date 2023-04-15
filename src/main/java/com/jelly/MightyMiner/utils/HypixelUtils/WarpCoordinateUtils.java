@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.utils.HypixelUtils;
 
 import com.jelly.MightyMiner.macros.macros.CommissionMacro;
+import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import net.minecraft.util.BlockPos;
 
@@ -8,18 +9,31 @@ import java.util.ArrayList;
 
 public class WarpCoordinateUtils {
     public static ArrayList<BlockPos> getRandomEmissaryWarpCoordinates() {
-        int routeNumber = MathUtils.randomNum(0, 2);
+        int routeNumber = MathUtils.randomNum(0, 5);
+        LogUtils.debugLog("Route number: " + routeNumber);
         ArrayList<BlockPos> route = new ArrayList<>();
         if (routeNumber == 0) {
             route.add(new BlockPos(3, 165, -12));
             route.add(new BlockPos(35, 145, 1));
             route.add(new BlockPos(39, 134, 22));
         } else if (routeNumber == 1) {
-            route.add(new BlockPos(3, 165, -12));
+            route.add(new BlockPos(6, 155, -10));
+            route.add(new BlockPos(38, 142, 6));
+            route.add(new BlockPos(39, 134, 22));
+        } else if (routeNumber == 2) {
+            route.add(new BlockPos(4, 155, -12));
+            route.add(new BlockPos(27, 145, -6));
+            route.add(new BlockPos(39, 134, 22));
+        } else if (routeNumber == 3) {
+            route.add(new BlockPos(6, 155, -10));
+            route.add(new BlockPos(27, 145, -6));
+            route.add(new BlockPos(39, 134, 22));
+        } else if (routeNumber == 4) {
+            route.add(new BlockPos(6, 155, -10));
             route.add(new BlockPos(35, 145, 1));
             route.add(new BlockPos(39, 134, 22));
-        } else {
-            route.add(new BlockPos(3, 165, -12));
+        } else if (routeNumber == 5) {
+            route.add(new BlockPos(4, 155, -12));
             route.add(new BlockPos(35, 145, 1));
             route.add(new BlockPos(39, 134, 22));
         }
@@ -28,6 +42,7 @@ public class WarpCoordinateUtils {
 
     public static ArrayList<BlockPos> getRandomCommissionWarpCoordinates(String questName) {
         int routeNumber = MathUtils.randomNum(0, 2);
+        LogUtils.debugLog("Route number: " + routeNumber);
         ArrayList<BlockPos> route = new ArrayList<>();
         if (questName.equals(CommissionMacro.ComissionType.CLIFFSIDE_VEINS_MITHRIL.questName) || questName.equals(CommissionMacro.ComissionType.CLIFFSIDE_VEINS_TITANIUM.questName) || questName.equals(CommissionMacro.ComissionType.MITHRIL_MINER.questName) || questName.equals(CommissionMacro.ComissionType.TITANIUM_MINER.questName)) {
             if (routeNumber == 0) {
@@ -133,7 +148,7 @@ public class WarpCoordinateUtils {
                 route.add(new BlockPos(-64, 210, 4));
                 route.add(new BlockPos(-101, 180, -11));
                 route.add(new BlockPos(-140, 176, -41));
-                route.add(new BlockPos(-128, 172, -30));
+                route.add(new BlockPos(-129, 169, -17   ));
             }
         } else if (questName.equals(CommissionMacro.ComissionType.ICE_WALKER_SLAYER.questName)) {
             if (routeNumber == 0) {

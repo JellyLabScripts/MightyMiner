@@ -1821,7 +1821,8 @@ public class CommissionMacro extends Macro {
                                     Pair<Float, BlockPos> closestDistanceToLast = Pair.of((float) (new Vec3(chosenBlockType.get(0).getX() + 0.5d, chosenBlockType.get(0).getY() + 0.5d, chosenBlockType.get(0).getZ() + 0.5d).distanceTo(new Vec3(mc.thePlayer.rayTrace(5, 1).getBlockPos()))), chosenBlockType.get(0));
                                     for (BlockPos blockPos: chosenBlockType) {
                                         Vec3 blockVec = new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d);
-                                        Vec3 lastChosenBlockVec = new Vec3(mc.thePlayer.rayTrace(5, 1).getBlockPos());
+                                        BlockPos playerLookingAt = mc.thePlayer.rayTrace(5, 1).getBlockPos();
+                                        Vec3 lastChosenBlockVec = new Vec3(playerLookingAt.getX() + 0.5d, playerLookingAt.getY() + 0.5d, playerLookingAt.getZ() + 0.5d);
                                         float distance = (float) blockVec.distanceTo(lastChosenBlockVec);
                                         if (distance < closestDistanceToLast.getLeft()) {
                                             closestDistanceToLast = Pair.of(distance, blockPos);
@@ -1860,7 +1861,7 @@ public class CommissionMacro extends Macro {
                                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                                     miningState = MiningState.SEARCH;
                                 }
-                                if (AngleUtils.isDiffLowerThan(rotateTo.getLeft(), rotateTo.getRight(), 0.25f)) {
+                                if (AngleUtils.isDiffLowerThan(rotateTo.getLeft(), rotateTo.getRight(), 0.05f)) {
                                     rotation.reset();
                                     rotation.completed = true;
                                 }
@@ -1887,7 +1888,7 @@ public class CommissionMacro extends Macro {
                                     return;
                                 }
                                 break;
-                            case MINE:
+                             case MINE:
                                 KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, true);
                                 if (miningFor.hasReached(MightyMiner.config.commRestartTimeThreshold * 1000L)) {
                                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);

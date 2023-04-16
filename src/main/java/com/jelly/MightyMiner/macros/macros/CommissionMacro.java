@@ -581,7 +581,7 @@ public class CommissionMacro extends Macro {
         // Out of Soulflow
         if (MacroHandler.outOfSoulflow) {
             MacroHandler.outOfSoulflow = false;
-            LogUtils.debugLog("Out of Soulflow");
+            LogUtils.addMessage("Out of Soulflow");
             MacroHandler.disableScript();
         }
 
@@ -609,7 +609,7 @@ public class CommissionMacro extends Macro {
                 LogUtils.debugLog("Regenerating Mana");
                 nextActionDelay.reset();
             }
-            if (manaRegenTimer.hasReached(20000)) {
+            if (manaRegenTimer.hasReached(MightyMiner.config.manaRegenTime * 1000L)) {
                 regenMana = false;
             }
             return;
@@ -739,7 +739,7 @@ public class CommissionMacro extends Macro {
                                             failedOpeningPigeonCounter++;
 
                                             // Switching back to hold Pigeon action
-                                            LogUtils.addMessage("Trying again to open Royal Pigeon");
+                                            LogUtils.debugLog("Trying again to open Royal Pigeon");
                                             nextActionDelay.reset();
                                             openPigeonState = OpenPigeonState.HOLD_PIGEON;
                                         }
@@ -1692,6 +1692,15 @@ public class CommissionMacro extends Macro {
                 }
                 break;
             case COMMITTING:
+                if (typeOfCommission == TypeOfCommission.MINING_COMM) {
+                    if (MightyMiner.config.refuelWithAbiphone) {
+                        if (FuelFilling.isRefueling()) {
+                            return;
+                        }
+                    }
+                    checkMiningSpeedBoost();
+                }
+
                 if (nextActionDelay.hasReached(2500)) {
                     // Check if Commission is finished
                     if (finishedCommission()) {
@@ -1829,7 +1838,7 @@ public class CommissionMacro extends Macro {
                                         }
                                     }
                                     chosenBlock = closestDistanceToLast.getRight();
-                                    Vec3 lookVec = VectorUtils.getVeryAccurateHittableHitVec(chosenBlock);
+                                    Vec3 lookVec = VectorUtils.getRandomHittable(chosenBlock);
                                     if (lookVec != null) {
                                         rotateTo = VectorUtils.vec3ToRotation(lookVec);
 
@@ -1846,11 +1855,31 @@ public class CommissionMacro extends Macro {
                                         lookingFor.reset();
                                         rotation.completed = false;
                                         lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
+                                        return;
                                     } else {
-                                        LogUtils.debugLog("No look found");
-                                        blacklistedBlocks.add(chosenBlock);
+                                        Vec3 lookVec2 = VectorUtils.getVeryAccurateHittableHitVec(chosenBlock);
+                                        if (lookVec2 != null) {
+                                            rotateTo = VectorUtils.vec3ToRotation(lookVec2);
+
+                                            if (rotateTo.getLeft() >= 180 || rotateTo.getLeft() <= -180) {
+                                                rotateTo = Pair.of((float) 179, rotateTo.getRight());
+                                            }
+                                            if (rotateTo.getRight() >= 90) {
+                                                rotateTo = Pair.of(rotateTo.getLeft(), (float) 89);
+                                            } else if (rotateTo.getRight() <= -90) {
+                                                rotateTo = Pair.of(rotateTo.getLeft(), (float) -89);
+                                            }
+                                            LogUtils.debugLog("Rotating to Yaw: " + rotateTo.getLeft() + ", Pitch: " + rotateTo.getRight());
+                                            miningState = MiningState.LOOK;
+                                            lookingFor.reset();
+                                            rotation.completed = false;
+                                            lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
+                                        } else {
+                                            LogUtils.debugLog("No look found");
+                                            blacklistedBlocks.add(chosenBlock);
+                                        }
+                                        return;
                                     }
-                                    return;
                                 }
                                 LogUtils.addMessage("No Mithril found");
                                 searchCoolDown.reset();

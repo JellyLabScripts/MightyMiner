@@ -367,8 +367,6 @@ public class CommissionMacro extends Macro {
 
     private static boolean isWarping = false;
 
-    public static boolean brokeBlock = false;
-
 
 
     @Override

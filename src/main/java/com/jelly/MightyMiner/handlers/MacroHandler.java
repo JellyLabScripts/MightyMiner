@@ -48,6 +48,8 @@ public class MacroHandler {
 
     public static GameState gameState = new GameState();
 
+    public static boolean commMacroRunning = false;
+
 
     public static void initializeMacro(){
         macros.add(new GemstoneMacro());
@@ -56,7 +58,6 @@ public class MacroHandler {
         macros.add(new AOTVMacro());
         macros.add(new CommissionMacro());
     }
-
     @SubscribeEvent
     public void onTickPlayer(TickEvent.ClientTickEvent tickEvent) {
         if (!enabled || mc.thePlayer == null || mc.theWorld == null) return;
@@ -135,7 +136,7 @@ public class MacroHandler {
         if (message.contains("Soulflow")) {
             outOfSoulflow = true;
         }
-        if (message.contains("Evacuating")) {
+        if (message.contains("Evacuating") || message.contains("Game Update") || message.contains("This server will restart soon")) {
             restartHappening = true;
         }
 

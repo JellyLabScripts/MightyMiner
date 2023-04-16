@@ -21,7 +21,6 @@ import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import com.jelly.MightyMiner.utils.Utils.ReflectionUtils;
-import jdk.internal.net.http.common.Log;
 import kotlinx.atomicfu.TraceBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;

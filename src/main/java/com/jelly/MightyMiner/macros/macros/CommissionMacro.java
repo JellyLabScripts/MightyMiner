@@ -865,6 +865,8 @@ public class CommissionMacro extends Macro {
                                                     // Switching to next action
                                                     nextActionDelay.reset();
                                                     warpToEmissaryState = WarpToEmissaryState.LOOK;
+                                                    lookTimeIncrement = MathUtils.randomNum(0, 100);
+                                                    LogUtils.debugLog("Rotating to Yaw / Pitch");
                                                 } else {
                                                     // Trying very accurate Hittable
                                                     LogUtils.debugLog("Failed with Random Hittable");
@@ -937,7 +939,7 @@ public class CommissionMacro extends Macro {
                                                 return;
                                             }
                                             // Checking if rotation is finished
-                                            if (AngleUtils.isDiffLowerThan(yawPitchGoal.getLeft(), yawPitchGoal.getRight(), 0.01f)) {
+                                            if (AngleUtils.isDiffLowerThan(yawPitchGoal.getLeft(), yawPitchGoal.getRight(), 0.1f)) {
                                                 rotation.reset();
                                                 rotation.completed = true;
                                             }
@@ -1080,12 +1082,18 @@ public class CommissionMacro extends Macro {
                                                 // Checking Arrive Fail Counter
                                                 if (navigatingArriveFailCounter > 5) {
                                                     if (BlockUtils.getPlayerLoc().down().equals((Object) previousWarpDestination)) {
-                                                        // Enabling mana regen
-                                                        regenMana = true;
-                                                        manaRegenTimer.reset();
+                                                        if (mc.thePlayer.rayTrace(61, 1).getBlockPos().equals((Object) currentWarpDestination)) {
+                                                            // Enabling mana regen
+                                                            regenMana = true;
+                                                            manaRegenTimer.reset();
 
-                                                        // Switching to next action
-                                                        warpToEmissaryState = WarpToEmissaryState.CALCULATE_LOOK;
+                                                            // Switching to next action
+                                                            warpToEmissaryState = WarpToEmissaryState.WARP;
+                                                        } else {
+                                                            // Switching to the next action
+                                                            nextActionDelay.reset();
+                                                            warpToEmissaryState = WarpToEmissaryState.CALCULATE_LOOK;
+                                                        }
                                                     } else {
                                                         // Switching to next action
                                                         nextActionDelay.reset();
@@ -1458,6 +1466,8 @@ public class CommissionMacro extends Macro {
                                     // Switching to next action
                                     nextActionDelay.reset();
                                     navigatingState = NavigatingState.LOOK;
+                                    lookTimeIncrement = MathUtils.randomNum(0, 100);
+                                    LogUtils.debugLog("Rotating to Yaw / Pitch");
                                 } else {
                                     // Trying very accurate Hittable
                                     LogUtils.debugLog("Failed with Random Hittable");
@@ -1472,7 +1482,6 @@ public class CommissionMacro extends Macro {
                                         yawPitchGoal = VectorUtils.vec3ToRotation(veryAccurateLookVec);
 
                                         // Setting up Look Variables
-                                        failedLookingCounter = 0;
                                         rotation.completed = false;
                                         lookFailTimer.reset();
 
@@ -1530,7 +1539,7 @@ public class CommissionMacro extends Macro {
                                 return;
                             }
                             // Checking if rotation is finished
-                            if (AngleUtils.isDiffLowerThan(yawPitchGoal.getLeft(), yawPitchGoal.getRight(), 0.01f)) {
+                            if (AngleUtils.isDiffLowerThan(yawPitchGoal.getLeft(), yawPitchGoal.getRight(), 0.1f)) {
                                 rotation.reset();
                                 rotation.completed = true;
                             }
@@ -1658,12 +1667,18 @@ public class CommissionMacro extends Macro {
                                 // Checking Arrive Fail Counter
                                 if (navigatingArriveFailCounter > 5) {
                                     if (BlockUtils.getPlayerLoc().down().equals((Object) previousWarpDestination)) {
-                                        // Enabling mana regen
-                                        regenMana = true;
-                                        manaRegenTimer.reset();
+                                        if (mc.thePlayer.rayTrace(61, 1).getBlockPos().equals((Object) currentWarpDestination)) {
+                                            // Enabling mana regen
+                                            regenMana = true;
+                                            manaRegenTimer.reset();
 
-                                        // Switching to next action
-                                        navigatingState = NavigatingState.CALCULATE_LOOK;
+                                            // Switching to next action
+                                            navigatingState = NavigatingState.WARP;
+                                        } else {
+                                            // Switching to the next action
+                                            nextActionDelay.reset();
+                                            navigatingState = NavigatingState.CALCULATE_LOOK;
+                                        }
                                     } else {
                                         // Switching to next action
                                         nextActionDelay.reset();

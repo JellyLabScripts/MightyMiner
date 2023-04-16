@@ -18,12 +18,32 @@ import java.util.ArrayList;
 public class PlayerUtils {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
+
+    public static BlockPos playerBlockPos() {
+        return mc.thePlayer.getPosition();
+    }
+
+    public static Vec3 playerEyePosVec() {
+        return mc.thePlayer.getPositionEyes(1.0f);
+    }
+
+    public static float playerEyeHeight() {
+        return mc.thePlayer.getEyeHeight();
+    }
+
+    public static Vec3 playerPosVec() {
+        return mc.thePlayer.getPositionVector();
+    }
+
+    public static Vec3 playerLookVec() {
+        return mc.thePlayer.getLookVec();
+    }
+
     public static boolean hasStoppedMoving(){
         return mc.thePlayer.posX - mc.thePlayer.lastTickPosX == 0 &&
                 mc.thePlayer.posY - mc.thePlayer.lastTickPosY == 0 &&
                 mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ == 0;
     }
-
     public static boolean hasOpenContainer() {
         return mc.currentScreen != null && !(mc.currentScreen instanceof net.minecraft.client.gui.GuiChat);
     }
@@ -165,11 +185,20 @@ public class PlayerUtils {
         for(Entity e :  mc.theWorld.getLoadedEntityList()){
             if (!NpcUtil.isNpc(e)) continue;
             if(e.getDistanceToEntity(mc.thePlayer) < radius) {
-                LogUtils.debugLog("Emissary found");
                 return true;
             }
         }
         return false;
+    }
+
+    public static Vec3 emissaryVec(int radius) {
+        for(Entity e :  mc.theWorld.getLoadedEntityList()) {
+            if (!NpcUtil.isNpc(e)) continue;
+            if (e.getDistanceToEntity(mc.thePlayer) < radius) {
+                return e.getPositionEyes(1.0f);
+            }
+        }
+        return null;
     }
 
     public static boolean hasMobsInRadius(int radius, String mobClass) {

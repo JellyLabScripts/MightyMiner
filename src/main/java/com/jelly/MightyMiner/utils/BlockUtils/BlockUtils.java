@@ -4,11 +4,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
@@ -113,6 +115,14 @@ public class BlockUtils {
         } else {
             return 0;
         }
+    }
+
+    public static IBlockState getBlockState(BlockPos pos) {
+        return mc.theWorld.getBlockState(pos);
+    }
+
+    public static WorldClient getWorld() {
+        return mc.theWorld;
     }
 
     @SuppressWarnings("UnstableApiUsage")

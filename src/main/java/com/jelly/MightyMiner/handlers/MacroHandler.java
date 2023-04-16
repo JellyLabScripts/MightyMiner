@@ -29,9 +29,20 @@ public class MacroHandler {
     public static boolean pickaxeSkillReady = true;
 
     public static boolean enabled = false;
+
+    public static boolean finishedCommission = false;
+
+    public static boolean restartHappening = false;
+
+    public static boolean goldenGoblin = true;
+
+    public static boolean kickOccurred = false;
+
     static BlockRenderer blockRenderer = new BlockRenderer();
 
     public static boolean miningSpeedActive = false;
+
+    public static boolean outOfSoulflow = false;
 
     List<BlockPos> coords;
 
@@ -43,6 +54,7 @@ public class MacroHandler {
         macros.add(new PowderMacro());
         macros.add(new MithrilMacro());
         macros.add(new AOTVMacro());
+        macros.add(new CommissionMacro());
     }
 
     @SubscribeEvent
@@ -115,6 +127,24 @@ public class MacroHandler {
                 LogUtils.addMessage("Auto renewing Crystal Hollows pass");
                 mc.thePlayer.sendChatMessage("/purchasecrystallhollowspass");
             }
+        }
+        if (message.contains("Commission")) {
+            finishedCommission = true;
+        }
+
+        if (message.contains("Soulflow")) {
+            outOfSoulflow = true;
+        }
+        if (message.contains("Evacuating")) {
+            restartHappening = true;
+        }
+
+        if (message.contains("A Golden Goblin")) {
+            goldenGoblin = true;
+        }
+
+        if (message.contains("A kick occurred in your connection")) {
+            kickOccurred = true;
         }
 
         for (Macro macro : macros) {

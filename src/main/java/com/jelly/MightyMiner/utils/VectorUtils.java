@@ -15,7 +15,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
-import org.graalvm.compiler.loop.MathUtil;
 
 public class VectorUtils {
 

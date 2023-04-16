@@ -3,7 +3,9 @@ package com.jelly.MightyMiner.features;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.events.ReceivePacketEvent;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.macros.macros.CommissionMacro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
@@ -55,6 +57,7 @@ public class Failsafes {
 
     @SubscribeEvent
     public void onWorldChange(WorldEvent.Load event) {
+        if (CommissionMacro.isWarping()) return;
         if (mc.thePlayer == null || mc.theWorld == null)
             return;
 
@@ -98,6 +101,7 @@ public class Failsafes {
 
     @SubscribeEvent
     public void onPacket(ReceivePacketEvent event) {
+        if (CommissionMacro.isWarping()) return;
         if (!MightyMiner.config.stopMacrosOnRotationCheck) return;
         if (macros.stream().noneMatch(Macro::isEnabled)) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;

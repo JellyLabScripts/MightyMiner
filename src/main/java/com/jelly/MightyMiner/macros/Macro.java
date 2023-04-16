@@ -49,7 +49,11 @@ public abstract class Macro {
         return enabled;
     }
 
-    public void onBlockChange(BlockChangeEvent event){}
+    public void onBlockChange(BlockChangeEvent event){
+        if (event.pos.equals((Object) mc.thePlayer.rayTrace(5, 1).getBlockPos()) && !event.old.getBlock().equals(event.update.getBlock())) {
+            CommissionMacro.brokeBlock = true;
+        }
+    }
 
     public void checkMiningSpeedBoost() {
 

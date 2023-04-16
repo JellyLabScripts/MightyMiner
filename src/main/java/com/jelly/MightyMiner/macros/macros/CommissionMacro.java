@@ -333,7 +333,7 @@ public class CommissionMacro extends Macro {
 
     private ArrayList<Integer> priorities = new ArrayList<>();
 
-    private BlockPos chosenBlock = null;
+    public static BlockPos chosenBlock = null;
 
     private Pair<Float, Float> rotateTo = null;
 
@@ -367,11 +367,14 @@ public class CommissionMacro extends Macro {
 
     private static boolean isWarping = false;
 
+    public static boolean brokeBlock = false;
+
 
 
     @Override
     protected void onEnable() {
         // Initializing variables
+        brokeBlock = false;
         regenMana = false;
         occupiedCounter = 0;
         disableOnLimbo = MightyMiner.config.stopOnLimbo;
@@ -650,6 +653,7 @@ public class CommissionMacro extends Macro {
                     miningState = MiningState.NONE;
 
                     // Resetting Variables
+                    brokeBlock = false;
                     isWarping = true;
                     regenMana = false;
                     keyPressed = false;
@@ -1983,8 +1987,8 @@ public class CommissionMacro extends Macro {
                                     return;
                                 }
                                 mc.thePlayer.inventory.currentItem = pickaxeSlot;
-                                MovingObjectPosition bedrockCheck = mc.thePlayer.rayTrace(4, 1);
-                                if (bedrockCheck.getBlockPos().equals((Object) chosenBlock) && mc.theWorld.getBlockState(bedrockCheck.getBlockPos()).equals(Blocks.bedrock.getDefaultState())) {
+                                if (brokeBlock) {
+                                    brokeBlock = false;
                                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                                     miningFor.reset();
                                     LogUtils.debugLog("Mined Block");

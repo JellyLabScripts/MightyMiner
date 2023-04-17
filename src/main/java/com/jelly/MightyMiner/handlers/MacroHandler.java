@@ -48,8 +48,6 @@ public class MacroHandler {
 
     public static GameState gameState = new GameState();
 
-    public static boolean commMacroRunning = false;
-
 
     public static void initializeMacro(){
         macros.add(new GemstoneMacro());
@@ -136,7 +134,7 @@ public class MacroHandler {
         if (message.contains("Soulflow")) {
             outOfSoulflow = true;
         }
-        if (message.contains("Evacuating") || message.contains("Game Update") || message.contains("This server will restart soon")) {
+        if (message.contains("Evacuating") || message.contains("Update") || message.contains("Reboot")) {
             restartHappening = true;
         }
 

@@ -102,6 +102,7 @@ public class Failsafes {
     @SubscribeEvent
     public void onPacket(ReceivePacketEvent event) {
         if (CommissionMacro.isWarping()) return;
+        if (Macro.brokeBlockUnderPlayer) return;
         if (!MightyMiner.config.stopMacrosOnRotationCheck) return;
         if (macros.stream().noneMatch(Macro::isEnabled)) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;

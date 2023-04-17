@@ -104,7 +104,7 @@ public class Failsafes {
     @SubscribeEvent
     public void onPacket(ReceivePacketEvent event) {
         if (CommissionMacro.isWarping()) return;
-        if (BlockUtils.getBlockState(BlockUtils.getPlayerLoc().down()).getBlock().equals(Blocks.bedrock) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc()).getBlock().equals(Blocks.bedrock))
+        if (BlockUtils.getBlockState(BlockUtils.getPlayerLoc().down()).getBlock().equals(Blocks.bedrock) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc()).getBlock().equals(Blocks.bedrock) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc().down()).getBlock().equals(Blocks.air) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc()).getBlock().equals(Blocks.air))
         if (Macro.brokeBlockUnderPlayer) return;
         if (!MightyMiner.config.stopMacrosOnRotationCheck) return;
         if (macros.stream().noneMatch(Macro::isEnabled)) return;

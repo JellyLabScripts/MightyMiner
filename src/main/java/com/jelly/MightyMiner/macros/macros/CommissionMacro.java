@@ -1894,7 +1894,7 @@ public class CommissionMacro extends Macro {
                                         }
                                     }
 
-                                    Pair<Float, BlockPos> closestDistanceToLast = Pair.of((float) (new Vec3(chosenBlockType.get(0).getX() + 0.5d, chosenBlockType.get(0).getY() + 0.5d, chosenBlockType.get(0).getZ() + 0.5d).distanceTo(new Vec3(mc.thePlayer.rayTrace(5, 1).getBlockPos()))), chosenBlockType.get(0));
+                                    Pair<Float, BlockPos> closestDistanceToLast = Pair.of((float) (new Vec3(chosenBlockType.get(0).getX() + 0.5d, chosenBlockType.get(0).getY() + 0.5d, chosenBlockType.get(0).getZ() + 0.5d).distanceTo(new Vec3(mc.thePlayer.rayTrace(5, 1).getBlockPos().getX() + 0.5d, mc.thePlayer.rayTrace(5, 1).getBlockPos().getY() + 0.5d,mc.thePlayer.rayTrace(5, 1).getBlockPos().getZ() + 0.5d))), chosenBlockType.get(0));
                                     for (BlockPos blockPos: chosenBlockType) {
                                         Vec3 blockVec = new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d);
                                         BlockPos playerLookingAt = mc.thePlayer.rayTrace(5, 1).getBlockPos();
@@ -1922,7 +1922,6 @@ public class CommissionMacro extends Macro {
                                         lookingFor.reset();
                                         rotation.completed = false;
                                         lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
-                                        return;
                                     } else {
                                         Vec3 lookVec2 = VectorUtils.getVeryAccurateHittableHitVec(chosenBlock);
                                         if (lookVec2 != null) {
@@ -1945,8 +1944,8 @@ public class CommissionMacro extends Macro {
                                             LogUtils.debugLog("No look found");
                                             blacklistedBlocks.add(chosenBlock);
                                         }
-                                        return;
                                     }
+                                    return;
                                 }
                                 LogUtils.addMessage("No Mithril found");
                                 searchCoolDown.reset();

@@ -7,10 +7,12 @@ import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.CommissionMacro;
 import com.jelly.MightyMiner.player.Rotation;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Timer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.init.Blocks;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.Tuple;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -102,6 +104,7 @@ public class Failsafes {
     @SubscribeEvent
     public void onPacket(ReceivePacketEvent event) {
         if (CommissionMacro.isWarping()) return;
+        if (BlockUtils.getBlockState(BlockUtils.getPlayerLoc().down()).getBlock().equals(Blocks.bedrock) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc()).getBlock().equals(Blocks.bedrock))
         if (Macro.brokeBlockUnderPlayer) return;
         if (!MightyMiner.config.stopMacrosOnRotationCheck) return;
         if (macros.stream().noneMatch(Macro::isEnabled)) return;

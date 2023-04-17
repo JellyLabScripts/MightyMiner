@@ -103,14 +103,14 @@ public class Failsafes {
 
     @SubscribeEvent
     public void onPacket(ReceivePacketEvent event) {
-        if (CommissionMacro.isWarping()) return;
-        if (BlockUtils.getBlockState(BlockUtils.getPlayerLoc().down()).getBlock().equals(Blocks.bedrock) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc()).getBlock().equals(Blocks.bedrock) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc().down()).getBlock().equals(Blocks.air) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc()).getBlock().equals(Blocks.air)) return;
-        if (Macro.brokeBlockUnderPlayer) return;
         if (!MightyMiner.config.stopMacrosOnRotationCheck) return;
         if (macros.stream().noneMatch(Macro::isEnabled)) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;
         if (!(event.packet instanceof S08PacketPlayerPosLook)) return;
         if (mc.thePlayer.getHeldItem() != null && Arrays.stream(teleportItems).anyMatch(i -> mc.thePlayer.getHeldItem().getDisplayName().contains(i))) return;
+        if (CommissionMacro.isWarping()) return;
+        if (Macro.brokeBlockUnderPlayer) return;
+        if (mc.theWorld != null && mc.thePlayer != null && (BlockUtils.getBlockState(BlockUtils.getPlayerLoc()).getBlock().equals(Blocks.bedrock) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc().down()).getBlock().equals(Blocks.bedrock) || BlockUtils.getBlockState(BlockUtils.getPlayerLoc()).getBlock().equals(Blocks.air) && BlockUtils.getBlockState(BlockUtils.getPlayerLoc().down()).getBlock().equals(Blocks.air))) return;
 
         if (rotationChecks > 2) {
             DisableMacros();

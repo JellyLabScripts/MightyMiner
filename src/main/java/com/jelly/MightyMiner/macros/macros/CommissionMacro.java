@@ -1,61 +1,33 @@
 package com.jelly.MightyMiner.macros.macros;
 
-import cc.polyfrost.oneconfig.libs.checker.units.qual.C;
-import cc.polyfrost.oneconfig.libs.checker.units.qual.K;
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
-import com.jelly.MightyMiner.baritone.automine.config.MiningType;
-import com.jelly.MightyMiner.config.aotv.AOTVWaypointsStructs;
-import com.jelly.MightyMiner.features.FuelFilling;
-import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
-import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.*;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
-import com.jelly.MightyMiner.utils.Utils.ReflectionUtils;
-import jdk.internal.net.http.common.Log;
-import kotlinx.atomicfu.TraceBase;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockPrismarine;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiInventory;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.util.*;
-import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.world.NoteBlockEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraft.entity.Entity;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
-import org.lwjgl.Sys;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,11 +35,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.concurrent.ThreadLocalRandom;
-import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
 
-import static com.jelly.MightyMiner.handlers.KeybindHandler.*;
 
 public class CommissionMacro extends Macro {
     private static class Target {

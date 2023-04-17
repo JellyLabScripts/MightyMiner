@@ -211,6 +211,7 @@ public class CommissionMacro extends Macro {
     }
 
     public enum MiningState {
+        VISIBLE_BLOCKS,
         SEARCH,
         LOOK,
         MINE,
@@ -366,6 +367,8 @@ public class CommissionMacro extends Macro {
     private int occupiedCounter = 0;
 
     private static boolean isWarping = false;
+
+    private ArrayList<BlockPos> visibleBlocks = new ArrayList<>();
 
 
 
@@ -1714,7 +1717,7 @@ public class CommissionMacro extends Macro {
                         blacklistedBlocks.clear();
                         rotateTo = null;
                         chosenBlock = null;
-                        miningState = MiningState.SEARCH;
+                        miningState = MiningState.VISIBLE_BLOCKS;
                         occupiedCounter = 0;
                         priorities.clear();
                         priorities.add(0);
@@ -1732,7 +1735,7 @@ public class CommissionMacro extends Macro {
                         rotateTo = null;
                         chosenBlock = null;
                         lastChosenBlock = null;
-                        miningState = MiningState.SEARCH;
+                        miningState = MiningState.VISIBLE_BLOCKS;
                         occupiedCounter = 0;
                         priorities.clear();
                         priorities.add(3);
@@ -1849,6 +1852,18 @@ public class CommissionMacro extends Macro {
                 switch (typeOfCommission) {
                     case MINING_COMM:
                         switch (miningState) {
+                            case VISIBLE_BLOCKS:
+                                visibleBlocks.clear();
+                                for (BlockPos blockPos: BlockPos.getAllInBox(new BlockPos(mc.thePlayer.getPositionEyes(1.0f)).subtract(new BlockPos(4, 4, 4)), new BlockPos(mc.thePlayer.getPositionEyes(1.0f)).add(new BlockPos(4, 4, 4)))) {
+                                    if (VectorUtils.getHittableHitVec(blockPos) != null) {
+                                        visibleBlocks.add(blockPos);
+                                    }
+                                }
+
+                                // Switching to next state
+                                nextActionDelay.reset();
+                                miningState = MiningState.SEARCH;
+                                break;
                             case SEARCH:
                                 if (!searchCoolDown.hasReached(1500)) return;
                                 int range = 4;
@@ -1866,7 +1881,7 @@ public class CommissionMacro extends Macro {
                                             IBlockState blockState = mc.theWorld.getBlockState(blockPos);
                                             if (!(!mc.theWorld.getBlockState(blockPos.down()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.up()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.south()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.north()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.west()).getBlock().equals(Blocks.air)  && !mc.theWorld.getBlockState(blockPos.east()).getBlock().equals(Blocks.air))) {
                                                 if (!BlockUtils.getPlayerLoc().down().equals((Object) blockPos)) {
-                                                    if (VectorUtils.getHittableHitVec(blockPos) != null) {
+                                                    if (visibleBlocks.contains((Object) blockPos)) {
                                                         if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.GRAY))
                                                                 || blockState.equals(Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.CYAN))) {
                                                             greyBlocks.add(blockPos);

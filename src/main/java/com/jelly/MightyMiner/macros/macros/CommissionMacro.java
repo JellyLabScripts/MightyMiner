@@ -672,6 +672,7 @@ public class CommissionMacro extends Macro {
                     stuckAtShootCounter = 0;
                     blockedVisionCounter = 0;
                     lookingForNewTargetCounter = 0;
+                    occupiedCounter = 0;
 
                     // Resetting Timers
                     nextActionDelay.reset();
@@ -1714,6 +1715,7 @@ public class CommissionMacro extends Macro {
                         rotateTo = null;
                         chosenBlock = null;
                         miningState = MiningState.SEARCH;
+                        occupiedCounter = 0;
                         priorities.clear();
                         priorities.add(0);
                         priorities.add(1);
@@ -1731,6 +1733,7 @@ public class CommissionMacro extends Macro {
                         chosenBlock = null;
                         lastChosenBlock = null;
                         miningState = MiningState.SEARCH;
+                        occupiedCounter = 0;
                         priorities.clear();
                         priorities.add(3);
                         priorities.add(0);
@@ -1743,6 +1746,7 @@ public class CommissionMacro extends Macro {
                         // Setting up Slayer Macro
                         mc.thePlayer.inventory.currentItem = weaponSlot;
                         LogUtils.debugLog("Setting up Slayer Macro");
+                        occupiedCounter = 0;
                         stuckAtShootCounter = 0;
                         blockedVisionCounter = 0;
                         lookingForNewTargetCounter = 0;
@@ -1833,9 +1837,11 @@ public class CommissionMacro extends Macro {
                         // Too many players nearby
                         LogUtils.debugLog("Too many players nearby");
 
-                        // Switching action to start
+                        // ReWarp
+                        isWarping = true;
                         nextActionDelay.reset();
-                        comissionState = State.SETUP;
+                        reWarpState = ReWarpState.WARP_HUB;
+                        return;
                     }
                     nextActionDelay.reset();
                 }

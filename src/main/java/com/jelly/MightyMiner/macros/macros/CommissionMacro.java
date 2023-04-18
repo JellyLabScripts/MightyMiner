@@ -1,60 +1,35 @@
 package com.jelly.MightyMiner.macros.macros;
 
-import cc.polyfrost.oneconfig.libs.checker.units.qual.C;
-import cc.polyfrost.oneconfig.libs.checker.units.qual.K;
+
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
-import com.jelly.MightyMiner.baritone.automine.config.MiningType;
-import com.jelly.MightyMiner.config.aotv.AOTVWaypointsStructs;
 import com.jelly.MightyMiner.features.FuelFilling;
-import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
-import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.*;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
-import com.jelly.MightyMiner.utils.Utils.ReflectionUtils;
-import kotlinx.atomicfu.TraceBase;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockPrismarine;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiInventory;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.util.*;
-import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.world.NoteBlockEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraft.entity.Entity;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
-import org.lwjgl.Sys;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,11 +37,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.concurrent.ThreadLocalRandom;
-import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
 
-import static com.jelly.MightyMiner.handlers.KeybindHandler.*;
 
 public class CommissionMacro extends Macro {
     private static class Target {
@@ -211,6 +182,7 @@ public class CommissionMacro extends Macro {
     }
 
     public enum MiningState {
+        VISIBLE_BLOCKS,
         SEARCH,
         LOOK,
         MINE,
@@ -366,6 +338,8 @@ public class CommissionMacro extends Macro {
     private int occupiedCounter = 0;
 
     private static boolean isWarping = false;
+
+    private ArrayList<BlockPos> visibleBlocks = new ArrayList<>();
 
 
 
@@ -672,6 +646,7 @@ public class CommissionMacro extends Macro {
                     stuckAtShootCounter = 0;
                     blockedVisionCounter = 0;
                     lookingForNewTargetCounter = 0;
+                    occupiedCounter = 0;
 
                     // Resetting Timers
                     nextActionDelay.reset();
@@ -1713,7 +1688,8 @@ public class CommissionMacro extends Macro {
                         blacklistedBlocks.clear();
                         rotateTo = null;
                         chosenBlock = null;
-                        miningState = MiningState.SEARCH;
+                        miningState = MiningState.VISIBLE_BLOCKS;
+                        occupiedCounter = 0;
                         priorities.clear();
                         priorities.add(0);
                         priorities.add(1);
@@ -1730,7 +1706,8 @@ public class CommissionMacro extends Macro {
                         rotateTo = null;
                         chosenBlock = null;
                         lastChosenBlock = null;
-                        miningState = MiningState.SEARCH;
+                        miningState = MiningState.VISIBLE_BLOCKS;
+                        occupiedCounter = 0;
                         priorities.clear();
                         priorities.add(3);
                         priorities.add(0);
@@ -1743,6 +1720,7 @@ public class CommissionMacro extends Macro {
                         // Setting up Slayer Macro
                         mc.thePlayer.inventory.currentItem = weaponSlot;
                         LogUtils.debugLog("Setting up Slayer Macro");
+                        occupiedCounter = 0;
                         stuckAtShootCounter = 0;
                         blockedVisionCounter = 0;
                         lookingForNewTargetCounter = 0;
@@ -1833,9 +1811,11 @@ public class CommissionMacro extends Macro {
                         // Too many players nearby
                         LogUtils.debugLog("Too many players nearby");
 
-                        // Switching action to start
+                        // ReWarp
+                        isWarping = true;
                         nextActionDelay.reset();
-                        comissionState = State.SETUP;
+                        reWarpState = ReWarpState.WARP_HUB;
+                        return;
                     }
                     nextActionDelay.reset();
                 }
@@ -1843,6 +1823,18 @@ public class CommissionMacro extends Macro {
                 switch (typeOfCommission) {
                     case MINING_COMM:
                         switch (miningState) {
+                            case VISIBLE_BLOCKS:
+                                visibleBlocks.clear();
+                                for (BlockPos blockPos: BlockPos.getAllInBox(new BlockPos(mc.thePlayer.getPositionEyes(1.0f)).subtract(new BlockPos(4, 4, 4)), new BlockPos(mc.thePlayer.getPositionEyes(1.0f)).add(new BlockPos(4, 4, 4)))) {
+                                    if (VectorUtils.getHittableHitVec(blockPos) != null) {
+                                        visibleBlocks.add(blockPos);
+                                    }
+                                }
+
+                                // Switching to next state
+                                nextActionDelay.reset();
+                                miningState = MiningState.SEARCH;
+                                break;
                             case SEARCH:
                                 if (!searchCoolDown.hasReached(1500)) return;
                                 int range = 4;
@@ -1860,7 +1852,7 @@ public class CommissionMacro extends Macro {
                                             IBlockState blockState = mc.theWorld.getBlockState(blockPos);
                                             if (!(!mc.theWorld.getBlockState(blockPos.down()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.up()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.south()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.north()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.west()).getBlock().equals(Blocks.air)  && !mc.theWorld.getBlockState(blockPos.east()).getBlock().equals(Blocks.air))) {
                                                 if (!BlockUtils.getPlayerLoc().down().equals((Object) blockPos)) {
-                                                    if (VectorUtils.getHittableHitVec(blockPos) != null) {
+                                                    if (visibleBlocks.contains((Object) blockPos)) {
                                                         if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.GRAY))
                                                                 || blockState.equals(Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.CYAN))) {
                                                             greyBlocks.add(blockPos);
@@ -1894,7 +1886,7 @@ public class CommissionMacro extends Macro {
                                         }
                                     }
 
-                                    Pair<Float, BlockPos> closestDistanceToLast = Pair.of((float) (new Vec3(chosenBlockType.get(0).getX() + 0.5d, chosenBlockType.get(0).getY() + 0.5d, chosenBlockType.get(0).getZ() + 0.5d).distanceTo(new Vec3(mc.thePlayer.rayTrace(5, 1).getBlockPos()))), chosenBlockType.get(0));
+                                    Pair<Float, BlockPos> closestDistanceToLast = Pair.of((float) (new Vec3(chosenBlockType.get(0).getX() + 0.5d, chosenBlockType.get(0).getY() + 0.5d, chosenBlockType.get(0).getZ() + 0.5d).distanceTo(new Vec3(mc.thePlayer.rayTrace(5, 1).getBlockPos().getX() + 0.5d, mc.thePlayer.rayTrace(5, 1).getBlockPos().getY() + 0.5d,mc.thePlayer.rayTrace(5, 1).getBlockPos().getZ() + 0.5d))), chosenBlockType.get(0));
                                     for (BlockPos blockPos: chosenBlockType) {
                                         Vec3 blockVec = new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d);
                                         BlockPos playerLookingAt = mc.thePlayer.rayTrace(5, 1).getBlockPos();
@@ -1922,7 +1914,6 @@ public class CommissionMacro extends Macro {
                                         lookingFor.reset();
                                         rotation.completed = false;
                                         lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
-                                        return;
                                     } else {
                                         Vec3 lookVec2 = VectorUtils.getVeryAccurateHittableHitVec(chosenBlock);
                                         if (lookVec2 != null) {
@@ -1945,8 +1936,8 @@ public class CommissionMacro extends Macro {
                                             LogUtils.debugLog("No look found");
                                             blacklistedBlocks.add(chosenBlock);
                                         }
-                                        return;
                                     }
+                                    return;
                                 }
                                 LogUtils.addMessage("No Mithril found");
                                 searchCoolDown.reset();

@@ -5,8 +5,7 @@ import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.events.BlockChangeEvent;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.MacroHandler;
-import com.jelly.MightyMiner.macros.macros.CommissionMacro;
-import com.jelly.MightyMiner.utils.LogUtils;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Packet;
@@ -14,12 +13,11 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraft.util.BlockPos;
 
 public abstract class Macro {
     protected Minecraft mc = Minecraft.getMinecraft();
     protected boolean enabled = false;
-    public static boolean brokeBlock = false;
+    public static boolean brokeBlockUnderPlayer = false;
 
     public void toggle() {
         enabled = !enabled;
@@ -54,9 +52,7 @@ public abstract class Macro {
     }
 
     public void onBlockChange(BlockChangeEvent event){
-        if (event.pos.equals((Object) mc.thePlayer.rayTrace(5, 1).getBlockPos()) && !event.old.getBlock().equals(event.update.getBlock())) {
-            brokeBlock = true;
-        }
+        brokeBlockUnderPlayer = event.pos.equals((Object) BlockUtils.getPlayerLoc().down()) || event.pos.equals((Object) BlockUtils.getPlayerLoc());
     }
 
     public void checkMiningSpeedBoost() {

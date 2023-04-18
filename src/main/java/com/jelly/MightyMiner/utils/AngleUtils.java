@@ -13,6 +13,8 @@ import net.minecraft.util.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 public class AngleUtils {
 
     static final List<Block> lookAtCenterBlocks = new ArrayList<Block>(){
@@ -56,6 +58,8 @@ public class AngleUtils {
     public static boolean shouldRotateClockwise(float start, float target) {
         return clockwiseDifference(get360RotationYaw(start), target) < 180;
     }
+
+
 
     public static float getClosest() {
         if (get360RotationYaw() < 45 || get360RotationYaw() > 315) {
@@ -159,6 +163,34 @@ public class AngleUtils {
         } else if(actualYaw1 - actualYaw2 < -180){
             return Math.abs(actualYaw2 - 360 - actualYaw1);
         } else return Math.abs(actualYaw1 - actualYaw2);
+    }
+
+    public static double getRotationDifference(final Vec3 vec) {
+        final Pair<Float, Float> rotation = getYawAndPitch(vec, true);
+
+        return getRotationDifference(rotation, Pair.of(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
+    }
+
+    public static double getRotationDifference(final Pair<Float, Float> a, final Pair<Float, Float> b) {
+        return Math.hypot(getAngleDifference(a.getKey(), b.getKey()), a.getValue() - b.getValue());
+    }
+
+    public static Pair<Float, Float> getYawAndPitch(final Vec3 vec, final boolean predict) {
+        final Vec3 eyesPos = new Vec3(mc.thePlayer.posX, mc.thePlayer.getEntityBoundingBox().minY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
+
+        if(predict) {
+            if(mc.thePlayer.onGround) {
+                eyesPos.addVector(mc.thePlayer.motionX, 0.0, mc.thePlayer.motionZ);
+            } else eyesPos.addVector(mc.thePlayer.motionX, mc.thePlayer.motionY, mc.thePlayer.motionZ);
+        }
+
+        final double diffX = vec.xCoord - eyesPos.xCoord;
+        final double diffY = vec.yCoord - eyesPos.yCoord;
+        final double diffZ = vec.zCoord - eyesPos.zCoord;
+
+        return Pair.of(AngleUtils.wrapAngleTo180((double) Math.toDegrees(Math.atan2(diffZ, diffX)) - 90F),
+                AngleUtils.wrapAngleTo180((double) (-Math.toDegrees(Math.atan2(diffY, Math.sqrt(diffX * diffX + diffZ * diffZ))))
+        ));
     }
 
     public static float getRequiredPitchSide(BlockPos blockLookingAt) {

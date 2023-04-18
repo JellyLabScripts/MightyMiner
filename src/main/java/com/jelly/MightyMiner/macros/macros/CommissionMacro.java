@@ -1,33 +1,60 @@
 package com.jelly.MightyMiner.macros.macros;
 
+import cc.polyfrost.oneconfig.libs.checker.units.qual.C;
+import cc.polyfrost.oneconfig.libs.checker.units.qual.K;
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
+import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
+import com.jelly.MightyMiner.config.aotv.AOTVWaypointsStructs;
+import com.jelly.MightyMiner.features.FuelFilling;
+import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.*;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
+import com.jelly.MightyMiner.utils.Utils.ReflectionUtils;
+import kotlinx.atomicfu.TraceBase;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockPrismarine;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.util.*;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.event.world.NoteBlockEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraft.entity.Entity;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.lwjgl.Sys;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +62,11 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.io.*;
+import java.awt.*;
+import java.awt.event.*;
 
+import static com.jelly.MightyMiner.handlers.KeybindHandler.*;
 
 public class CommissionMacro extends Macro {
     private static class Target {
@@ -260,6 +291,8 @@ public class CommissionMacro extends Macro {
 
     ArrayList<BlockPos> warpCoordinates = null;
 
+    private BlockPos previousWarpDestination = null;
+
     private BlockPos currentWarpDestination = null;
 
     private int warpCoordinateCounter = 0;
@@ -300,7 +333,7 @@ public class CommissionMacro extends Macro {
 
     private ArrayList<Integer> priorities = new ArrayList<>();
 
-    private BlockPos chosenBlock = null;
+    public static BlockPos chosenBlock = null;
 
     private Pair<Float, Float> rotateTo = null;
 
@@ -332,6 +365,8 @@ public class CommissionMacro extends Macro {
 
     private int occupiedCounter = 0;
 
+    private static boolean isWarping = false;
+
 
 
     @Override
@@ -342,7 +377,9 @@ public class CommissionMacro extends Macro {
         disableOnLimbo = MightyMiner.config.stopOnLimbo;
 
         // Resetting states
+        isWarping = true;
         reWarpState = ReWarpState.WARP_FORGE;
+        nextActionDelay.reset();
 
         // Check if player has pigeon
         LogUtils.debugLog("Checking if player has Pigeon");
@@ -399,7 +436,7 @@ public class CommissionMacro extends Macro {
     public void onTick(TickEvent.Phase phase) {
         switch (reWarpState) {
             case WARP_SB:
-                if (nextActionDelay.hasReached(1000)) {
+                if (nextActionDelay.hasReached(2000)) {
                     // Warping to Skyblock
                     LogUtils.debugLog("Warping to Skyblock");
                     mc.thePlayer.sendChatMessage("/skyblock");
@@ -410,7 +447,7 @@ public class CommissionMacro extends Macro {
                 }
                 return;
             case CHECK_SB:
-                if (nextActionDelay.hasReached(1000)) {
+                if (nextActionDelay.hasReached(2000)) {
                     // Check if player arrived at skyblock
                     if (BlockUtils.getPlayerLoc().down().equals((Object) new BlockPos(-49, 199, -122))) {
                         // Arrived at Skyblock
@@ -424,6 +461,7 @@ public class CommissionMacro extends Macro {
                         warpFailCounter = 0;
 
                         // Resetting State
+                        isWarping = false;
                         reWarpState = ReWarpState.NONE;
                     } else {
                         // Checking warp fail counter
@@ -446,7 +484,7 @@ public class CommissionMacro extends Macro {
                 }
                 return;
             case WARP_HUB:
-                if (nextActionDelay.hasReached(1000)) {
+                if (nextActionDelay.hasReached(2000)) {
                     // Warping to hub
                     LogUtils.debugLog("Warping to hub");
                     mc.thePlayer.sendChatMessage("/hub");
@@ -457,7 +495,7 @@ public class CommissionMacro extends Macro {
                 }
                 return;
             case CHECK_HUB:
-                if (nextActionDelay.hasReached(1000)) {
+                if (nextActionDelay.hasReached(2000)) {
                     // Check if player arrived at hub
                     if (BlockUtils.getPlayerLoc().down().equals((Object) new BlockPos(-3, 69, -70))) {
                         // Arrived at hub
@@ -468,6 +506,7 @@ public class CommissionMacro extends Macro {
 
                         // Switching to next action
                         nextActionDelay.reset();
+                        isWarping = true;
                         reWarpState = ReWarpState.WARP_FORGE;
                     } else {
                         // Checking warp fail counter
@@ -480,6 +519,7 @@ public class CommissionMacro extends Macro {
 
                             // Switching to previous action
                             nextActionDelay.reset();
+                            isWarping = true;
                             reWarpState = ReWarpState.WARP_HUB;
                         } else {
                             // Failed to warp to often
@@ -490,7 +530,7 @@ public class CommissionMacro extends Macro {
                 }
                 return;
             case WARP_FORGE:
-                if (nextActionDelay.hasReached(1000)) {
+                if (nextActionDelay.hasReached(2000)) {
                     // Warping to hub
                     LogUtils.debugLog("Warping to forge");
                     mc.thePlayer.sendChatMessage("/warpforge");
@@ -501,7 +541,7 @@ public class CommissionMacro extends Macro {
                 }
                 return;
             case CHECK_FORGE:
-                if (nextActionDelay.hasReached(1000)) {
+                if (nextActionDelay.hasReached(2000)) {
                     // Check if player arrived at forge
                     if (BlockUtils.getPlayerLoc().down().equals((Object) new BlockPos(0, 148, -69))) {
                         // Arrived at forge
@@ -515,6 +555,7 @@ public class CommissionMacro extends Macro {
                         warpFailCounter = 0;
 
                         // Resetting State
+                        isWarping = false;
                         reWarpState = ReWarpState.NONE;
                     } else {
                         // Checking warp fail counter
@@ -527,6 +568,7 @@ public class CommissionMacro extends Macro {
 
                             // Switching to previous action
                             nextActionDelay.reset();
+                            isWarping = true;
                             reWarpState = ReWarpState.WARP_FORGE;
                         } else {
                             // Failed to warp to often
@@ -543,13 +585,14 @@ public class CommissionMacro extends Macro {
         // Goblin raid at forge
         if (goblinRaidAtForge()) {
             LogUtils.debugLog("There is a goblin raid at the forge");
+            isWarping = true;
             reWarpState = ReWarpState.WARP_HUB;
         }
         
         // Out of Soulflow
         if (MacroHandler.outOfSoulflow) {
             MacroHandler.outOfSoulflow = false;
-            LogUtils.debugLog("Out of Soulflow");
+            LogUtils.addMessage("Out of Soulflow");
             MacroHandler.disableScript();
         }
 
@@ -568,6 +611,8 @@ public class CommissionMacro extends Macro {
         if (MacroHandler.restartHappening) {
             LogUtils.debugLog("Restart Happening");
             MacroHandler.restartHappening = false;
+            isWarping = true;
+            nextActionDelay.reset();
             reWarpState = ReWarpState.WARP_HUB;
         }
 
@@ -577,7 +622,7 @@ public class CommissionMacro extends Macro {
                 LogUtils.debugLog("Regenerating Mana");
                 nextActionDelay.reset();
             }
-            if (manaRegenTimer.hasReached(20000)) {
+            if (manaRegenTimer.hasReached(MightyMiner.config.manaRegenTime * 1000L)) {
                 regenMana = false;
             }
             return;
@@ -603,12 +648,12 @@ public class CommissionMacro extends Macro {
                     typeOfCommission = TypeOfCommission.NONE;
                     killingState = KillingState.SEARCHING;
                     miningState = MiningState.NONE;
-
-                    // Resetting Variables
+                    isWarping = true;
                     regenMana = false;
                     keyPressed = false;
                     warpCoordinates = null;
                     currentWarpDestination = null;
+                    previousWarpDestination = null;
                     yawPitchGoal = null;
                     lastChosenBlock = null;
                     warpCoordinateCounter = 0;
@@ -707,7 +752,7 @@ public class CommissionMacro extends Macro {
                                             failedOpeningPigeonCounter++;
 
                                             // Switching back to hold Pigeon action
-                                            LogUtils.addMessage("Trying again to open Royal Pigeon");
+                                            LogUtils.debugLog("Trying again to open Royal Pigeon");
                                             nextActionDelay.reset();
                                             openPigeonState = OpenPigeonState.HOLD_PIGEON;
                                         }
@@ -741,6 +786,9 @@ public class CommissionMacro extends Macro {
                                                 // Player arrived at Forge
                                                 LogUtils.debugLog("Player arrived at Forge");
 
+                                                // Resetting variables
+                                                isWarping = false;
+
                                                 // Sneaking
                                                 KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, true);
 
@@ -766,6 +814,7 @@ public class CommissionMacro extends Macro {
 
                                                     // Trying to warp again
                                                     nextActionDelay.reset();
+                                                    isWarping = true;
                                                     warpToEmissaryState = WarpToEmissaryState.WARP_TO_FORGE;
                                                 }
                                             }
@@ -775,6 +824,7 @@ public class CommissionMacro extends Macro {
                                         if (nextActionDelay.hasReached(100)) {
                                             // Resetting Variables
                                             currentWarpDestination = null;
+                                            previousWarpDestination = null;
                                             yawPitchGoal = null;
                                             failedLookingCounter = 0;
                                             failedLookingAtBlockCounter = 0;
@@ -786,6 +836,7 @@ public class CommissionMacro extends Macro {
                                             // Setting first warp destination
                                             warpCoordinateCounter = 0;
                                             LogUtils.debugLog("Setting first warp destination");
+                                            previousWarpDestination = new BlockPos(0, 148, -69);
                                             currentWarpDestination = warpCoordinates.get(warpCoordinateCounter);
 
                                             // Switching to the next action
@@ -814,6 +865,8 @@ public class CommissionMacro extends Macro {
                                                     // Switching to next action
                                                     nextActionDelay.reset();
                                                     warpToEmissaryState = WarpToEmissaryState.LOOK;
+                                                    lookTimeIncrement = MathUtils.randomNum(0, 100);
+                                                    LogUtils.debugLog("Rotating to Yaw / Pitch");
                                                 } else {
                                                     // Trying very accurate Hittable
                                                     LogUtils.debugLog("Failed with Random Hittable");
@@ -866,6 +919,8 @@ public class CommissionMacro extends Macro {
                                                         LogUtils.debugLog("Fell out of warp position (Attacked by something)");
 
                                                         // Re-Warping
+                                                        isWarping = true;
+                                                        nextActionDelay.reset();
                                                         reWarpState = ReWarpState.WARP_HUB;
                                                     } else {
                                                         // Did not fall out of spot
@@ -884,7 +939,7 @@ public class CommissionMacro extends Macro {
                                                 return;
                                             }
                                             // Checking if rotation is finished
-                                            if (AngleUtils.isDiffLowerThan(yawPitchGoal.getLeft(), yawPitchGoal.getRight(), 0.01f)) {
+                                            if (AngleUtils.isDiffLowerThan(yawPitchGoal.getLeft(), yawPitchGoal.getRight(), 0.1f)) {
                                                 rotation.reset();
                                                 rotation.completed = true;
                                             }
@@ -989,6 +1044,7 @@ public class CommissionMacro extends Macro {
                                                 if (warpCoordinateCounter < warpCoordinates.size()) {
                                                     // Setting next warp destination
                                                     LogUtils.debugLog("Setting next warp destination");
+                                                    previousWarpDestination = currentWarpDestination;
                                                     currentWarpDestination = warpCoordinates.get(warpCoordinateCounter);
 
                                                     // Switching to next action
@@ -1011,6 +1067,7 @@ public class CommissionMacro extends Macro {
                                                         emissaryState = EmissaryState.ROTATE_TO_EMISSARY;
 
                                                         // Resetting State
+                                                        isWarping = true;
                                                         warpToEmissaryState = WarpToEmissaryState.WARP_TO_FORGE;
                                                     } else {
                                                         // There is no emissary in radius 5
@@ -1024,12 +1081,25 @@ public class CommissionMacro extends Macro {
 
                                                 // Checking Arrive Fail Counter
                                                 if (navigatingArriveFailCounter > 5) {
-                                                    // Enabling mana regen
-                                                    regenMana = true;
-                                                    manaRegenTimer.reset();
+                                                    if (BlockUtils.getPlayerLoc().down().equals((Object) previousWarpDestination)) {
+                                                        if (mc.thePlayer.rayTrace(61, 1).getBlockPos().equals((Object) currentWarpDestination)) {
+                                                            // Enabling mana regen
+                                                            regenMana = true;
+                                                            manaRegenTimer.reset();
 
-                                                    // Trying to warp again
-                                                    warpToEmissaryState = WarpToEmissaryState.WARP_TO_FORGE;
+                                                            // Switching to next action
+                                                            warpToEmissaryState = WarpToEmissaryState.WARP;
+                                                        } else {
+                                                            // Switching to the next action
+                                                            nextActionDelay.reset();
+                                                            warpToEmissaryState = WarpToEmissaryState.CALCULATE_LOOK;
+                                                        }
+                                                    } else {
+                                                        // Switching to next action
+                                                        nextActionDelay.reset();
+                                                        isWarping = true;
+                                                        warpToEmissaryState = WarpToEmissaryState.WARP_TO_FORGE;
+                                                    }
                                                 } else {
                                                     // Incrementing Arrive Fail Counter
                                                     navigatingArriveFailCounter++;
@@ -1098,6 +1168,8 @@ public class CommissionMacro extends Macro {
                                                         LogUtils.debugLog("Fell out of warp position (Attacked by something)");
 
                                                         // Re-Warping
+                                                        nextActionDelay.reset();
+                                                        isWarping = true;
                                                         reWarpState = ReWarpState.WARP_HUB;
                                                     } else {
                                                         // Did not fall out of spot
@@ -1209,6 +1281,8 @@ public class CommissionMacro extends Macro {
                                                 nextActionDelay.reset();
 
                                                 // Rewarping
+                                                nextActionDelay.reset();
+                                                isWarping = true;
                                                 reWarpState = ReWarpState.WARP_HUB;
                                                 return;
                                             }
@@ -1285,6 +1359,7 @@ public class CommissionMacro extends Macro {
 
                         // Switching to next action
                         nextActionDelay.reset();
+                        isWarping = true;
                         comissionState = State.WARP_TO_FORGE;
                     } else {
                         // Wasn't able to determine commission
@@ -1309,6 +1384,9 @@ public class CommissionMacro extends Macro {
                     if (BlockUtils.getPlayerLoc().down().equals((Object) new BlockPos(0, 148, -69))) {
                         // Player arrived at Forge
                         LogUtils.debugLog("Player arrived at Forge");
+
+                        // Resetting variables
+                        isWarping = false;
 
                         // Sneaking
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, true);
@@ -1335,6 +1413,7 @@ public class CommissionMacro extends Macro {
 
                             // Trying to warp again
                             nextActionDelay.reset();
+                            isWarping = true;
                             comissionState = State.WARP_TO_FORGE;
                         }
                     }
@@ -1346,6 +1425,7 @@ public class CommissionMacro extends Macro {
                         if (nextActionDelay.hasReached(100)) {
                             // Resetting Variables
                             currentWarpDestination = null;
+                            previousWarpDestination = null;
                             yawPitchGoal = null;
                             failedLookingCounter = 0;
                             failedLookingAtBlockCounter = 0;
@@ -1357,6 +1437,7 @@ public class CommissionMacro extends Macro {
                             // Setting first warp destination
                             warpCoordinateCounter = 0;
                             LogUtils.debugLog("Setting first warp destination");
+                            previousWarpDestination = new BlockPos(0, 148, -69);
                             currentWarpDestination = warpCoordinates.get(warpCoordinateCounter);
 
                             // Switching to the next action
@@ -1385,6 +1466,8 @@ public class CommissionMacro extends Macro {
                                     // Switching to next action
                                     nextActionDelay.reset();
                                     navigatingState = NavigatingState.LOOK;
+                                    lookTimeIncrement = MathUtils.randomNum(0, 100);
+                                    LogUtils.debugLog("Rotating to Yaw / Pitch");
                                 } else {
                                     // Trying very accurate Hittable
                                     LogUtils.debugLog("Failed with Random Hittable");
@@ -1399,7 +1482,6 @@ public class CommissionMacro extends Macro {
                                         yawPitchGoal = VectorUtils.vec3ToRotation(veryAccurateLookVec);
 
                                         // Setting up Look Variables
-                                        failedLookingCounter = 0;
                                         rotation.completed = false;
                                         lookFailTimer.reset();
 
@@ -1437,6 +1519,8 @@ public class CommissionMacro extends Macro {
                                         LogUtils.debugLog("Fell out of warp position (Attacked by something)");
 
                                         // Re-Warping
+                                        nextActionDelay.reset();
+                                        isWarping = true;
                                         reWarpState = ReWarpState.WARP_HUB;
                                     } else {
                                         // Did not fall out of spot
@@ -1455,7 +1539,7 @@ public class CommissionMacro extends Macro {
                                 return;
                             }
                             // Checking if rotation is finished
-                            if (AngleUtils.isDiffLowerThan(yawPitchGoal.getLeft(), yawPitchGoal.getRight(), 0.01f)) {
+                            if (AngleUtils.isDiffLowerThan(yawPitchGoal.getLeft(), yawPitchGoal.getRight(), 0.1f)) {
                                 rotation.reset();
                                 rotation.completed = true;
                             }
@@ -1560,6 +1644,7 @@ public class CommissionMacro extends Macro {
                                 if (warpCoordinateCounter < warpCoordinates.size()) {
                                     // Setting next warp destination
                                     LogUtils.debugLog("Setting next warp destination");
+                                    previousWarpDestination = currentWarpDestination;
                                     currentWarpDestination = warpCoordinates.get(warpCoordinateCounter);
 
                                     // Switching to next action
@@ -1581,15 +1666,27 @@ public class CommissionMacro extends Macro {
 
                                 // Checking Arrive Fail Counter
                                 if (navigatingArriveFailCounter > 5) {
-                                    // Enabling mana regen
-                                    regenMana = true;
-                                    manaRegenTimer.reset();
+                                    if (BlockUtils.getPlayerLoc().down().equals((Object) previousWarpDestination)) {
+                                        if (mc.thePlayer.rayTrace(61, 1).getBlockPos().equals((Object) currentWarpDestination)) {
+                                            // Enabling mana regen
+                                            regenMana = true;
+                                            manaRegenTimer.reset();
 
-                                    // Trying to warp again
-                                    comissionState = State.WARP_TO_FORGE;
+                                            // Switching to next action
+                                            navigatingState = NavigatingState.WARP;
+                                        } else {
+                                            // Switching to the next action
+                                            nextActionDelay.reset();
+                                            navigatingState = NavigatingState.CALCULATE_LOOK;
+                                        }
+                                    } else {
+                                        // Switching to next action
+                                        nextActionDelay.reset();
+                                        comissionState = State.WARP_TO_FORGE;
 
-                                    // Resetting State
-                                    navigatingState = NavigatingState.GET_WARP_COORDINATES;
+                                        //Resetting state
+                                        navigatingState = NavigatingState.GET_WARP_COORDINATES;
+                                    }
                                 } else {
                                     // Incrementing Arrive Fail Counter
                                     navigatingArriveFailCounter++;
@@ -1660,6 +1757,15 @@ public class CommissionMacro extends Macro {
                 }
                 break;
             case COMMITTING:
+                if (typeOfCommission == TypeOfCommission.MINING_COMM) {
+                    if (MightyMiner.config.refuelWithAbiphone) {
+                        if (FuelFilling.isRefueling()) {
+                            return;
+                        }
+                    }
+                    checkMiningSpeedBoost();
+                }
+
                 if (nextActionDelay.hasReached(2500)) {
                     // Check if Commission is finished
                     if (finishedCommission()) {
@@ -1705,6 +1811,8 @@ public class CommissionMacro extends Macro {
                         if (occupiedCounter > 2) {
                             occupiedCounter = 0;
                             // ReWarp
+                            isWarping = true;
+                            nextActionDelay.reset();
                             reWarpState = ReWarpState.WARP_HUB;
                             return;
                         }
@@ -1797,7 +1905,7 @@ public class CommissionMacro extends Macro {
                                         }
                                     }
                                     chosenBlock = closestDistanceToLast.getRight();
-                                    Vec3 lookVec = VectorUtils.getVeryAccurateHittableHitVec(chosenBlock);
+                                    Vec3 lookVec = VectorUtils.getRandomHittable(chosenBlock);
                                     if (lookVec != null) {
                                         rotateTo = VectorUtils.vec3ToRotation(lookVec);
 
@@ -1814,11 +1922,31 @@ public class CommissionMacro extends Macro {
                                         lookingFor.reset();
                                         rotation.completed = false;
                                         lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
+                                        return;
                                     } else {
-                                        LogUtils.debugLog("No look found");
-                                        blacklistedBlocks.add(chosenBlock);
+                                        Vec3 lookVec2 = VectorUtils.getVeryAccurateHittableHitVec(chosenBlock);
+                                        if (lookVec2 != null) {
+                                            rotateTo = VectorUtils.vec3ToRotation(lookVec2);
+
+                                            if (rotateTo.getLeft() >= 180 || rotateTo.getLeft() <= -180) {
+                                                rotateTo = Pair.of((float) 179, rotateTo.getRight());
+                                            }
+                                            if (rotateTo.getRight() >= 90) {
+                                                rotateTo = Pair.of(rotateTo.getLeft(), (float) 89);
+                                            } else if (rotateTo.getRight() <= -90) {
+                                                rotateTo = Pair.of(rotateTo.getLeft(), (float) -89);
+                                            }
+                                            LogUtils.debugLog("Rotating to Yaw: " + rotateTo.getLeft() + ", Pitch: " + rotateTo.getRight());
+                                            miningState = MiningState.LOOK;
+                                            lookingFor.reset();
+                                            rotation.completed = false;
+                                            lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
+                                        } else {
+                                            LogUtils.debugLog("No look found");
+                                            blacklistedBlocks.add(chosenBlock);
+                                        }
+                                        return;
                                     }
-                                    return;
                                 }
                                 LogUtils.addMessage("No Mithril found");
                                 searchCoolDown.reset();
@@ -1868,8 +1996,7 @@ public class CommissionMacro extends Macro {
                                     return;
                                 }
                                 mc.thePlayer.inventory.currentItem = pickaxeSlot;
-                                MovingObjectPosition bedrockCheck = mc.thePlayer.rayTrace(4, 1);
-                                if (bedrockCheck.getBlockPos().equals((Object) chosenBlock) && mc.theWorld.getBlockState(bedrockCheck.getBlockPos()).equals(Blocks.bedrock.getDefaultState())) {
+                                if (mc.theWorld.getBlockState(mc.thePlayer.rayTrace(5, 1).getBlockPos()).getBlock().equals(Blocks.bedrock)) {
                                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                                     miningFor.reset();
                                     LogUtils.debugLog("Mined Block");
@@ -2182,5 +2309,8 @@ public class CommissionMacro extends Macro {
         return playerCount;
     }
 
+    public static boolean isWarping() {
+        return isWarping;
+    }
 
 }

@@ -206,6 +206,9 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Switch(name = "Stop on limbo", description = "Stop macro when getting kicked to limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")
     public boolean stopOnLimbo = true;
 
+    @VigilanceName(name = "Mana regeneration time in s", category = COMMISSION_MACRO, subcategory = "Failsafe")
+    @Slider(name = "Mana regeneration time in s", description = "Time to regenerate mana in s", category = COMMISSION_MACRO, subcategory = "Failsafe", max = 35, min = 1)
+    public int manaRegenTime = 20;
 
 
     @Page(name = "List of waypoints", location = PageLocation.TOP, category = AOTV_MACRO, subcategory = "Waypoints")

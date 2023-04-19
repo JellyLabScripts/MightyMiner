@@ -1849,21 +1849,23 @@ public class CommissionMacro extends Macro {
                                 for (BlockPos blockPos: BlockPos.getAllInBox(from, to)) {
                                     if (!blacklistedBlocks.contains((Object) blockPos)) {
                                         if (new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d).distanceTo(mc.thePlayer.getPositionEyes(1.0f)) < 4) {
-                                            IBlockState blockState = mc.theWorld.getBlockState(blockPos);
-                                            if (!(!mc.theWorld.getBlockState(blockPos.down()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.up()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.south()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.north()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.west()).getBlock().equals(Blocks.air)  && !mc.theWorld.getBlockState(blockPos.east()).getBlock().equals(Blocks.air))) {
-                                                if (!BlockUtils.getPlayerLoc().down().equals((Object) blockPos)) {
-                                                    if (visibleBlocks.contains((Object) blockPos)) {
-                                                        if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.GRAY))
-                                                                || blockState.equals(Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.CYAN))) {
-                                                            greyBlocks.add(blockPos);
-                                                        } else if (blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.ROUGH))
-                                                                || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.DARK))
-                                                                || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.BRICKS))) {
-                                                            prismarineBlocks.add(blockPos);
-                                                        } else if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.LIGHT_BLUE))) {
-                                                            lightBlueBlocks.add(blockPos);
-                                                        } else if (blockState.equals(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH))) {
-                                                            titaniumBlocks.add(blockPos);
+                                            if (AngleUtils.getRotationDifference(new Vec3(blockPos)) <= MightyMiner.config.playerFov) {
+                                                IBlockState blockState = mc.theWorld.getBlockState(blockPos);
+                                                if (!(!mc.theWorld.getBlockState(blockPos.down()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.up()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.south()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.north()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.west()).getBlock().equals(Blocks.air)  && !mc.theWorld.getBlockState(blockPos.east()).getBlock().equals(Blocks.air))) {
+                                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) blockPos)) {
+                                                        if (visibleBlocks.contains((Object) blockPos)) {
+                                                            if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.GRAY))
+                                                                    || blockState.equals(Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.CYAN))) {
+                                                                greyBlocks.add(blockPos);
+                                                            } else if (blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.ROUGH))
+                                                                    || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.DARK))
+                                                                    || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.BRICKS))) {
+                                                                prismarineBlocks.add(blockPos);
+                                                            } else if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.LIGHT_BLUE))) {
+                                                                lightBlueBlocks.add(blockPos);
+                                                            } else if (blockState.equals(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH))) {
+                                                                titaniumBlocks.add(blockPos);
+                                                            }
                                                         }
                                                     }
                                                 }

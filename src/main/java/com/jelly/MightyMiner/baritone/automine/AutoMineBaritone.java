@@ -54,7 +54,6 @@ public class AutoMineBaritone {
 
     ArrayList<ArrayList<IBlockState>> targetBlockType;
 
-    ArrayList<BlockData<EnumDyeColor>> targetBlockState;
     BlockPos targetBlockPos;
 
     volatile Path path;

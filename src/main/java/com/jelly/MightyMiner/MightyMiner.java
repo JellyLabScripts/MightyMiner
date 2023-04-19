@@ -98,7 +98,6 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new Failsafes());
         MinecraftForge.EVENT_BUS.register(new AOTVWaypointsCommands());
         MinecraftForge.EVENT_BUS.register(new PlayerESP());
-        MinecraftForge.EVENT_BUS.register(new DrawerUtils());
         KeybindHandler.initializeCustomKeybindings();
         MacroHandler.initializeMacro();
 

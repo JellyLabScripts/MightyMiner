@@ -242,8 +242,10 @@ public class BlockUtils {
         BlockPos from = new BlockPos(PlayerUtils.playerEyePosVec().add(rangeVec1));
         BlockPos to = new BlockPos(PlayerUtils.playerEyePosVec().add(rangeVec2));
         for (BlockPos blockPos: BlockPos.getAllInBox(from, to)) {
-            if (requiredBlock.contains(BlockUtils.getBlockState(blockPos)) && new Vec3(blockPos).distanceTo(PlayerUtils.playerEyePosVec()) < 4 && !forbiddenBlockPos.contains(blockPos) && blockPos.getY() < maxY && blockPos.getY() > minY && AngleUtils.getRotationDifference(getBlockCenter(blockPos)) <= MightyMiner.config.playerFov) {
-                foundBlocks.add(blockPos);
+            if (requiredBlock.contains(BlockUtils.getBlockState(blockPos)) && new Vec3(blockPos).distanceTo(PlayerUtils.playerEyePosVec()) < 4 && !forbiddenBlockPos.contains(blockPos) && blockPos.getY() < maxY && blockPos.getY() > minY) {
+                if (AngleUtils.getRotationDifference(getBlockCenter(blockPos)) <= MightyMiner.config.playerFov * (1.0f + (4 - new Vec3(blockPos).distanceTo(PlayerUtils.playerEyePosVec())) / 5) || mc.thePlayer.rotationPitch > 75 || mc.thePlayer.rotationPitch < -75) {
+                    foundBlocks.add(blockPos);
+                }
             }
         }
         return foundBlocks;

@@ -24,8 +24,6 @@ public abstract class Macro {
     protected Minecraft mc = Minecraft.getMinecraft();
     protected boolean enabled = false;
     public static boolean brokeBlockUnderPlayer = false;
-    public static boolean brokeNext = false;
-    public static boolean brokeCurrent = false;
 
     public void toggle() {
         enabled = !enabled;
@@ -60,16 +58,6 @@ public abstract class Macro {
     }
 
     public void onBlockChange(BlockChangeEvent event) {
-        /*
-        if (event.pos.equals((Object) MithrilMacro.getCurrent())) {
-            brokeCurrent = true;
-        }
-        if (event.pos.equals((Object) MithrilMacro.getNext())) {
-            brokeNext = true;
-        }
-        brokeBlockUnderPlayer = event.pos.equals((Object) BlockUtils.getPlayerLoc().down()) || event.pos.equals((Object) BlockUtils.getPlayerLoc());
-
-         */
     }
 
     public void checkMiningSpeedBoost() {

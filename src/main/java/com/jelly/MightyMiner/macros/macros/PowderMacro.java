@@ -8,11 +8,11 @@ import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.features.Autosell;
 import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
-import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.Box;
 import com.jelly.MightyMiner.utils.BlockUtils.OffsetBox;
@@ -20,7 +20,6 @@ import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import com.jelly.MightyMiner.utils.Utils.ThreadUtils;
-import ibxm.Player;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
@@ -471,7 +470,9 @@ public class PowderMacro extends Macro {
 
         ThreadUtils.sleep(200);
         Logger.log("Adding chest to queue");
-        List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 3, 0, -7, 7), new ArrayList<>(solvedOrSolvingChests), 0, 256, Blocks.chest);
+
+        List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 3, 0, -7, 7),
+                new ArrayList<>(solvedOrSolvingChests), 0, 256, new BlockData<>(Blocks.chest));
 
         if(foundBlocks.isEmpty()){
             LogUtils.addMessage("That chest was impossible to solve");

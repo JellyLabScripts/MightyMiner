@@ -11,7 +11,6 @@ import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 public class MithrilMacro extends Macro {
 
     AutoMineBaritone baritone;
-    ArrayList<BlockData<EnumDyeColor>> mithPriorityList = new ArrayList<>();
+    ArrayList<BlockData<?>> mithPriorityList = new ArrayList<>();
 
     @Override
     protected void onEnable() {
@@ -35,7 +34,6 @@ public class MithrilMacro extends Macro {
         }
 
         mithPriorityList.clear();
-//        mithPriorityList.addAll(BlockUtils.addData(new ArrayList<Block>(){{add((Block) Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH));}}));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2));
         mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3));
@@ -64,9 +62,6 @@ public class MithrilMacro extends Macro {
             case IDLE: case FAILED:
                 baritone.mineFor(mithPriorityList);
                 break;
-
-
-
         }
 
         checkMiningSpeedBoost();

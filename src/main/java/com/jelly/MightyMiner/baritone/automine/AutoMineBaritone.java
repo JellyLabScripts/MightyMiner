@@ -16,9 +16,7 @@ import com.jelly.MightyMiner.events.ChunkLoadEvent;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -28,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class AutoMineBaritone {
 
@@ -51,7 +48,7 @@ public class AutoMineBaritone {
     PathExecutor executor;
     BlockPos playerFloorPos;
 
-    ArrayList<BlockData<EnumDyeColor>> targetBlockType;
+    ArrayList<BlockData<?>> targetBlockType;
     BlockPos targetBlockPos;
 
     volatile Path path;
@@ -69,24 +66,21 @@ public class AutoMineBaritone {
     }
 
 
-    public final void mineFor(Block... block) {
-        mineFor(BlockUtils.addData(Arrays.stream(block).collect(Collectors.toCollection(ArrayList::new))));
+    //varargs are just for convenience here, all inside operations should be using ArrayList
+    public void mineFor(BlockData<?>... blockTypes) {
+        mineFor(new ArrayList<>(Arrays.asList(blockTypes)));
     }
 
-    @SafeVarargs
-    public final void mineFor(BlockData<EnumDyeColor>... blockType) {
-        mineFor(Arrays.stream(blockType).collect(Collectors.toCollection(ArrayList::new)));
-    }
-
-    public void mineFor(ArrayList<BlockData<EnumDyeColor>> blockType) {
+    public void mineFor(ArrayList<BlockData<?>> blockTypes) {
         Logger.playerLog("Starting to mine");
         registerEventListener();
         pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.MINE, false);
         path = null;
 
-        targetBlockType = blockType;
+        targetBlockType = blockTypes;
         startPathFinding();
     }
+
 
     public void goTo(BlockPos blockPos) {
         Logger.playerLog("Going to: " + blockPos.toString());

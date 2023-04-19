@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.utils.PlayerUtils;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
@@ -21,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.jelly.MightyMiner.utils.PlayerUtils.AnyBlockAroundVec3;
 import static com.jelly.MightyMiner.utils.AngleUtils.*;
@@ -141,10 +139,6 @@ public class BlockUtils {
         return blockCache.getUnchecked(blockPos);
     }
 
-    public static List<BlockPos> findBlock(int searchDiameter, Block... requiredBlock) {
-        return findBlock(searchDiameter, null, 0, 256, requiredBlock);
-    }
-
     public static ArrayList<BlockData<EnumDyeColor>> addData(ArrayList<Block> blocks){
         ArrayList<BlockData<EnumDyeColor>> requiredBlocksList = new ArrayList<>();
         for(Block block : blocks){
@@ -153,26 +147,28 @@ public class BlockUtils {
         return requiredBlocksList;
     }
 
-    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<BlockData<EnumDyeColor>> requiredBlocks) {
+    public static List<BlockPos> findBlockInCube(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlocks) {
+        ArrayList<BlockData<?>> blockDataList = new ArrayList<>();
+        for(Block b : requiredBlocks){
+            blockDataList.add(new BlockData<>(b));
+        }
+        return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
+                ,forbiddenBlockPos, minY, maxY, blockDataList);
+    }
+    public static List<BlockPos> findBlockInCube(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, BlockData<?>... requiredBlocks) {
+        return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
+                ,forbiddenBlockPos, minY, maxY, new ArrayList<>(Arrays.asList(requiredBlocks)));
+    }
+    public static List<BlockPos> findBlockInCube(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<BlockData<?>> requiredBlocks) {
         return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
                 ,forbiddenBlockPos, minY, maxY, requiredBlocks);
     }
-    @SafeVarargs
-    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, BlockData<EnumDyeColor>... requiredBlocks) {
-        return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
-                ,forbiddenBlockPos, minY, maxY, Arrays.stream(requiredBlocks).collect(Collectors.toCollection(ArrayList::new)));
-    }
-    public static List<BlockPos> findBlock(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlocks) {
-        return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
-                ,forbiddenBlockPos, minY, maxY, addData(Arrays.stream(requiredBlocks).collect(Collectors.toCollection(ArrayList::new))));
-    }
-    
-    public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlocks) {
-        return findBlock(searchBox, forbiddenBlockPos, minY, maxY, addData(Arrays.stream(requiredBlocks).collect(Collectors.toCollection(ArrayList::new))));
+
+    public static List<BlockPos> findBlock(Box box, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, BlockData<?>... requiredBlocks) {
+        return findBlock(box, forbiddenBlockPos, minY, maxY, new ArrayList<>(Arrays.asList(requiredBlocks)));
     }
 
-
-    public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<BlockData<EnumDyeColor>> requiredBlock) {
+    public static List<BlockPos> findBlock(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<BlockData<?>> requiredBlock) {
 
         List<BlockPos> foundBlocks = new ArrayList<>();
         if(forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty())
@@ -191,7 +187,14 @@ public class BlockUtils {
                         Block block = mc.theWorld.getBlockState(finalCurrentBlock).getBlock();
                         if (!blockData.block.equals(block)) return false;
                         if (blockData.requiredBlockStateValue == null) return true;
-                        return block.getMetaFromState(mc.theWorld.getBlockState(finalCurrentBlock)) == blockData.requiredBlockStateValue.getMetadata();
+
+                        if(blockData.requiredBlockStateValue instanceof EnumDyeColor)
+                            return block.getMetaFromState(mc.theWorld.getBlockState(finalCurrentBlock)) == ((EnumDyeColor) blockData.requiredBlockStateValue).getMetadata();
+                        if(blockData.requiredBlockStateValue instanceof BlockStone.EnumType)
+                            return block.getMetaFromState(mc.theWorld.getBlockState(finalCurrentBlock)) == ((BlockStone.EnumType) blockData.requiredBlockStateValue).getMetadata();
+
+                        return false;
+                        //Add more "data types" here when necessary
                     })) {
                         if (forbiddenBlockPos != null && !forbiddenBlockPos.isEmpty() && forbiddenBlockPos.contains(currentBlock))
                             continue;

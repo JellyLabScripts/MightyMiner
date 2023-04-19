@@ -13,7 +13,6 @@ import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import java.util.*;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 
 public class AStarPathFinder {
@@ -41,7 +40,7 @@ public class AStarPathFinder {
     }
 
 
-    public Path getPath(PathMode mode, boolean withPreference, ArrayList<BlockData<EnumDyeColor>> blockType) throws NoBlockException, NoPathException {
+    public Path getPath(PathMode mode, boolean withPreference, ArrayList<BlockData<?>> blockType) throws NoBlockException, NoPathException {
         initialize(mode);
 
         long pastTime = System.currentTimeMillis();
@@ -50,8 +49,8 @@ public class AStarPathFinder {
         List<BlockPos> foundBlocks = new ArrayList<>();
 
         if (withPreference) { // loop for EACH block type
-            for (BlockData<EnumDyeColor> block : blockType) {
-                foundBlocks = BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), block);
+            for (BlockData<?> block : blockType) {
+                foundBlocks = BlockUtils.findBlockInCube(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), block);
                 possiblePaths = getPossiblePaths(foundBlocks);
 
                 if (!possiblePaths.isEmpty()) {
@@ -63,7 +62,7 @@ public class AStarPathFinder {
             }
 
         } else { // 1 loop for ALL block types
-            foundBlocks = BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType);
+            foundBlocks = BlockUtils.findBlockInCube(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType);
             possiblePaths = getPossiblePaths(foundBlocks);
         }
 

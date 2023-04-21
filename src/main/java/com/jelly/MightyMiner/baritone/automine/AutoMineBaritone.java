@@ -16,10 +16,8 @@ import com.jelly.MightyMiner.events.ChunkLoadEvent;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -29,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class AutoMineBaritone {
 
@@ -52,7 +49,7 @@ public class AutoMineBaritone {
     PathExecutor executor;
     BlockPos playerFloorPos;
 
-    ArrayList<ArrayList<IBlockState>> targetBlockType;
+    ArrayList<BlockData<?>> targetBlockType;
 
     BlockPos targetBlockPos;
 
@@ -71,24 +68,23 @@ public class AutoMineBaritone {
     }
 
 
-    public final void mineFor(Block... block) {
-        mineFor(BlockUtils.addStateData((Arrays.stream(block).collect(Collectors.toCollection(ArrayList::new)))));
+
+    //varargs are just for convenience here, all inside operations should be using ArrayList
+    public void mineFor(BlockData<?>... blockTypes) {
+        mineFor(new ArrayList<>(Arrays.asList(blockTypes)));
     }
 
-    @SafeVarargs
-    public final void mineFor(ArrayList<IBlockState>... blockType) {
-        mineFor(Arrays.stream(blockType).collect(Collectors.toCollection(ArrayList::new)));
-    }
+    public void mineFor(ArrayList<BlockData<?>> blockTypes) {
 
-    public void mineFor(ArrayList<ArrayList<IBlockState>> blockType) {
         Logger.playerLog("Starting to mine");
         registerEventListener();
         pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.MINE, false);
         path = null;
 
-        targetBlockType = blockType;
+        targetBlockType = blockTypes;
         startPathFinding();
     }
+
 
     public void goTo(BlockPos blockPos) {
         Logger.playerLog("Going to: " + blockPos.toString());
@@ -100,6 +96,10 @@ public class AutoMineBaritone {
         startPathFinding();
     }
 
+
+    public void clearBlacklist(){
+        pathFinder.clearBlackList();
+    }
     public BaritoneState getState(){
         return this.state;
     }

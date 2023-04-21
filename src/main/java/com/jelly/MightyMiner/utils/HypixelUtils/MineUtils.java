@@ -17,48 +17,33 @@ public class MineUtils {
 
     public static EnumDyeColor[] gemPriority = {null, EnumDyeColor.RED, EnumDyeColor.PURPLE, EnumDyeColor.LIME, EnumDyeColor.LIGHT_BLUE, EnumDyeColor.ORANGE, EnumDyeColor.YELLOW, EnumDyeColor.MAGENTA};
 
-    public static ArrayList<ArrayList<IBlockState>> getGemListBasedOnPriority(int priority) {
-        ArrayList<ArrayList<IBlockState>> filter = new ArrayList<>();
-        ArrayList<IBlockState> glass = new ArrayList<>();
-        glass.add(Blocks.stained_glass.getDefaultState().withProperty(BlockColored.COLOR, gemPriority[priority]));
-        filter.add(glass);
-        if (MightyMiner.config.aotvMineGemstonePanes) {
-            ArrayList<IBlockState> pane = new ArrayList<>();
-            pane.add(Blocks.stained_glass_pane.getDefaultState().withProperty(BlockColored.COLOR, gemPriority[priority]));
-            filter.add(pane);
-        }
+
+    public static ArrayList<BlockData<?>> getGemListBasedOnPriority(int priority) {
+        ArrayList<BlockData<?>> filter = new ArrayList<>();
+        filter.add(new BlockData<>(Blocks.stained_glass, gemPriority[priority]));
+        if (MightyMiner.config.aotvMineGemstonePanes)
+            filter.add(new BlockData<>(Blocks.stained_glass_pane, gemPriority[priority]));
         return filter;
     }
 
-
-    public static ArrayList<ArrayList<IBlockState>> getMithrilColorBasedOnPriority(int priority) {
+    public static ArrayList<BlockData<?>> getMithrilColorBasedOnPriority(int priority) {
         switch (priority) {
             case 0:
-                return new ArrayList<ArrayList<IBlockState>>() {{
-                    add(new ArrayList<IBlockState>() {{
-                        add(Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.CYAN));
-                        add(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.GRAY));
-                    }});
+                return new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_hardened_clay, null));
+                    add(new BlockData<>(Blocks.wool, EnumDyeColor.GRAY));
                 }};
             case 1:
-                return new ArrayList<ArrayList<IBlockState>>() {{
-                    add(new ArrayList<IBlockState>() {{
-                        add(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.BRICKS));
-                        add(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.DARK));
-                        add(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.ROUGH));
-                    }});
+                return new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.prismarine, null));
                 }};
             case 2:
-                return new ArrayList<ArrayList<IBlockState>>() {{
-                    add(new ArrayList<IBlockState>() {{
-                        add(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.LIGHT_BLUE));
-                    }});
+                return new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.wool, EnumDyeColor.LIGHT_BLUE));
                 }};
             case 3:
-                return new ArrayList<ArrayList<IBlockState>>() {{
-                    add(new ArrayList<IBlockState>() {{
-                        add(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH));
-                    }});
+                return new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH).getBlock(), BlockStone.EnumType.DIORITE_SMOOTH));
                 }};
             default:
                 return null;

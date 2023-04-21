@@ -123,7 +123,7 @@ public class GemstoneMacro extends Macro {
         if(haveTreasureChest && packet instanceof S2APacketParticles){
             if(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT){
                 try {
-                    BlockPos closetChest = BlockUtils.findBlock(8, Blocks.chest, Blocks.trapped_chest).get(0);
+                    BlockPos closetChest = BlockUtils.findBlockInCube(8, null, 0, 256, Blocks.chest, Blocks.trapped_chest).get(0);
                     if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - closetChest.getX()) < 2 && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - closetChest.getY()) < 2 && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - closetChest.getZ()) < 2) {
                         rotation.initAngleLock(
                                 AngleUtils.getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - closetChest.getX(), ((S2APacketParticles) packet).getZCoordinate() - closetChest.getZ()),

@@ -15,7 +15,6 @@ import java.util.*;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 
 public class AStarPathFinder {
@@ -42,8 +41,14 @@ public class AStarPathFinder {
         blackListedPos.remove(blockPos);
     }
 
+    public void clearBlackList() {
+        blackListedPos.clear();
+    }
 
-    public Path getPath(PathMode mode, boolean withPreference, ArrayList<ArrayList<IBlockState>> blockType) throws NoBlockException, NoPathException {
+
+
+    public Path getPath(PathMode mode, boolean withPreference, ArrayList<BlockData<?>> blockType) throws NoBlockException, NoPathException {
+
         initialize(mode);
 
         long pastTime = System.currentTimeMillis();
@@ -52,12 +57,10 @@ public class AStarPathFinder {
         List<BlockPos> foundBlocks = new ArrayList<>();
 
         if (withPreference) { // loop for EACH block type
-            for (ArrayList<IBlockState> block : blockType) {
-                foundBlocks.clear();
-                for (IBlockState state: block) {
-                    foundBlocks.addAll(BlockUtils.findBlock(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), state));
-                    possiblePaths = getPossiblePaths(foundBlocks);
-                }
+
+            for (BlockData<?> block : blockType) {
+                foundBlocks = BlockUtils.findBlockInCube(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), block);
+                possiblePaths = getPossiblePaths(foundBlocks);
 
                 if (!possiblePaths.isEmpty()) {
                     Logger.playerLog("Total time | Time per path : " + (System.currentTimeMillis() - pastTime) + " ms | " + ((System.currentTimeMillis() - pastTime) * 1.0D / possiblePaths.size()) + " ms");
@@ -68,10 +71,9 @@ public class AStarPathFinder {
             }
 
         } else { // 1 loop for ALL block types
-            for (ArrayList<IBlockState> block : blockType) {
-                foundBlocks.addAll(BlockUtils.findBlockFromStateList(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), block));
-                possiblePaths = getPossiblePaths(foundBlocks);
-            }
+
+            foundBlocks = BlockUtils.findBlockInCube(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType);
+            possiblePaths = getPossiblePaths(foundBlocks);
         }
 
         if(foundBlocks.isEmpty())

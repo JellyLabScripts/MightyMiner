@@ -201,6 +201,13 @@ public class PlayerUtils {
         return null;
     }
 
+    public static boolean isLookingAtEmissaryCeanna() {
+        if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
+            return mc.objectMouseOver.entityHit.getDisplayName().getUnformattedText().equals("s54905uvb6");
+        }
+        return false;
+    }
+
     public static boolean hasMobsInRadius(int radius, String mobClass) {
         Class<?> type;
         try {

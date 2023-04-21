@@ -341,6 +341,11 @@ public class CommissionMacro extends Macro {
 
     private ArrayList<BlockPos> visibleBlocks = new ArrayList<>();
 
+    private AutoMineBaritone baritone;
+
+    private ArrayList<ArrayList<IBlockState>> mithPriorityList = new ArrayList<>();
+
+
 
 
     @Override
@@ -886,7 +891,7 @@ public class CommissionMacro extends Macro {
                                                 // Checking failed looking counter
                                                 if (failedLookingCounter > 5) {
                                                     // Failed to often
-                                                    LogUtils.debugLog("Failed looking to often");
+                                                    LogUtils.debugLog("Failed looking to often (Warp To Emissary)");
 
                                                     // Checking if player is still in spot
                                                     if (!BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
@@ -1135,7 +1140,7 @@ public class CommissionMacro extends Macro {
                                                 // Checking failed looking counter
                                                 if (failedLookingCounter > 5) {
                                                     // Failed to often
-                                                    LogUtils.debugLog("Failed looking to often");
+                                                    LogUtils.debugLog("Failed looking to often (Find Emissary)");
 
                                                     // Checking if player is still in spot
                                                     if (!BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
@@ -1158,7 +1163,7 @@ public class CommissionMacro extends Macro {
 
                                                     // Calculating new look
                                                     nextActionDelay.reset();
-                                                    warpToEmissaryState = WarpToEmissaryState.CALCULATE_LOOK;
+                                                    rotateToEmissaryState = RotateToEmissaryState.FIND_EMISSARY;
                                                 }
                                                 return;
                                             }
@@ -1487,7 +1492,7 @@ public class CommissionMacro extends Macro {
                                 // Checking failed looking counter
                                 if (failedLookingCounter > 5) {
                                     // Failed to often
-                                    LogUtils.debugLog("Failed looking to often");
+                                    LogUtils.debugLog("Failed looking to often (Navigating)");
                                     // Checking if player is still in spot
                                     if (!BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
                                         // Fell out of position
@@ -1685,36 +1690,25 @@ public class CommissionMacro extends Macro {
                         // Setting up Mithril Macro
                         LogUtils.debugLog("Setting up Mithril Macro");
                         mc.thePlayer.inventory.currentItem = pickaxeSlot;
-                        blacklistedBlocks.clear();
-                        rotateTo = null;
-                        chosenBlock = null;
-                        miningState = MiningState.VISIBLE_BLOCKS;
-                        occupiedCounter = 0;
-                        priorities.clear();
-                        priorities.add(0);
-                        priorities.add(1);
-                        priorities.add(2);
-                        priorities.add(3);
-                        Collections.reverse(priorities);
-                        rotation.completed = false;
+                        mithPriorityList.clear();
+                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(3));
+                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(0));
+                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(1));
+                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(2));
+
+                        baritone = new AutoMineBaritone(getMineBehaviour());
                         typeOfCommission = TypeOfCommission.MINING_COMM;
                     } else if (currentQuest.contains("Titanium")) {
                         // Setting up Titanium Macro
                         LogUtils.debugLog("Setting up Titanium Macro");
                         mc.thePlayer.inventory.currentItem = pickaxeSlot;
-                        blacklistedBlocks.clear();
-                        rotateTo = null;
-                        chosenBlock = null;
-                        lastChosenBlock = null;
-                        miningState = MiningState.VISIBLE_BLOCKS;
-                        occupiedCounter = 0;
-                        priorities.clear();
-                        priorities.add(3);
-                        priorities.add(0);
-                        priorities.add(1);
-                        priorities.add(2);
-                        Collections.reverse(priorities);
-                        rotation.completed = false;
+                        mithPriorityList.clear();
+                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(3));
+                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(0));
+                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(1));
+                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(2));
+
+                        baritone = new AutoMineBaritone(getMineBehaviour());
                         typeOfCommission = TypeOfCommission.MINING_COMM;
                     } else if (currentQuest.contains("Slayer")) {
                         // Setting up Slayer Macro
@@ -1750,6 +1744,9 @@ public class CommissionMacro extends Macro {
                         // Finished Commission
                         LogUtils.debugLog("Finished Commission");
 
+                        if (baritone != null) baritone.disableBaritone();
+                        KeybindHandler.resetKeybindState();
+
                         // Reset all Keybindings
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
@@ -1766,6 +1763,9 @@ public class CommissionMacro extends Macro {
                         // Player fell out of Spot
                         LogUtils.debugLog("Player fell out of Spot");
 
+                        if (baritone != null) baritone.disableBaritone();
+                        KeybindHandler.resetKeybindState();
+
                         // Reset all Keybindings
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
@@ -1781,6 +1781,9 @@ public class CommissionMacro extends Macro {
                     if (playerCountInRadius(5) > 0) {
                         // Spot occupied
                         LogUtils.debugLog("Spot occupied");
+
+                        if (baritone != null) baritone.disableBaritone();
+                        KeybindHandler.resetKeybindState();
 
                         // Incrementing occupied counter
                         occupiedCounter++;
@@ -1811,6 +1814,9 @@ public class CommissionMacro extends Macro {
                         // Too many players nearby
                         LogUtils.debugLog("Too many players nearby");
 
+                        if (baritone != null) baritone.disableBaritone();
+                        KeybindHandler.resetKeybindState();
+
                         // ReWarp
                         isWarping = true;
                         nextActionDelay.reset();
@@ -1822,186 +1828,28 @@ public class CommissionMacro extends Macro {
 
                 switch (typeOfCommission) {
                     case MINING_COMM:
-                        switch (miningState) {
-                            case VISIBLE_BLOCKS:
-                                visibleBlocks.clear();
-                                for (BlockPos blockPos: BlockPos.getAllInBox(new BlockPos(mc.thePlayer.getPositionEyes(1.0f)).subtract(new BlockPos(4, 4, 4)), new BlockPos(mc.thePlayer.getPositionEyes(1.0f)).add(new BlockPos(4, 4, 4)))) {
-                                    if (VectorUtils.getHittableHitVec(blockPos) != null) {
-                                        visibleBlocks.add(blockPos);
-                                    }
+                        if (MightyMiner.config.refuelWithAbiphone) {
+                            if (FuelFilling.isRefueling()) {
+                                if (baritone != null && baritone.getState() != AutoMineBaritone.BaritoneState.IDLE) {
+                                    baritone.disableBaritone();
                                 }
-
-                                // Switching to next state
-                                nextActionDelay.reset();
-                                miningState = MiningState.SEARCH;
-                                break;
-                            case SEARCH:
-                                if (!searchCoolDown.hasReached(1500)) return;
-                                int range = 4;
-                                BlockPos playerEyes = new BlockPos(mc.thePlayer.getPositionEyes(1.0f));
-                                BlockPos rangeVec = new BlockPos(range, range, range);
-                                BlockPos from = playerEyes.subtract(rangeVec);
-                                BlockPos to = playerEyes.add(rangeVec);
-                                ArrayList<BlockPos> greyBlocks = new ArrayList<>();
-                                ArrayList<BlockPos> prismarineBlocks = new ArrayList<>();
-                                ArrayList<BlockPos> lightBlueBlocks = new ArrayList<>();
-                                ArrayList<BlockPos> titaniumBlocks = new ArrayList<>();
-                                for (BlockPos blockPos: BlockPos.getAllInBox(from, to)) {
-                                    if (!blacklistedBlocks.contains((Object) blockPos)) {
-                                        if (new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d).distanceTo(mc.thePlayer.getPositionEyes(1.0f)) < 4) {
-                                            if (AngleUtils.getRotationDifference(new Vec3(blockPos)) <= MightyMiner.config.playerFov) {
-                                                IBlockState blockState = mc.theWorld.getBlockState(blockPos);
-                                                if (!(!mc.theWorld.getBlockState(blockPos.down()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.up()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.south()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.north()).getBlock().equals(Blocks.air) && !mc.theWorld.getBlockState(blockPos.west()).getBlock().equals(Blocks.air)  && !mc.theWorld.getBlockState(blockPos.east()).getBlock().equals(Blocks.air))) {
-                                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) blockPos)) {
-                                                        if (visibleBlocks.contains((Object) blockPos)) {
-                                                            if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.GRAY))
-                                                                    || blockState.equals(Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.CYAN))) {
-                                                                greyBlocks.add(blockPos);
-                                                            } else if (blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.ROUGH))
-                                                                    || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.DARK))
-                                                                    || blockState.equals(Blocks.prismarine.getDefaultState().withProperty(BlockPrismarine.VARIANT, BlockPrismarine.EnumType.BRICKS))) {
-                                                                prismarineBlocks.add(blockPos);
-                                                            } else if (blockState.equals(Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.LIGHT_BLUE))) {
-                                                                lightBlueBlocks.add(blockPos);
-                                                            } else if (blockState.equals(Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE_SMOOTH))) {
-                                                                titaniumBlocks.add(blockPos);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (greyBlocks.size() != 0 || prismarineBlocks.size() != 0 || lightBlueBlocks.size() != 0 || titaniumBlocks.size() != 0) {
-                                    ArrayList<ArrayList<BlockPos>> allBlockTypes = new ArrayList<>();
-                                    allBlockTypes.add(greyBlocks);
-                                    allBlockTypes.add(prismarineBlocks);
-                                    allBlockTypes.add(lightBlueBlocks);
-                                    allBlockTypes.add(titaniumBlocks);
-
-                                    ArrayList<BlockPos> chosenBlockType = new ArrayList<>();
-                                    for (int priority: priorities) {
-                                        if (allBlockTypes.get(priority).size() > 0) {
-                                            chosenBlockType = allBlockTypes.get(priority);
-                                        }
-                                    }
-
-                                    Pair<Float, BlockPos> closestDistanceToLast = Pair.of((float) (new Vec3(chosenBlockType.get(0).getX() + 0.5d, chosenBlockType.get(0).getY() + 0.5d, chosenBlockType.get(0).getZ() + 0.5d).distanceTo(new Vec3(mc.thePlayer.rayTrace(5, 1).getBlockPos().getX() + 0.5d, mc.thePlayer.rayTrace(5, 1).getBlockPos().getY() + 0.5d,mc.thePlayer.rayTrace(5, 1).getBlockPos().getZ() + 0.5d))), chosenBlockType.get(0));
-                                    for (BlockPos blockPos: chosenBlockType) {
-                                        Vec3 blockVec = new Vec3(blockPos.getX() + 0.5d, blockPos.getY() + 0.5d, blockPos.getZ() + 0.5d);
-                                        BlockPos playerLookingAt = mc.thePlayer.rayTrace(5, 1).getBlockPos();
-                                        Vec3 lastChosenBlockVec = new Vec3(playerLookingAt.getX() + 0.5d, playerLookingAt.getY() + 0.5d, playerLookingAt.getZ() + 0.5d);
-                                        float distance = (float) blockVec.distanceTo(lastChosenBlockVec);
-                                        if (distance < closestDistanceToLast.getLeft()) {
-                                            closestDistanceToLast = Pair.of(distance, blockPos);
-                                        }
-                                    }
-                                    chosenBlock = closestDistanceToLast.getRight();
-                                    Vec3 lookVec = VectorUtils.getRandomHittable(chosenBlock);
-                                    if (lookVec != null) {
-                                        rotateTo = VectorUtils.vec3ToRotation(lookVec);
-
-                                        if (rotateTo.getLeft() >= 180 || rotateTo.getLeft() <= -180) {
-                                            rotateTo = Pair.of((float) 179, rotateTo.getRight());
-                                        }
-                                        if (rotateTo.getRight() >= 90) {
-                                            rotateTo = Pair.of(rotateTo.getLeft(), (float) 89);
-                                        } else if (rotateTo.getRight() <= -90) {
-                                            rotateTo = Pair.of(rotateTo.getLeft(), (float) -89);
-                                        }
-                                        LogUtils.debugLog("Rotating to Yaw: " + rotateTo.getLeft() + ", Pitch: " + rotateTo.getRight());
-                                        miningState = MiningState.LOOK;
-                                        lookingFor.reset();
-                                        rotation.completed = false;
-                                        lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
-                                    } else {
-                                        Vec3 lookVec2 = VectorUtils.getVeryAccurateHittableHitVec(chosenBlock);
-                                        if (lookVec2 != null) {
-                                            rotateTo = VectorUtils.vec3ToRotation(lookVec2);
-
-                                            if (rotateTo.getLeft() >= 180 || rotateTo.getLeft() <= -180) {
-                                                rotateTo = Pair.of((float) 179, rotateTo.getRight());
-                                            }
-                                            if (rotateTo.getRight() >= 90) {
-                                                rotateTo = Pair.of(rotateTo.getLeft(), (float) 89);
-                                            } else if (rotateTo.getRight() <= -90) {
-                                                rotateTo = Pair.of(rotateTo.getLeft(), (float) -89);
-                                            }
-                                            LogUtils.debugLog("Rotating to Yaw: " + rotateTo.getLeft() + ", Pitch: " + rotateTo.getRight());
-                                            miningState = MiningState.LOOK;
-                                            lookingFor.reset();
-                                            rotation.completed = false;
-                                            lookTimeIncrement = ThreadLocalRandom.current().nextInt(1, 100 + 1);
-                                        } else {
-                                            LogUtils.debugLog("No look found");
-                                            blacklistedBlocks.add(chosenBlock);
-                                        }
-                                    }
-                                    return;
-                                }
-                                LogUtils.addMessage("No Mithril found");
-                                searchCoolDown.reset();
-                                break;
-                            case LOOK:
-                                if (lookingFor.hasReached(1000)) {
-                                    LogUtils.debugLog("Failed looking at Block. Trying again");
-                                    KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
-                                    miningState = MiningState.SEARCH;
-                                }
-                                if (AngleUtils.isDiffLowerThan(rotateTo.getLeft(), rotateTo.getRight(), 0.05f)) {
-                                    rotation.reset();
-                                    rotation.completed = true;
-                                }
-
-                                MovingObjectPosition ray = mc.thePlayer.rayTrace(4, 1);
-                                if (ray.getBlockPos().equals((Object) chosenBlock)) {
-                                    KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, true);
-                                }
-
-                                if (!rotation.completed) {
-                                    rotation.initAngleLock(rotateTo.getLeft(), rotateTo.getRight(), MightyMiner.config.commRotationTime + lookTimeIncrement);
-                                }
-
-                                if (!rotation.completed) return;
-                                lookingFor.reset();
-                                if (ray.getBlockPos().equals((Object) chosenBlock)) {
-                                    KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, true);
-                                    miningState = MiningState.MINE;
-                                    miningFor.reset();
-                                } else {
-                                    LogUtils.debugLog("Failed looking at block. Looking for another Block");
-                                    blacklistedBlocks.add(chosenBlock);
-                                    miningState = MiningState.SEARCH;
-                                    return;
-                                }
-                                break;
-                             case MINE:
-                                KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, true);
-                                if (miningFor.hasReached(MightyMiner.config.commRestartTimeThreshold * 1000L)) {
-                                    KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
-                                    LogUtils.debugLog("Mining for to long. Looking for another Block");
-                                    mc.inGameHasFocus = true;
-                                    mc.mouseHelper.grabMouseCursor();
-                                    blacklistedBlocks.add(chosenBlock);
-                                    miningState = MiningState.SEARCH;
-                                    return;
-                                }
-                                mc.thePlayer.inventory.currentItem = pickaxeSlot;
-                                if (mc.theWorld.getBlockState(mc.thePlayer.rayTrace(5, 1).getBlockPos()).getBlock().equals(Blocks.bedrock)) {
-                                    KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
-                                    miningFor.reset();
-                                    LogUtils.debugLog("Mined Block");
-                                    rotateTo = null;
-                                    chosenBlock = null;
-                                    miningState = MiningState.SEARCH;
-                                }
-                                break;
-                            case NONE:
-                                LogUtils.debugLog("None");
-                                break;
+                                return;
+                            }
                         }
+
+                        if (phase != TickEvent.Phase.START)
+                            return;
+
+                        switch (baritone.getState()) {
+                            case IDLE: case FAILED:
+                                baritone.mineFor(mithPriorityList);
+                                break;
+
+
+
+                        }
+
+                        checkMiningSpeedBoost();
                         break;
                     case SLAYING_COMM:
                         if (unpressKey.hasReached(250) && keyPressed) {
@@ -2304,6 +2152,21 @@ public class CommissionMacro extends Macro {
 
     public static boolean isWarping() {
         return isWarping;
+    }
+
+    private BaritoneConfig getMineBehaviour() {
+        return new BaritoneConfig(
+                MiningType.STATIC,
+                MightyMiner.config.commShiftWhenMine,
+                true,
+                true,
+                MightyMiner.config.commRotationTime,
+                MightyMiner.config.commRestartTimeThreshold,
+                null,
+                null,
+                256,
+                0
+        );
     }
 
 }

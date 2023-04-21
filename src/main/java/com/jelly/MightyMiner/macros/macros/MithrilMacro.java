@@ -13,6 +13,7 @@ import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
+
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 public class MithrilMacro extends Macro {
 
     AutoMineBaritone baritone;
+
     boolean noMithril;
 
     @Override
@@ -128,3 +130,4 @@ public class MithrilMacro extends Macro {
         );
     }
 }
+

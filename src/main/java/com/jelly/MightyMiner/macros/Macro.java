@@ -5,6 +5,9 @@ import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.events.BlockChangeEvent;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.MacroHandler;
+import com.jelly.MightyMiner.macros.macros.CommissionMacro;
+import com.jelly.MightyMiner.macros.macros.MithrilMacro;
+
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
@@ -13,6 +16,8 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import javax.crypto.Mac;
 
 public abstract class Macro {
     protected Minecraft mc = Minecraft.getMinecraft();
@@ -51,8 +56,7 @@ public abstract class Macro {
         return enabled;
     }
 
-    public void onBlockChange(BlockChangeEvent event){
-        brokeBlockUnderPlayer = event.pos.equals((Object) BlockUtils.getPlayerLoc().down()) || event.pos.equals((Object) BlockUtils.getPlayerLoc());
+    public void onBlockChange(BlockChangeEvent event) {
     }
 
     public void checkMiningSpeedBoost() {

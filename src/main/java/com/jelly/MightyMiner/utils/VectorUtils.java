@@ -286,8 +286,8 @@ public class VectorUtils {
         return (vecs.size() == 0) ? null : vecs.get(MathUtils.random.nextInt(vecs.size()));
     }
 
-    public static List<Vec3> getAllHittablePosition(final BlockPos pos) {
-        final List<Vec3> hittables = new ArrayList<Vec3>();
+    public static ArrayList<Vec3> getAllHittablePosition(final BlockPos pos) {
+        final ArrayList<Vec3> hittables = new ArrayList<Vec3>();
         for (int x = 1; x < 5; ++x) {
             for (int y = 1; y < 5; ++y) {
                 for (int z = 1; z < 5; ++z) {
@@ -302,8 +302,97 @@ public class VectorUtils {
         return hittables;
     }
 
-    public static List<Vec3> getAllHittableHitVec(final BlockPos pos) {
-        final List<Vec3> hittables = new ArrayList<Vec3>();
+    public static ArrayList<Vec3> getAllVeryAccurateHittablePosition(final BlockPos pos) {
+        final ArrayList<Vec3> hittables = new ArrayList<>();
+        for (int x = 1; x < 9; ++x) {
+            for (int y = 1; y < 9; ++y) {
+                for (int z = 1; z < 9; ++z) {
+                    final Vec3 vec = new Vec3(pos.getX() + x / 8.0f - 0.0625, pos.getY() + y / 8.0f - 0.0625, pos.getZ() + z / 8.0f - 0.0625);
+                    final MovingObjectPosition position = rayTraceLook(vec, 4.5f);
+                    if (position != null && position.getBlockPos().equals((Object)pos)) {
+                        hittables.add(position.hitVec);
+                    }
+                }
+            }
+        }
+        return hittables;
+    }
+
+    public static ArrayList<Pair<BlockPos, ArrayList<Vec3>>> getAllVisibleWhitelistedBlocksWithAllHittablePos(int range, ArrayList<IBlockState> whitelist) {
+        ArrayList<Pair<BlockPos, ArrayList<Vec3>>> allVisibleBlocksWithAllHittablePos = new ArrayList<>();
+        BlockPos playerEyes = new BlockPos(PlayerUtils.playerEyePosVec());
+        BlockPos rangeVec = new BlockPos(range, range, range);
+        BlockPos from = playerEyes.subtract(rangeVec);
+        BlockPos to = playerEyes.add(rangeVec);
+        for (BlockPos blockPos: BlockPos.getAllInBox(from, to)) {
+            ArrayList<Vec3> allHittablePos = getAllVeryAccurateHittablePosition(blockPos);
+            if (whitelist.contains(BlockUtils.getBlockState(blockPos)) && allHittablePos.size() > 0) {
+                allVisibleBlocksWithAllHittablePos.add(Pair.of(blockPos, allHittablePos));
+            }
+        }
+        return allVisibleBlocksWithAllHittablePos;
+    }
+
+    public static ArrayList<Pair<BlockPos, ArrayList<Vec3>>> getAllVisibleBlocksWithAllHittablePos(int range) {
+        ArrayList<Pair<BlockPos, ArrayList<Vec3>>> allVisibleBlocksWithAllHittablePos = new ArrayList<>();
+        BlockPos playerEyes = new BlockPos(PlayerUtils.playerEyePosVec());
+        BlockPos rangeVec = new BlockPos(range, range, range);
+        BlockPos from = playerEyes.subtract(rangeVec);
+        BlockPos to = playerEyes.add(rangeVec);
+        for (BlockPos blockPos: BlockPos.getAllInBox(from, to)) {
+            ArrayList<Vec3> allHittablePos = getAllVeryAccurateHittablePosition(blockPos);
+            if (allHittablePos.size() > 0) {
+                allVisibleBlocksWithAllHittablePos.add(Pair.of(blockPos, allHittablePos));
+            }
+        }
+        return allVisibleBlocksWithAllHittablePos;
+    }
+
+    public static ArrayList<Vec3> sortClosestToFurthest(ArrayList<Vec3> positions, Vec3 referencePoint) {
+        Vec3 smaller;
+        Vec3 bigger;
+        boolean run = true;
+
+
+        for (int i = 0; i < positions.size() && run; i++) {
+            run = false;
+
+            for (int y = 0; y < positions.size()-1; y++) {
+                if(positions.get(y).distanceTo(referencePoint) > positions.get(y + 1).distanceTo(referencePoint)) {
+                    bigger = positions.get(y);
+                    smaller = positions.get(y + 1);
+                    positions.set(y, smaller);
+                    positions.set(y + 1, bigger);
+                    run = true;
+                }
+            }
+        }
+
+        return positions;
+    }
+
+    public static ArrayList<BlockPos> getAllVisibleWhitelistedBlocks(ArrayList<IBlockState> whitelist) {
+        ArrayList<BlockPos> visibleWhitelistedBlocks = new ArrayList<>();
+
+        Vec3 playerVec = PlayerUtils.playerEyePosVec();
+
+        int distance = 4;
+
+        Vec3 rangeVec = new Vec3(distance, distance, distance);
+        Vec3 from = playerVec.subtract(rangeVec);
+        Vec3 to = playerVec.add(rangeVec);
+
+        for (BlockPos blockPos: BlockPos.getAllInBox(new BlockPos(from), new BlockPos(to))) {
+            if (new Vec3(blockPos).distanceTo(playerVec) < distance && whitelist.contains(BlockUtils.getBlockState(blockPos)) && isHittable(blockPos)) {
+                visibleWhitelistedBlocks.add(blockPos);
+            }
+        }
+
+        return visibleWhitelistedBlocks;
+    }
+
+    public static ArrayList<Vec3> getAllHittableHitVec(final BlockPos pos) {
+        final ArrayList<Vec3> hittables = new ArrayList<Vec3>();
         for (int x = 1; x < 5; ++x) {
             for (int y = 1; y < 5; ++y) {
                 for (int z = 1; z < 5; ++z) {
@@ -322,10 +411,10 @@ public class VectorUtils {
         if (isRayTraceableLook(new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), pos, 4.5f)) {
             return true;
         }
-        for (int x = 1; x < 6; ++x) {
-            for (int y = 1; y < 6; ++y) {
-                for (int z = 1; z < 6; ++z) {
-                    if (isRayTraceableLook(new Vec3(pos.getX() + x / 5.0f - 0.1, pos.getY() + y / 5.0f - 0.1, pos.getZ() + z / 5.0f - 0.1), pos, 4.5f)) {
+        for (int x = 1; x < 5; ++x) {
+            for (int y = 1; y < 5; ++y) {
+                for (int z = 1; z < 5; ++z) {
+                    if (isRayTraceableLook(new Vec3(pos.getX() + x / 4.0f - 0.125, pos.getY() + y / 4.0f - 0.125, pos.getZ() + z / 4.0f - 0.125), pos, 4.5f)) {
                         return true;
                     }
                 }

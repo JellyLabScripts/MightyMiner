@@ -2,15 +2,21 @@ package com.jelly.MightyMiner.utils.HypixelUtils;
 
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
+import net.minecraft.block.BlockColored;
+import net.minecraft.block.BlockGlass;
+import net.minecraft.block.BlockPrismarine;
 import net.minecraft.block.BlockStone;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
+import org.fusesource.jansi.Ansi;
 
 import java.util.ArrayList;
 
 public class MineUtils {
 
     public static EnumDyeColor[] gemPriority = {null, EnumDyeColor.RED, EnumDyeColor.PURPLE, EnumDyeColor.LIME, EnumDyeColor.LIGHT_BLUE, EnumDyeColor.ORANGE, EnumDyeColor.YELLOW, EnumDyeColor.MAGENTA};
+
 
     public static ArrayList<BlockData<?>> getGemListBasedOnPriority(int priority) {
         ArrayList<BlockData<?>> filter = new ArrayList<>();

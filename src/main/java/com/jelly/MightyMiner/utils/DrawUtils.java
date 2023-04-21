@@ -74,6 +74,53 @@ public class DrawUtils {
         bufferBuilder.pos(nextPos.getX() + 0.5f, nextPos.getY() + 0.5f, nextPos.getZ() + 0.5f).color(MightyMiner.config.aotvRouteLineColor.getRed() / 255f, MightyMiner.config.aotvRouteLineColor.getGreen() / 255f, MightyMiner.config.aotvRouteLineColor.getBlue() / 255f, MightyMiner.config.aotvRouteLineColor.getAlpha() / 255f).endVertex();
     }
 
+    private static void drawLine(WorldRenderer bufferBuilder, Vec3 pos, Vec3 nextPos) {
+        bufferBuilder.pos(pos.xCoord, pos.yCoord, pos.zCoord).color(MightyMiner.config.aotvRouteLineColor.getRed() / 255f, MightyMiner.config.aotvRouteLineColor.getGreen() / 255f, MightyMiner.config.aotvRouteLineColor.getBlue() / 255f, MightyMiner.config.aotvRouteLineColor.getAlpha() / 255f).endVertex();
+        bufferBuilder.pos(nextPos.xCoord, nextPos.yCoord, nextPos.zCoord).color(MightyMiner.config.aotvRouteLineColor.getRed() / 255f, MightyMiner.config.aotvRouteLineColor.getGreen() / 255f, MightyMiner.config.aotvRouteLineColor.getBlue() / 255f, MightyMiner.config.aotvRouteLineColor.getAlpha() / 255f).endVertex();
+    }
+
+    private static void drawLine(WorldRenderer bufferBuilder, Vec3 pos, Vec3 nextPos, Color color) {
+        bufferBuilder.pos(pos.xCoord, pos.yCoord, pos.zCoord).color(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f).endVertex();
+        bufferBuilder.pos(nextPos.xCoord, nextPos.yCoord, nextPos.zCoord).color(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f).endVertex();
+    }
+
+    public static void drawLine(RenderWorldLastEvent event, Vec3 from, Vec3 to, float lineWidth, Color color) {
+        final Entity render = mc.getRenderViewEntity();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer bufferBuilder = tessellator.getWorldRenderer();
+        final double realX = render.lastTickPosX + (render.posX - render.lastTickPosX) * event.partialTicks;
+        final double realY = render.lastTickPosY + (render.posY - render.lastTickPosY) * event.partialTicks;
+        final double realZ = render.lastTickPosZ + (render.posZ - render.lastTickPosZ) * event.partialTicks;
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-realX, -realY, -realZ);
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableLighting();
+        GL11.glDisable(3553);
+        GL11.glLineWidth(lineWidth);
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.disableDepth();
+        GlStateManager.depthMask(false);
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        bufferBuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+
+        DrawUtils.drawLine(bufferBuilder, from, to, color);
+
+        tessellator.draw();
+        GlStateManager.translate(realX, realY, realZ);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableDepth();
+        GlStateManager.depthMask(true);
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
+        GlStateManager.popMatrix();
+    }
+
+
+
+
     public static void drawEntity(Entity entity, OneColor color, int width, float partialTicks) {
         drawEntity(entity, color.toJavaColor(), width, partialTicks);
     }

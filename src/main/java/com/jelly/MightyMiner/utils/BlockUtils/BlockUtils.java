@@ -4,7 +4,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.utils.AngleUtils;
+import com.jelly.MightyMiner.utils.LogUtils;
+import com.jelly.MightyMiner.utils.PlayerUtils;
+
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
+import jdk.internal.net.http.common.Log;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
@@ -139,26 +144,30 @@ public class BlockUtils {
         return blockCache.getUnchecked(blockPos);
     }
 
-    public static ArrayList<BlockData<EnumDyeColor>> addData(ArrayList<Block> blocks){
-        ArrayList<BlockData<EnumDyeColor>> requiredBlocksList = new ArrayList<>();
-        for(Block block : blocks){
-            requiredBlocksList.add(new BlockData<>(block, null));
-        }
-        return requiredBlocksList;
+
+    public static Vec3 getBlockCenter(BlockPos blockPos) {
+        return new Vec3(blockPos.add(0.5d, 0.5d, 0.5d));
     }
+   
+
 
     public static List<BlockPos> findBlockInCube(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, Block... requiredBlocks) {
         ArrayList<BlockData<?>> blockDataList = new ArrayList<>();
         for(Block b : requiredBlocks){
             blockDataList.add(new BlockData<>(b));
         }
+
         return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
                 ,forbiddenBlockPos, minY, maxY, blockDataList);
     }
+
+  
     public static List<BlockPos> findBlockInCube(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, BlockData<?>... requiredBlocks) {
+
         return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
                 ,forbiddenBlockPos, minY, maxY, new ArrayList<>(Arrays.asList(requiredBlocks)));
     }
+
     public static List<BlockPos> findBlockInCube(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<BlockData<?>> requiredBlocks) {
         return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
                 ,forbiddenBlockPos, minY, maxY, requiredBlocks);
@@ -207,6 +216,22 @@ public class BlockUtils {
             }
         }
         foundBlocks.sort(Comparator.comparingDouble(b -> MathUtils.getDistanceBetweenTwoBlock(b, BlockUtils.getPlayerLoc().add(0, 1.62d, 0))));
+        return foundBlocks;
+    }
+
+    public static List<BlockPos> findBlockFromState(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<IBlockState> requiredBlock) {
+        List<BlockPos> foundBlocks = new ArrayList<>();
+        Vec3 rangeVec1 = new Vec3(searchBox.dx_bound1, searchBox.dy_bound1, searchBox.dz_bound1);
+        Vec3 rangeVec2 = new Vec3(searchBox.dx_bound2, searchBox.dy_bound2, searchBox.dz_bound2);
+        BlockPos from = new BlockPos(PlayerUtils.playerEyePosVec().add(rangeVec1));
+        BlockPos to = new BlockPos(PlayerUtils.playerEyePosVec().add(rangeVec2));
+        for (BlockPos blockPos: BlockPos.getAllInBox(from, to)) {
+            if (requiredBlock.contains(BlockUtils.getBlockState(blockPos)) && new Vec3(blockPos).distanceTo(PlayerUtils.playerEyePosVec()) < 4 && !forbiddenBlockPos.contains(blockPos) && blockPos.getY() < maxY && blockPos.getY() > minY) {
+                if (AngleUtils.getRotationDifference(getBlockCenter(blockPos)) <= MightyMiner.config.playerFov * (1.0f + (4 - new Vec3(blockPos).distanceTo(PlayerUtils.playerEyePosVec())) / 5) || mc.thePlayer.rotationPitch > 75 || mc.thePlayer.rotationPitch < -75) {
+                    foundBlocks.add(blockPos);
+                }
+            }
+        }
         return foundBlocks;
     }
 

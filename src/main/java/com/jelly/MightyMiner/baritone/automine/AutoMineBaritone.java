@@ -16,6 +16,7 @@ import com.jelly.MightyMiner.events.ChunkLoadEvent;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
@@ -49,6 +50,7 @@ public class AutoMineBaritone {
     BlockPos playerFloorPos;
 
     ArrayList<BlockData<?>> targetBlockType;
+
     BlockPos targetBlockPos;
 
     volatile Path path;
@@ -66,12 +68,14 @@ public class AutoMineBaritone {
     }
 
 
+
     //varargs are just for convenience here, all inside operations should be using ArrayList
     public void mineFor(BlockData<?>... blockTypes) {
         mineFor(new ArrayList<>(Arrays.asList(blockTypes)));
     }
 
     public void mineFor(ArrayList<BlockData<?>> blockTypes) {
+
         Logger.playerLog("Starting to mine");
         registerEventListener();
         pathSetting = new PathFindSetting(config.isMineWithPreference(), PathMode.MINE, false);

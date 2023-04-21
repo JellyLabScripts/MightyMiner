@@ -8,10 +8,12 @@ import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathExc
 import com.jelly.MightyMiner.baritone.automine.structures.*;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
+import net.minecraft.util.Vec3;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 
 import java.util.*;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 
@@ -44,7 +46,9 @@ public class AStarPathFinder {
     }
 
 
+
     public Path getPath(PathMode mode, boolean withPreference, ArrayList<BlockData<?>> blockType) throws NoBlockException, NoPathException {
+
         initialize(mode);
 
         long pastTime = System.currentTimeMillis();
@@ -53,6 +57,7 @@ public class AStarPathFinder {
         List<BlockPos> foundBlocks = new ArrayList<>();
 
         if (withPreference) { // loop for EACH block type
+
             for (BlockData<?> block : blockType) {
                 foundBlocks = BlockUtils.findBlockInCube(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), block);
                 possiblePaths = getPossiblePaths(foundBlocks);
@@ -66,6 +71,7 @@ public class AStarPathFinder {
             }
 
         } else { // 1 loop for ALL block types
+
             foundBlocks = BlockUtils.findBlockInCube(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType);
             possiblePaths = getPossiblePaths(foundBlocks);
         }
@@ -134,7 +140,7 @@ public class AStarPathFinder {
         double cost = 0.0D;
         if (nodes.size() <= 2) {
             for (BlockNode node : nodes)
-                cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                cost += (0.5 * Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d + mc.thePlayer.rayTrace(5, 1).hitVec.distanceTo(new Vec3(node.getPos())) / 540.0d;
         } else {
             for (BlockNode node : nodes)
                 cost += (node.getType() == BlockType.WALK) ? 1D : 1.5D;

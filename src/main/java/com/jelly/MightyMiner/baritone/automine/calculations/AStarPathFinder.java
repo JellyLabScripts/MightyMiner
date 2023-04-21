@@ -129,7 +129,6 @@ public class AStarPathFinder {
     }
 
     private void initialize(PathMode mode){
-        this.addToBlackList(lastTarget);
         this.mode = mode;
     }
 

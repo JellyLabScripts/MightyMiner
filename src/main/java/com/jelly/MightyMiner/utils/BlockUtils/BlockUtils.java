@@ -9,7 +9,6 @@ import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
 
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
-import jdk.internal.net.http.common.Log;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;

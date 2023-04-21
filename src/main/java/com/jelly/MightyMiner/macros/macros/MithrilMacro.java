@@ -39,8 +39,6 @@ public class MithrilMacro extends Macro {
         }
 
         noMithril = false;
-
-        index = 0;
         baritone = new AutoMineBaritone(getMineBehaviour());
     }
 

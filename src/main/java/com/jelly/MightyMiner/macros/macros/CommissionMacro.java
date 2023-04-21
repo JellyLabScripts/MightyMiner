@@ -2,12 +2,16 @@ package com.jelly.MightyMiner.macros.macros;
 
 
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
+import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.*;
 import com.jelly.MightyMiner.utils.PlayerUtils;
@@ -227,8 +231,6 @@ public class CommissionMacro extends Macro {
 
     private KillingState killingState = KillingState.NONE;
 
-    private MiningState miningState = MiningState.NONE;
-
     private ReWarpState reWarpState = ReWarpState.NONE;
 
     private Rotation rotation = new Rotation();
@@ -254,8 +256,6 @@ public class CommissionMacro extends Macro {
     private int emissaryForgeWarpFailCounter = 0;
 
     private int failedOpeningEmissaryCounter = 0;
-
-    private int emissaryArriveFailCounter = 0;
 
     private int navigatingArriveFailCounter = 0;
 
@@ -626,7 +626,6 @@ public class CommissionMacro extends Macro {
                     navigatingWarpState = NavigatingWarpState.HOLD_AOTV;
                     typeOfCommission = TypeOfCommission.NONE;
                     killingState = KillingState.SEARCHING;
-                    miningState = MiningState.NONE;
                     isWarping = true;
                     regenMana = false;
                     keyPressed = false;
@@ -646,7 +645,6 @@ public class CommissionMacro extends Macro {
                     failedLookingAtBlockCounter = 0;
                     emissaryForgeWarpFailCounter = 0;
                     failedOpeningEmissaryCounter = 0;
-                    emissaryArriveFailCounter = 0;
                     navigatingArriveFailCounter = 0;
                     stuckAtShootCounter = 0;
                     blockedVisionCounter = 0;
@@ -1690,11 +1688,6 @@ public class CommissionMacro extends Macro {
                         // Setting up Mithril Macro
                         LogUtils.debugLog("Setting up Mithril Macro");
                         mc.thePlayer.inventory.currentItem = pickaxeSlot;
-                        mithPriorityList.clear();
-                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(3));
-                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(0));
-                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(1));
-                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(2));
 
                         baritone = new AutoMineBaritone(getMineBehaviour());
                         typeOfCommission = TypeOfCommission.MINING_COMM;
@@ -1702,11 +1695,6 @@ public class CommissionMacro extends Macro {
                         // Setting up Titanium Macro
                         LogUtils.debugLog("Setting up Titanium Macro");
                         mc.thePlayer.inventory.currentItem = pickaxeSlot;
-                        mithPriorityList.clear();
-                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(3));
-                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(0));
-                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(1));
-                        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(2));
 
                         baritone = new AutoMineBaritone(getMineBehaviour());
                         typeOfCommission = TypeOfCommission.MINING_COMM;
@@ -1842,10 +1830,14 @@ public class CommissionMacro extends Macro {
 
                         switch (baritone.getState()) {
                             case IDLE: case FAILED:
-                                baritone.mineFor(mithPriorityList);
-                                break;
+                            ArrayList<BlockData<?>> targets = getHighestPriority();
 
-
+                            if(targets == null) {
+                                LogUtils.debugLog("No mithril available, waiting");
+                                return;
+                            }
+                            baritone.clearBlacklist();
+                            baritone.mineFor(targets);
 
                         }
 
@@ -2107,6 +2099,39 @@ public class CommissionMacro extends Macro {
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindForward, false);
     }
 
+
+
+    private ArrayList<BlockData<?>> getHighestPriority() {
+        for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+                MineUtils.getMithrilColorBasedOnPriority(3))) {
+            if(BlockUtils.canMineBlock(bp))
+                return MineUtils.getMithrilColorBasedOnPriority(3);
+        }
+
+        for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+                new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_hardened_clay, null));
+                    add(new BlockData<>(Blocks.wool, EnumDyeColor.GRAY));
+                    add(new BlockData<>(Blocks.prismarine, null));
+                }})) {
+            if(BlockUtils.canMineBlock(bp))
+                return new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_hardened_clay, null));
+                    add(new BlockData<>(Blocks.wool, EnumDyeColor.GRAY));
+                    add(new BlockData<>(Blocks.prismarine, null));
+                }};
+        }
+
+        for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+                MineUtils.getMithrilColorBasedOnPriority(2))) {
+            if(BlockUtils.canMineBlock(bp))
+                return MineUtils.getMithrilColorBasedOnPriority(2);
+        }
+
+        return null;
+
+    }
+
     public boolean finishedCommission() {
         if (MacroHandler.finishedCommission) {
             MacroHandler.finishedCommission = false;
@@ -2159,7 +2184,7 @@ public class CommissionMacro extends Macro {
                 MiningType.STATIC,
                 MightyMiner.config.commShiftWhenMine,
                 true,
-                true,
+                false,
                 MightyMiner.config.commRotationTime,
                 MightyMiner.config.commRestartTimeThreshold,
                 null,

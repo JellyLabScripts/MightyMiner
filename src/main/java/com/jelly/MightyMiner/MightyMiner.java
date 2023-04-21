@@ -10,8 +10,6 @@ import com.jelly.MightyMiner.config.aotv.AOTVWaypointsStructs;
 import com.jelly.MightyMiner.features.*;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
-import com.jelly.MightyMiner.macros.macros.MithrilMacro;
-import com.jelly.MightyMiner.utils.DrawerUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.SkyblockInfo;
 import com.jelly.MightyMiner.waypoints.WaypointHandler;
 import net.minecraft.client.Minecraft;

@@ -7,10 +7,13 @@ import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
@@ -18,7 +21,7 @@ import java.util.ArrayList;
 public class MithrilMacro extends Macro {
 
     AutoMineBaritone baritone;
-    ArrayList<BlockData<?>> mithPriorityList = new ArrayList<>();
+    boolean noMithril;
 
     @Override
     protected void onEnable() {
@@ -33,12 +36,9 @@ public class MithrilMacro extends Macro {
             }
         }
 
-        mithPriorityList.clear();
-        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1));
-        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2));
-        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3));
-        mithPriorityList.addAll(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4));
+        noMithril = false;
 
+        index = 0;
         baritone = new AutoMineBaritone(getMineBehaviour());
     }
 
@@ -60,13 +60,52 @@ public class MithrilMacro extends Macro {
 
         switch (baritone.getState()) {
             case IDLE: case FAILED:
-                baritone.mineFor(mithPriorityList);
+
+                ArrayList<BlockData<?>> targets = getHighestPriority();
+                if(targets == null) {
+                    if(!noMithril) {
+                        LogUtils.addMessage("No mithril available, waiting");
+                        noMithril = true;
+                    }
+                    return;
+                }
+
+                noMithril = false;
+                baritone.clearBlacklist();
+                baritone.mineFor(getHighestPriority());
+
                 break;
+
         }
 
         checkMiningSpeedBoost();
     }
 
+
+    private ArrayList<BlockData<?>> getHighestPriority() {
+       for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+               MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1))) {
+           if(BlockUtils.canMineBlock(bp))
+               return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1);
+       }
+        for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+                MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2))) {
+            if(BlockUtils.canMineBlock(bp))
+                return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2);
+        }
+        for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+                MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3))) {
+            if(BlockUtils.canMineBlock(bp))
+                return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3);
+        }
+        for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+                MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4))) {
+            if(BlockUtils.canMineBlock(bp))
+                return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4);
+        }
+        return null;
+
+    }
 
     @Override
     protected void onDisable() {
@@ -79,7 +118,7 @@ public class MithrilMacro extends Macro {
                 MiningType.STATIC,
                 MightyMiner.config.mithShiftWhenMine,
                 true,
-                true,
+                false,
                 MightyMiner.config.mithRotationTime,
                 MightyMiner.config.mithRestartTimeThreshold,
                 null,

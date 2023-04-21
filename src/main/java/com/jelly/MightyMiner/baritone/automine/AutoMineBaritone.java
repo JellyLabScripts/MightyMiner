@@ -92,6 +92,10 @@ public class AutoMineBaritone {
         startPathFinding();
     }
 
+
+    public void clearBlacklist(){
+        pathFinder.clearBlackList();
+    }
     public BaritoneState getState(){
         return this.state;
     }

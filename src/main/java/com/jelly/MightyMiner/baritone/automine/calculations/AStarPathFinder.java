@@ -39,6 +39,10 @@ public class AStarPathFinder {
         blackListedPos.remove(blockPos);
     }
 
+    public void clearBlackList() {
+        blackListedPos.clear();
+    }
+
 
     public Path getPath(PathMode mode, boolean withPreference, ArrayList<BlockData<?>> blockType) throws NoBlockException, NoPathException {
         initialize(mode);

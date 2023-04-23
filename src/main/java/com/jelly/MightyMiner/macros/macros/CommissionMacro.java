@@ -2102,13 +2102,13 @@ public class CommissionMacro extends Macro {
 
 
     private ArrayList<BlockData<?>> getHighestPriority() {
-        for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+        for(BlockPos bp : BlockUtils.findBlockInCube(10, null, 0, 256,
                 MineUtils.getMithrilColorBasedOnPriority(3))) {
             if(BlockUtils.canMineBlock(bp))
                 return MineUtils.getMithrilColorBasedOnPriority(3);
         }
 
-        for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+        for(BlockPos bp : BlockUtils.findBlockInCube(10, null, 0, 256,
                 new ArrayList<BlockData<?>>() {{
                     add(new BlockData<>(Blocks.stained_hardened_clay, null));
                     add(new BlockData<>(Blocks.wool, EnumDyeColor.GRAY));
@@ -2122,7 +2122,7 @@ public class CommissionMacro extends Macro {
                 }};
         }
 
-        for(BlockPos bp : BlockUtils.findBlockInCube(5, null, 0, 256,
+        for(BlockPos bp : BlockUtils.findBlockInCube(10, null, 0, 256,
                 MineUtils.getMithrilColorBasedOnPriority(2))) {
             if(BlockUtils.canMineBlock(bp))
                 return MineUtils.getMithrilColorBasedOnPriority(2);

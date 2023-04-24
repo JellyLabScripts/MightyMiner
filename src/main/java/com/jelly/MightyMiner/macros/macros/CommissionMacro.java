@@ -1008,7 +1008,7 @@ public class CommissionMacro extends Macro {
                                         }
                                         break;
                                     case ARRIVE_CHECK:
-                                        if (nextActionDelay.hasReached(300)) {
+                                        if (nextActionDelay.hasReached(MightyMiner.config.commArriveWaitTime)) {
                                             // Checking if player arrived at warp destination
                                             LogUtils.debugLog("Checking if player arrived at warp destination");
                                             if (BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
@@ -1608,7 +1608,7 @@ public class CommissionMacro extends Macro {
                         }
                         break;
                     case ARRIVE_CHECK:
-                        if (nextActionDelay.hasReached(300)) {
+                        if (nextActionDelay.hasReached(MightyMiner.config.commArriveWaitTime)) {
                             // Checking if player arrived at warp destination
                             LogUtils.debugLog("Checking if player arrived at warp destination");
                             if (BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {

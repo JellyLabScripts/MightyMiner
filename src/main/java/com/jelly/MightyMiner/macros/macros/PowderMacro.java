@@ -561,6 +561,8 @@ public class PowderMacro extends Macro {
                 new ArrayList<Block>(){
                     {
                         add(Blocks.chest);
+                        add(Blocks.stained_glass);
+                        add(Blocks.stained_glass_pane);
                     }
                 },
                 null,
@@ -568,4 +570,5 @@ public class PowderMacro extends Macro {
                 0
         );
     }
+
 }

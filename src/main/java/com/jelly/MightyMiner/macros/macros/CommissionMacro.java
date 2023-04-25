@@ -892,7 +892,7 @@ public class CommissionMacro extends Macro {
                                                     LogUtils.debugLog("Failed looking to often (Warp To Emissary)");
 
                                                     // Checking if player is still in spot
-                                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
+                                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) previousWarpDestination)) {
                                                         // Fell out of position
                                                         LogUtils.debugLog("Fell out of warp position (Attacked by something)");
 
@@ -1141,7 +1141,7 @@ public class CommissionMacro extends Macro {
                                                     LogUtils.debugLog("Failed looking to often (Find Emissary)");
 
                                                     // Checking if player is still in spot
-                                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
+                                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) previousWarpDestination)) {
                                                         // Fell out of position
                                                         LogUtils.debugLog("Fell out of warp position (Attacked by something)");
 
@@ -1492,7 +1492,7 @@ public class CommissionMacro extends Macro {
                                     // Failed to often
                                     LogUtils.debugLog("Failed looking to often (Navigating)");
                                     // Checking if player is still in spot
-                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) currentWarpDestination)) {
+                                    if (!BlockUtils.getPlayerLoc().down().equals((Object) previousWarpDestination)) {
                                         // Fell out of position
                                         LogUtils.debugLog("Fell out of warp position (Attacked by something)");
 

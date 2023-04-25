@@ -83,22 +83,22 @@ public class MithrilMacro extends Macro {
 
 
     private ArrayList<BlockData<?>> getHighestPriority() {
-       for(BlockPos bp : BlockUtils.findBlockInCube(10, null, 0, 256,
+       for(BlockPos bp : BlockUtils.findBlockInCube(12, null, 0, 256,
                MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1))) {
            if(BlockUtils.canMineBlock(bp))
                return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1);
        }
-        for(BlockPos bp : BlockUtils.findBlockInCube(10, null, 0, 256,
+        for(BlockPos bp : BlockUtils.findBlockInCube(12, null, 0, 256,
                 MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2))) {
             if(BlockUtils.canMineBlock(bp))
                 return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2);
         }
-        for(BlockPos bp : BlockUtils.findBlockInCube(10, null, 0, 256,
+        for(BlockPos bp : BlockUtils.findBlockInCube(12, null, 0, 256,
                 MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3))) {
             if(BlockUtils.canMineBlock(bp))
                 return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3);
         }
-        for(BlockPos bp : BlockUtils.findBlockInCube(10, null, 0, 256,
+        for(BlockPos bp : BlockUtils.findBlockInCube(12, null, 0, 256,
                 MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4))) {
             if(BlockUtils.canMineBlock(bp))
                 return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4);

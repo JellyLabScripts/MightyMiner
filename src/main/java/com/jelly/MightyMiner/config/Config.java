@@ -204,7 +204,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
 
     @VigilanceName(name = "Arrive check wait time in ms", category = COMMISSION_MACRO, subcategory = "Warping")
     @Slider( name = "Arrive check wait time in ms", category = COMMISSION_MACRO, subcategory = "Warping", max = 750, min = 200)
-    public int commArriveWaitTime = 10;
+    public int commArriveWaitTime = 250;
 
     @VigilanceName(name = "Stop on limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")
     @Switch(name = "Stop on limbo", description = "Stop macro when getting kicked to limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")

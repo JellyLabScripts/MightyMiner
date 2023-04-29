@@ -71,8 +71,11 @@ public class AStarPathFinder {
             }
 
         } else { // 1 loop for ALL block types
-
-            foundBlocks = BlockUtils.findBlockInCube(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), blockType);
+            for(BlockPos bp : BlockUtils.findBlockInCube(10, null, 0, 256, blockType)) {
+                if (BlockUtils.canMineBlock(bp)) {
+                    foundBlocks.add(bp);
+                }
+            } 
             possiblePaths = getPossiblePaths(foundBlocks);
         }
 

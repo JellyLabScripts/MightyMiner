@@ -95,22 +95,6 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Dropdown(name = "Type of gemstone to mine", category = GEMSTONE_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz", "Jasper"})
     public int gemGemstoneType = 0;
 
-    @VigilanceName(name = "RGA hardstone aura", category = POWDER_MACRO, subcategory = "RGA Nuker")
-    @Switch(name = "RGA hardstone aura", description = "Mines hard stone around you. USE WITH center to block and optionally make gemstones full block (Core)", category = POWDER_MACRO, subcategory = "RGA Nuker")
-    public boolean powNuker = false;
-
-    @VigilanceName(name = "Hardstone aura height", category = POWDER_MACRO, subcategory = "RGA Nuker")
-    @Slider(name = "Hardstone aura height", category = POWDER_MACRO, subcategory = "RGA Nuker", max = 4, min = 2)
-    public int powNukerHeight = 3;
-
-    @VigilanceName(name = "Hardstone aura ", category = POWDER_MACRO, subcategory = "RGA Nuker")
-    @Dropdown(name = "Hardstone aura",
-            category = POWDER_MACRO,
-            subcategory = "RGA Nuker",
-            options = { "Blocks around", "Facing axis"}
-    )
-    public int powNukerType = 0;
-
     @VigilanceName(name = "Mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
     @Switch(name = "Mine gemstones", description = "Make sure you have a drill that is able to mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
     public boolean powMineGemstone = true;
@@ -373,8 +357,6 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
 
         this.addDependency("playerRad", "playerFailsafe");
         this.addDependency("playerDetectionThreshold", "playerFailsafe");
-        this.addDependency("powNukerHeight", "powNuker");
-        this.addDependency("powNukerType", "powNuker");
         this.addDependency("aotvRouteLineColor", "aotvShowRouteLines");
         this.addDependency("aotvRouteBlocksColor", "aotvHighlightRouteBlocks");
         this.addDependency("refuelThreshold", "refuelWithAbiphone");

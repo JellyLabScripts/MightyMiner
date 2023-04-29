@@ -88,7 +88,6 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(new MacroHandler());
         MinecraftForge.EVENT_BUS.register(new WaypointHandler());
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
-        MinecraftForge.EVENT_BUS.register(new RGANuker());
         MinecraftForge.EVENT_BUS.register(new SkyblockInfo());
         MinecraftForge.EVENT_BUS.register(new FuelFilling());
         MinecraftForge.EVENT_BUS.register(mobKiller);

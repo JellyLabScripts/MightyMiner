@@ -93,6 +93,7 @@ public class Failsafes {
         if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer != null && someoneIsCloseTimer.hasReached(MightyMiner.config.playerDetectionThreshold)) {
             PlayerUtils.sendPingAlert();
             DisableMacros();
+            KeybindHandler.resetKeybindState();
             LogUtils.addMessage("Someone is close, disabling macros");
             someoneIsCloseTimer = null;
         }

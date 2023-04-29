@@ -6,7 +6,6 @@ import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.features.Autosell;
-import com.jelly.MightyMiner.features.RGANuker;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
@@ -174,7 +173,6 @@ public class PowderMacro extends Macro {
 
     @Override
     public void onDisable() {
-        RGANuker.enabled = false;
         Autosell.disable();
         aote = false;
         if (mineBaritone != null) // nullpointerexception crash sometimes if detected player right after turning on the macro
@@ -187,9 +185,6 @@ public class PowderMacro extends Macro {
         if(phase != TickEvent.Phase.START || !enabled)
             return;
 
-        if(!RGANuker.enabled && MightyMiner.config.powNuker){
-            RGANuker.enabled = true;
-        }
 
         if(MightyMiner.config.powAutosell){
             if(Autosell.isEnabled())
@@ -306,7 +301,6 @@ public class PowderMacro extends Macro {
                 }
 
                 if(frontShouldMineSlow()){
-                    RGANuker.enabled = false;
                     if(havePotentialObstacles()
                             && !BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) && !BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane)
                             && PlayerUtils.notAtCenter(playerYaw)
@@ -315,9 +309,7 @@ public class PowderMacro extends Macro {
                         aote = true;
                 }
 
-                if(MightyMiner.config.powNuker) {
-                    rotation.initAngleLock(playerYaw, (shouldLookDown() ? 60 : (frontShouldMineSlow() ? 27 : 0)), 200);
-                } else if(frontShouldMineSlow())
+                if(frontShouldMineSlow())
                     rotation.initAngleLock(playerYaw, shouldLookDown() ? 60 : 27, 200);
 
 
@@ -326,7 +318,7 @@ public class PowderMacro extends Macro {
                 else
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pickaxe");
 
-                KeybindHandler.setKeyBindState(KeybindHandler.keybindW, shouldWalkForward() || MightyMiner.config.powNuker || currentState == State.UTurn);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindW, shouldWalkForward() || currentState == State.UTurn);
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
                 this.checkMiningSpeedBoost();
                 break;
@@ -413,7 +405,6 @@ public class PowderMacro extends Macro {
         } else if(!frontShouldMineSlow()
                 && (currentState == State.UTurn || currentState == State.NORMAL)
                 && !aote
-                && !MightyMiner.config.powNuker
                 && !Autosell.isEnabled()
                 && !(mineBaritone.getState() == AutoMineBaritone.BaritoneState.EXECUTING)){
             rotation.updateInCircle(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate);

@@ -13,7 +13,7 @@ public class ComissionUtils {
         List<String> tablist = TablistUtils.getTabListPlayersUnprocessed();
         for (String s : tablist) {
             for (CommissionMacro.ComissionType value : CommissionMacro.ComissionType.values()) {
-                if (s.contains(value.questName)) {
+                if (s.contains(value.questName) && !s.contains("Golden") && !s.contains("Raid")) {
                     quest = value;
                     isDone = s.contains("DONE");
                 }

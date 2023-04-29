@@ -71,7 +71,6 @@ public class MithrilMacro extends Macro {
                 }
 
                 noMithril = false;
-                baritone.clearBlacklist();
                 baritone.mineFor(getHighestPriority());
 
                 break;

@@ -2190,7 +2190,7 @@ public class CommissionMacro extends Macro {
                 "§l Commission Macro:",
                 "§rCommissions done: §f" + commissionCount,
                 "§rCommission per Hour: §f" + questsPerHour,
-                "§rCurrent Commission: §f" + currentQuest,
+                "§rCurrent Commission: §f" + (currentQuest != null ? currentQuest: "None"),
                 "§rRun Time: §f" + time + "h",
         };
     }

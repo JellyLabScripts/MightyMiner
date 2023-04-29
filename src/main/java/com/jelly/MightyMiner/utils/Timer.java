@@ -7,6 +7,10 @@ public class Timer {
         reset();
     }
 
+    public long getTime() {
+        return System.currentTimeMillis() - this.lastMS;
+    }
+
     public boolean hasReached(long milliseconds) {
         return (System.currentTimeMillis() - this.lastMS >= milliseconds);
     }

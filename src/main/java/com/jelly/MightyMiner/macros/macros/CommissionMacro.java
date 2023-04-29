@@ -1836,7 +1836,6 @@ public class CommissionMacro extends Macro {
                                 LogUtils.debugLog("No mithril available, waiting");
                                 return;
                             }
-                            baritone.clearBlacklist();
                             baritone.mineFor(targets);
 
                         }
@@ -2173,6 +2172,19 @@ public class CommissionMacro extends Macro {
             }
         }
         return playerCount;
+    }
+    
+    public static String[] drawInfo() {
+        float runTimeInH = (float) (((float) runTime.getTime()) / (3.6f * Math.pow(10, 6)));
+        float time = (float) (((float) Math.round(runTimeInH * 100.0f)) / 100.0f);
+        float questsPerHour = (float) (((float) Math.round((((float) commissionCount) / time) * 100f)) / 100f);
+        return new String[] {
+                "§l Commission Macro:",
+                "§rCommissions done: §f" + commissionCount,
+                "§rCommission per Hour: §f" + questsPerHour,
+                "§rCurrent Commission: §f" + currentQuest,
+                "§rRun Time: §f" + time + "h",
+        };
     }
 
     public static boolean isWarping() {

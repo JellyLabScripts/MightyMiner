@@ -305,6 +305,9 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
 
     @HUD(name = "MobKiller info", category = ADDONS, subcategory = "MobKiller")
     public MobKillerHUD mobKillerHud = new MobKillerHUD();
+    
+    @HUD(name = "Commission Macro statistics", category = ADDONS, subcategory = "Commission Macro")
+    public CommissionMacroHUD commissionMacroHUD = new CommissionMacroHUD();
 
     @VigilanceName(name = "Sell wishing compass to npc", category = ADDONS, subcategory = "Autosell")
     @Switch(name = "Sell wishing compass to npc", description = "You need a booster cookie", category = ADDONS, subcategory = "Autosell")

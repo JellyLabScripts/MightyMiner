@@ -9,6 +9,7 @@ import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator;
 import cc.polyfrost.oneconfig.config.migration.VigilanceName;
 import com.jelly.MightyMiner.gui.AOTVWaypointsPage;
 import com.jelly.MightyMiner.hud.MobKillerHUD;
+import com.jelly.MightyMiner.hud.CommissionMacroHUD;
 import com.jelly.MightyMiner.macros.macros.CommissionMacro;
 
 public class Config extends cc.polyfrost.oneconfig.config.Config {

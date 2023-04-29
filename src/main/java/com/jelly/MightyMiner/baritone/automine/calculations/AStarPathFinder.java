@@ -115,12 +115,12 @@ public class AStarPathFinder {
 
         LinkedList<LinkedList<BlockNode>> possiblePaths = new LinkedList<>();
         int limit = 3000;
-        for (int i = 0; i < Math.min(targetBlocks.size(), 20); i++) {
-            LinkedList<BlockNode> path = pathFinderBehaviour.isStaticMode() ? calculator.calculateStaticPath(targetBlocks.get(i)) : calculator.calculatePath(BlockUtils.getPlayerLoc(), targetBlocks.get(i), pathFinderBehaviour, mode, limit);
+        for (BlockPos targetBlock : targetBlocks) {
+            LinkedList<BlockNode> path = pathFinderBehaviour.isStaticMode() ? calculator.calculateStaticPath(targetBlock) : calculator.calculatePath(BlockUtils.getPlayerLoc(), targetBlock, pathFinderBehaviour, mode, limit);
 
             if (!path.isEmpty()) {
 
-                if(path.getLast().getPos() == null)
+                if (path.getLast().getPos() == null)
                     path.removeLast(); // remove last dummy blockNode as it is useless for find(BLock)
 
                 possiblePaths.add(path);

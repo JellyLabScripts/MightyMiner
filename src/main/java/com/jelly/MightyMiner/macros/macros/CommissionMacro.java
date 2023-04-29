@@ -205,7 +205,7 @@ public class CommissionMacro extends Macro {
         NONE
     }
 
-    private String currentQuest = null;
+    private static String currentQuest = null;
 
     private State comissionState = State.NONE;
 
@@ -345,6 +345,10 @@ public class CommissionMacro extends Macro {
 
     private ArrayList<ArrayList<IBlockState>> mithPriorityList = new ArrayList<>();
 
+    private static int commissionCount = 0;
+
+    private static final Timer runTime = new Timer();
+
 
 
 
@@ -354,6 +358,8 @@ public class CommissionMacro extends Macro {
         regenMana = false;
         occupiedCounter = 0;
         disableOnLimbo = MightyMiner.config.stopOnLimbo;
+        commissionCount = 0;
+        runTime.reset();
 
         // Resetting states
         isWarping = true;
@@ -567,7 +573,7 @@ public class CommissionMacro extends Macro {
             isWarping = true;
             reWarpState = ReWarpState.WARP_HUB;
         }
-        
+
         // Out of Soulflow
         if (MacroHandler.outOfSoulflow) {
             MacroHandler.outOfSoulflow = false;
@@ -1314,6 +1320,7 @@ public class CommissionMacro extends Macro {
                     // Exiting commission menu
                     LogUtils.debugLog("Exiting commission menu");
                     mc.thePlayer.closeScreen();
+                    commissionCount ++;
                     mc.inGameHasFocus = true;
                     mc.mouseHelper.grabMouseCursor();
 
@@ -1830,13 +1837,13 @@ public class CommissionMacro extends Macro {
 
                         switch (baritone.getState()) {
                             case IDLE: case FAILED:
-                            ArrayList<BlockData<?>> targets = getHighestPriority();
+                                ArrayList<BlockData<?>> targets = getHighestPriority();
 
-                            if(targets == null) {
-                                LogUtils.debugLog("No mithril available, waiting");
-                                return;
-                            }
-                            baritone.mineFor(targets);
+                                if(targets == null) {
+                                    LogUtils.debugLog("No mithril available, waiting");
+                                    return;
+                                }
+                                baritone.mineFor(targets);
 
                         }
 
@@ -2104,7 +2111,8 @@ public class CommissionMacro extends Macro {
         for(BlockPos bp : BlockUtils.findBlockInCube(12, null, 0, 256,
                 MineUtils.getMithrilColorBasedOnPriority(3))) {
             if(BlockUtils.canMineBlock(bp))
-                return MineUtils.getMithrilColorBasedOnPriority(3);
+                return MineUtils.
+                        getMithrilColorBasedOnPriority(3);
         }
 
         for(BlockPos bp : BlockUtils.findBlockInCube(12, null, 0, 256,
@@ -2173,7 +2181,7 @@ public class CommissionMacro extends Macro {
         }
         return playerCount;
     }
-    
+
     public static String[] drawInfo() {
         float runTimeInH = (float) (((float) runTime.getTime()) / (3.6f * Math.pow(10, 6)));
         float time = (float) (((float) Math.round(runTimeInH * 100.0f)) / 100.0f);

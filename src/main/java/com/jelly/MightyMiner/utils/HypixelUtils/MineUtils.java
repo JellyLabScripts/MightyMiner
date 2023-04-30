@@ -18,11 +18,18 @@ public class MineUtils {
     public static EnumDyeColor[] gemPriority = {null, EnumDyeColor.RED, EnumDyeColor.PURPLE, EnumDyeColor.LIME, EnumDyeColor.LIGHT_BLUE, EnumDyeColor.ORANGE, EnumDyeColor.YELLOW, EnumDyeColor.MAGENTA};
 
 
-    public static ArrayList<BlockData<?>> getGemListBasedOnPriority(int priority) {
-        ArrayList<BlockData<?>> filter = new ArrayList<>();
-        filter.add(new BlockData<>(Blocks.stained_glass, gemPriority[priority]));
-        if (MightyMiner.config.aotvMineGemstonePanes)
-            filter.add(new BlockData<>(Blocks.stained_glass_pane, gemPriority[priority]));
+    public static ArrayList<ArrayList<BlockData<?>>> getGemListBasedOnPriority(int priority) {
+        ArrayList<ArrayList<BlockData<?>>> filter = new ArrayList<>();
+        ArrayList<BlockData<?>> glass = new ArrayList<BlockData<?>>() {{
+            add(new BlockData<>(Blocks.stained_glass_pane, gemPriority[priority]));
+        }};
+        filter.add(glass);
+        if (MightyMiner.config.aotvMineGemstonePanes) {
+            ArrayList<BlockData<?>> panes = new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.stained_glass_pane, gemPriority[priority]));
+            }};
+            filter.add(panes);
+        }
         return filter;
     }
 

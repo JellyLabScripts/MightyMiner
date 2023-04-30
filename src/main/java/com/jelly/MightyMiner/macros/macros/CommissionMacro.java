@@ -479,6 +479,7 @@ public class CommissionMacro extends Macro {
     @Override
     public void onTick(TickEvent.Phase phase) {
         if (inventoryCheckDelay.hasReached(2000)) {
+            if (mc.theWorld == null || mc.thePlayer == null) return;
             inventoryCheckDelay.reset();
             boolean freeSlot = false;
             for (int i = 0; i < mc.thePlayer.openContainer.inventorySlots.size() - 9; i++) {

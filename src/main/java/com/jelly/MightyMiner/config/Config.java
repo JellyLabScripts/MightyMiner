@@ -195,6 +195,10 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Switch( name = "Auto Pickonimbus swapper", category = COMMISSION_MACRO, subcategory = "Mining")
     public boolean commAutoPickonimbusSwapper = false;
 
+    @VigilanceName(name = "Skip goblin slayer quest (requires 3 commission slots)", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
+    @Switch( name = "Skip goblin slayer quest (requires 3 commission slots)", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
+    public boolean commSkipGoblinSlayerQuest = false;
+
     @VigilanceName(name = "Stop on limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")
     @Switch(name = "Stop on limbo", description = "Stop macro when getting kicked to limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")
     public boolean stopOnLimbo = true;

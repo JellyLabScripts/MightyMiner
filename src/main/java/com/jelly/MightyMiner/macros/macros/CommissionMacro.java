@@ -481,15 +481,17 @@ public class CommissionMacro extends Macro {
         if (!isWarping && comissionState == State.COMMITTING) {
             if (inventoryCheckDelay.hasReached(2000)) {
                 if (mc.theWorld == null || mc.thePlayer == null) return;
-                inventoryCheckDelay.reset();
-                boolean freeSlot = false;
-                for (int i = 0; i < mc.thePlayer.openContainer.inventorySlots.size() - 9; i++) {
-                    if (InventoryUtils.getStackInSlot(i) == null) freeSlot = true;
-                }
-                if (!freeSlot) {
-                    LogUtils.debugLog("Inventory filled up");
-                    MacroHandler.disableScript();
-                    return;
+                                if (!(mc.currentScreen instanceof GuiChest)) {
+                    inventoryCheckDelay.reset();
+                    boolean freeSlot = false;
+                    for (int i = 0; i < mc.thePlayer.openContainer.inventorySlots.size() - 9; i++) {
+                        if (InventoryUtils.getStackInSlot(i) == null) freeSlot = true;
+                    }
+                    if (!freeSlot) {
+                        LogUtils.debugLog("Inventory filled up");
+                        MacroHandler.disableScript();
+                        return;
+                    }
                 }
             }
             if (MightyMiner.config.commAutoPickonimbusSwapper) {

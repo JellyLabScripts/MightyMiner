@@ -94,6 +94,7 @@ public class CommissionMacro extends Macro {
         }
     }
 
+
     public enum State {
         SETUP,
         OPEN_COMM_MENU,
@@ -1962,6 +1963,14 @@ public class CommissionMacro extends Macro {
                     }
                     checkMiningSpeedBoost();
                 }
+
+                // Check if player is aiming at golden Goblin
+                Entity entityLookingAt = NpcUtil.getStandOfEntityLookingAt(10);
+                if (entityLookingAt != null && entityLookingAt.getName().contains("Golden Goblin")) {
+                    KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, true);
+                    KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
+                }
+
 
                 if (nextActionDelay.hasReached(2500)) {
                     // Check if Commission is finished

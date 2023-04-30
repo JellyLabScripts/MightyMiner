@@ -1,5 +1,6 @@
 package com.jelly.MightyMiner.utils.HypixelUtils;
 
+import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.macros.macros.CommissionMacro;
 import com.jelly.MightyMiner.utils.TablistUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,8 +15,15 @@ public class ComissionUtils {
         for (String s : tablist) {
             for (CommissionMacro.ComissionType value : CommissionMacro.ComissionType.values()) {
                 if (s.contains(value.questName) && !s.contains("Golden") && !s.contains("Raid")) {
-                    quest = value;
-                    isDone = s.contains("DONE");
+                    if (MightyMiner.config.commSkipGoblinSlayerQuest) {
+                        if (!s.contains("Goblin Slayer")) {
+                            quest = value;
+                            isDone = s.contains("DONE");
+                        }
+                    } else {
+                        quest = value;
+                        isDone = s.contains("DONE");
+                    }
                 }
             }
         }

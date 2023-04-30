@@ -1695,6 +1695,8 @@ public class CommissionMacro extends Macro {
                         // Setting up Mithril Macro
                         LogUtils.debugLog("Setting up Mithril Macro");
                         mc.thePlayer.inventory.currentItem = pickaxeSlot;
+                        mc.inGameHasFocus = true;
+                        mc.mouseHelper.grabMouseCursor();
 
                         baritone = new AutoMineBaritone(getMineBehaviour());
                         typeOfCommission = TypeOfCommission.MINING_COMM;
@@ -1702,6 +1704,8 @@ public class CommissionMacro extends Macro {
                         // Setting up Titanium Macro
                         LogUtils.debugLog("Setting up Titanium Macro");
                         mc.thePlayer.inventory.currentItem = pickaxeSlot;
+                        mc.inGameHasFocus = true;
+                        mc.mouseHelper.grabMouseCursor();
 
                         baritone = new AutoMineBaritone(getMineBehaviour());
                         typeOfCommission = TypeOfCommission.MINING_COMM;

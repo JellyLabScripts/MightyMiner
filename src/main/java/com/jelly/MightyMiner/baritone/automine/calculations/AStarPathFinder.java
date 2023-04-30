@@ -47,7 +47,7 @@ public class AStarPathFinder {
 
 
 
-    public Path getPath(PathMode mode, boolean withPreference, ArrayList<BlockData<?>> blockType) throws NoBlockException, NoPathException {
+    public Path getPath(PathMode mode, boolean withPreference, ArrayList<ArrayList<BlockData<?>>> blockType) throws NoBlockException, NoPathException {
 
         initialize(mode);
 
@@ -58,7 +58,7 @@ public class AStarPathFinder {
 
         if (withPreference) { // loop for EACH block type
 
-            for (BlockData<?> block : blockType) {
+            for (ArrayList<BlockData<?>> block : blockType) {
                 foundBlocks = BlockUtils.findBlockInCube(pathFinderBehaviour.getSearchRadius() * 2, blackListedPos, pathFinderBehaviour.getMinY(), pathFinderBehaviour.getMaxY(), block);
                 possiblePaths = getPossiblePaths(foundBlocks);
 
@@ -71,12 +71,14 @@ public class AStarPathFinder {
             }
 
         } else { // 1 loop for ALL block types
-            for(BlockPos bp : BlockUtils.findBlockInCube(10, blackListedPos, 0, 256, blockType)) {
-                if (BlockUtils.canMineBlock(bp)) {
-                    foundBlocks.add(bp);
+            for (ArrayList<BlockData<?>> block: blockType) {
+                for(BlockPos bp : BlockUtils.findBlockInCube(10, blackListedPos, 0, 256, block)) {
+                    if (BlockUtils.canMineBlock(bp)) {
+                        foundBlocks.add(bp);
+                    }
                 }
-            } 
-            possiblePaths = getPossiblePaths(foundBlocks);
+                possiblePaths.addAll(getPossiblePaths(foundBlocks));
+            }
         }
 
         if(foundBlocks.isEmpty())

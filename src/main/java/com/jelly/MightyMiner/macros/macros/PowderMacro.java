@@ -554,6 +554,8 @@ public class PowderMacro extends Macro {
                         add(Blocks.chest);
                         add(Blocks.stained_glass);
                         add(Blocks.stained_glass_pane);
+                        add(Blocks.prismarine);
+                        add(Blocks.wool);
                     }
                 },
                 null,

@@ -22,12 +22,16 @@ import net.minecraft.block.BlockPrismarine;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiChest;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -205,6 +209,29 @@ public class CommissionMacro extends Macro {
         NONE
     }
 
+    public enum PickonimbusState {
+        GET,
+        PULL,
+        SET,
+        NONE,
+    }
+
+    public enum PullState {
+        OPEN_INVENTORY,
+        CHECK_INVENTORY,
+        PULL_ITEM,
+        CLOSE_INVENTORY,
+        CHECK_CLOSED_INVENTORY,
+        NONE
+    }
+
+    public enum PullItemState {
+        CHECK,
+        FREE_SLOT,
+        PULL_DOWN_ITEM,
+        NONE
+    }
+
     private static String currentQuest = null;
 
     private State comissionState = State.NONE;
@@ -233,13 +260,20 @@ public class CommissionMacro extends Macro {
 
     private ReWarpState reWarpState = ReWarpState.NONE;
 
+    private PickonimbusState pickonimbusState = PickonimbusState.NONE;
+
+    private PullState pullState = PullState.NONE;
+
+    private PullItemState pullItemState = PullItemState.NONE;
+
+
     private Rotation rotation = new Rotation();
 
     private int pigeonSlot;
 
     private int aotvSlot;
 
-    private int pickaxeSlot;
+    private static int pickaxeSlot;
 
     private int weaponSlot;
 
@@ -349,7 +383,15 @@ public class CommissionMacro extends Macro {
 
     private static final Timer runTime = new Timer();
 
+    private boolean hasPickonimbus = false;
 
+    private ArrayList<Integer> pickonimbusSlots = new ArrayList<>();
+
+    private final Timer pullActionDelay = new Timer();
+
+    private int inventoryFailCounter = 0;
+
+    private final Timer inventoryCheckDelay = new Timer();
 
 
     @Override
@@ -390,15 +432,32 @@ public class CommissionMacro extends Macro {
             aotvSlot = PlayerUtils.getItemInHotbar("Aspect of the Void");
         }
 
-        // Check if player has a Pickaxe / Drill / Gauntlet
-        if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Pick", "Gauntlet", "Drill") == -1) {
-            LogUtils.addMessage("You don't have a Pickaxe/Gauntlet/Drill");
-            LogUtils.debugLog("Player does not have Pickaxe/Gauntlet/Drill");
-            MacroHandler.disableScript();
-            return;
+        if (MightyMiner.config.commAutoPickonimbusSwapper) {
+            hasPickonimbus = false;
+            for (Slot item: InventoryUtils.getInventorySlots()) {
+                String itemName = item.getStack().getDisplayName();
+                if (itemName.contains("Pickonimbus")) {
+                    hasPickonimbus = true;
+                }
+            }
+            if (hasPickonimbus) {
+                pickonimbusState = PickonimbusState.GET;
+            } else {
+                LogUtils.debugLog("No Pickonimbus found");
+                MacroHandler.disableScript();
+                return;
+            }
         } else {
-            LogUtils.debugLog("Player has Pickaxe/Gauntlet/Drill");
-            pickaxeSlot = PlayerUtils.getItemInHotbar("Pick", "Gauntlet", "Drill");
+            // Check if player has a Pickaxe / Drill / Gauntlet
+            if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Pick", "Gauntlet", "Drill") == -1) {
+                LogUtils.addMessage("You don't have a Pickaxe/Gauntlet/Drill");
+                LogUtils.debugLog("Player does not have Pickaxe/Gauntlet/Drill");
+                MacroHandler.disableScript();
+                return;
+            } else {
+                LogUtils.debugLog("Player has Pickaxe/Gauntlet/Drill");
+                pickaxeSlot = PlayerUtils.getItemInHotbar("Pick", "Gauntlet", "Drill");
+            }
         }
 
         // Check if player has a Juju / Terminator / Aurora
@@ -419,6 +478,169 @@ public class CommissionMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase) {
+        if (inventoryCheckDelay.hasReached(2000)) {
+            inventoryCheckDelay.reset();
+            boolean freeSlot = false;
+            for (int i = 0; i < mc.thePlayer.openContainer.inventorySlots.size() - 9; i++) {
+                if (InventoryUtils.getStackInSlot(i) == null) freeSlot = true;
+            }
+            if (!freeSlot) {
+                LogUtils.debugLog("Inventory filled up");
+                MacroHandler.disableScript();
+                return;
+            }
+        }
+        if (MightyMiner.config.commAutoPickonimbusSwapper) {
+            switch (pickonimbusState) {
+                case GET:
+                    if (mc.theWorld == null || mc.thePlayer == null) return;
+                    pickonimbusSlots.clear();
+                    for (Slot item: InventoryUtils.getInventorySlots()) {
+                        String itemName = item.getStack().getDisplayName();
+                        if (itemName.contains("Pickonimbus")) {
+                            pickonimbusSlots.add(item.getSlotIndex());
+                        }
+                    }
+                    if (pickonimbusSlots.size() > 0) {
+                        Collections.sort(pickonimbusSlots);
+                        if (pickonimbusSlots.get(0) > 8) {
+                            inventoryFailCounter = 0;
+                            pickonimbusState = PickonimbusState.PULL;
+                            pullState = PullState.OPEN_INVENTORY;
+                        } else {
+                            pickaxeSlot = PlayerUtils.getItemInHotbarWithBlackList(true, null, "Pickonimbus");
+                        }
+                    } else {
+                        LogUtils.debugLog("No more pickonimbus 2000");
+
+                        // Check if player has a Pickaxe / Drill / Gauntlet
+                        if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Pick", "Gauntlet", "Drill") == -1) {
+                            LogUtils.addMessage("You don't have a Pickaxe/Gauntlet/Drill");
+                            LogUtils.debugLog("Player does not have Pickaxe/Gauntlet/Drill");
+                            MacroHandler.disableScript();
+                            return;
+                        } else {
+                            LogUtils.debugLog("Player has Pickaxe/Gauntlet/Drill");
+                            pickaxeSlot = PlayerUtils.getItemInHotbar("Pick", "Gauntlet", "Drill");
+                            mc.thePlayer.inventory.currentItem = pickaxeSlot;
+                        }
+                    }
+                    break;
+                case PULL:
+                    switch (pullState) {
+                        case OPEN_INVENTORY:
+                            if (pullActionDelay.hasReached(200)) {
+                                InventoryUtils.openInventory();
+
+                                pullActionDelay.reset();
+                                pullState = PullState.CHECK_INVENTORY;
+                            }
+                            break;
+                        case CHECK_INVENTORY:
+                            if (pullActionDelay.hasReached(500)) {
+                                if (mc.currentScreen instanceof GuiInventory) {
+                                    pullActionDelay.reset();
+                                    pullState = PullState.PULL_ITEM;
+                                    pullItemState = PullItemState.CHECK;
+                                } else {
+                                    if (inventoryFailCounter > 5) {
+                                        LogUtils.debugLog("Failed opening Inventory to often");
+                                        MacroHandler.disableScript();
+                                        return;
+                                    } else {
+                                        LogUtils.debugLog("Failed opening Inventory: " + inventoryFailCounter);
+                                        inventoryFailCounter++;
+                                        pullActionDelay.reset();
+                                        pullState = PullState.OPEN_INVENTORY;
+                                    }
+                                }
+
+                                pullActionDelay.reset();
+                            }
+                            break;
+                        case PULL_ITEM:
+                            switch (pullItemState) {
+                                case CHECK:
+                                    pullActionDelay.reset();
+                                    if (hasEmptyHotBarSlot()) {
+                                        pullItemState = PullItemState.PULL_DOWN_ITEM;
+                                    } else {
+                                        pullItemState = PullItemState.FREE_SLOT;
+                                    }
+                                    break;
+                                case FREE_SLOT:
+                                    if (pullActionDelay.hasReached(500)) {
+                                        for (Slot item: InventoryUtils.getInventorySlots()) {
+                                            String itemName = item.getStack().getDisplayName();
+                                            if (item.getSlotIndex() < 9 && !itemName.contains("Pick") && !itemName.contains("Gauntlet") && !itemName.contains("Drill")  && !itemName.contains("Aurora")  && !itemName.contains("Juju") && !itemName.contains("Terminator")  && !itemName.contains("Aspect of the Void") && !itemName.contains("Royal Pigeon")) {
+                                                InventoryUtils.clickOpenContainerSlot(item.slotNumber, 0, 1);
+                                                break;
+                                            }
+                                        }
+
+                                        pullItemState = PullItemState.PULL_DOWN_ITEM;
+                                        pullActionDelay.reset();
+                                    }
+                                    break;
+                                case PULL_DOWN_ITEM:
+                                    if (pullActionDelay.hasReached(500)) {
+                                        InventoryUtils.clickOpenContainerSlot(pickonimbusSlots.get(0), 0, 1);
+
+                                        pullState = PullState.CLOSE_INVENTORY;
+                                        pullItemState = PullItemState.NONE;
+                                        pullActionDelay.reset();
+                                    }
+                                    break;
+                                case NONE:
+                                    LogUtils.debugLog("Not in a pull item state");
+                                    MacroHandler.disableScript();
+                                    break;
+                            }
+                            break;
+                        case CLOSE_INVENTORY:
+                            if (pullActionDelay.hasReached(400)) {
+                                mc.thePlayer.closeScreen();
+
+                                pullActionDelay.reset();
+                                pullState = PullState.CHECK_CLOSED_INVENTORY;
+                            }
+                            break;
+                        case CHECK_CLOSED_INVENTORY:
+                            if (pullActionDelay.hasReached(400)) {
+                                if (!(mc.currentScreen instanceof GuiInventory)) {
+                                    pickonimbusState = PickonimbusState.SET;
+                                    pullState = PullState.OPEN_INVENTORY;
+                                } else {
+                                    pullActionDelay.reset();
+                                    pullState = PullState.CLOSE_INVENTORY;
+                                }
+                            }
+                            break;
+                        case NONE:
+                            LogUtils.debugLog("Not in a pull state");
+                            MacroHandler.disableScript();
+                            break;
+                    }
+                    break;
+                case SET:
+                    if (pullActionDelay.hasReached(500)) {
+                        pickaxeSlot = PlayerUtils.getItemInHotbarWithBlackList(true, null, "Pickonimbus");
+                        if (pickaxeSlot == -1) {
+                            pickonimbusState = PickonimbusState.PULL;
+                        } else {
+                            mc.thePlayer.inventory.currentItem = pickaxeSlot;
+                            pickonimbusState = PickonimbusState.GET;
+                        }
+                        pullActionDelay.reset();
+                    }
+                    break;
+                case NONE:
+                    LogUtils.debugLog("Not in a pickonimbus State");
+                    MacroHandler.disableScript();
+                    break;
+            }
+        }
+        if (pickonimbusState != PickonimbusState.GET) return;
         switch (reWarpState) {
             case WARP_SB:
                 if (nextActionDelay.hasReached(2000)) {
@@ -632,6 +854,7 @@ public class CommissionMacro extends Macro {
                     navigatingWarpState = NavigatingWarpState.HOLD_AOTV;
                     typeOfCommission = TypeOfCommission.NONE;
                     killingState = KillingState.SEARCHING;
+                    pickonimbusState = PickonimbusState.GET;
                     isWarping = true;
                     regenMana = false;
                     keyPressed = false;
@@ -655,7 +878,6 @@ public class CommissionMacro extends Macro {
                     stuckAtShootCounter = 0;
                     blockedVisionCounter = 0;
                     lookingForNewTargetCounter = 0;
-                    occupiedCounter = 0;
 
                     // Resetting Timers
                     nextActionDelay.reset();
@@ -1713,7 +1935,6 @@ public class CommissionMacro extends Macro {
                         // Setting up Slayer Macro
                         mc.thePlayer.inventory.currentItem = weaponSlot;
                         LogUtils.debugLog("Setting up Slayer Macro");
-                        occupiedCounter = 0;
                         stuckAtShootCounter = 0;
                         blockedVisionCounter = 0;
                         lookingForNewTargetCounter = 0;
@@ -2201,6 +2422,17 @@ public class CommissionMacro extends Macro {
 
     public static boolean isWarping() {
         return isWarping;
+    }
+
+    private boolean hasEmptyHotBarSlot() {
+        for (int i = 0; i < 9; i++) {
+            if (InventoryUtils.getStackInSlot(i) == null) return true;
+        }
+        return false;
+    }
+
+    public static int getPickaxeSlot() {
+        return pickaxeSlot;
     }
 
     private BaritoneConfig getMineBehaviour() {

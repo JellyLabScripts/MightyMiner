@@ -2067,13 +2067,8 @@ public class CommissionMacro extends Macro {
 
                         switch (baritone.getState()) {
                             case IDLE: case FAILED:
-                                ArrayList<BlockData<?>> targets = getHighestPriority();
-
-                                if(targets == null) {
-                                    LogUtils.debugLog("No mithril available, waiting");
-                                    return;
-                                }
-                                baritone.mineFor(targets);
+                                baritone.mineFor(getPriorityList());
+                                break;
 
                         }
 
@@ -2336,6 +2331,23 @@ public class CommissionMacro extends Macro {
     }
 
 
+    private ArrayList<ArrayList<BlockData<?>>> getPriorityList() {
+        ArrayList<ArrayList<BlockData<?>>> priorityList = new ArrayList<>();
+        ArrayList<BlockData<?>> gray = MineUtils.getMithrilColorBasedOnPriority(0);
+        ArrayList<BlockData<?>> green = MineUtils.getMithrilColorBasedOnPriority(1);
+        ArrayList<BlockData<?>> blue = MineUtils.getMithrilColorBasedOnPriority(2);
+        ArrayList<BlockData<?>> titanium = MineUtils.getMithrilColorBasedOnPriority(3);
+
+        if (gray != null && green != null && blue != null && titanium != null) {
+            gray.addAll(green);
+            priorityList.add(titanium);
+            priorityList.add(gray);
+            priorityList.add(blue);
+        }
+        return priorityList;
+    }
+
+
 
     private ArrayList<BlockData<?>> getHighestPriority() {
         for(BlockPos bp : BlockUtils.findBlockInCube(9, null, 0, 256,
@@ -2445,7 +2457,7 @@ public class CommissionMacro extends Macro {
                 MiningType.STATIC,
                 MightyMiner.config.commShiftWhenMine,
                 true,
-                false,
+                true,
                 MightyMiner.config.commRotationTime,
                 MightyMiner.config.commRestartTimeThreshold,
                 null,

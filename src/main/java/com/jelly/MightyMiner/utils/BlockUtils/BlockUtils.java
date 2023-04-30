@@ -522,7 +522,7 @@ public class BlockUtils {
     }
 
     public static ArrayList<Vec3> getAllVisibilityLines(BlockPos pos, Vec3 fromEye) {
-        return getAllVisibilityLines(pos, fromEye, false);
+        return getAllVisibilityLines(pos, fromEye, true);
     }
 
     public static ArrayList<Vec3> getAllVisibilityLines(BlockPos pos, Vec3 fromEye, boolean lowerY) {

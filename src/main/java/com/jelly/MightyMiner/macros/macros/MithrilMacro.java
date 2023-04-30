@@ -60,18 +60,7 @@ public class MithrilMacro extends Macro {
 
         switch (baritone.getState()) {
             case IDLE: case FAILED:
-
-                ArrayList<BlockData<?>> targets = getHighestPriority();
-                if(targets == null) {
-                    if(!noMithril) {
-                        LogUtils.addMessage("No mithril available, waiting");
-                        noMithril = true;
-                    }
-                    return;
-                }
-
-                noMithril = false;
-                baritone.mineFor(getHighestPriority());
+                baritone.mineFor(getPriorityList());
 
                 break;
 
@@ -80,30 +69,15 @@ public class MithrilMacro extends Macro {
         checkMiningSpeedBoost();
     }
 
+    private ArrayList<ArrayList<BlockData<?>>> getPriorityList() {
+        ArrayList<ArrayList<BlockData<?>>> priorityList = new ArrayList<>();
 
-    private ArrayList<BlockData<?>> getHighestPriority() {
-       for(BlockPos bp : BlockUtils.findBlockInCube(9, null, 0, 256,
-               MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1))) {
-           if(BlockUtils.canMineBlock(bp))
-               return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1);
-       }
-        for(BlockPos bp : BlockUtils.findBlockInCube(9, null, 0, 256,
-                MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2))) {
-            if(BlockUtils.canMineBlock(bp))
-                return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2);
-        }
-        for(BlockPos bp : BlockUtils.findBlockInCube(9, null, 0, 256,
-                MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3))) {
-            if(BlockUtils.canMineBlock(bp))
-                return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3);
-        }
-        for(BlockPos bp : BlockUtils.findBlockInCube(9, null, 0, 256,
-                MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4))) {
-            if(BlockUtils.canMineBlock(bp))
-                return MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4);
-        }
-        return null;
+        priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1));
+        priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2));
+        priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3));
+        priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4));
 
+        return priorityList;
     }
 
     @Override
@@ -117,7 +91,7 @@ public class MithrilMacro extends Macro {
                 MiningType.STATIC,
                 MightyMiner.config.mithShiftWhenMine,
                 true,
-                false,
+                true,
                 MightyMiner.config.mithRotationTime,
                 MightyMiner.config.mithRestartTimeThreshold,
                 null,

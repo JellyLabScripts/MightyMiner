@@ -95,7 +95,7 @@ public class AOTVMacro extends Macro {
         }
 
         if (MightyMiner.config.aotvKillYogs) {
-            MightyMiner.mobKiller.Toggle();
+            MightyMiner.mobKiller.toggle();
             MobKiller.setMobsNames(false, "Yog");
             if (MightyMiner.config.useHyperionUnderPlayer) {
                 MobKiller.scanRange = Math.min(5, MightyMiner.config.mobKillerScanRange);
@@ -125,7 +125,7 @@ public class AOTVMacro extends Macro {
         if (baritone != null) // Jelly, stop making the same mistake over and over 💀
             baritone.disableBaritone();
         if (MobKiller.isToggled)
-            MightyMiner.mobKiller.Toggle();
+            MightyMiner.mobKiller.toggle();
         MobKiller.isToggled = false;
     }
 
@@ -222,7 +222,7 @@ public class AOTVMacro extends Macro {
 
                 switch (baritone.getState()) {
                     case IDLE:
-                        baritone.mineFor(MineUtils.getGemListBasedOnPriority(MightyMiner.config.aotvGemstoneType));
+                        baritone.mineFor(MineUtils.getGemListBasedOnPriority());
                         break;
                     case EXECUTING:
                         this.checkMiningSpeedBoost();

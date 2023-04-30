@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.utils.HypixelUtils;
 
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.gui.AOTVGemstoneFilter;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockGlass;
@@ -29,6 +30,74 @@ public class MineUtils {
                 add(new BlockData<>(Blocks.stained_glass_pane, gemPriority[priority]));
             }};
             filter.add(panes);
+        }
+        return filter;
+    }
+
+    public static ArrayList<ArrayList<BlockData<?>>> getGemListBasedOnPriority() {
+        ArrayList<ArrayList<BlockData<?>>> filter = new ArrayList<>();
+        if (AOTVGemstoneFilter.ruby) {
+            filter.add(new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.RED));
+            }});
+            if (MightyMiner.config.aotvMineGemstonePanes)
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.RED));
+                }});
+        }
+        if (AOTVGemstoneFilter.amethyst) {
+            filter.add(new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.PURPLE));
+            }});
+            if (MightyMiner.config.aotvMineGemstonePanes)
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.PURPLE));
+                }});
+        }
+        if (AOTVGemstoneFilter.topaz) {
+            filter.add(new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.YELLOW));
+            }});
+            if (MightyMiner.config.aotvMineGemstonePanes)
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.YELLOW));
+                }});
+        }
+        if (AOTVGemstoneFilter.sapphire) {
+            filter.add(new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.LIGHT_BLUE));
+            }});
+            if (MightyMiner.config.aotvMineGemstonePanes)
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.LIGHT_BLUE));
+                }});
+        }
+        if (AOTVGemstoneFilter.amber) {
+            filter.add(new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.ORANGE));
+            }});
+            if (MightyMiner.config.aotvMineGemstonePanes)
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.ORANGE));
+                }});
+        }
+        if (AOTVGemstoneFilter.jade) {
+            filter.add(new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.LIME));
+            }});
+            if (MightyMiner.config.aotvMineGemstonePanes)
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.LIME));
+                }});
+        }
+        if (AOTVGemstoneFilter.jasper) {
+            filter.add(new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.MAGENTA));
+            }});
+            if (MightyMiner.config.aotvMineGemstonePanes)
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.MAGENTA));
+                }});
         }
         return filter;
     }

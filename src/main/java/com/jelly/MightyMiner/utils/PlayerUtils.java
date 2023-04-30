@@ -14,6 +14,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerUtils {
 
@@ -256,39 +257,27 @@ public class PlayerUtils {
     }
 
     public static boolean entityIsVisible(Entity entityToCheck) {
-        Vec3 startPos = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
-        Vec3 endPos = new Vec3(entityToCheck.posX, entityToCheck.posY + entityToCheck.height / 2, entityToCheck.posZ);
+        return mc.thePlayer.canEntityBeSeen(entityToCheck);
+    }
 
-        Vec3 direction = new Vec3(endPos.xCoord - startPos.xCoord, endPos.yCoord - startPos.yCoord, endPos.zCoord - startPos.zCoord);
-
-        double maxDistance = startPos.distanceTo(endPos);
-
-        double increment = 0.05;
-
-        Vec3 currentPos = startPos;
-
-        while (currentPos.distanceTo(startPos) < maxDistance) {
-
-            ArrayList<BlockPos> blocks = AnyBlockAroundVec3(currentPos, 0.1f);
-
-            boolean flag = false;
-
-            for (BlockPos pos : blocks) {
-                // Add the block to the list if it hasn't been added already
-                if (!mc.theWorld.isAirBlock(pos)) {
-                    flag = true;
+    public static boolean entityIsTargeted(Entity entity) {
+        int reach = 50;
+        Vec3 eyesPos = mc.thePlayer.getPositionEyes(1.0F);
+        Vec3 lookVec = mc.thePlayer.getLook(1.0F);
+        List<Entity> entityList = mc.theWorld.getEntitiesInAABBexcluding(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().addCoord(lookVec.xCoord * reach, lookVec.yCoord * reach, lookVec.zCoord * reach).expand(1.0D, 1.0D, 1.0D), Entity::canBeCollidedWith);
+        Entity entityMouseOver = null;
+        for (Entity e : entityList) {
+            AxisAlignedBB entityBoundingBox = e.getEntityBoundingBox().expand(0.3D, 0.3D, 0.3D);
+            MovingObjectPosition movingObjectPosition = entityBoundingBox.calculateIntercept(eyesPos, eyesPos.addVector(lookVec.xCoord * reach, lookVec.yCoord * reach, lookVec.zCoord * reach));
+            if (movingObjectPosition != null) {
+                double distanceToEntity = eyesPos.distanceTo(movingObjectPosition.hitVec);
+                if (distanceToEntity < reach) {
+                    entityMouseOver = e;
+                    reach = (int) distanceToEntity;
                 }
             }
-
-            if (flag) {
-                return false;
-            }
-
-            // Move along the line by the specified increment
-            Vec3 scaledDirection = new Vec3(direction.xCoord * increment, direction.yCoord * increment, direction.zCoord * increment);
-            currentPos = currentPos.add(scaledDirection);
         }
-        return true;
+        return entityMouseOver != null && entityMouseOver.equals(entity);
     }
 
     public static ArrayList<BlockPos> AnyBlockAroundVec3(Vec3 pos, float around) {

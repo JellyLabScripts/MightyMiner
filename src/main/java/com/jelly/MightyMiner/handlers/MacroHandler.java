@@ -203,7 +203,7 @@ public class MacroHandler {
        pickaxeSkillReady = true;
        enabled = false;
         if (MobKiller.isToggled) {
-            MightyMiner.mobKiller.Toggle();
+            MightyMiner.mobKiller.toggle();
         }
        if(flag)
            LogUtils.addMessage("Disabled script");

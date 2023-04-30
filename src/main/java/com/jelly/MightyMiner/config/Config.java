@@ -7,6 +7,7 @@ import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.PageLocation;
 import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator;
 import cc.polyfrost.oneconfig.config.migration.VigilanceName;
+import com.jelly.MightyMiner.gui.AOTVGemstoneFilter;
 import com.jelly.MightyMiner.gui.AOTVWaypointsPage;
 import com.jelly.MightyMiner.hud.MobKillerHUD;
 import com.jelly.MightyMiner.hud.CommissionMacroHUD;
@@ -211,6 +212,9 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Page(name = "List of waypoints", location = PageLocation.TOP, category = AOTV_MACRO, subcategory = "Waypoints")
     public AOTVWaypointsPage aotvWaypointsPage = new AOTVWaypointsPage();
 
+    @Page(name = "Gemstone settings", location = PageLocation.TOP, category = AOTV_MACRO, subcategory = "Mining")
+    public AOTVGemstoneFilter aotvGemstoneFilterPage = new AOTVGemstoneFilter();
+
     @VigilanceName(name = "Camera speed to ore in ms", category = AOTV_MACRO, subcategory = "Mechanics")
     @Slider(name = "Camera speed to ore in ms", category = AOTV_MACRO, subcategory = "Mechanics", max = 1500, min = 1, step = 10)
     public int aotvCameraSpeed = 100;
@@ -243,10 +247,6 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @VigilanceName(name = "Auto yog killer", category = AOTV_MACRO, subcategory = "Yogs")
     @Switch(name = "Auto yog killer", description = "Warning: Early alpha. For more configuration options go to MobKiller", category = AOTV_MACRO, subcategory = "Yogs")
     public boolean aotvKillYogs = true;
-
-    @VigilanceName(name = "Type of gemstone to mine", category = AOTV_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Type of gemstone to mine", category = AOTV_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz", "Jasper"})
-    public int aotvGemstoneType = 0;
 
     @VigilanceName(name = "Stop if any cobblestone on the route has been destroyed", category = AOTV_MACRO, subcategory = "Mining")
     @Switch(name = "Stop if any cobblestone on the route has been destroyed", category = AOTV_MACRO, subcategory = "Mining")

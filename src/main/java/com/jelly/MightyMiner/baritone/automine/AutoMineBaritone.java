@@ -49,7 +49,7 @@ public class AutoMineBaritone {
     PathExecutor executor;
     BlockPos playerFloorPos;
 
-    ArrayList<BlockData<?>> targetBlockType;
+    ArrayList<ArrayList<BlockData<?>>> targetBlockType;
 
     BlockPos targetBlockPos;
 
@@ -68,13 +68,7 @@ public class AutoMineBaritone {
     }
 
 
-
-    //varargs are just for convenience here, all inside operations should be using ArrayList
-    public void mineFor(BlockData<?>... blockTypes) {
-        mineFor(new ArrayList<>(Arrays.asList(blockTypes)));
-    }
-
-    public void mineFor(ArrayList<BlockData<?>> blockTypes) {
+    public void mineFor(ArrayList<ArrayList<BlockData<?>>> blockTypes) {
 
         Logger.playerLog("Starting to mine");
         registerEventListener();

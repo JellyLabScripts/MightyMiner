@@ -51,6 +51,7 @@ public class AOTVMacro extends Macro {
 
     private State currentState = State.MINING;
     private final Rotation rotation = new Rotation();
+    private static final Timer waitAfterKillTimer = new Timer();
 
     @Override
     public void onEnable() {
@@ -111,6 +112,7 @@ public class AOTVMacro extends Macro {
         tping = false;
         baritone = new AutoMineBaritone(getAutoMineConfig());
         currentState = State.MINING;
+        waitAfterKillTimer.reset();
     }
 
     @Override
@@ -141,7 +143,7 @@ public class AOTVMacro extends Macro {
 
                 AOTVWaypointsStructs.Waypoint wp = Waypoints.stream().filter(waypoint -> waypoint.x == pos.getX() && waypoint.y == pos.getY() && waypoint.z == pos.getZ()).findFirst().orElse(null);
                 if (wp != null) {
-                    LogUtils.addMessage("AOTV Macro (Experimental) - Cobblestone at waypoint " + EnumChatFormatting.BOLD + wp.name + EnumChatFormatting.RESET + EnumChatFormatting.RED + " has been destroyed!");
+                    LogUtils.addMessage("AOTV Macro - Cobblestone at waypoint " + EnumChatFormatting.BOLD + wp.name + EnumChatFormatting.RESET + EnumChatFormatting.RED + " has been destroyed!");
 
                     if (MightyMiner.config.stopIfCobblestoneDestroyed) {
                         this.toggle();
@@ -182,7 +184,10 @@ public class AOTVMacro extends Macro {
                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
                 mc.mouseHelper.grabMouseCursor();
                 tpStuckTimer.reset();
+                waitAfterKillTimer.reset();
                 return;
+            } else if (!FuelFilling.isRefueling()) {
+                if (!waitAfterKillTimer.hasReached(500)) return;
             }
             if (FuelFilling.isRefueling()) {
                 if (baritone != null && baritone.getState() != AutoMineBaritone.BaritoneState.IDLE) {
@@ -213,6 +218,11 @@ public class AOTVMacro extends Macro {
                 if (miningTool != -1) {
                     mc.thePlayer.inventory.currentItem = miningTool;
                 }
+                baritone.disableBaritone();
+                LogUtils.addMessage("AOTV Macro - Yog has been killed!");
+                waitAfterKillTimer.reset();
+            } else {
+                if (!waitAfterKillTimer.hasReached(500)) return;
             }
         }
 
@@ -252,7 +262,7 @@ public class AOTVMacro extends Macro {
                         tping = false;
                         currentState = State.MINING;
                     } else if (!BlockUtils.getPlayerLoc().down().equals(waypoint) && tpStuckTimer.hasReached(2500)) {
-                        LogUtils.addMessage("AOTV Macro (Experimental) - You are not at a valid waypoint!");
+                        LogUtils.addMessage("AOTV Macro - You are not at a valid waypoint!");
                         tping = false;
                         tpStuckTimer.reset();
                     }
@@ -262,7 +272,7 @@ public class AOTVMacro extends Macro {
 
                 if (MightyMiner.config.aotvTeleportThreshold > 0) {
                     if (!firstTp && !timeBetweenLastWaypoint.hasReached((long) (MightyMiner.config.aotvTeleportThreshold * 1000))) {
-                        LogUtils.addMessage("AOTV Macro (Experimental) - You are warping too fast! Probably veins didn't respawn in time. Waiting 10 seconds.");
+                        LogUtils.addMessage("AOTV Macro - You are warping too fast! Probably veins didn't respawn in time. Waiting 10 seconds.");
                         waitForVeinsTimer.reset();
                         tooFastTp = true;
                         return;
@@ -289,20 +299,20 @@ public class AOTVMacro extends Macro {
                 if (movingObjectPosition != null && movingObjectPosition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
                     if (movingObjectPosition.getBlockPos().equals(waypoint)) {
                         mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem());
-                        LogUtils.addMessage("AOTV Macro (Experimental) - Teleported to waypoint " + currentWaypoint);
+                        LogUtils.addMessage("AOTV Macro - Teleported to waypoint " + currentWaypoint);
                         tping = true;
                         timeBetweenLastWaypoint.reset();
                         tpStuckTimer.reset();
                         if (firstTp) firstTp = false;
                     } else {
                         if (tpStuckTimer.hasReached(2000) && rotation.completed) {
-                            LogUtils.addMessage("AOTV Macro (Experimental) - Path is not cleared. Block: " + movingObjectPosition.getBlockPos().toString() + " is on the way.");
+                            LogUtils.addMessage("AOTV Macro - Path is not cleared. Block: " + movingObjectPosition.getBlockPos().toString() + " is on the way.");
                             this.toggle();
                             break;
                         }
                     }
                 } else if (movingObjectPosition != null) {
-                    LogUtils.addMessage("AOTV Macro (Experimental) - Something is on the way!");
+                    LogUtils.addMessage("AOTV Macro - Something is on the way!");
                     this.toggle();
                 }
                 break;

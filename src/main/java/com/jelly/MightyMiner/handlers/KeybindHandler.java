@@ -86,15 +86,9 @@ public class KeybindHandler {
                 MacroHandler.startScript(MightyMiner.config.macroType);
         }
         if(macroKeybinds[1].isKeyDown()){
-//            if (MobKiller.isToggled) {
-//                LogUtils.debugLog("MobKiller disabled");
-//                MobKiller.isToggled = false;
-//            } else {
-//                LogUtils.debugLog("MobKiller enabled");
-//                MobKiller.setMobsNames(false, "Dummy", "Yog");
-//                MobKiller.isToggled = true;
-//            }
-            Failsafes.fakeMovement();
+            MobKiller.setMobsNames(false, "Dummy", "Yog");
+            MightyMiner.mobKiller.toggle();
+//            Failsafes.fakeMovement();
         }
         if(macroKeybinds[2].isKeyDown()){
             MightyMiner.config.openGui();

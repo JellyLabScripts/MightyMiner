@@ -260,26 +260,6 @@ public class PlayerUtils {
         return mc.thePlayer.canEntityBeSeen(entityToCheck);
     }
 
-    public static boolean entityIsTargeted(Entity entity) {
-        int reach = 50;
-        Vec3 eyesPos = mc.thePlayer.getPositionEyes(1.0F);
-        Vec3 lookVec = mc.thePlayer.getLook(1.0F);
-        List<Entity> entityList = mc.theWorld.getEntitiesInAABBexcluding(mc.thePlayer, mc.thePlayer.getEntityBoundingBox().addCoord(lookVec.xCoord * reach, lookVec.yCoord * reach, lookVec.zCoord * reach).expand(1.0D, 1.0D, 1.0D), Entity::canBeCollidedWith);
-        Entity entityMouseOver = null;
-        for (Entity e : entityList) {
-            AxisAlignedBB entityBoundingBox = e.getEntityBoundingBox().expand(0.3D, 0.3D, 0.3D);
-            MovingObjectPosition movingObjectPosition = entityBoundingBox.calculateIntercept(eyesPos, eyesPos.addVector(lookVec.xCoord * reach, lookVec.yCoord * reach, lookVec.zCoord * reach));
-            if (movingObjectPosition != null) {
-                double distanceToEntity = eyesPos.distanceTo(movingObjectPosition.hitVec);
-                if (distanceToEntity < reach) {
-                    entityMouseOver = e;
-                    reach = (int) distanceToEntity;
-                }
-            }
-        }
-        return entityMouseOver != null && entityMouseOver.equals(entity);
-    }
-
     public static ArrayList<BlockPos> AnyBlockAroundVec3(Vec3 pos, float around) {
         ArrayList<BlockPos> blocks = new ArrayList<>();
         for (double x = (pos.xCoord - around); x <= pos.xCoord + around; x += around) {

@@ -86,6 +86,8 @@ public class MobKiller {
             currentState = States.SEARCHING;
             rotation.reset();
         }
+        rotation.reset();
+        rotation.completed = true;
         isToggled = !isToggled;
         target = null;
         potentialTargets.clear();
@@ -166,7 +168,7 @@ public class MobKiller {
                 break;
             case ATTACKING:
 
-                if (NpcUtil.getEntityHp(target.entity) <= 0 || target.distance() > scanRange || (target.entity != null && (target.entity.isDead)) || target.stand.getCustomNameTag().isEmpty()) {
+                if (NpcUtil.getEntityHp(target.entity) <= 1 || target.distance() > scanRange || (target.entity != null && (target.entity.isDead)) || target.stand.getCustomNameTag().trim().isEmpty()) {
                     currentState = States.KILLED;
                     afterKillDelay.reset();
                     break;
@@ -182,20 +184,11 @@ public class MobKiller {
 
                     mc.thePlayer.inventory.currentItem = weapon;
 
-                    if (target.distance() > 5.5) return;
-
-                    if (!rotation.completed) return;
-
-                    rotation.initAngleLock(mc.thePlayer.rotationYaw, 89, MightyMiner.config.mobKillerCameraSpeed);
-
                     if (AngleUtils.isDiffLowerThan(mc.thePlayer.rotationYaw, 89, 0.5f)) {
-                        rotation.reset();
-                        rotation.completed = true;
-                    }
-
-                    if (attackDelay.hasReached(MightyMiner.config.mobKillerAttackDelay) && target.distance() < 6) {
-                        rightClick();
-                        attackDelay.reset();
+                        if (attackDelay.hasReached(MightyMiner.config.mobKillerAttackDelay) && target.distance() < 6) {
+                            rightClick();
+                            attackDelay.reset();
+                        }
                     }
 
                 } else {
@@ -229,7 +222,7 @@ public class MobKiller {
                         blockedVisionDelay.reset();
                         currentState = States.BLOCKED_VISION;
                     } else {
-                        targeted = PlayerUtils.entityIsTargeted(target.entity);
+                        targeted = NpcUtil.entityIsTargeted(target.entity);
                         if (targeted) {
                             if (attackDelay.hasReached(MightyMiner.config.mobKillerAttackDelay)) {
                                 if (MightyMiner.config.attackButton == 0) {
@@ -243,21 +236,6 @@ public class MobKiller {
                             }
                         }
                     }
-
-                    if (!rotation.completed) return;
-
-                    int yawRotation;
-                    int pitchRotation;
-
-                    Tuple<Float, Float> angles;
-                    if (target.worm) {
-                        angles = AngleUtils.getRotation(target.stand.getPositionVector().add(new Vec3(0, 0.2f, 0)));
-                    } else {
-                        angles = AngleUtils.getRotation(target.entity.getPositionVector().add(new Vec3(0, target.entity.height / 2, 0)));
-                    }
-                    yawRotation = (int) angles.getFirst().floatValue();
-                    pitchRotation = (int) angles.getSecond().floatValue();
-                    rotation.initAngleLock(yawRotation, pitchRotation, MightyMiner.config.mobKillerCameraSpeed);
                 }
 
                 break;
@@ -305,6 +283,27 @@ public class MobKiller {
     public void onRenderWorldLastRotation(RenderWorldLastEvent event) {
         if (rotation.rotating)
             rotation.update();
+
+        if (!rotation.completed) return;
+
+        if (target != null && !MightyMiner.config.useHyperionUnderPlayer) {
+            int yawRotation;
+            int pitchRotation;
+
+            Tuple<Float, Float> angles;
+            if (target.worm) {
+                angles = AngleUtils.getRotation(target.stand.getPositionVector().add(new Vec3(0, 0.2f, 0)));
+            } else {
+                angles = AngleUtils.getRotation(target.entity.getPositionVector().add(new Vec3(0, target.entity.height / 2, 0)));
+            }
+            yawRotation = (int) angles.getFirst().floatValue();
+            pitchRotation = (int) angles.getSecond().floatValue();
+            rotation.initAngleLock(yawRotation, pitchRotation, MightyMiner.config.mobKillerCameraSpeed);
+        } else if (target != null) {
+            if (target.distance() > 5.5) return;
+
+            rotation.initAngleLock(mc.thePlayer.rotationYaw, 89, MightyMiner.config.mobKillerCameraSpeed);
+        }
     }
 
     public static String[] drawInfo() {

@@ -534,7 +534,7 @@ public class BlockUtils {
             for (float y = pos.getY() + spaceFromEdge; y <= pos.getY() + (1f - spaceFromEdge); y += accuracy) {
                 for (float z = pos.getZ() + spaceFromEdge; z <= pos.getZ() + (1f - spaceFromEdge); z += accuracy) {
                     Vec3 target = new Vec3(x, y, z);
-                    if (fromEye.distanceTo(target) > 4.5f) {
+                    if (fromEye.distanceTo(target) > 4f) {
                         continue;
                     }
                     BlockPos test = new BlockPos(target.xCoord, target.yCoord, target.zCoord);

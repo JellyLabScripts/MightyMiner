@@ -64,6 +64,8 @@ public class AStarPathFinder {
 
                 if (!possiblePaths.isEmpty()) {
                     Logger.playerLog("Total time | Time per path : " + (System.currentTimeMillis() - pastTime) + " ms | " + ((System.currentTimeMillis() - pastTime) * 1.0D / possiblePaths.size()) + " ms");
+                    possiblePaths.removeIf(path -> path.getLast().getPos().equals(mc.thePlayer.rayTrace(5, 1).getBlockPos()));
+                    possiblePaths.removeIf(path -> path.getFirst().getPos().equals(mc.thePlayer.rayTrace(5, 1).getBlockPos()));
                     possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
                     setLastTarget(possiblePaths.getFirst());
                     return new Path(possiblePaths.getFirst(), mode);
@@ -88,6 +90,8 @@ public class AStarPathFinder {
             throw new NoPathException();
 
         Logger.playerLog("Total time | Time per path : " + (System.currentTimeMillis() - pastTime) + " ms | " + ((System.currentTimeMillis() - pastTime) * 1.0D / possiblePaths.size()) + " ms");
+        possiblePaths.removeIf(path -> path.getLast().getPos().equals(mc.thePlayer.rayTrace(5, 1).getBlockPos()));
+        possiblePaths.removeIf(path -> path.getFirst().getPos().equals(mc.thePlayer.rayTrace(5, 1).getBlockPos()));
         possiblePaths.sort(Comparator.comparingDouble(this::calculatePathCost));
         setLastTarget(possiblePaths.getFirst());
         return new Path(possiblePaths.getFirst(), mode);

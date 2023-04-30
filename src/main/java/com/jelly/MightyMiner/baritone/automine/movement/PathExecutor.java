@@ -152,6 +152,8 @@ public class PathExecutor {
         } else {
             stuckTickCount++;
             if(stuckTickCount > 20 * config.getRestartTimeThreshold()){
+                mc.inGameHasFocus = true;
+                mc.mouseHelper.grabMouseCursor();
                 fail();
                 return;
             }

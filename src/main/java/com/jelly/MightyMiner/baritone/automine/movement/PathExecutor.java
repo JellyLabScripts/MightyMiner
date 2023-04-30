@@ -8,6 +8,8 @@ import com.jelly.MightyMiner.baritone.automine.structures.BlockNode;
 import com.jelly.MightyMiner.baritone.automine.structures.BlockType;
 import com.jelly.MightyMiner.baritone.automine.structures.Path;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.handlers.MacroHandler;
+import com.jelly.MightyMiner.macros.macros.CommissionMacro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.AngleUtils;
@@ -214,7 +216,11 @@ public class PathExecutor {
                 break;
             case MINING:
                 BlockPos targetMineBlock = blocksInPath.getLast().getPos();
-                mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Pick", "Drill", "Gauntlet");
+                if (MacroHandler.macros.get(4).isEnabled()) {
+                    mc.thePlayer.inventory.currentItem = CommissionMacro.getPickaxeSlot();
+                } else {
+                    mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar(false, "Pick", "Gauntlet", "Drill");
+                }
                 KeybindHandler.updateKeys(
                         false, false, false, false,
                         mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null &&

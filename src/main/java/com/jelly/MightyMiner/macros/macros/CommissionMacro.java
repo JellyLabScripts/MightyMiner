@@ -481,7 +481,7 @@ public class CommissionMacro extends Macro {
         if (!isWarping && comissionState == State.COMMITTING) {
             if (inventoryCheckDelay.hasReached(2000)) {
                 if (mc.theWorld == null || mc.thePlayer == null) return;
-                                if (!(mc.currentScreen instanceof GuiChest)) {
+                if (!(mc.currentScreen instanceof GuiChest)) {
                     inventoryCheckDelay.reset();
                     boolean freeSlot = false;
                     for (int i = 0; i < mc.thePlayer.openContainer.inventorySlots.size() - 9; i++) {

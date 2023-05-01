@@ -1,6 +1,9 @@
 package com.jelly.MightyMiner.features;
 
+import cc.polyfrost.oneconfig.libs.checker.units.qual.C;
+import cc.polyfrost.oneconfig.libs.checker.units.qual.K;
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import com.jelly.MightyMiner.utils.HypixelUtils.NpcUtil;
@@ -15,6 +18,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -34,10 +38,18 @@ public class MobKiller {
     private static boolean caseSensitive = false;
     private static String[] mobsNames = null;
 
+    private final ArrayList<Entity> blacklistedEntities = new ArrayList<>();
+    private static boolean skipWhenBlockedVision = false;
+    private static boolean antiAfkEnabled = false;
+    private static boolean sneakWhileKilling = false;
     private final Timer attackDelay = new Timer();
     private final Timer blockedVisionDelay = new Timer();
     private final Timer afterKillDelay = new Timer();
     public static States currentState = States.SEARCHING;
+
+    private CurrentKey currentKey = CurrentKey.NONE;
+
+    private final Timer keyHoldTimer = new Timer();
 
     public static boolean isToggled = false;
 
@@ -75,6 +87,12 @@ public class MobKiller {
         KILLED
     }
 
+    public enum CurrentKey {
+        LEFT,
+        RIGHT,
+        NONE
+    }
+
     public static boolean hasTarget() {
         return target != null;
     }
@@ -84,6 +102,13 @@ public class MobKiller {
             blockedVisionDelay.reset();
             attackDelay.reset();
             currentState = States.SEARCHING;
+            if (antiAfkEnabled) {
+                currentKey = CurrentKey.LEFT;
+            }
+            if (sneakWhileKilling) {
+                KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, true);
+            }
+            skipWhenBlockedVision = false;
             rotation.reset();
         }
         rotation.reset();
@@ -91,11 +116,31 @@ public class MobKiller {
         isToggled = !isToggled;
         target = null;
         potentialTargets.clear();
+        blacklistedEntities.clear();
     }
 
     public static void setMobsNames(boolean caseSensitive, String... mobsNames) {
         MobKiller.caseSensitive = caseSensitive;
         MobKiller.mobsNames = mobsNames;
+    }
+
+
+    public static void setSkipWhenBlockedVision(boolean b) {
+        MobKiller.skipWhenBlockedVision = b;
+    }
+
+    public static void setAntiAfk(boolean b) {
+        MobKiller.antiAfkEnabled = b;
+    }
+
+    public static void setSneak(boolean b) {
+        MobKiller.sneakWhileKilling = b;
+    }
+
+    public static void resetOptions() {
+        MobKiller.skipWhenBlockedVision = false;
+        MobKiller.antiAfkEnabled = false;
+        MobKiller.sneakWhileKilling = false;
     }
 
     @SubscribeEvent
@@ -106,6 +151,33 @@ public class MobKiller {
 
         if (mobsNames == null || mobsNames.length == 0) return;
 
+        if (antiAfkEnabled) {
+            if (keyHoldTimer.hasReached(50)) {
+                KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
+                KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
+            }
+            if (keyHoldTimer.hasReached(2000)) {
+                switch (currentKey) {
+                    case LEFT:
+                        KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
+                        KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, true);
+                        keyHoldTimer.reset();
+                        currentKey = CurrentKey.RIGHT;
+                        break;
+                    case RIGHT:
+                        KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, true);
+                        KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
+                        keyHoldTimer.reset();
+                        currentKey = CurrentKey.LEFT;
+                        break;
+                    case NONE:
+                        LogUtils.debugLog("No anti afk Key");
+                        MobKiller.antiAfkEnabled = false;
+                        break;
+                }
+            }
+        }
+
 
         switch (currentState) {
             case SEARCHING:
@@ -115,9 +187,9 @@ public class MobKiller {
                     String mobsName1 = StringUtils.stripControlCodes(mobsName);
                     String vCustomNameTag = StringUtils.stripControlCodes(v.getCustomNameTag());
                     if (caseSensitive) {
-                        return vCustomNameTag.contains(mobsName1);
+                        return vCustomNameTag.contains(mobsName1) && !blacklistedEntities.contains(v);
                     } else {
-                        return vCustomNameTag.toLowerCase().contains(mobsName1.toLowerCase());
+                        return vCustomNameTag.toLowerCase().contains(mobsName1.toLowerCase()) && !blacklistedEntities.contains(v);
                     }
                 }))).collect(Collectors.toList());
 
@@ -167,7 +239,10 @@ public class MobKiller {
                 }
                 break;
             case ATTACKING:
-
+                if (antiAfkEnabled) {
+                    KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
+                    KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
+                }
                 if (NpcUtil.getEntityHp(target.entity) <= 1 || target.distance() > scanRange || (target.entity != null && (target.entity.isDead)) || target.stand.getCustomNameTag().trim().isEmpty()) {
                     currentState = States.KILLED;
                     afterKillDelay.reset();
@@ -198,7 +273,7 @@ public class MobKiller {
                     if (!MightyMiner.config.customItemToKill.isEmpty()) {
                         weapon = PlayerUtils.getItemInHotbar(MightyMiner.config.customItemToKill);
                     } else {
-                        weapon = PlayerUtils.getItemInHotbar("Juju", "Terminator", "Bow", "Frozen Scythe", "Glacial Scythe");
+                        weapon = PlayerUtils.getItemInHotbar("Juju", "Terminator", "Bow", "Frozen Scythe", "Glacial Scythe", "Aurora");
                     }
 
                     if (weapon == -1) {
@@ -246,8 +321,14 @@ public class MobKiller {
                     break;
                 }
 
+
                 if (blockedVisionDelay.hasReached(5000)) {
-                    currentState = States.ATTACKING;
+                    if (skipWhenBlockedVision) {
+                        blacklistedEntities.add(target.entity);
+                        currentState = States.SEARCHING;
+                    } else {
+                        currentState = States.ATTACKING;
+                    }
                     break;
                 }
 

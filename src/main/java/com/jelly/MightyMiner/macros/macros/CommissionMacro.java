@@ -6,6 +6,7 @@ import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.features.FuelFilling;
+import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
@@ -479,6 +480,7 @@ public class CommissionMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase) {
+
         if (!isWarping && comissionState == State.COMMITTING) {
             if (inventoryCheckDelay.hasReached(2000)) {
                 if (mc.theWorld == null || mc.thePlayer == null) return;
@@ -1937,13 +1939,27 @@ public class CommissionMacro extends Macro {
 
                         baritone = new AutoMineBaritone(getMineBehaviour());
                         typeOfCommission = TypeOfCommission.MINING_COMM;
-                    } else if (currentQuest.contains("Slayer")) {
+                    } else if (currentQuest.contains("Ice")) {
                         // Setting up Slayer Macro
                         mc.thePlayer.inventory.currentItem = weaponSlot;
-                        LogUtils.debugLog("Setting up Slayer Macro");
-                        stuckAtShootCounter = 0;
-                        blockedVisionCounter = 0;
-                        lookingForNewTargetCounter = 0;
+                        LogUtils.debugLog("Setting up Ice Walker Slayer Macro");
+                        MobKiller.resetOptions();
+                        MobKiller.setMobsNames(false, "Ice Walker");
+                        MobKiller.setSkipWhenBlockedVision(true);
+                        MobKiller.setAntiAfk(true);
+                        MobKiller.setSneak(true);
+                        MightyMiner.mobKiller.toggle();
+                        typeOfCommission = TypeOfCommission.SLAYING_COMM;
+                    } else if (currentQuest.contains("Goblin")) {
+                        // Setting up Slayer Macro
+                        mc.thePlayer.inventory.currentItem = weaponSlot;
+                        LogUtils.debugLog("Setting up Goblin Slayer Macro");
+                        MobKiller.resetOptions();
+                        MobKiller.setMobsNames(false, "Goblin", "Knifethrower", "Fireslinger");
+                        MobKiller.setSkipWhenBlockedVision(true);
+                        MobKiller.setAntiAfk(true);
+                        MobKiller.setSneak(true);
+                        MightyMiner.mobKiller.toggle();
                         typeOfCommission = TypeOfCommission.SLAYING_COMM;
                     } else {
                         // Wasn't able to identify commission type
@@ -1986,6 +2002,8 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
+                        MightyMiner.mobKiller.toggle();
+                        MobKiller.resetOptions();
 
                         // Switching action to start
                         nextActionDelay.reset();
@@ -1996,7 +2014,6 @@ public class CommissionMacro extends Macro {
                     if (playerFellOutOfSpot(currentWarpDestination)) {
                         // Player fell out of Spot
                         LogUtils.debugLog("Player fell out of Spot");
-
                         if (baritone != null) baritone.disableBaritone();
                         KeybindHandler.resetKeybindState();
 
@@ -2005,6 +2022,9 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
+                        MightyMiner.mobKiller.toggle();
+                        MobKiller.resetOptions();
+
 
                         // Switching action to start
                         nextActionDelay.reset();
@@ -2037,6 +2057,8 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
+                        MightyMiner.mobKiller.toggle();
+                        MobKiller.resetOptions();
 
                         // Switching action to start
                         nextActionDelay.reset();
@@ -2050,6 +2072,9 @@ public class CommissionMacro extends Macro {
 
                         if (baritone != null) baritone.disableBaritone();
                         KeybindHandler.resetKeybindState();
+
+                        MightyMiner.mobKiller.toggle();
+                        MobKiller.resetOptions();
 
                         // ReWarp
                         isWarping = true;
@@ -2084,225 +2109,6 @@ public class CommissionMacro extends Macro {
                         checkMiningSpeedBoost();
                         break;
                     case SLAYING_COMM:
-                        if (unpressKey.hasReached(250) && keyPressed) {
-                            KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
-                            KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
-                            keyPressed = false;
-
-                            unpressKey.reset();
-                            playerNeedsToMove.reset();
-                        }
-                        if (playerNeedsToMove.hasReached(1500)) {
-                            KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, true);
-                            if (key == 0) {
-                                KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, true);
-                                keyPressed = true;
-                                playerNeedsToMove.reset();
-                                unpressKey.reset();
-                                key = 1;
-                            } else if (key == 1) {
-                                KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, true);
-                                keyPressed = true;
-                                playerNeedsToMove.reset();
-                                unpressKey.reset();
-                                key = 0;
-                            }
-                            return;
-                        }
-                        switch (killingState) {
-                            case SEARCHING:
-                                // Clearing Target list
-                                potentialTargets.clear();
-
-                                // Getting all entities
-                                List<Entity> entities = mc.theWorld.loadedEntityList.stream().filter(entity -> entity instanceof EntityArmorStand).filter(entity -> mc.thePlayer.getPositionEyes(1).distanceTo(entity.getPositionVector()) <= scanRange).collect(Collectors.toList());
-
-                                // Filtering out players
-                                List<Entity> filtered = entities.stream().filter(v -> (!v.getName().contains(mc.thePlayer.getName()) && Arrays.stream(mobsNames).anyMatch(mobsName -> {
-                                    String mobsName1 = StringUtils.stripControlCodes(mobsName);
-                                    String vName = StringUtils.stripControlCodes(v.getName());
-                                    String vCustomNameTag = StringUtils.stripControlCodes(v.getCustomNameTag());
-                                    return vName.toLowerCase().contains(mobsName1.toLowerCase()) || vCustomNameTag.toLowerCase().contains(mobsName1.toLowerCase());
-                                }))).collect(Collectors.toList());
-                                double distance;
-                                Target closestTarget = null;
-
-                                // Setting scan radius
-                                if (currentQuest.equals("ICE_WALKER_SLAYER")) {
-                                    distance = 30;
-                                } else {
-                                    distance = 20;
-                                }
-
-                                // Getting all relevant mobs
-                                for (Entity entity : filtered) {
-                                    double currentDistance;
-                                    EntityArmorStand stand = (EntityArmorStand) entity;
-                                    if (stand.getCustomNameTag().contains("Ice Walker") || stand.getCustomNameTag().contains("Goblin") || stand.getCustomNameTag().contains("Knifethrower") || stand.getCustomNameTag().contains("Fireslinger")) {
-                                        Target target1 = new Target(null, stand, true);
-                                        if (PlayerUtils.entityIsVisible(target1.stand)) {
-                                            if ((target1.stand.getPosition().getY() - 10) <= mc.thePlayer.getPositionEyes(1.0f).yCoord) {
-                                                if (closestTarget != null) {
-                                                    currentDistance = stand.getDistanceToEntity(mc.thePlayer);
-                                                    if (currentDistance < distance) {
-                                                        distance = currentDistance;
-                                                        closestTarget = target1;
-                                                    }
-                                                } else {
-                                                    distance = stand.getDistanceToEntity(mc.thePlayer);
-                                                    closestTarget = target1;
-                                                }
-
-                                                potentialTargets.add(target1);
-
-                                                continue;
-                                            }
-                                        }
-                                    }
-
-                                    Entity target = NpcUtil.getEntityCuttingOtherEntity(stand, null);
-
-                                    if (target == null) continue;
-                                    if (NpcUtil.getEntityHp(stand) <= 0) continue;
-
-                                    boolean visible = PlayerUtils.entityIsVisible(target);
-
-                                    if (!visible) continue;
-
-                                    // Getting closest target
-                                    if (target instanceof EntityLivingBase) {
-
-                                        Target target1 = new Target((EntityLivingBase) target, stand);
-
-                                        if (closestTarget != null) {
-                                            currentDistance = target.getDistanceToEntity(mc.thePlayer);
-                                            if (currentDistance < distance) {
-                                                distance = currentDistance;
-                                                closestTarget = target1;
-                                            }
-                                        } else {
-                                            distance = target.getDistanceToEntity(mc.thePlayer);
-                                            closestTarget = target1;
-                                        }
-
-                                        potentialTargets.add(target1);
-                                    }
-                                }
-
-                                // Switch to next action when there is a target
-                                if (closestTarget != null && closestTarget.distance() < scanRange) {
-                                    target = closestTarget;
-                                    killingState = KillingState.ATTACKING;
-                                }
-                                break;
-                            case ATTACKING:
-                                // Reset anti AFK Keys
-                                KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
-                                KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
-                                keyPressed = false;
-
-                                // Detecting if entity got Killed
-                                if (NpcUtil.getEntityHp(target.stand) <= 0 || target.distance() > scanRange || target.stand == null || (target.entity != null && (target.entity.isDead || target.entity.getHealth() < 0.0))) {
-                                    killingState = KillingState.KILLED;
-                                    rotation.completed = false;
-                                    stuckAtShootCounter = 0;
-                                    blockedVisionCounter = 0;
-                                    afterKillDelay.reset();
-                                    break;
-                                }
-
-                                // Making player hold weapon
-                                int weapon;
-                                weapon = PlayerUtils.getItemInHotbar("Juju", "Terminator", "Bow", "Frozen Scythe", "Glacial Scythe", "Aurora");
-                                if (weapon == -1) {
-                                    LogUtils.debugLog("No weapon found");
-                                    MacroHandler.disableScript();
-                                    return;
-                                }
-                                mc.thePlayer.inventory.currentItem = weapon;
-
-                                // Get entity position
-                                BlockPos entityPos = target.stand.getPosition();
-                                BlockPos headLevel = new BlockPos(entityPos.getX(), entityPos.getY() - 1, entityPos.getZ());
-
-                                // Look at entity
-                                if (!PlayerUtils.entityIsVisible(target.stand)) {
-                                    killingState = KillingState.SEARCHING;
-                                }
-                                float reqYaw = AngleUtils.getRequiredYawSide(headLevel);
-                                float reqPitch = AngleUtils.getRequiredPitchSide(headLevel);
-
-                                rotation.initAngleLock(reqYaw, reqPitch, MightyMiner.config.commKillerCameraSpeed);
-                                if (AngleUtils.isDiffLowerThan(reqYaw, reqPitch, 1f)) {
-                                    rotation.reset();
-                                    rotation.completed = true;
-                                }
-
-                                if (!rotation.completed) return;
-
-                                // Check if target is visible
-                                boolean visible = PlayerUtils.entityIsVisible(target.stand);
-
-                                if (!visible) {
-                                    LogUtils.debugLog("Something is blocking target!");
-                                    blockedVisionDelay.reset();
-                                    killingState = KillingState.BLOCKED_VISION;
-                                    rotation.completed = false;
-                                } else {
-                                    if (attackDelay.hasReached(MightyMiner.config.commKillerAttackDelay)) {
-                                        // Shooting target
-                                        stuckAtShootCounter ++;
-                                        LogUtils.debugLog("Shooting Target");
-                                        KeybindHandler.setKeyBindState(mc.gameSettings.keyBindUseItem, true);
-                                        KeybindHandler.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
-                                        attackDelay.reset();
-                                    }
-                                    if (stuckAtShootCounter > 10) {
-                                        // Get new target when missing target
-                                        LogUtils.debugLog("Looking for a new Target");
-                                        lookingForNewTargetCounter++;
-                                        if (lookingForNewTargetCounter > 200) {
-                                            KeybindHandler.setKeyBindState(mc.gameSettings.keyBindForward, true);
-                                        }
-                                        killingState = KillingState.SEARCHING;
-                                    }
-                                }
-                                break;
-                            case BLOCKED_VISION:
-                                // Detect if entity got Killed
-                                if (NpcUtil.getEntityHp(target.stand) <= 0 || target.distance() > MightyMiner.config.commKillerScanRange) {
-                                    killingState = KillingState.KILLED;
-                                    break;
-                                }
-
-                                // Blocked vision Failsafe
-                                if (blockedVisionDelay.hasReached(500)) {
-                                    blockedVisionCounter ++;
-                                    if (blockedVisionCounter < 3) {
-                                        KeybindHandler.rightClick();
-                                        killingState = KillingState.ATTACKING;
-                                    } else {
-                                        KeybindHandler.rightClick();
-                                        lookingForNewTargetCounter = 0;
-                                        killingState = KillingState.SEARCHING;
-                                    }
-                                    break;
-                                }
-                                break;
-                            case KILLED:
-                                // Handle Kill Event
-                                if (!afterKillDelay.hasReached(MightyMiner.config.commKillerAttackDelay))
-                                    return;
-                                lookingForNewTargetCounter = 0;
-                                target = null;
-                                killingState = KillingState.SEARCHING;
-                                break;
-                            case NONE:
-                                // No Type of Commission State
-                                LogUtils.debugLog("No Type of Killing State");
-                                MacroHandler.disableScript();
-                                break;
-                        }
                         break;
                     case NONE:
                         // No Type of Commission State
@@ -2337,6 +2143,8 @@ public class CommissionMacro extends Macro {
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindForward, false);
+        MightyMiner.mobKiller.toggle();
+        MobKiller.resetOptions();
     }
 
 

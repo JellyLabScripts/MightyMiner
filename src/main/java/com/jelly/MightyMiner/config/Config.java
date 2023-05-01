@@ -176,18 +176,6 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Slider(name = "Camera speed to waypoint in ms", category = COMMISSION_MACRO, subcategory = "Warping", max = 1500, min = 1, step = 10)
     public int commCameraWaypointSpeed = 800;
 
-    @VigilanceName(name = "MobKiller camera speed in ms", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
-    @Slider(name = "MobKiller camera speed in ms", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer", max = 1000, min = 1)
-    public int commKillerCameraSpeed = 100;
-
-    @VigilanceName(name = "MobKiller delay between attacks in ms", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
-    @Slider(name = "MobKiller delay between attacks in ms", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer", max = 1000, min = 1)
-    public int commKillerAttackDelay = 150;
-
-    @VigilanceName(name = "MobKiller scan distance", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
-    @Slider( name = "MobKiller scan distance", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer", max = 30, min = 1)
-    public int commKillerScanRange = 10;
-
     @VigilanceName(name = "Arrive check wait time in ms", category = COMMISSION_MACRO, subcategory = "Warping")
     @Slider( name = "Arrive check wait time in ms", category = COMMISSION_MACRO, subcategory = "Warping", max = 750, min = 200)
     public int commArriveWaitTime = 250;

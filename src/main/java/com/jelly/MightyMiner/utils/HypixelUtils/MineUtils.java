@@ -22,7 +22,7 @@ public class MineUtils {
     public static ArrayList<ArrayList<BlockData<?>>> getGemListBasedOnPriority(int priority) {
         ArrayList<ArrayList<BlockData<?>>> filter = new ArrayList<>();
         ArrayList<BlockData<?>> glass = new ArrayList<BlockData<?>>() {{
-            add(new BlockData<>(Blocks.stained_glass, gemPriority[priority]));
+            add(new BlockData<>(Blocks.stained_glass_pane, gemPriority[priority]));
         }};
         filter.add(glass);
         if (MightyMiner.config.aotvMineGemstonePanes) {
@@ -37,67 +37,88 @@ public class MineUtils {
     public static ArrayList<ArrayList<BlockData<?>>> getGemListBasedOnPriority() {
         ArrayList<ArrayList<BlockData<?>>> filter = new ArrayList<>();
         if (AOTVGemstoneFilter.ruby) {
-            filter.add(new ArrayList<BlockData<?>>() {{
-                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.RED));
-            }});
-            if (MightyMiner.config.aotvMineGemstonePanes)
+            if (MightyMiner.config.aotvMineGemstonePanes) {
                 filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.RED));
                     add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.RED));
                 }});
+            } else {
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.RED));
+                }});
+            }
         }
         if (AOTVGemstoneFilter.amethyst) {
-            filter.add(new ArrayList<BlockData<?>>() {{
-                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.PURPLE));
-            }});
-            if (MightyMiner.config.aotvMineGemstonePanes)
+            if (MightyMiner.config.aotvMineGemstonePanes) {
                 filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.PURPLE));
                     add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.PURPLE));
                 }});
+            } else {
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.PURPLE));
+                }});
+            }
         }
         if (AOTVGemstoneFilter.topaz) {
-            filter.add(new ArrayList<BlockData<?>>() {{
-                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.YELLOW));
-            }});
-            if (MightyMiner.config.aotvMineGemstonePanes)
+            if (MightyMiner.config.aotvMineGemstonePanes) {
                 filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.YELLOW));
                     add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.YELLOW));
                 }});
+            } else {
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.YELLOW));
+                }});
+            }
         }
         if (AOTVGemstoneFilter.sapphire) {
-            filter.add(new ArrayList<BlockData<?>>() {{
-                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.LIGHT_BLUE));
-            }});
-            if (MightyMiner.config.aotvMineGemstonePanes)
+            if (MightyMiner.config.aotvMineGemstonePanes) {
                 filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.LIGHT_BLUE));
                     add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.LIGHT_BLUE));
                 }});
+            } else {
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.LIGHT_BLUE));
+                }});
+            }
         }
         if (AOTVGemstoneFilter.amber) {
-            filter.add(new ArrayList<BlockData<?>>() {{
-                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.ORANGE));
-            }});
-            if (MightyMiner.config.aotvMineGemstonePanes)
+            if (MightyMiner.config.aotvMineGemstonePanes) {
                 filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.ORANGE));
                     add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.ORANGE));
                 }});
+            } else {
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.ORANGE));
+                }});
+            }
         }
         if (AOTVGemstoneFilter.jade) {
-            filter.add(new ArrayList<BlockData<?>>() {{
-                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.LIME));
-            }});
-            if (MightyMiner.config.aotvMineGemstonePanes)
+            if (MightyMiner.config.aotvMineGemstonePanes) {
                 filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.LIME));
                     add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.LIME));
                 }});
+            } else {
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.LIME));
+                }});
+            }
         }
         if (AOTVGemstoneFilter.jasper) {
-            filter.add(new ArrayList<BlockData<?>>() {{
-                add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.MAGENTA));
-            }});
-            if (MightyMiner.config.aotvMineGemstonePanes)
+            if (MightyMiner.config.aotvMineGemstonePanes) {
                 filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.MAGENTA));
                     add(new BlockData<>(Blocks.stained_glass_pane, EnumDyeColor.MAGENTA));
                 }});
+            } else {
+                filter.add(new ArrayList<BlockData<?>>() {{
+                    add(new BlockData<>(Blocks.stained_glass, EnumDyeColor.MAGENTA));
+                }});
+            }
         }
         return filter;
     }

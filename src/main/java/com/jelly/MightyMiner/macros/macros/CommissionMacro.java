@@ -5,6 +5,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
+import com.jelly.MightyMiner.features.Failsafes;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.features.MobKiller;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
@@ -394,6 +395,34 @@ public class CommissionMacro extends Macro {
     private int inventoryFailCounter = 0;
 
     private final Timer inventoryCheckDelay = new Timer();
+
+    private int staffCheckCounter = 0;
+
+    private boolean inStaffCheck = false;
+
+    public enum StaffCheckState {
+        FIND,
+        LOOK,
+        CLICK
+    }
+
+    private MithrilMacro.StaffCheckState staffCheckState = MithrilMacro.StaffCheckState.FIND;
+
+    private List<BlockPos> validBlocks = new ArrayList<>();
+
+    private int clickCounter = 0;
+
+    private ArrayList<BlockPos> blacklistStaff = new ArrayList<>();
+
+    private int checkIteration = 0;
+
+    private int noDmgCount = 0;
+
+    private final Timer restartTimer = new Timer();
+
+    public static boolean restarting = false;
+
+    private int totalCheckCounter = 0;
 
 
     @Override
@@ -1928,6 +1957,14 @@ public class CommissionMacro extends Macro {
                         mc.inGameHasFocus = true;
                         mc.mouseHelper.grabMouseCursor();
 
+                        staffCheckCounter = 0;
+                        clickCounter = 0;
+                        checkIteration = 0;
+                        inStaffCheck = false;
+                        totalCheckCounter = 0;
+                        restarting = false;
+                        staffCheckState = MithrilMacro.StaffCheckState.FIND;
+
                         baritone = new AutoMineBaritone(getMineBehaviour());
                         typeOfCommission = TypeOfCommission.MINING_COMM;
                     } else if (currentQuest.contains("Titanium")) {
@@ -1936,6 +1973,14 @@ public class CommissionMacro extends Macro {
                         mc.thePlayer.inventory.currentItem = pickaxeSlot;
                         mc.inGameHasFocus = true;
                         mc.mouseHelper.grabMouseCursor();
+
+                        staffCheckCounter = 0;
+                        clickCounter = 0;
+                        checkIteration = 0;
+                        inStaffCheck = false;
+                        totalCheckCounter = 0;
+                        restarting = false;
+                        staffCheckState = MithrilMacro.StaffCheckState.FIND;
 
                         baritone = new AutoMineBaritone(getMineBehaviour());
                         typeOfCommission = TypeOfCommission.MINING_COMM;
@@ -2087,8 +2132,99 @@ public class CommissionMacro extends Macro {
 
                 switch (typeOfCommission) {
                     case MINING_COMM:
+                        if (restartTimer.hasReached(6000) && restarting) {
+                            inStaffCheck = false;
+                            staffCheckCounter = 0;
+                            checkIteration = 0;
+                            clickCounter = 0;
+                            restarting = false;
+                            totalCheckCounter++;
+                            return;
+                        }
+                        if (restarting) return;
+
+                        if (inStaffCheck) {
+
+                            switch (staffCheckState) {
+                                case FIND:
+                                    validBlocks.clear();
+                                    ArrayList<BlockData<?>> gray = MineUtils.getMithrilColorBasedOnPriority(0);
+                                    ArrayList<BlockData<?>> green = MineUtils.getMithrilColorBasedOnPriority(1);
+                                    ArrayList<BlockData<?>> blue = MineUtils.getMithrilColorBasedOnPriority(2);
+                                    ArrayList<BlockData<?>> titanium = MineUtils.getMithrilColorBasedOnPriority(3);
+                                    ArrayList<BlockData<?>> all = new ArrayList<>();
+                                    all.addAll(gray);
+                                    all.addAll(green);
+                                    all.addAll(blue);
+                                    all.addAll(titanium);
+                                    for (BlockPos blockPos: BlockUtils.findBlockInCube(10, blacklistStaff, 0, 256, all)) {
+                                        if (BlockUtils.canMineBlock(blockPos)) {
+                                            validBlocks.add(blockPos);
+                                        }
+                                    }
+
+                                    if (validBlocks.size() > 0 && totalCheckCounter < 1) {
+                                        rotation.reset();
+                                        staffCheckState = MithrilMacro.StaffCheckState.LOOK;
+                                    } else {
+                                        Failsafes.fakeMovement(false);
+                                        return;
+                                    }
+                                    break;
+                                case LOOK:
+                                    Vec3 lookVec = BlockUtils.getClosetVisibilityLine(validBlocks.get(0));
+                                    Pair<Float, Float> rotateTo = VectorUtils.vec3ToRotation(lookVec);
+
+                                    if (AngleUtils.isDiffLowerThan(rotateTo.getLeft(), rotateTo.getRight(), 1f)) {
+                                        staffCheckState = MithrilMacro.StaffCheckState.CLICK;
+                                        clickCounter = 0;
+                                        blacklistStaff.clear();
+                                        blacklistStaff.add(validBlocks.get(0));
+                                        rotation.reset();
+                                        return;
+                                    }
+
+                                    rotation.initAngleLock(rotateTo.getLeft(), rotateTo.getRight(), 400);
+                                    break;
+                                case CLICK:
+                                    if (clickCounter > 2) {
+                                        if (checkIteration > 2) {
+                                            restartTimer.reset();
+                                            restarting = true;
+                                            return;
+                                        } else {
+                                            checkIteration++;
+                                            staffCheckState = MithrilMacro.StaffCheckState.FIND;
+                                        }
+                                    } else {
+                                        KeybindHandler.leftClick();
+                                        clickCounter++;
+                                    }
+                                    break;
+                            }
+                        }
+                        if (inStaffCheck) return;
+
+                        MovingObjectPosition ray2 = mc.thePlayer.rayTrace(5, 1);
+                        if (ray2 != null) {
+                            if (BlockUtils.getBlockDamage(ray2.getBlockPos()) > 0) {
+                                noDmgCount = 0;
+                            } else {
+                                noDmgCount ++;
+                            }
+                        }
+
+                        if (staffCheckCounter > 2) {
+                            LogUtils.addMessage("Unbreakable block staff check or wrong stuck time threshold");
+                            PlayerUtils.sendPingAlert();
+                            staffCheckCounter = 0;
+                            inStaffCheck = true;
+                            return;
+                        }
+
                         if (MightyMiner.config.refuelWithAbiphone) {
                             if (FuelFilling.isRefueling()) {
+                                staffCheckState = MithrilMacro.StaffCheckState.FIND;
                                 if (baritone != null && baritone.getState() != AutoMineBaritone.BaritoneState.IDLE) {
                                     baritone.disableBaritone();
                                 }
@@ -2100,7 +2236,19 @@ public class CommissionMacro extends Macro {
                             return;
 
                         switch (baritone.getState()) {
-                            case IDLE: case FAILED:
+                            case IDLE:
+                                baritone.mineFor(getPriorityList());
+                                break;
+                            case FAILED:
+                                MovingObjectPosition ray = mc.thePlayer.rayTrace(5, 1);
+                                if (ray != null && baritone.getCurrentBlockPos() != null && ray.getBlockPos().equals(baritone.getCurrentBlockPos()) && noDmgCount > MightyMiner.config.mithRestartTimeThreshold * 20) {
+                                    LogUtils.debugLog("Maybe unbreakable block failsafe");
+                                    staffCheckCounter++;
+
+                                    if (staffCheckCounter > 2) {
+                                        return;
+                                    }
+                                }
                                 baritone.mineFor(getPriorityList());
                                 break;
 

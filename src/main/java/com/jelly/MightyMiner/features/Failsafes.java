@@ -39,7 +39,7 @@ public class Failsafes {
         DisableMacros(false);
     }
 
-    private static void DisableMacros(boolean saveLastMacro) {
+    public static void DisableMacros(boolean saveLastMacro) {
 
         if (MobKiller.isToggled) {
             MightyMiner.mobKiller.toggle();

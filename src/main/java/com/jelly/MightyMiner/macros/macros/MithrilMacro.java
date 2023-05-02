@@ -4,20 +4,27 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
 import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.config.MiningType;
+import com.jelly.MightyMiner.features.Failsafes;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
-import com.jelly.MightyMiner.utils.AngleUtils;
+import com.jelly.MightyMiner.player.Rotation;
+import com.jelly.MightyMiner.utils.*;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
-import com.jelly.MightyMiner.utils.LogUtils;
-import com.jelly.MightyMiner.utils.PlayerUtils;
 
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class MithrilMacro extends Macro {
 
@@ -25,9 +32,46 @@ public class MithrilMacro extends Macro {
 
     boolean noMithril;
 
+    private int staffCheckCounter = 0;
+
+    private boolean inStaffCheck = false;
+
+    public enum StaffCheckState {
+        FIND,
+        LOOK,
+        CLICK
+    }
+
+    private StaffCheckState staffCheckState = StaffCheckState.FIND;
+
+    private List<BlockPos> validBlocks = new ArrayList<>();
+
+    private int clickCounter = 0;
+
+    private ArrayList<BlockPos> blacklistStaff = new ArrayList<>();
+
+    private int checkIteration = 0;
+
+    private int noDmgCount = 0;
+
+    private final Timer restartTimer = new Timer();
+
+    public static boolean restarting = false;
+
+    private int totalCheckCounter = 0;
+
+    private final Rotation rotation = new Rotation();
+
     @Override
     protected void onEnable() {
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");
+        staffCheckCounter = 0;
+        clickCounter = 0;
+        checkIteration = 0;
+        inStaffCheck = false;
+        totalCheckCounter = 0;
+        restarting = false;
+        staffCheckState = StaffCheckState.FIND;
 
         if (MightyMiner.config.playerFailsafe) {
             if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad)) {
@@ -45,9 +89,99 @@ public class MithrilMacro extends Macro {
     @Override
     public void onTick(TickEvent.Phase phase) {
         if (!enabled) return;
+        if (restartTimer.hasReached(6000) && restarting) {
+            inStaffCheck = false;
+            staffCheckCounter = 0;
+            checkIteration = 0;
+            clickCounter = 0;
+            restarting = false;
+            totalCheckCounter++;
+            return;
+        }
+        if (restarting) return;
+
+        if (inStaffCheck) {
+
+            switch (staffCheckState) {
+                case FIND:
+                    validBlocks.clear();
+                    ArrayList<BlockData<?>> gray = MineUtils.getMithrilColorBasedOnPriority(0);
+                    ArrayList<BlockData<?>> green = MineUtils.getMithrilColorBasedOnPriority(1);
+                    ArrayList<BlockData<?>> blue = MineUtils.getMithrilColorBasedOnPriority(2);
+                    ArrayList<BlockData<?>> titanium = MineUtils.getMithrilColorBasedOnPriority(3);
+                    ArrayList<BlockData<?>> all = new ArrayList<>();
+                    all.addAll(gray);
+                    all.addAll(green);
+                    all.addAll(blue);
+                    all.addAll(titanium);
+                    for (BlockPos blockPos: BlockUtils.findBlockInCube(10, blacklistStaff, 0, 256, all)) {
+                        if (BlockUtils.canMineBlock(blockPos)) {
+                            validBlocks.add(blockPos);
+                        }
+                    }
+
+                    if (validBlocks.size() > 0 && totalCheckCounter < 1) {
+                        rotation.reset();
+                        staffCheckState = StaffCheckState.LOOK;
+                    } else {
+                        Failsafes.fakeMovement(false);
+                        return;
+                    }
+                    break;
+                case LOOK:
+                    Vec3 lookVec = BlockUtils.getClosetVisibilityLine(validBlocks.get(0));
+                    Pair<Float, Float> rotateTo = VectorUtils.vec3ToRotation(lookVec);
+
+                    if (AngleUtils.isDiffLowerThan(rotateTo.getLeft(), rotateTo.getRight(), 1f)) {
+                        staffCheckState = StaffCheckState.CLICK;
+                        clickCounter = 0;
+                        blacklistStaff.clear();
+                        blacklistStaff.add(validBlocks.get(0));
+                        rotation.reset();
+                        return;
+                    }
+
+                    rotation.initAngleLock(rotateTo.getLeft(), rotateTo.getRight(), 400);
+                    break;
+                case CLICK:
+                    if (clickCounter > 2) {
+                        if (checkIteration > 2) {
+                            restartTimer.reset();
+                            restarting = true;
+                            return;
+                        } else {
+                            checkIteration++;
+                            staffCheckState = StaffCheckState.FIND;
+                        }
+                    } else {
+                        KeybindHandler.leftClick();
+                        clickCounter++;
+                    }
+                    break;
+            }
+        }
+        if (inStaffCheck) return;
+
+        MovingObjectPosition ray2 = mc.thePlayer.rayTrace(5, 1);
+        if (ray2 != null) {
+            if (BlockUtils.getBlockDamage(ray2.getBlockPos()) > 0) {
+                noDmgCount = 0;
+            } else {
+                noDmgCount ++;
+            }
+        }
+
+        if (staffCheckCounter > 2) {
+            LogUtils.addMessage("Unbreakable block staff check or wrong stuck time threshold");
+            PlayerUtils.sendPingAlert();
+            staffCheckCounter = 0;
+            inStaffCheck = true;
+            return;
+        }
 
         if (MightyMiner.config.refuelWithAbiphone) {
             if (FuelFilling.isRefueling()) {
+                staffCheckState = StaffCheckState.FIND;
                 if (baritone != null && baritone.getState() != AutoMineBaritone.BaritoneState.IDLE) {
                     baritone.disableBaritone();
                 }
@@ -59,9 +193,20 @@ public class MithrilMacro extends Macro {
             return;
 
         switch (baritone.getState()) {
-            case IDLE: case FAILED:
+            case IDLE:
                 baritone.mineFor(getPriorityList());
+                break;
+            case FAILED:
+                MovingObjectPosition ray = mc.thePlayer.rayTrace(5, 1);
+                if (ray != null && baritone.getCurrentBlockPos() != null && ray.getBlockPos().equals(baritone.getCurrentBlockPos()) && noDmgCount > MightyMiner.config.mithRestartTimeThreshold * 20) {
+                    LogUtils.debugLog("Maybe unbreakable block failsafe");
+                    staffCheckCounter++;
 
+                    if (staffCheckCounter > 2) {
+                        return;
+                    }
+                }
+                baritone.mineFor(getPriorityList());
                 break;
 
         }
@@ -84,6 +229,13 @@ public class MithrilMacro extends Macro {
     protected void onDisable() {
         if (baritone != null) baritone.disableBaritone();
         KeybindHandler.resetKeybindState();
+    }
+
+    public void onLastRender(RenderWorldLastEvent event) {
+        if (mc.thePlayer == null || mc.theWorld == null) return;
+        if (rotation.rotating) {
+            rotation.update();
+        }
     }
 
     private BaritoneConfig getMineBehaviour() {

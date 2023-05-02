@@ -53,6 +53,8 @@ public class AOTVMacro extends Macro {
     private final Rotation rotation = new Rotation();
     private static final Timer waitAfterKillTimer = new Timer();
 
+    private boolean reScan = true;
+
     @Override
     public void onEnable() {
         if (MightyMiner.aotvWaypoints.getSelectedRoute() == null) {
@@ -109,6 +111,7 @@ public class AOTVMacro extends Macro {
         timeBetweenLastWaypoint.reset();
         tooFastTp = false;
         firstTp = true;
+        reScan = true;
         tping = false;
         baritone = new AutoMineBaritone(getAutoMineConfig());
         currentState = State.MINING;
@@ -235,9 +238,15 @@ public class AOTVMacro extends Macro {
                         baritone.mineFor(MineUtils.getGemListBasedOnPriority());
                         break;
                     case EXECUTING:
+                        reScan = true;
                         this.checkMiningSpeedBoost();
                         break;
                     case FAILED:
+                        if (reScan) {
+                            baritone.mineFor(MineUtils.getGemListBasedOnPriority());
+                            reScan = false;
+                            return;
+                        }
                         LogUtils.addMessage("No gemstones left. Teleporting to next vein");
                         if (currentWaypoint == Waypoints.size() - 1) {
                             currentWaypoint = 0;
@@ -247,7 +256,7 @@ public class AOTVMacro extends Macro {
                         tpStuckTimer.reset();
                         currentState = State.WARPING;
                         baritone.disableBaritone();
-
+                        reScan = true;
                         break;
                 }
 
@@ -333,7 +342,7 @@ public class AOTVMacro extends Macro {
                 MiningType.STATIC,
                 false,
                 false,
-                false,
+                true,
                 MightyMiner.config.aotvCameraSpeed,
                 MightyMiner.config.aotvRestartTimeThreshold, //changed with config
                 null,

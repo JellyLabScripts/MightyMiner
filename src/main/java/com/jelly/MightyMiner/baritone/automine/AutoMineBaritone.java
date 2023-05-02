@@ -110,6 +110,7 @@ public class AutoMineBaritone {
     public void disableBaritone() {
         Logger.playerLog("Disabled baritone");
         state = BaritoneState.IDLE;
+        executor.disable();
         executor.reset();
         terminate();
     }

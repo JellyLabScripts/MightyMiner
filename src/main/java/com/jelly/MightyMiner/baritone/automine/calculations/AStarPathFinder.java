@@ -74,7 +74,8 @@ public class AStarPathFinder {
             for (ArrayList<BlockData<?>> block: blockType) {
                 foundBlocks.addAll(BlockUtils.findBlockInCube(10, blackListedPos, 0, 256, block));
             }
-            possiblePaths.addAll(getPossiblePaths(foundBlocks));
+                possiblePaths.addAll(getPossiblePaths(foundBlocks));
+
         }
 
         if(foundBlocks.isEmpty())

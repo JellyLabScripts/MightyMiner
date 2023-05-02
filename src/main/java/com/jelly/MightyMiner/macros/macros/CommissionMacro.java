@@ -2138,6 +2138,8 @@ public class CommissionMacro extends Macro {
     }
     @Override
     protected void onDisable() {
+        if (baritone != null) baritone.disableBaritone();
+        KeybindHandler.resetKeybindState();
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);

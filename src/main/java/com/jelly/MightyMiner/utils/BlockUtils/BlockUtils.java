@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.mixins.accessors.RenderGlobalAccessor;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.LogUtils;
 import com.jelly.MightyMiner.utils.PlayerUtils;
@@ -14,6 +15,8 @@ import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.renderer.DestroyBlockProgress;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
@@ -22,6 +25,7 @@ import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -159,6 +163,24 @@ public class BlockUtils {
         return findBlock(new Box(-boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2, -boxDiameter / 2, boxDiameter / 2)
                 ,forbiddenBlockPos, minY, maxY, blockDataList);
     }
+
+    public static float getBlockDamage(BlockPos target) {
+        try {
+            Map<Integer, DestroyBlockProgress> map = ((RenderGlobalAccessor) Minecraft.getMinecraft().renderGlobal).getDamagedBlocks();
+
+            for (DestroyBlockProgress destroyblockprogress : map.values()) {
+                if (destroyblockprogress.getPosition().equals(target)) {
+                    if (destroyblockprogress.getPartialBlockDamage() >= 0 && destroyblockprogress.getPartialBlockDamage() <= 10)
+                        return destroyblockprogress.getPartialBlockDamage() / 10.0F;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0F;
+    }
+
+
 
   
     public static List<BlockPos> findBlockInCube(int boxDiameter, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, BlockData<?>... requiredBlocks) {

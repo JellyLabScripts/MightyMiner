@@ -110,7 +110,6 @@ public class AutoMineBaritone {
     public void disableBaritone() {
         Logger.playerLog("Disabled baritone");
         state = BaritoneState.IDLE;
-        executor.disable();
         executor.reset();
         terminate();
     }
@@ -160,13 +159,17 @@ public class AutoMineBaritone {
                     }
                 } else if (executor.hasFailed()) {
                     Logger.log("Executor has failed");
-                    failBaritone(false);
+                    failBaritone(true);
                 } else if (!executor.isExecuting()) {
                     Logger.log("Executor is starting to execute a path");
                     executor.executePath(path, config);
                 }
 
         }
+    }
+
+    public BlockPos getCurrentBlockPos() {
+        return path != null && path.getBlocksInPath() != null && path.getBlocksInPath().getFirst() != null ? path.getBlocksInPath().getFirst().getPos() : null;
     }
 
     @SubscribeEvent

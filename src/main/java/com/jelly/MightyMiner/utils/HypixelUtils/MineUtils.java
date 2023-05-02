@@ -22,7 +22,7 @@ public class MineUtils {
     public static ArrayList<ArrayList<BlockData<?>>> getGemListBasedOnPriority(int priority) {
         ArrayList<ArrayList<BlockData<?>>> filter = new ArrayList<>();
         ArrayList<BlockData<?>> glass = new ArrayList<BlockData<?>>() {{
-            add(new BlockData<>(Blocks.stained_glass_pane, gemPriority[priority]));
+            add(new BlockData<>(Blocks.stained_glass, gemPriority[priority]));
         }};
         filter.add(glass);
         if (MightyMiner.config.aotvMineGemstonePanes) {

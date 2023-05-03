@@ -57,7 +57,6 @@ public class MacroHandler {
         macros.add(new MithrilMacro());
         macros.add(new AOTVMacro());
         macros.add(new CommissionMacro());
-        macros.add(new Pathfinder());
     }
     @SubscribeEvent(receiveCanceled=true, priority=HIGHEST)
     public void onTickPlayer(TickEvent.ClientTickEvent tickEvent) {

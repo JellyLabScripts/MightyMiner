@@ -2078,6 +2078,7 @@ public class CommissionMacro extends Macro {
                         // Switching action to start
                         nextActionDelay.reset();
                         comissionState = State.SETUP;
+                        return;
                     }
 
                     // Check if player is in Spot
@@ -2099,6 +2100,7 @@ public class CommissionMacro extends Macro {
                         // Switching action to start
                         nextActionDelay.reset();
                         comissionState = State.SETUP;
+                        return;
                     }
 
                     // Check if spot is occupied
@@ -2133,6 +2135,7 @@ public class CommissionMacro extends Macro {
                         // Switching action to start
                         nextActionDelay.reset();
                         comissionState = State.SETUP;
+                        return;
                     }
 
                     // Check if too many players nearby (Slaying)
@@ -2143,8 +2146,8 @@ public class CommissionMacro extends Macro {
                         if (baritone != null) baritone.disableBaritone();
                         KeybindHandler.resetKeybindState();
 
-                        MightyMiner.mobKiller.toggle();
                         MobKiller.resetOptions();
+                        MightyMiner.mobKiller.toggle();
 
                         // ReWarp
                         isWarping = true;
@@ -2282,6 +2285,9 @@ public class CommissionMacro extends Macro {
                         checkMiningSpeedBoost();
                         break;
                     case SLAYING_COMM:
+                        if (!MobKiller.isToggled) {
+                            MightyMiner.mobKiller.toggle();
+                        }
                         break;
                     case NONE:
                         // No Type of Commission State

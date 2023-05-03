@@ -2072,8 +2072,8 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
-                        MightyMiner.mobKiller.toggle();
                         MobKiller.resetOptions();
+                        MightyMiner.mobKiller.toggle();
 
                         // Switching action to start
                         nextActionDelay.reset();
@@ -2092,8 +2092,8 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
-                        MightyMiner.mobKiller.toggle();
                         MobKiller.resetOptions();
+                        MightyMiner.mobKiller.toggle();
 
 
                         // Switching action to start
@@ -2127,8 +2127,8 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
-                        MightyMiner.mobKiller.toggle();
                         MobKiller.resetOptions();
+                        MightyMiner.mobKiller.toggle();
 
                         // Switching action to start
                         nextActionDelay.reset();

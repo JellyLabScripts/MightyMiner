@@ -509,7 +509,6 @@ public class CommissionMacro extends Macro {
 
     @Override
     public void onTick(TickEvent.Phase phase) {
-
         if (!isWarping && comissionState == State.COMMITTING) {
             if (inventoryCheckDelay.hasReached(2000)) {
                 if (mc.theWorld == null || mc.thePlayer == null) return;
@@ -1113,7 +1112,8 @@ public class CommissionMacro extends Macro {
                                                 } else {
                                                     // Trying very accurate Hittable
                                                     LogUtils.debugLog("Failed with Random Hittable");
-                                                    Vec3 veryAccurateLookVec = VectorUtils.getVeryAccurateHittableHitVec(currentWarpDestination);
+                                                    //Vec3 veryAccurateLookVec = VectorUtils.getVeryAccurateHittableHitVec(currentWarpDestination);
+                                                    Vec3 veryAccurateLookVec = HittableUtils.getRandomHitVec(currentWarpDestination, 10);
 
                                                     // Checking if player can look at Block
                                                     if (veryAccurateLookVec != null) {
@@ -1135,7 +1135,8 @@ public class CommissionMacro extends Macro {
                                                     } else {
                                                         // Cannot look at Block
                                                         LogUtils.debugLog("This route is not working (Maybe a Star Sentry event Blocking vision)");
-                                                        MacroHandler.disableScript();
+                                                        reWarpState = ReWarpState.WARP_HUB;
+                                                        return;
                                                     }
                                                 }
                                             } else {
@@ -1151,6 +1152,8 @@ public class CommissionMacro extends Macro {
                                                 // Failed looking at Block
                                                 LogUtils.debugLog("Failed looking");
 
+                                                MovingObjectPosition ray = mc.thePlayer.rayTrace(62, 1);
+
                                                 // Checking failed looking counter
                                                 if (failedLookingCounter > 5) {
                                                     // Failed to often
@@ -1165,6 +1168,13 @@ public class CommissionMacro extends Macro {
                                                         isWarping = true;
                                                         nextActionDelay.reset();
                                                         reWarpState = ReWarpState.WARP_HUB;
+                                                    } else if (ray != null && ray.getBlockPos().equals((Object) currentWarpDestination)) {
+                                                        // Player is looking at wanted block
+                                                        LogUtils.debugLog("Player is looking at wanted block");
+
+                                                        // Switching to next action
+                                                        nextActionDelay.reset();
+                                                        warpToEmissaryState = WarpToEmissaryState.WARP;
                                                     } else {
                                                         // Did not fall out of spot
                                                         LogUtils.debugLog("Probably to low FPS");
@@ -1405,6 +1415,8 @@ public class CommissionMacro extends Macro {
                                                     // Failed to often
                                                     LogUtils.debugLog("Failed looking to often (Find Emissary)");
 
+                                                    MovingObjectPosition ray = mc.thePlayer.rayTrace(62, 1);
+
                                                     // Checking if player is still in spot
                                                     if (!BlockUtils.getPlayerLoc().down().equals((Object) previousWarpDestination)) {
                                                         // Fell out of position
@@ -1414,7 +1426,14 @@ public class CommissionMacro extends Macro {
                                                         nextActionDelay.reset();
                                                         isWarping = true;
                                                         reWarpState = ReWarpState.WARP_HUB;
-                                                    } else {
+                                                    } else if (ray != null && ray.getBlockPos().equals((Object) currentWarpDestination)) {
+                                                        // Player is looking at wanted block
+                                                        LogUtils.debugLog("Player is looking at wanted block");
+
+                                                        // Switching to next action
+                                                        nextActionDelay.reset();
+                                                        warpToEmissaryState = WarpToEmissaryState.WARP;
+                                                    }else {
                                                         // Did not fall out of spot
                                                         LogUtils.debugLog("Probably to low FPS");
                                                         MacroHandler.disableScript();
@@ -1715,7 +1734,8 @@ public class CommissionMacro extends Macro {
                                 } else {
                                     // Trying very accurate Hittable
                                     LogUtils.debugLog("Failed with Random Hittable");
-                                    Vec3 veryAccurateLookVec = VectorUtils.getVeryAccurateHittableHitVec(currentWarpDestination);
+                                    //Vec3 veryAccurateLookVec = VectorUtils.getVeryAccurateHittableHitVec(currentWarpDestination);
+                                    Vec3 veryAccurateLookVec = HittableUtils.getRandomHitVec(currentWarpDestination, 10);
 
                                     // Checking if player can look at Block
                                     if (veryAccurateLookVec != null) {
@@ -1737,7 +1757,8 @@ public class CommissionMacro extends Macro {
                                     } else {
                                         // Cannot look at Block
                                         LogUtils.debugLog("This route is not working (Maybe a Star Sentry event Blocking vision)");
-                                        MacroHandler.disableScript();
+                                        reWarpState = ReWarpState.WARP_HUB;
+                                        return;
                                     }
                                 }
                             } else {
@@ -1753,6 +1774,8 @@ public class CommissionMacro extends Macro {
                                 // Failed looking at Block
                                 LogUtils.debugLog("Failed looking");
 
+                                MovingObjectPosition ray = mc.thePlayer.rayTrace(62, 1);
+
                                 // Checking failed looking counter
                                 if (failedLookingCounter > 5) {
                                     // Failed to often
@@ -1766,6 +1789,13 @@ public class CommissionMacro extends Macro {
                                         nextActionDelay.reset();
                                         isWarping = true;
                                         reWarpState = ReWarpState.WARP_HUB;
+                                    } else if (ray != null && ray.getBlockPos().equals((Object) currentWarpDestination)) {
+                                        // Player is looking at wanted block
+                                        LogUtils.debugLog("Player is looking at wanted block");
+
+                                        // Switching to next action
+                                        nextActionDelay.reset();
+                                        warpToEmissaryState = WarpToEmissaryState.WARP;
                                     } else {
                                         // Did not fall out of spot
                                         LogUtils.debugLog("Probably to low FPS");

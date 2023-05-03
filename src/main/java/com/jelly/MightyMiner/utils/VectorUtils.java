@@ -1,22 +1,50 @@
 package com.jelly.MightyMiner.utils;
 
+import com.jelly.MightyMiner.macros.macros.Pathfinder;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
+import net.minecraft.block.BlockFence;
+import net.minecraft.block.BlockFenceGate;
+import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.AxisAlignedBB;
+
 import java.util.List;
 import java.util.ArrayList;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 public class VectorUtils {
+
+    public static ArrayList<BlockPos> getAllTeleportableBlocks(Vec3 vec, float range) {
+        Minecraft mc = Minecraft.getMinecraft();
+        long pastTime = System.currentTimeMillis();
+        BlockPos origin = new BlockPos(vec);
+        Iterable<BlockPos> blocks = BlockPos.getAllInBox(origin.subtract(new Vec3i(range, 16, range)), origin.add(new Vec3i(range, 16, range)));
+        ArrayList<BlockPos> validBlocks = (ArrayList<BlockPos>) StreamSupport.stream(
+                blocks.spliterator(), false
+        ).filter(blockPos ->
+                mc.theWorld.getBlockState(blockPos).getBlock().isCollidable() && mc.theWorld.getBlockState(blockPos).getBlock() != Blocks.carpet &&
+                        mc.theWorld.getBlockState(blockPos).getBlock() != Blocks.skull && mc.theWorld.getBlockState(blockPos).getBlock() != Blocks.wall_sign &&
+                        mc.theWorld.getBlockState(blockPos).getBlock() != Blocks.standing_sign &&
+                        !(mc.theWorld.getBlockState(blockPos).getBlock() instanceof BlockFence) &&
+                        !(mc.theWorld.getBlockState(blockPos).getBlock() instanceof BlockFenceGate) &&
+                        mc.theWorld.getBlockState(blockPos).getBlock().getCollisionBoundingBox(mc.theWorld, blockPos, mc.theWorld.getBlockState(blockPos)) != null &&
+                        mc.theWorld.getBlockState(blockPos.add(0, 1, 0)).getBlock() == Blocks.air &&
+                        mc.theWorld.getBlockState(blockPos.add(0, 2, 0)).getBlock() == Blocks.air &&
+                        vec.distanceTo(new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.95, blockPos.getZ() + 0.5)) >= 40 &&
+                        vec.distanceTo(new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.95, blockPos.getZ() + 0.5)) <= 61 &&
+                        HittableUtils.isHittable(blockPos, 10)
+        ).collect(Collectors.toList());
+        LogUtils.debugLog((System.currentTimeMillis() - pastTime) + "");
+        return validBlocks;
+    }
+
 
     public static Pair<Float, Float> vec3ToRotation(final Vec3 vec) {
         final double diffX = vec.xCoord - PlayerUtils.playerPosVec().xCoord;
@@ -63,6 +91,14 @@ public class VectorUtils {
         final Vec3 vec3 = PlayerUtils.playerEyePosVec();
         final Vec3 vec4 = PlayerUtils.playerLookVec();
         return fastRayTrace(vec3, vec3.addVector(vec4.xCoord * range, vec4.yCoord * range, vec4.zCoord * range), false);
+    }
+
+    public static Vec3 getVectorForRotation(float pitch, float yaw) {
+        float f = MathHelper.cos(-yaw * 0.017453292F - (float)Math.PI);
+        float f1 = MathHelper.sin(-yaw * 0.017453292F - (float)Math.PI);
+        float f2 = -MathHelper.cos(-pitch * 0.017453292F);
+        float f3 = MathHelper.sin(-pitch * 0.017453292F);
+        return new Vec3((double)(f1 * f2), (double)f3, (double)(f * f2));
     }
 
     public static MovingObjectPosition rayTraceLook(final Vec3 target, final float range) {
@@ -411,10 +447,10 @@ public class VectorUtils {
         if (isRayTraceableLook(new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), pos, 4.5f)) {
             return true;
         }
-        for (int x = 1; x < 5; ++x) {
-            for (int y = 1; y < 5; ++y) {
-                for (int z = 1; z < 5; ++z) {
-                    if (isRayTraceableLook(new Vec3(pos.getX() + x / 4.0f - 0.125, pos.getY() + y / 4.0f - 0.125, pos.getZ() + z / 4.0f - 0.125), pos, 4.5f)) {
+        for (int x = 1; x < 9; ++x) {
+            for (int y = 1; y < 9; ++y) {
+                for (int z = 1; z < 9; ++z) {
+                    if (isRayTraceableLook(new Vec3(pos.getX() + x / 8.0f - 0.0625, pos.getY() + y / 8.0f - 0.0625, pos.getZ() + z / 8.0f - 0.0625), pos, 61f)) {
                         return true;
                     }
                 }
@@ -457,7 +493,7 @@ public class VectorUtils {
         return (position != null) ? position.sideHit : null;
     }
 
-    private static MovingObjectPosition fastRayTrace(final Vec3 vec31, final Vec3 vec32) {
+    public static MovingObjectPosition fastRayTrace(final Vec3 vec31, final Vec3 vec32) {
         return fastRayTrace(vec31, vec32, true);
     }
 

@@ -60,7 +60,7 @@ public class AOTVWaypointsPage extends Page {
             // import
             try {
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                String data = (String) clipboard.getData(DataFlavor.stringFlavor);
+                String data = clipboard.getData(DataFlavor.stringFlavor).toString().trim();
                 if (data.startsWith("#MightyMinerWaypoint#::")) {
                     data = data.replace("#MightyMinerWaypoint#::", "");
                     data = new String(Base64.getDecoder().decode(data));

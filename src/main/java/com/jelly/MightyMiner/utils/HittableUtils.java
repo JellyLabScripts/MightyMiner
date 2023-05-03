@@ -60,7 +60,7 @@ public class HittableUtils {
     public static Vec3 getRandomHitVec(BlockPos blockPos, float accuracy) {
         ArrayList<Vec3> hitVec = getAllHitVec(blockPos, accuracy);
         if (hitVec.size() > 1) {
-            int randInt = MathUtils.randomNum(0, hitVec.size());
+            int randInt = MathUtils.randomNum(0, hitVec.size() - 1);
             return hitVec.get(randInt);
         } else if (hitVec.size() == 1) {
             return hitVec.get(0);

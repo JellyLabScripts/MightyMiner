@@ -187,6 +187,10 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @VigilanceName(name = "Skip goblin slayer quest (requires 3 commission slots)", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
     @Switch( name = "Skip goblin slayer quest (requires 3 commission slots)", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
     public boolean commSkipGoblinSlayerQuest = false;
+    
+        @VigilanceName(name = "Commission read out delay (in ms)", category = COMMISSION_MACRO, subcategory = "Warping")
+    @Slider( name = "Commission read out delay (in ms)", description = "Time the macro waits to read out commission (in ms)", category = COMMISSION_MACRO, subcategory = "Warping", max = 2000, min = 500)
+    public int commReadOutDelay = 1000;
 
     @VigilanceName(name = "Stop on limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")
     @Switch(name = "Stop on limbo", description = "Stop macro when getting kicked to limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")

@@ -38,7 +38,6 @@ public class MobKiller {
     private static boolean caseSensitive = false;
     private static String[] mobsNames = null;
 
-    private final ArrayList<Entity> blacklistedEntities = new ArrayList<>();
     private static boolean skipWhenBlockedVision = false;
     private static boolean antiAfkEnabled = false;
     private static boolean sneakWhileKilling = false;
@@ -56,6 +55,8 @@ public class MobKiller {
     private final CopyOnWriteArrayList<Target> potentialTargets = new CopyOnWriteArrayList<>();
 
     private final Rotation rotation = new Rotation();
+
+    private final Timer noKillTimer = new Timer();
 
     private static class Target {
         public Entity entity;
@@ -116,7 +117,6 @@ public class MobKiller {
         isToggled = !isToggled;
         target = null;
         potentialTargets.clear();
-        blacklistedEntities.clear();
     }
 
     public static void setMobsNames(boolean caseSensitive, String... mobsNames) {
@@ -187,9 +187,9 @@ public class MobKiller {
                     String mobsName1 = StringUtils.stripControlCodes(mobsName);
                     String vCustomNameTag = StringUtils.stripControlCodes(v.getCustomNameTag());
                     if (caseSensitive) {
-                        return vCustomNameTag.contains(mobsName1) && !blacklistedEntities.contains(v);
+                        return vCustomNameTag.contains(mobsName1);
                     } else {
-                        return vCustomNameTag.toLowerCase().contains(mobsName1.toLowerCase()) && !blacklistedEntities.contains(v);
+                        return vCustomNameTag.toLowerCase().contains(mobsName1.toLowerCase());
                     }
                 }))).collect(Collectors.toList());
 
@@ -235,6 +235,7 @@ public class MobKiller {
 
                 if (closestTarget != null && closestTarget.distance() < scanRange) {
                     target = closestTarget;
+                    noKillTimer.reset();
                     currentState = States.ATTACKING;
                 }
                 break;
@@ -242,6 +243,10 @@ public class MobKiller {
                 if (antiAfkEnabled) {
                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
                     KeybindHandler.setKeyBindState(mc.gameSettings.keyBindLeft, false);
+                }
+
+                if (noKillTimer.hasReached(6000)) {
+                    currentState = States.SEARCHING;
                 }
                 if (NpcUtil.getEntityHp(target.entity) <= 1 || target.distance() > scanRange || (target.entity != null && (target.entity.isDead)) || target.stand.getCustomNameTag().trim().isEmpty()) {
                     currentState = States.KILLED;
@@ -324,7 +329,6 @@ public class MobKiller {
 
                 if (blockedVisionDelay.hasReached(5000)) {
                     if (skipWhenBlockedVision) {
-                        blacklistedEntities.add(target.entity);
                         currentState = States.SEARCHING;
                     } else {
                         currentState = States.ATTACKING;

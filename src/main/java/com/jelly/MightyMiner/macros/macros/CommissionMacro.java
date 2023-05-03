@@ -1196,7 +1196,7 @@ public class CommissionMacro extends Macro {
                                             if (AngleUtils.isDiffLowerThan(yawPitchGoal.getLeft(), yawPitchGoal.getRight(), 0.1f)) {
                                                 rotation.reset();
                                                 rotation.completed = true;
-                                            }
+                                             }
 
                                             // Rotating to Yaw / Pitch
                                             if (!rotation.completed) {
@@ -1602,7 +1602,7 @@ public class CommissionMacro extends Macro {
                 }
                 break;
             case GET_COMMISSION:
-                if (nextActionDelay.hasReached(1000)) {
+                if (nextActionDelay.hasReached(MightyMiner.config.commReadOutDelay)) {
                     // Determining Commission
                     LogUtils.debugLog("Determining Commission");
                     ComissionType commission = ComissionUtils.determineComm().getKey();

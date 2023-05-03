@@ -1175,6 +1175,7 @@ public class CommissionMacro extends Macro {
                                                         // Switching to next action
                                                         nextActionDelay.reset();
                                                         warpToEmissaryState = WarpToEmissaryState.WARP;
+                                                        return;
                                                     } else {
                                                         // Did not fall out of spot
                                                         LogUtils.debugLog("Probably to low FPS");
@@ -1426,14 +1427,7 @@ public class CommissionMacro extends Macro {
                                                         nextActionDelay.reset();
                                                         isWarping = true;
                                                         reWarpState = ReWarpState.WARP_HUB;
-                                                    } else if (ray != null && ray.getBlockPos().equals((Object) currentWarpDestination)) {
-                                                        // Player is looking at wanted block
-                                                        LogUtils.debugLog("Player is looking at wanted block");
-
-                                                        // Switching to next action
-                                                        nextActionDelay.reset();
-                                                        warpToEmissaryState = WarpToEmissaryState.WARP;
-                                                    }else {
+                                                    } else {
                                                         // Did not fall out of spot
                                                         LogUtils.debugLog("Probably to low FPS");
                                                         MacroHandler.disableScript();
@@ -1795,7 +1789,8 @@ public class CommissionMacro extends Macro {
 
                                         // Switching to next action
                                         nextActionDelay.reset();
-                                        warpToEmissaryState = WarpToEmissaryState.WARP;
+                                        navigatingState = NavigatingState.WARP;
+                                        return;
                                     } else {
                                         // Did not fall out of spot
                                         LogUtils.debugLog("Probably to low FPS");

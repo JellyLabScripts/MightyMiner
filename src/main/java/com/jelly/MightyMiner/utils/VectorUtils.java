@@ -461,7 +461,7 @@ public class VectorUtils {
         return fastRayTrace(vec31, vec32, true);
     }
 
-    private static MovingObjectPosition fastRayTrace(Vec3 vec31, final Vec3 vec32, final boolean hitLiquid) {
+    public static MovingObjectPosition fastRayTrace(Vec3 vec31, final Vec3 vec32, final boolean hitLiquid) {
         final int i = MathHelper.floor_double(vec32.xCoord);
         final int j = MathHelper.floor_double(vec32.yCoord);
         final int k = MathHelper.floor_double(vec32.zCoord);

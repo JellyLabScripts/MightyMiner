@@ -22,6 +22,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.minecraftforge.fml.common.eventhandler.EventPriority.HIGHEST;
+
 public class MacroHandler {
     public static List<Macro> macros = new ArrayList<>();
     public static Minecraft mc = Minecraft.getMinecraft();
@@ -55,8 +57,9 @@ public class MacroHandler {
         macros.add(new MithrilMacro());
         macros.add(new AOTVMacro());
         macros.add(new CommissionMacro());
+        macros.add(new Pathfinder());
     }
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled=true, priority=HIGHEST)
     public void onTickPlayer(TickEvent.ClientTickEvent tickEvent) {
         if (!enabled || mc.thePlayer == null || mc.theWorld == null) return;
 
@@ -70,7 +73,7 @@ public class MacroHandler {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled=true, priority=HIGHEST)
     public void onRenderWorld(final RenderWorldLastEvent event) {
         if(mc.theWorld == null || mc.thePlayer == null)
             return;
@@ -87,7 +90,7 @@ public class MacroHandler {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled=true, priority=HIGHEST)
     public void onRenderOverlay(RenderGameOverlayEvent event) {
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
@@ -100,7 +103,7 @@ public class MacroHandler {
     }
 
 
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled=true, priority=HIGHEST)
     public void onMessageReceived(ClientChatReceivedEvent event) {
         String message = ChatFormatting.stripFormatting(event.message.getUnformattedText());
         try {
@@ -153,7 +156,7 @@ public class MacroHandler {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled=true, priority=HIGHEST)
     public void onPacketReceived(ReceivePacketEvent event) {
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;
@@ -165,7 +168,7 @@ public class MacroHandler {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled=true, priority=HIGHEST)
     public void onBlockChange(BlockChangeEvent event) {
         if (!enabled || mc.thePlayer == null || mc.theWorld == null)
             return;

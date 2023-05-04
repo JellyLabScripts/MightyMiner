@@ -2242,8 +2242,7 @@ public class CommissionMacro extends Macro {
                             }
                         }
 
-                        if (staffCheckCounter > 2) {
-                            LogUtils.addMessage("Unbreakable block staff check or wrong stuck time threshold");
+                        if (staffCheckCounter > 2) {LogUtils.addMessage("Unbreakable block staff check or wrong stuck time threshold");
                             PlayerUtils.sendPingAlert();
                             staffCheckCounter = 0;
                             inStaffCheck = true;

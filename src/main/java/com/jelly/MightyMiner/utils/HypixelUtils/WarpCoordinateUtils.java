@@ -183,8 +183,8 @@ public class WarpCoordinateUtils {
                 route.add(new BlockPos(-8, 161, 106));
                 route.add(new BlockPos(9, 130, 129));
                 route.add(new BlockPos(-22, 137, 171));
-                route.add(new BlockPos(-44, 149, 145));
-                route.add(new BlockPos(-76, 144, 141));
+                route.add(new BlockPos(-50, 144, 165));
+                route.add(new BlockPos(-78, 142, 142));
             } else if (routeNumber == 1) {
                 route.add(new BlockPos(0, 165, -12));
                 route.add(new BlockPos(25, 176, 7));
@@ -193,7 +193,7 @@ public class WarpCoordinateUtils {
                 route.add(new BlockPos(9, 130, 129));
                 route.add(new BlockPos(-22, 137, 171));
                 route.add(new BlockPos(-44, 149, 145));
-                route.add(new BlockPos(-76, 144, 141));
+                route.add(new BlockPos(-81, 141, 143));
             } else {
                 route.add(new BlockPos(0, 165, -12));
                 route.add(new BlockPos(25, 176, 7));
@@ -202,7 +202,7 @@ public class WarpCoordinateUtils {
                 route.add(new BlockPos(9, 130, 129));
                 route.add(new BlockPos(-22, 137, 171));
                 route.add(new BlockPos(-44, 149, 145));
-                route.add(new BlockPos(-76, 144, 141));
+                route.add(new BlockPos(-74, 148 , 140));
             }
         }
         return route;

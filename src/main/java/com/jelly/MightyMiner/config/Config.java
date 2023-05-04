@@ -295,9 +295,9 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @VigilanceName(name = "Custom item to use for MobKiller", category = ADDONS, subcategory = "MobKiller")
     @Text(name = "Custom item to use for MobKiller", description = "Leave empty to use default weapons", category = ADDONS, subcategory = "MobKiller")
     public String customItemToKill = "";
-
+    
     @VigilanceName(name = "Mouse button to use in MobKiller", category = ADDONS, subcategory = "MobKiller")
-    @Dropdown(name = "Mouse button to use in MobKiller", category = ADDONS, subcategory = "MobKiller", options = {"Left", "Right"})
+    @Dropdown(name = "Mouse button to use in MobKiller", category = ADDONS, subcategory = "MobKiller", options = {"Attack", "Use"})
     public int attackButton = 1;
 
     @VigilanceName(name = "Use Hyperion under player", category = ADDONS, subcategory = "MobKiller")

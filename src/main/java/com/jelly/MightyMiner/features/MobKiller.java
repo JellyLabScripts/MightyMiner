@@ -60,7 +60,7 @@ public class MobKiller {
 
     private static class Target {
         public Entity entity;
-        public EntityArmorStand stand;
+        public EntityArmorStand stand;  
         public boolean worm;
         public double distance() {
             if (entity != null)
@@ -266,7 +266,7 @@ public class MobKiller {
 
                     if (AngleUtils.isDiffLowerThan(mc.thePlayer.rotationYaw, 89, 0.5f)) {
                         if (attackDelay.hasReached(MightyMiner.config.mobKillerAttackDelay) && target.distance() < 6) {
-                            rightClick();
+                            KeybindHandler.onTick(mc.gameSettings.keyBindAttack);
                             attackDelay.reset();
                         }
                     }
@@ -307,10 +307,10 @@ public class MobKiller {
                             if (attackDelay.hasReached(MightyMiner.config.mobKillerAttackDelay)) {
                                 if (MightyMiner.config.attackButton == 0) {
                                     if (target.distance() <= 4.5) {
-                                        leftClick();
+                                        KeybindHandler.onTick(mc.gameSettings.keyBindAttack);
                                     }
                                 } else {
-                                    rightClick();
+                                    KeybindHandler.onTick(mc.gameSettings.keyBindUseItem);
                                 }
                                 attackDelay.reset();
                             }

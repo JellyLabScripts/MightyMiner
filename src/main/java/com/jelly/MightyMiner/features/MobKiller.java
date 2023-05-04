@@ -109,7 +109,6 @@ public class MobKiller {
             if (sneakWhileKilling) {
                 KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, true);
             }
-            skipWhenBlockedVision = false;
             rotation.reset();
         }
         rotation.reset();

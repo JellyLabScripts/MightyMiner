@@ -50,6 +50,8 @@ public class MacroHandler {
 
     public static GameState gameState = new GameState();
 
+    public static int miningSpeed = 1500;
+
 
     public static void initializeMacro(){
         macros.add(new GemstoneMacro());

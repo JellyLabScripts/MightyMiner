@@ -243,7 +243,7 @@ public class MithrilMacro extends Macro {
                 MiningType.STATIC,
                 MightyMiner.config.mithShiftWhenMine,
                 true,
-                true,
+                false,
                 MightyMiner.config.mithRotationTime,
                 MightyMiner.config.mithRestartTimeThreshold,
                 null,

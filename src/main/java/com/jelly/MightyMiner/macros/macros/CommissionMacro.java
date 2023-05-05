@@ -2471,7 +2471,7 @@ public class CommissionMacro extends Macro {
                 MiningType.STATIC,
                 MightyMiner.config.commShiftWhenMine,
                 true,
-                true,
+                false,
                 MightyMiner.config.commRotationTime,
                 MightyMiner.config.commRestartTimeThreshold,
                 null,

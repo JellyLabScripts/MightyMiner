@@ -7,7 +7,8 @@
     "client.ChunkMixin",
     "client.MixinGlassPane",
     "client.MixinModList",
-    "network.MixinNetworkManager"
+    "network.MixinNetworkManager",
+    "client.PlayerControllerMixin"
   ],
   "client": [
     "client.MixinChunkProviderClient",

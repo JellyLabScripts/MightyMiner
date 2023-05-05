@@ -240,6 +240,19 @@ public class BlockUtils {
         return foundBlocks;
     }
 
+    public static boolean isBlock(BlockData<?> blockData, BlockPos blockPos) {
+        Block block = BlockUtils.getBlock(blockPos);
+        IBlockState blockState = BlockUtils.getBlockState(blockPos);
+        if (!blockData.block.equals(block)) return false;
+        if (blockData.requiredBlockStateValue == null) return true;
+
+        if(blockData.requiredBlockStateValue instanceof EnumDyeColor)
+            return block.getMetaFromState(blockState) == ((EnumDyeColor) blockData.requiredBlockStateValue).getMetadata();
+        if(blockData.requiredBlockStateValue instanceof BlockStone.EnumType)
+            return block.getMetaFromState(blockState) == ((BlockStone.EnumType) blockData.requiredBlockStateValue).getMetadata();
+        return false;
+    }
+
     public static List<BlockPos> findBlockFromState(Box searchBox, ArrayList<BlockPos> forbiddenBlockPos, int minY, int maxY, ArrayList<IBlockState> requiredBlock) {
         List<BlockPos> foundBlocks = new ArrayList<>();
         Vec3 rangeVec1 = new Vec3(searchBox.dx_bound1, searchBox.dy_bound1, searchBox.dz_bound1);

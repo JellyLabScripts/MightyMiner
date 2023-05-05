@@ -1,13 +1,16 @@
 package com.jelly.MightyMiner.baritone.automine.calculations;
 
+import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathFinderBehaviour;
 import com.jelly.MightyMiner.baritone.automine.calculations.behaviour.PathMode;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoBlockException;
 import com.jelly.MightyMiner.baritone.automine.calculations.exceptions.NoPathException;
 import com.jelly.MightyMiner.baritone.automine.structures.*;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.AngleUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
+import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 import net.minecraft.util.Vec3;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 
@@ -139,12 +142,39 @@ public class AStarPathFinder {
 
     private double calculatePathCost(List<BlockNode> nodes) {
         double cost = 0.0D;
-        if (nodes.size() <= 2) {
-            for (BlockNode node : nodes)
-                cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+        if (MacroHandler.macros.get(0).isEnabled()) {
+            if (nodes.size() <= 2) {
+                for (BlockNode node : nodes)
+                    cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+            } else {
+                for (BlockNode node : nodes)
+                    cost += (node.getType() == BlockType.WALK) ? 1D : 1.5D;
+            }
         } else {
-            for (BlockNode node : nodes)
-                cost += (node.getType() == BlockType.WALK) ? 1D : 1.5D;
+            for (BlockNode node : nodes) {
+                if (MacroHandler.macros.get(2).isEnabled()) {
+                    if (MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
+                        cost += 4.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                    } else if (MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
+                        cost += 3.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                    } else if (MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
+                        cost += 2.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                    } else {
+                        cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                    }
+                } else {
+                    if (MineUtils.getMithrilColorBasedOnPriority(3).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
+                        cost += 4.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                    } else if (MineUtils.getMithrilColorBasedOnPriority(2).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
+                        cost += 3.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                    } else if (MineUtils.getMithrilColorBasedOnPriority(1).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
+                        cost += 2.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                    } else {
+                        cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                    }
+                }
+            }
+
         }
         return cost;
     }

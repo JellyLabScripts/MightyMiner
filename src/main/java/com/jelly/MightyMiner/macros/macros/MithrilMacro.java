@@ -9,12 +9,17 @@ import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.mixins.accessors.RenderGlobalAccessor;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 
+import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.multiplayer.PlayerControllerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -62,6 +67,28 @@ public class MithrilMacro extends Macro {
 
     private final Rotation rotation = new Rotation();
 
+    private enum MiningSpeed {
+        OPEN_SB_MENU,
+        CHECK_SB_MENU,
+        GET_LORE,
+        NONE
+    }
+
+    private enum UseItem {
+        OPEN_INVENTORY,
+        CHECK_INVENTORY,
+        USE_ITEM,
+        NONE
+    }
+
+    private MiningSpeed miningSpeed = MiningSpeed.NONE;
+
+    private UseItem useItem = UseItem.NONE;
+
+    private final Timer miningSpeedDelay = new Timer();
+
+    private int pickaxe = -1;
+
     @Override
     protected void onEnable() {
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");
@@ -84,11 +111,113 @@ public class MithrilMacro extends Macro {
 
         noMithril = false;
         baritone = new AutoMineBaritone(getMineBehaviour());
+
+        pickaxe = PlayerUtils.getItemInHotbar(false, "Pick", "Gauntlet", "Drill");
+        if (pickaxe == -1) {
+            LogUtils.debugLog("No Pickaxe");
+            MacroHandler.disableScript();
+            return;
+        }
+
+        if (MightyMiner.config.fastMine) {
+            miningSpeed = MiningSpeed.OPEN_SB_MENU;
+            useItem = UseItem.OPEN_INVENTORY;
+            miningSpeedDelay.reset();
+        } else {
+            miningSpeed = MiningSpeed.NONE;
+        }
     }
+
 
     @Override
     public void onTick(TickEvent.Phase phase) {
         if (!enabled) return;
+
+        switch (miningSpeed) {
+            case OPEN_SB_MENU:
+                switch (useItem) {
+                    case OPEN_INVENTORY:
+                        if (miningSpeedDelay.hasReached(100)) {
+                            mc.thePlayer.inventory.currentItem = pickaxe;
+
+                            InventoryUtils.openInventory();
+
+                            miningSpeedDelay.reset();
+                            useItem = UseItem.CHECK_INVENTORY;
+                        }
+                        break;
+                    case CHECK_INVENTORY:
+                        if (miningSpeedDelay.hasReached(500)) {
+                            if (mc.currentScreen instanceof GuiInventory) {
+                                useItem = UseItem.USE_ITEM;
+                            } else {
+                                useItem = UseItem.OPEN_INVENTORY;
+                            }
+
+                            miningSpeedDelay.reset();
+                        }
+                        break;
+                    case USE_ITEM:
+                        if (miningSpeedDelay.hasReached(300)) {
+                            InventoryUtils.clickOpenContainerSlot(44);
+
+                            miningSpeedDelay.reset();
+                            miningSpeed = MiningSpeed.CHECK_SB_MENU;
+                            useItem = UseItem.OPEN_INVENTORY;
+                        }
+                        break;
+                    case NONE:
+                        LogUtils.debugLog("Not in a use item state");
+                        MacroHandler.disableScript();
+                        break;
+                }
+                break;
+            case CHECK_SB_MENU:
+                if (miningSpeedDelay.hasReached(500)) {
+                    if (InventoryUtils.getInventoryName() != null && InventoryUtils.getInventoryName().contains("SkyBlock Menu")) {
+                        miningSpeedDelay.reset();
+                        miningSpeed = MiningSpeed.GET_LORE;
+                    } else {
+                        miningSpeedDelay.reset();
+                        useItem = UseItem.OPEN_INVENTORY;
+                        miningSpeed = MiningSpeed.OPEN_SB_MENU;
+                    }
+                }
+                break;
+            case GET_LORE:
+                if (miningSpeedDelay.hasReached(100)) {
+                    ItemStack itemStack = InventoryUtils.getStackInOpenContainerSlot(13);
+
+                    if (itemStack != null) {
+                        NBTTagList lore = InventoryUtils.getLore(itemStack);
+                        if (lore != null) {
+                            for (int i = 0; i < lore.tagCount(); i++) {
+                                if (lore.get(i).toString().contains("Mining Speed")) {
+                                    MacroHandler.miningSpeed = Integer.parseInt(lore.get(i).toString().substring(19).replaceAll("[\\D]", ""));
+
+                                    mc.thePlayer.closeScreen();
+
+                                    miningSpeed = MiningSpeed.NONE;
+                                    return;
+                                }
+                            }
+                        } else {
+                            LogUtils.debugLog("No item lore");
+                            MacroHandler.disableScript();
+                            return;
+                        }
+                    } else {
+                        LogUtils.debugLog("No item stack");
+                        MacroHandler.disableScript();
+                        return;
+                    }
+                }
+                break;
+            case NONE:
+        }
+
+        if (miningSpeed != MiningSpeed.NONE) return;
+
         if (restartTimer.hasReached(6000) && restarting) {
             inStaffCheck = false;
             staffCheckCounter = 0;

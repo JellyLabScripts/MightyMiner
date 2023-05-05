@@ -2019,6 +2019,7 @@ public class CommissionMacro extends Macro {
                         MobKiller.setAntiAfk(true);
                         MobKiller.setSneak(true);
                         MightyMiner.mobKiller.toggle();
+                        MobKiller.isToggled = true;
                         typeOfCommission = TypeOfCommission.SLAYING_COMM;
                     } else if (currentQuest.contains("Goblin")) {
                         // Setting up Slayer Macro
@@ -2030,6 +2031,7 @@ public class CommissionMacro extends Macro {
                         MobKiller.setAntiAfk(true);
                         MobKiller.setSneak(true);
                         MightyMiner.mobKiller.toggle();
+                        MobKiller.isToggled = true;
                         typeOfCommission = TypeOfCommission.SLAYING_COMM;
                     } else {
                         // Wasn't able to identify commission type
@@ -2073,7 +2075,10 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                         MobKiller.resetOptions();
-                        MightyMiner.mobKiller.toggle();
+                        if (MobKiller.isToggled) {
+                            MightyMiner.mobKiller.toggle();
+                            MobKiller.isToggled = false;
+                        }
 
                         // Switching action to start
                         nextActionDelay.reset();
@@ -2094,8 +2099,10 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                         MobKiller.resetOptions();
-                        MightyMiner.mobKiller.toggle();
-
+                        if (MobKiller.isToggled) {
+                            MightyMiner.mobKiller.toggle();
+                            MobKiller.isToggled = false;
+                        }
 
                         // Switching action to start
                         nextActionDelay.reset();
@@ -2130,7 +2137,10 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                         MobKiller.resetOptions();
-                        MightyMiner.mobKiller.toggle();
+                        if (MobKiller.isToggled) {
+                            MightyMiner.mobKiller.toggle();
+                            MobKiller.isToggled = false;
+                        }
 
                         // Switching action to start
                         nextActionDelay.reset();
@@ -2147,7 +2157,10 @@ public class CommissionMacro extends Macro {
                         KeybindHandler.resetKeybindState();
 
                         MobKiller.resetOptions();
-                        MightyMiner.mobKiller.toggle();
+                        if (MobKiller.isToggled) {
+                            MightyMiner.mobKiller.toggle();
+                            MobKiller.isToggled = false;
+                        }
 
                         // ReWarp
                         isWarping = true;
@@ -2286,6 +2299,7 @@ public class CommissionMacro extends Macro {
                     case SLAYING_COMM:
                         if (!MobKiller.isToggled) {
                             MightyMiner.mobKiller.toggle();
+                            MobKiller.isToggled = true;
                         }
                         break;
                     case NONE:
@@ -2323,8 +2337,11 @@ public class CommissionMacro extends Macro {
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindRight, false);
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindSneak, false);
         KeybindHandler.setKeyBindState(mc.gameSettings.keyBindForward, false);
-        MightyMiner.mobKiller.toggle();
         MobKiller.resetOptions();
+        if (MobKiller.isToggled) {
+            MightyMiner.mobKiller.toggle();
+            MobKiller.isToggled = false;
+        }
     }
 
 

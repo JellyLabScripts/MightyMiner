@@ -8,6 +8,7 @@ import com.jelly.MightyMiner.baritone.automine.config.MiningType;
 import com.jelly.MightyMiner.features.Failsafes;
 import com.jelly.MightyMiner.features.FuelFilling;
 import com.jelly.MightyMiner.features.MobKiller;
+import com.jelly.MightyMiner.features.PingAlert;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
@@ -2371,7 +2372,7 @@ public class CommissionMacro extends Macro {
                         }
 
                         if (staffCheckCounter > 2) {LogUtils.addMessage("Unbreakable block staff check or wrong stuck time threshold");
-                            PlayerUtils.sendPingAlert();
+                            PingAlert.sendPingAlert();
                             staffCheckCounter = 0;
                             inStaffCheck = true;
                             return;

@@ -79,7 +79,7 @@ public class Rotation {
     }
 
 
-    public void updateMousePath(float radius, int blocksInFront, float rotationYawAxis, int rate, int shape){
+    public void updateInCircle(float radius, int blocksInFront, float rotationYawAxis, int rate){
         if(rotating) return;
 
 
@@ -106,17 +106,10 @@ public class Rotation {
         float b = 0.35f;
         float k = radius + 0.5f; // scale factor which scales up the whole loop (+0.5f is just an approximation)
         float c = -1.35f; // translates the whole graph c units right (negative -> left)
-        float p;
-        float q;
 
-        if (shape == 0) {
-            p = (float) (k * (a / 2.0 + b * Math.cos(phase) + a / 2.0 * Math.cos(2 * phase)) + c);
-            q = (float) (k * (b * Math.sin(phase) + a / 2.0 * Math.sin(2 * phase)));
-        }
-        else {
-            p = (float) (1.25 * k * (Math.cos(phase)) + 0.35);
-            q = (float) (0.5 * k * (Math.sin(phase)) - 1);
-        }
+        float p = (float) (k * (a/2.0 + b * Math.cos(phase) + a/2.0 * Math.cos(2 * phase)) + c);
+        float q = (float) (k * (b * Math.sin(phase) + a/2.0 * Math.sin(2 * phase)));
+
         //just need to input the corresponding parametric equations :)
 
         //Dürer folium also works

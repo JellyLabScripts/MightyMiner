@@ -76,6 +76,7 @@ public class GemstoneMacro extends Macro {
 
     @Override
     public void onEnable() {
+        MacroHandler.miningSpeedActive = false;
         System.out.println("Enabled Gemstone macro checking if player is near");
         baritone = new AutoMineBaritone(getMineBehaviour());
 

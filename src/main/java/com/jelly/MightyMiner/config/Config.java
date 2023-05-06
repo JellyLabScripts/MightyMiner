@@ -101,6 +101,10 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Dropdown(name = "Type of gemstone to mine", category = GEMSTONE_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz", "Jasper"})
     public int gemGemstoneType = 0;
 
+    @VigilanceName(name = "Mining Shape", category = POWDER_MACRO, subcategory = "Mining")
+    @Dropdown(name = "Mining Shape", description = "The shape you want the powder macro to mine in", category = POWDER_MACRO, subcategory = "Mining", options = {"Limacon", "Ellipse"})
+    public int powMiningShape = 0;
+
     @VigilanceName(name = "Mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
     @Switch(name = "Mine gemstones", description = "Make sure you have a drill that is able to mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
     public boolean powMineGemstone = true;
@@ -191,8 +195,8 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @VigilanceName(name = "Skip goblin slayer quest (requires 3 commission slots)", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
     @Switch( name = "Skip goblin slayer quest (requires 3 commission slots)", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
     public boolean commSkipGoblinSlayerQuest = false;
-    
-        @VigilanceName(name = "Commission read out delay (in ms)", category = COMMISSION_MACRO, subcategory = "Warping")
+
+    @VigilanceName(name = "Commission read out delay (in ms)", category = COMMISSION_MACRO, subcategory = "Warping")
     @Slider( name = "Commission read out delay (in ms)", description = "Time the macro waits to read out commission (in ms)", category = COMMISSION_MACRO, subcategory = "Warping", max = 2000, min = 500)
     public int commReadOutDelay = 1000;
 
@@ -299,7 +303,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @VigilanceName(name = "Custom item to use for MobKiller", category = ADDONS, subcategory = "MobKiller")
     @Text(name = "Custom item to use for MobKiller", description = "Leave empty to use default weapons", category = ADDONS, subcategory = "MobKiller")
     public String customItemToKill = "";
-    
+
     @VigilanceName(name = "Mouse button to use in MobKiller", category = ADDONS, subcategory = "MobKiller")
     @Dropdown(name = "Mouse button to use in MobKiller", category = ADDONS, subcategory = "MobKiller", options = {"Attack", "Use"})
     public int attackButton = 1;
@@ -310,7 +314,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
 
     @HUD(name = "MobKiller info", category = ADDONS, subcategory = "MobKiller")
     public MobKillerHUD mobKillerHud = new MobKillerHUD();
-    
+
     @HUD(name = "Commission Macro statistics", category = ADDONS, subcategory = "Commission Macro")
     public CommissionMacroHUD commissionMacroHUD = new CommissionMacroHUD();
 

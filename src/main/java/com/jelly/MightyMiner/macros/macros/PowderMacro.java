@@ -168,7 +168,7 @@ public class PowderMacro extends Macro {
         } else if(!MightyMiner.config.powMineGemstone && blocksAllowedToMine.contains(Blocks.stained_glass)){
             blocksAllowedToMine.removeIf(a -> a.equals(Blocks.stained_glass) || a.equals(Blocks.stained_glass_pane));
         }
-
+        executor.submit(addChestToQueue);
     }
 
     @Override
@@ -367,7 +367,7 @@ public class PowderMacro extends Macro {
                         treasureState = chestQueue.isEmpty() ? TreasureState.RETURNING : TreasureState.INIT;
                         break;
                 }
-                if((System.currentTimeMillis() - treasureInitialTime) / 1000f > 10 && treasureState != TreasureState.RETURNING) {
+                if((System.currentTimeMillis() - treasureInitialTime) / 1000f > 15 && treasureState != TreasureState.RETURNING) {
                     treasureState = TreasureState.RETURNING;
                     LogUtils.debugLog("Completed treasure due to timeout");
                     chestQueue.poll();
@@ -407,7 +407,7 @@ public class PowderMacro extends Macro {
                 && !aote
                 && !Autosell.isEnabled()
                 && !(mineBaritone.getState() == AutoMineBaritone.BaritoneState.EXECUTING)){
-            rotation.updateInCircle(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate);
+            rotation.updateMousePath(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate, MightyMiner.config.powMiningShape);
         }
     }
 
@@ -466,7 +466,7 @@ public class PowderMacro extends Macro {
                 new ArrayList<>(solvedOrSolvingChests), 0, 256, new BlockData<>(Blocks.chest));
 
         if(foundBlocks.isEmpty()){
-            LogUtils.addMessage("That chest was impossible to solve");
+            LogUtils.addMessage("No chest detected/chest out of range");
             return;
         }
 

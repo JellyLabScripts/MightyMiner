@@ -164,7 +164,7 @@ public class AStarPathFinder {
                     }
                 } else {
                     if (MineUtils.getMithrilColorBasedOnPriority(2).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
-                        cost += 7.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                        cost += 8.5D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
                     } else if (MineUtils.getMithrilColorBasedOnPriority(1).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
                         cost += 5.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
                     } else if (MineUtils.getMithrilColorBasedOnPriority(0).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {

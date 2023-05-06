@@ -448,6 +448,7 @@ public class CommissionMacro extends Macro {
 
     @Override
     protected void onEnable() {
+        MacroHandler.miningSpeedActive = false;
         // Initializing variables
         regenMana = false;
         occupiedCounter = 0;

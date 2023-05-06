@@ -23,7 +23,7 @@ public class FastMineUtils {
         IBlockState blockState = BlockUtils.getBlockState(mc.thePlayer.rayTrace(5, 1).getBlockPos());
 
         float blockStrength = getBlockStrength(blockState);
-        float miningSpeed = (float) MacroHandler.miningSpeed - 50;
+        float miningSpeed = (float) MacroHandler.miningSpeed - 120;
         return (blockStrength * 30.0f) / miningSpeed >= 4 ? (blockStrength * 30.0f) / miningSpeed : 4;
     }
 

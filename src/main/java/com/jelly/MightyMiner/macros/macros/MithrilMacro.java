@@ -91,6 +91,7 @@ public class MithrilMacro extends Macro {
 
     @Override
     protected void onEnable() {
+        MacroHandler.miningSpeedActive = false;
         LogUtils.debugLog("Enabled Mithril macro checking if player is near");
         staffCheckCounter = 0;
         clickCounter = 0;

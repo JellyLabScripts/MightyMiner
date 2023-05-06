@@ -409,7 +409,7 @@ public class PowderMacro extends Macro {
                 && !aote
                 && !Autosell.isEnabled()
                 && !(mineBaritone.getState() == AutoMineBaritone.BaritoneState.EXECUTING)){
-            rotation.updateInCircle(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate);
+            this.rotation.updateInCircle(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate);
         }
     }
 

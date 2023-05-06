@@ -1,6 +1,7 @@
 package com.jelly.MightyMiner.utils.HypixelUtils;
 
 import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 
 import net.minecraft.block.BlockColored;
@@ -15,14 +16,14 @@ public class FastMineUtils {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public static boolean shouldPreBreakBlock(float miningTicks, float blockDamage) {
-        return MightyMiner.config.fastMine && blockDamage < 1f && miningTicks >= getRequiredMiningTicks();
+        return !MacroHandler.macros.get(1).isEnabled() && MightyMiner.config.fastMine && blockDamage < 1f && miningTicks >= getRequiredMiningTicks();
     }
 
     public static float getRequiredMiningTicks() {
         IBlockState blockState = BlockUtils.getBlockState(mc.thePlayer.rayTrace(5, 1).getBlockPos());
 
         float blockStrength = getBlockStrength(blockState);
-        float miningSpeed = (float) 2480;
+        float miningSpeed = (float) MacroHandler.miningSpeed - 50;
         return (blockStrength * 30.0f) / miningSpeed >= 4 ? (blockStrength * 30.0f) / miningSpeed : 4;
     }
 

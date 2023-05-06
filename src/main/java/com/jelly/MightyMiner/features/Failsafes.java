@@ -91,7 +91,7 @@ public class Failsafes {
         }
 
         if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer != null && someoneIsCloseTimer.hasReached(MightyMiner.config.playerDetectionThreshold)) {
-            PlayerUtils.sendPingAlert();
+            PingAlert.sendPingAlert();
             DisableMacros();
             KeybindHandler.resetKeybindState();
             LogUtils.addMessage("Someone is close, disabling macros");
@@ -115,18 +115,18 @@ public class Failsafes {
         if (rotationChecks > 2) {
             DisableMacros();
             LogUtils.addMessage("You've got probably been rotation checked by staff, rotation packets since " + (firstRotationCheck / 1000) + " seconds = " + rotationChecks + ". Disabling macros.");
-            PlayerUtils.sendPingAlert();
+            PingAlert.sendPingAlert();
             fakeMovement(false);
             rotationChecks = 0;
         } else if (rotationChecks > 1) {
-                PlayerUtils.sendPingAlert();
+                PingAlert.sendPingAlert();
                 LogUtils.addMessage("You've got probably been rotation checked. Pausing macros and faking movement");
                 DisableMacros(true);
                 lastRotationCheck.reset();
                 fakeMovement(true);
                 rotationChecks++;
         } else {
-            PlayerUtils.sendPingAlert();
+            PingAlert.sendPingAlert();
             LogUtils.addMessage("You've got probably been rotation checked or got a resync.");
             lastRotationCheck.reset();
             rotationChecks++;

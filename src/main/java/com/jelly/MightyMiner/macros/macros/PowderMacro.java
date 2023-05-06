@@ -1,379 +1,567 @@
-package com.jelly.MightyMiner.config;
-
-import cc.polyfrost.oneconfig.config.annotations.*;
-import cc.polyfrost.oneconfig.config.core.OneColor;
-import cc.polyfrost.oneconfig.config.data.Mod;
-import cc.polyfrost.oneconfig.config.data.ModType;
-import cc.polyfrost.oneconfig.config.data.PageLocation;
-import cc.polyfrost.oneconfig.config.migration.VigilanceMigrator;
-import cc.polyfrost.oneconfig.config.migration.VigilanceName;
-import com.jelly.MightyMiner.gui.AOTVGemstoneFilter;
-import com.jelly.MightyMiner.gui.AOTVWaypointsPage;
-import com.jelly.MightyMiner.hud.MobKillerHUD;
-import com.jelly.MightyMiner.hud.CommissionMacroHUD;
-import com.jelly.MightyMiner.macros.macros.CommissionMacro;
-
-public class Config extends cc.polyfrost.oneconfig.config.Config {
-
-    //region PAGES
-
-    private transient static final String CORE = "Core";
-    private transient static final String GEMSTONE_MACRO = "Gemstone macro";
-    private transient static final String POWDER_MACRO = "Powder macro";
-    private transient static final String AOTV_MACRO = "AOTV macro";
-    private transient static final String MITHRIL_MACRO = "Mithril macro";
-    private transient static final String COMMISSION_MACRO = "Commission macro";
-    private transient static final String FAILSAFES = "Failsafes";
-    private transient static final String ADDONS = "Addons";
-
-
-    //endregion
-
-    @VigilanceName(name = "Macro", category = "Core", subcategory = "Macro")
-    @Dropdown(
-            name = "Macro", category = CORE,
-            subcategory = "Macro",
-            options = { "Gemstone macro", "Powder macro", "Mithril macro", "AOTV Gemstone macro", "Commission macro"}
-    )
-    public int macroType = 0;
-
-    @VigilanceName(name = "Use mining speed boost", category = "Core", subcategory = "Mining")
-    @Switch(name = "Use mining speed boost", category = CORE, subcategory = "Mining")
-    public boolean useMiningSpeedBoost = true;
-
-    @VigilanceName(name = "Fast mine", category = "Core", subcategory = "Mining")
-    @Switch(name = "Fast mine", category = CORE, subcategory = "Mining")
-    public boolean fastMine = false;
-
-    @VigilanceName(name = "Blue cheese omelette pickaxe switch", category = "Core", subcategory = "Mining")
-    @Switch(name = "Blue cheese omelette pickaxe switch", description = "Automatically switches to the pickaxe with blue cheese omelette when using mining speed boost", category = CORE, subcategory = "Mining")
-    public boolean blueCheeseOmeletteToggle = false;
-
-    @VigilanceName(name = "Macro", category = "Core", subcategory = "Macro")
-    @Switch(name = "Make glass panes as a full blocks", category = CORE, subcategory = "Mining")
-    public boolean glassPanesFullBlock = false;
-
-    @VigilanceName(name = "Auto renew crystal hollows pass before expire", category = "Core", subcategory = "Crystal hollows")
-    @Switch(name = "Auto renew crystal hollows pass before expire", category = CORE, subcategory = "Crystal hollows", description = "Will automatically renew the crystal hollows pass before it expires")
-    public boolean autoRenewCrystalHollowsPass = true;
-
-    @VigilanceName(name = "Refuel with abiphone", category = "Core", subcategory = "Refuel")
-    @Switch(name = "Refuel with abiphone", category = CORE, subcategory = "Refuel")
-    public boolean refuelWithAbiphone = false;
-
-    @VigilanceName(name = "Refuel if less than", category = "Core", subcategory = "Refuel")
-    @Slider(name = "Refuel if less than", category = CORE, subcategory = "Refuel", max = 3000, step = 50, min = 0.0F)
-    public int refuelThreshold = 200;
-
-    @VigilanceName(name = "Type of fuel to use", category = "Core", subcategory = "Refuel")
-    @Dropdown(name = "Type of fuel to use", category = CORE, subcategory = "Refuel", options = {"Goblin Egg", "Biofuel", "Volta", "Oil Barrel"})
-    public int typeOfFuelIndex = 0;
-
-    @VigilanceName(name = "Debug mode", category = "Core", subcategory = "Macro")
-    @Switch(name = "Debug mode", category = CORE, subcategory = "Macro", description = "Shows logs")
-    public boolean debugLogMode = false;
-
-    @VigilanceName(name = "Toggle mouse ungrab", category = "Core", subcategory = "Macro")
-    @Switch(name = "Toggle mouse ungrab", description = "May not work on some computers", category = CORE, subcategory = "Macro")
-    public boolean mouseUngrab = false;
-
-    @VigilanceName(name = "Stuck time threshold (seconds)", category = GEMSTONE_MACRO, subcategory = "Miscellaneous")
-    @Slider(name = "Stuck time threshold (seconds)", description = "restarts macro when stuck time > threshold", category = GEMSTONE_MACRO, subcategory = "Miscellaneous", max = 20, min = 3)
-    public int gemRestartTimeThreshold = 8;
-
-    @VigilanceName(name = "Max y level", category = GEMSTONE_MACRO, subcategory = "Pathfinding")
-    @Slider(name = "Max y level", category = GEMSTONE_MACRO, subcategory = "Pathfinding", max = 256, min = 0)
-    public int gemMaxY = 256;
-
-    @VigilanceName(name = "Min y level", category = GEMSTONE_MACRO, subcategory = "Pathfinding")
-    @Slider(name = "Min y level", category = GEMSTONE_MACRO, subcategory = "Pathfinding", max = 25, min = 0)
-    public int gemMinY = 0;
-
-    @VigilanceName(name = "Auto open chest", category = GEMSTONE_MACRO, subcategory = "Miscellaneous")
-    @Switch(name = "Auto open chest", category = GEMSTONE_MACRO, subcategory = "Miscellaneous")
-    public boolean gemOpenChest = false;
-
-    @VigilanceName(name = "Rotation time (milliseconds)", category = GEMSTONE_MACRO, subcategory = "Pathfinding")
-    @Slider(name = "Rotation time (milliseconds)", description = "Time the macro takes for each rotation", category = GEMSTONE_MACRO, subcategory = "Pathfinding", max = 500, min = 50, step = 10)
-    public int gemRotationTime = 300;
-
-    @VigilanceName(name = "Type of gemstone to mine", category = GEMSTONE_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Type of gemstone to mine", category = GEMSTONE_MACRO, subcategory = "Mining", options = {"Any", "Ruby", "Amethyst", "Jade", "Sapphire", "Amber", "Topaz", "Jasper"})
-    public int gemGemstoneType = 0;
-
-    @VigilanceName(name = "Mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
-    @Switch(name = "Mine gemstones", description = "Make sure you have a drill that is able to mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
-    public boolean powMineGemstone = true;
-
-    @Slider(name = "Rotation rate", description = "The higher the rotation rate, the faster you'll rotate (depends on computer)", category = POWDER_MACRO, subcategory = "Mining", max = 15, min = 1)
-    public int powRotateRate = 7;
-
-    @Slider(name = "Rotation radius", description = "The radius of the circle being dug out (e.g. 20 = 2 block radius)", category = POWDER_MACRO, subcategory = "Mining", max = 3.5f, min = 1.2f)
-    public float powRotateRadius = 2f;
-
-    @VigilanceName(name = "Use pickaxe to mine hardstone", category = POWDER_MACRO, subcategory = "Miscellaneous")
-    @Switch(name = "Use pickaxe to mine hardstone", category = POWDER_MACRO, subcategory = "Miscellaneous")
-    public boolean powPickaxeSwitch = true;
-
-    @VigilanceName(name = "Switch to blue cheese drill when solving chest", category = POWDER_MACRO, subcategory = "Miscellaneous")
-    @Switch(name = "Switch to blue cheese drill when solving chest", description = "Gives more powder, but make sure you have a blue cheese drill in your hotbar", category = POWDER_MACRO, subcategory = "Miscellaneous")
-    public boolean powBlueCheeseSwitch = true;
-
-    @VigilanceName(name = "Center to block", category = POWDER_MACRO, subcategory = "Miscellaneous")
-    @Switch(name = "Center to block", description = "Center to the middle of block using AOTE or AOTV when necessary. Please turn this on if you're not using nuker.", category = POWDER_MACRO, subcategory = "Miscellaneous")
-    public boolean powCenter = false;
-
-    @VigilanceName(name = "Width between each lane", category = POWDER_MACRO, subcategory = "Mining")
-    @Slider(name = "Width between each lane", category = POWDER_MACRO, subcategory = "Mining", max = 15, min = 3)
-    public int powLaneWidth = 6;
-
-    @VigilanceName(name = "Width between each lane", category = POWDER_MACRO, subcategory = ADDONS)
-    @Switch(name = "Autosell junk items", description = "More configurations in Addons. Make sure you have cookie on", category = POWDER_MACRO, subcategory = ADDONS)
-    public boolean powAutosell = false;
-
-    @VigilanceName(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 1", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
-    public int mithPriority1 = 1;
-
-    @VigilanceName(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 2", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
-    public int mithPriority2 = 2;
-
-    @VigilanceName(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 3", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
-    public int mithPriority3 = 0;
-
-    @VigilanceName(name = "Mithril macro priority 4", category = MITHRIL_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mithril macro priority 4", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
-    public int mithPriority4 = 0;
-
-    @VigilanceName(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")
-    @Switch(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")
-    public boolean mithShiftWhenMine = true;
-
-    @VigilanceName(name = "Rotation time (milliseconds)", category = MITHRIL_MACRO, subcategory = "Pathfinding")
-    @Slider(name = "Rotation time (milliseconds)", description = "Time the macro takes for each rotation", category = MITHRIL_MACRO, subcategory = "Pathfinding", max = 500, min = 50)
-    public int mithRotationTime = 300;
-
-    @VigilanceName(name = "Stuck time threshold (seconds)", category = MITHRIL_MACRO, subcategory = "Pathfinding")
-    @Slider(name = "Stuck time threshold (seconds)", description = "restarts macro when stuck time > threshold, depends on your mining speed", category = MITHRIL_MACRO, subcategory = "Pathfinding", max = 20, min = 2)
-    public int mithRestartTimeThreshold = 5;
-
-    /*@Property( type = PropertyType.SLIDER, name = "Rotation time (milliseconds)", description = "Time the pathfinding AI takes for each rotation", category = "Commission macro", subcategory = "Miscellaneous", max = 5, min = 1)
-    public int comBarRotationTime = 1;
-
-    @Property(type = PropertyType.SLIDER, name = "Safewalk index", description = "Stops walking when there is a large rotation. TURN THIS UP IF you are using high speed", category = "Commission macro", subcategory = "Miscellaneous", max = 10)
-    public int comBarSafeIndex = 5;*/
-    @VigilanceName(name = "Rotation time in ms", category = COMMISSION_MACRO, subcategory = "Mining")
-    @Slider(name = "Rotation time in ms", description = "Time the macro takes for each rotation", category = COMMISSION_MACRO, subcategory = "Mining", max = 1200, min = 50)
-    public int commRotationTime = 800;
-
-    @VigilanceName(name = "Stuck time threshold in s", category = COMMISSION_MACRO, subcategory = "Mining")
-    @Slider(name = "Stuck time threshold in s", description = "restarts macro when stuck time > threshold, depends on your mining speed", category = COMMISSION_MACRO, subcategory = "Mining", max = 10, min = 2)
-    public int commRestartTimeThreshold = 5;
-
-    @VigilanceName(name = "Shift when mining", category = COMMISSION_MACRO, subcategory = "Mining")
-    @Switch(name = "Shift when mining", category = COMMISSION_MACRO, subcategory = "Mining")
-    public boolean commShiftWhenMine = true;
-
-    @VigilanceName(name = "Camera speed to waypoint in ms", category = COMMISSION_MACRO, subcategory = "Warping")
-    @Slider(name = "Camera speed to waypoint in ms", category = COMMISSION_MACRO, subcategory = "Warping", max = 1500, min = 1, step = 10)
-    public int commCameraWaypointSpeed = 800;
-
-    @VigilanceName(name = "Arrive check wait time in ms", category = COMMISSION_MACRO, subcategory = "Warping")
-    @Slider( name = "Arrive check wait time in ms", category = COMMISSION_MACRO, subcategory = "Warping", max = 750, min = 200)
-    public int commArriveWaitTime = 250;
-
-    @VigilanceName(name = "Auto Pickonimbus swapper", category = COMMISSION_MACRO, subcategory = "Mining")
-    @Switch( name = "Auto Pickonimbus swapper", category = COMMISSION_MACRO, subcategory = "Mining")
-    public boolean commAutoPickonimbusSwapper = false;
-
-    @VigilanceName(name = "Skip goblin slayer quest (requires 3 commission slots)", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
-    @Switch( name = "Skip goblin slayer quest (requires 3 commission slots)", category = COMMISSION_MACRO, subcategory = "Ice Walker / Goblin Killer")
-    public boolean commSkipGoblinSlayerQuest = false;
-    
-        @VigilanceName(name = "Commission read out delay (in ms)", category = COMMISSION_MACRO, subcategory = "Warping")
-    @Slider( name = "Commission read out delay (in ms)", description = "Time the macro waits to read out commission (in ms)", category = COMMISSION_MACRO, subcategory = "Warping", max = 2000, min = 500)
-    public int commReadOutDelay = 1000;
-
-    @VigilanceName(name = "Stop on limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")
-    @Switch(name = "Stop on limbo", description = "Stop macro when getting kicked to limbo", category = COMMISSION_MACRO, subcategory = "Failsafe")
-    public boolean stopOnLimbo = true;
-
-    @VigilanceName(name = "Mana regeneration time in s", category = COMMISSION_MACRO, subcategory = "Failsafe")
-    @Slider(name = "Mana regeneration time in s", description = "Time to regenerate mana in s", category = COMMISSION_MACRO, subcategory = "Failsafe", max = 35, min = 1)
-    public int manaRegenTime = 20;
-
-    @VigilanceName(name = "Player FOV", category = COMMISSION_MACRO, subcategory = "Failsafe")
-    @Slider(name = "Player FOV", description = "Player FOV", category = COMMISSION_MACRO, subcategory = "Failsafe", max = 110, min = 30)
-    public int playerFov = 80;
-
-
-    @Page(name = "List of waypoints", location = PageLocation.TOP, category = AOTV_MACRO, subcategory = "Waypoints")
-    public AOTVWaypointsPage aotvWaypointsPage = new AOTVWaypointsPage();
-
-    @Page(name = "Gemstone settings", location = PageLocation.TOP, category = AOTV_MACRO, subcategory = "Mining")
-    public AOTVGemstoneFilter aotvGemstoneFilterPage = new AOTVGemstoneFilter();
-
-    @VigilanceName(name = "Camera speed to ore in ms", category = AOTV_MACRO, subcategory = "Mechanics")
-    @Slider(name = "Camera speed to ore in ms", category = AOTV_MACRO, subcategory = "Mechanics", max = 1500, min = 1, step = 10)
-    public int aotvCameraSpeed = 100;
-
-    @VigilanceName(name = "Camera speed to waypoint in ms", category = AOTV_MACRO, subcategory = "Mechanics")
-    @Slider(name = "Camera speed to waypoint in ms", category = AOTV_MACRO, subcategory = "Mechanics", max = 1500, min = 1, step = 10)
-    public int aotvCameraWaypointSpeed = 100;
-
-    @VigilanceName(name = "Teleport time threshold (s)", category = AOTV_MACRO, subcategory = "Mechanics")
-    @Slider(name = "Teleport time threshold (s)",
-            description = "Stops macro if it teleports between routes too fast. (If there is no veins on the spot, macro will teleport to the next and to the next etc)", category = AOTV_MACRO, subcategory = "Mechanics", min = 0f, max = 3f)
-    public float aotvTeleportThreshold = 1.5f;
-
-    @VigilanceName(name = "Stuck time threshold (seconds)", category = AOTV_MACRO, subcategory = "Mechanics")
-    @Slider(name = "Stuck time threshold (seconds)", description = "Restarts macro when stuck time > threshold, depends on your mining speed", category = AOTV_MACRO, subcategory = "Mechanics", max = 20, min = 2)
-    public int aotvRestartTimeThreshold = 5;
-
-    @VigilanceName(name = "Space from edge block to the center for accuracy checks", category = AOTV_MACRO, subcategory = "Targeting")
-    @Slider(name = "Space from edge block to the center for accuracy checks", subcategory = "Targeting", description = "Lower value means that macro will check closes to the block's edge if the block is visible", category = AOTV_MACRO, min = 0f, max = 0.5f)
-    public float aotvMiningAccuracy = 0.1f;
-
-    @VigilanceName(name = "Accuracy checks per dimension", category = AOTV_MACRO, subcategory = "Targeting")
-    @Slider(name = "Accuracy checks per dimension", subcategory = "Targeting", description = "Higher value means that macro will check more times if the block is visible", category = AOTV_MACRO, min = 1, max = 16)
-    public int aotvMiningAccuracyChecks = 8;
-
-    @VigilanceName(name = "Space from cobblestone to the center", category = AOTV_MACRO, subcategory = "Targeting")
-    @Slider(name = "Space from cobblestone to the center", subcategory = "Targeting", description = "Increase if macro destroys cobblestone too often", category = AOTV_MACRO, min = 0f, max = 0.35f)
-    public float aotvMiningCobblestoneAccuracy = 0.15f;
-
-    @VigilanceName(name = "Auto yog killer", category = AOTV_MACRO, subcategory = "Yogs")
-    @Switch(name = "Auto yog killer", description = "Warning: Early alpha. For more configuration options go to MobKiller", category = AOTV_MACRO, subcategory = "Yogs")
-    public boolean aotvKillYogs = true;
-
-    @VigilanceName(name = "Stop if any cobblestone on the route has been destroyed", category = AOTV_MACRO, subcategory = "Mining")
-    @Switch(name = "Stop if any cobblestone on the route has been destroyed", category = AOTV_MACRO, subcategory = "Mining")
-    public boolean stopIfCobblestoneDestroyed = true;
-
-    @VigilanceName(name = "Mine gemstone panes", category = AOTV_MACRO, subcategory = "Mining")
-    @Switch(name = "Mine gemstone panes", category = AOTV_MACRO, subcategory = "Mining")
-    public boolean aotvMineGemstonePanes = true;
-
-    @VigilanceName(name = "Draw blocks blocking AOTV vision", category = AOTV_MACRO, subcategory = "Drawings")
-    @Switch(name = "Draw blocks blocking AOTV vision", category = AOTV_MACRO, subcategory = "Drawings")
-    public boolean drawBlocksBlockingAOTV = true;
-
-    @VigilanceName(name = "Color of blocks blocking AOTV vision", category = AOTV_MACRO, subcategory = "Drawings")
-    @Color(name = "Color of blocks blocking AOTV vision", category = AOTV_MACRO, subcategory = "Drawings")
-    public OneColor aotvVisionBlocksColor = new OneColor(255, 0, 0, 120);
-
-    @VigilanceName(name = "Show route lines", category = AOTV_MACRO, subcategory = "Drawings")
-    @Switch(name = "Show route lines", category = AOTV_MACRO, subcategory = "Drawings")
-    public boolean aotvShowRouteLines = true;
-
-    @VigilanceName(name = "Color of route line", category = AOTV_MACRO, subcategory = "Drawings")
-    @Color(name = "Color of route line", category = AOTV_MACRO, subcategory = "Drawings")
-    public OneColor aotvRouteLineColor = new OneColor(217, 55, 55, 200);
-
-    @VigilanceName(name = "Highlight route blocks", category = AOTV_MACRO, subcategory = "Drawings")
-    @Switch(name = "Highlight route blocks", category = AOTV_MACRO, subcategory = "Drawings")
-    public boolean aotvHighlightRouteBlocks = true;
-
-    @VigilanceName(name = "Color of highlighted route blocks", category = AOTV_MACRO, subcategory = "Drawings")
-    @Color(name = "Color of highlighted route blocks", category = AOTV_MACRO, subcategory = "Drawings")
-    public OneColor aotvRouteBlocksColor = new OneColor(217, 55, 55, 200);
-
-    @VigilanceName(name = "Show distance to blocks", category = AOTV_MACRO, subcategory = "Drawings")
-    @Switch(name = "Show distance to blocks", category = AOTV_MACRO, subcategory = "Drawings", size = 2)
-    public boolean aotvShowDistanceToBlocks = true;
-
-    @VigilanceName(name = "MobKiller scan distance", category = ADDONS, subcategory = "MobKiller")
-    @Slider( name = "MobKiller scan distance", category = ADDONS, subcategory = "MobKiller", max = 30, min = 1)
-    public int mobKillerScanRange = 10;
-
-    @VigilanceName(name = "MobKiller camera speed in ms", category = ADDONS, subcategory = "MobKiller")
-    @Slider(name = "MobKiller camera speed in ms", category = ADDONS, subcategory = "MobKiller", max = 1000, min = 1)
-    public int mobKillerCameraSpeed = 100;
-
-    @VigilanceName(name = "MobKiller delay between attacks in ms", category = ADDONS, subcategory = "MobKiller")
-    @Slider(name = "MobKiller delay between attacks in ms", category = ADDONS, subcategory = "MobKiller", max = 1000, min = 1)
-    public int mobKillerAttackDelay = 100;
-
-    @VigilanceName(name = "Custom item to use for MobKiller", category = ADDONS, subcategory = "MobKiller")
-    @Text(name = "Custom item to use for MobKiller", description = "Leave empty to use default weapons", category = ADDONS, subcategory = "MobKiller")
-    public String customItemToKill = "";
-    
-    @VigilanceName(name = "Mouse button to use in MobKiller", category = ADDONS, subcategory = "MobKiller")
-    @Dropdown(name = "Mouse button to use in MobKiller", category = ADDONS, subcategory = "MobKiller", options = {"Attack", "Use"})
-    public int attackButton = 1;
-
-    @VigilanceName(name = "Use Hyperion under player", category = ADDONS, subcategory = "MobKiller")
-    @Switch(name = "Use Hyperion under player", category = ADDONS, subcategory = "MobKiller", size = 2)
-    public boolean useHyperionUnderPlayer = false;
-
-    @HUD(name = "MobKiller info", category = ADDONS, subcategory = "MobKiller")
-    public MobKillerHUD mobKillerHud = new MobKillerHUD();
-    
-    @HUD(name = "Commission Macro statistics", category = ADDONS, subcategory = "Commission Macro")
-    public CommissionMacroHUD commissionMacroHUD = new CommissionMacroHUD();
-
-    @VigilanceName(name = "Sell wishing compass to npc", category = ADDONS, subcategory = "Autosell")
-    @Switch(name = "Sell wishing compass to npc", description = "You need a booster cookie", category = ADDONS, subcategory = "Autosell")
-    public boolean sellWishingCompass = true;
-
-    @VigilanceName(name = "Sell ascension rope to npc", category = ADDONS, subcategory = "Autosell")
-    @Switch(name = "Sell ascension rope to npc", description = "You need a booster cookie", category = ADDONS, subcategory = "Autosell")
-    public boolean sellAscensionRope = true;
-
-    @VigilanceName(name = "Player ESP", category = ADDONS, subcategory = "PlayerESP")
-    @Switch(name = "Player ESP", category = ADDONS, subcategory = "PlayerESP")
-    public boolean playerESP = true;
-
-    @VigilanceName(name = "Player ESP color", category = ADDONS, subcategory = "PlayerESP")
-    @Color(name = "Player ESP color", category = ADDONS, subcategory = "PlayerESP")
-    public OneColor playerESPColor = new OneColor(255, 0, 0, 120);
-
-    @VigilanceName(name = "Enable Player detection failsafe", category = FAILSAFES, subcategory = "PlayerESP")
-    @Switch(name = "Enable Player detection failsafe", description = "Stop macro if there is a player nearby", category = FAILSAFES, subcategory = "Player detection failsafe")
-    public boolean playerFailsafe = true;
-
-    @VigilanceName(name = "Player detection radius", category = FAILSAFES, subcategory = "PlayerESP")
-    @Slider(name = "Player detection radius", description = "Trigger failsafe if there is player inside the given radius of player", category = FAILSAFES, min = 1, max = 30, subcategory = "Player detection failsafe")
-    public int playerRad = 10;
-
-    @Slider(name = "Player detection threshold until disable", category = FAILSAFES, min = 1, max = 10, subcategory = "Player detection failsafe")
-    public int playerDetectionThreshold = 3;
-
-    @VigilanceName(name = "Disable macro on world change", category = FAILSAFES, subcategory = "World change failsafe")
-    @Switch(name = "Disable macro on world change", description = "Disables the macro when you get teleported to another world", category = FAILSAFES, subcategory = "World change failsafe")
-    public boolean disableOnWorldChange = false;
-
-    @VigilanceName(name = "Rotation check", category = FAILSAFES, subcategory = "Rotation failsafe")
-    @Switch(name = "Rotation check", description = "May give false positives", category = FAILSAFES, subcategory = "Rotation failsafe")
-    public boolean stopMacrosOnRotationCheck = true;
-
-    @Switch(name = "Show notifications on staff check", category = FAILSAFES, subcategory = "Miscellaneous")
-    public boolean notifications = true;
-
-    @Switch(name = "Play ping sound when macro is interrupted", category = FAILSAFES, subcategory = "Miscellaneous")
-    public boolean pingSound = true;
-
-    @Switch(name = "Fake movements when being staff checked", description = "You could disable this if you're always by your computer", category = FAILSAFES, subcategory = "Miscellaneous")
-    public boolean fakeMovements = true;
-
-
-    public Config() {
-        super(new Mod("Mighty Miner", ModType.HYPIXEL, new VigilanceMigrator("mightyminer.toml")), "/mightyminer/config.json");
-        initialize();
-
-        this.addDependency("playerRad", "playerFailsafe");
-        this.addDependency("playerDetectionThreshold", "playerFailsafe");
-        this.addDependency("aotvRouteLineColor", "aotvShowRouteLines");
-        this.addDependency("aotvRouteBlocksColor", "aotvHighlightRouteBlocks");
-        this.addDependency("refuelThreshold", "refuelWithAbiphone");
-        this.addDependency("typeOfFuelIndex", "refuelWithAbiphone");
-        this.addDependency("aotvRouteLineColor", "aotvShowRouteLines");
-        this.addDependency("aotvShowDistanceToBlocks", "aotvHighlightRouteBlocks");
-        this.addDependency("aotvRouteBlocksColor", "aotvHighlightRouteBlocks");
-        this.addDependency("aotvVisionBlocksColor", "drawBlocksBlockingAOTV");
-        this.addDependency("playerESPColor", "playerESP");
-        this.addDependency("blueCheeseOmeletteToggle", "useMiningSpeedBoost");
+package com.jelly.MightyMiner.macros.macros;
+
+import com.jelly.MightyMiner.MightyMiner;
+import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
+import com.jelly.MightyMiner.baritone.automine.config.MiningType;
+import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
+import com.jelly.MightyMiner.baritone.automine.logging.Logger;
+import com.jelly.MightyMiner.features.Autosell;
+import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.macros.Macro;
+import com.jelly.MightyMiner.player.Rotation;
+import com.jelly.MightyMiner.render.BlockRenderer;
+import com.jelly.MightyMiner.utils.*;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
+import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
+import com.jelly.MightyMiner.utils.BlockUtils.Box;
+import com.jelly.MightyMiner.utils.BlockUtils.OffsetBox;
+import com.jelly.MightyMiner.utils.PlayerUtils;
+import com.jelly.MightyMiner.utils.Timer;
+import com.jelly.MightyMiner.utils.Utils.MathUtils;
+import com.jelly.MightyMiner.utils.Utils.ThreadUtils;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S2APacketParticles;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+
+import java.awt.*;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import static com.jelly.MightyMiner.utils.AngleUtils.*;
+import static com.jelly.MightyMiner.utils.BlockUtils.BlockUtils.*;
+
+
+public class PowderMacro extends Macro {
+
+    List<Block> blocksAllowedToMine = new ArrayList<Block>() {
+        {
+            add(Blocks.stone);
+            add(Blocks.air);
+            add(Blocks.coal_ore);
+            add(Blocks.iron_ore);
+            add(Blocks.emerald_ore);
+            add(Blocks.gold_ore);
+            add(Blocks.redstone_ore);
+            add(Blocks.lapis_ore);
+            add(Blocks.lit_redstone_ore);
+            add(Blocks.diamond_ore);
+            add(Blocks.prismarine);
+            add(Blocks.chest);
+        }
+    };
+    List<Block> mineSlowBlocks = new ArrayList<Block>(){
+        {
+            add(Blocks.prismarine);
+            add(Blocks.stained_glass_pane);
+            add(Blocks.stained_glass);
+            add(Blocks.wool);
+        }
+    };
+    //base stuff
+    Rotation rotation = new Rotation();
+    AutoMineBaritone mineBaritone;
+    BlockRenderer renderer = new BlockRenderer();
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    //states
+    State currentState;
+    State treasureCacheState;
+    TreasureState treasureState = TreasureState.INIT;
+
+    enum State {
+        NORMAL,
+        TREASURE,
+        UTurn
     }
+
+    enum TreasureState {
+        INIT,
+        WALKING,
+        SOLVING,
+        FINISHED,
+        RETURNING
+
+    }
+
+    //mechanics
+    long treasureInitialTime;
+    float playerYaw;
+    int turnState = 0;
+    BlockPos uTurnCachePos;
+
+    //chests
+    BlockPos currentChest;
+    volatile Queue<BlockPos> chestQueue = new LinkedList<>();
+    volatile CircularFifoQueue<BlockPos> solvedOrSolvingChests = new CircularFifoQueue<>(3);
+    volatile BlockPos returnBlockPos;
+    BlockPos targetBlockPos;
+
+    //aote
+    boolean aote;
+    boolean saved;
+    int aoteTick;
+    float savedPitch;
+    int savedItemIndex;
+
+    //antistuck
+    double lastX;
+    double lastZ;
+    final Timer cooldown = new Timer();
+
+
+    @Override
+    public void onEnable() {
+        if(MightyMiner.config.playerFailsafe) {
+            if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad)) {
+                LogUtils.addMessage("Not starting, there is a player nearby");
+                this.toggle();
+                return;
+            }
+        }
+        if(MightyMiner.config.powBlueCheeseSwitch){
+            if(PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese") == -1){
+                LogUtils.addMessage("You don't have a blue cheese drill. Switch disabled");
+                MightyMiner.config.powBlueCheeseSwitch = false;
+            }
+        }
+
+        if(PlayerUtils.getItemInHotbar(true, "Drill", "Gauntlet", "Pickonimbus", "Pickaxe") == -1) {
+            LogUtils.addMessage("You don't have any mining tool!");
+            this.toggle();
+            return;
+        }
+
+        if (MightyMiner.config.powMineGemstone && PlayerUtils.getItemInHotbar(true, "Drill", "Gauntlet", "Pickonimbus") == -1) {
+            LogUtils.addMessage("You don't have a drill, gauntlet or pickonimbus in your hotbar to mine gemstones (in case of pathing)");
+            this.toggle();
+            return;
+        }
+
+
+        mineBaritone = new AutoMineBaritone(getAutomineConfig());
+
+        rotation.reset();
+
+        currentState = State.NORMAL;
+        treasureState = TreasureState.INIT;
+        turnState = 1;
+        treasureInitialTime = System.currentTimeMillis();
+        playerYaw = AngleUtils.getClosest();
+
+        chestQueue.clear();
+        solvedOrSolvingChests.clear();
+        renderer.renderMap.clear();
+
+        aote = false;
+
+        if(MightyMiner.config.powMineGemstone && !blocksAllowedToMine.contains(Blocks.stained_glass)){
+            blocksAllowedToMine.add(Blocks.stained_glass_pane);
+            blocksAllowedToMine.add(Blocks.stained_glass);
+        } else if(!MightyMiner.config.powMineGemstone && blocksAllowedToMine.contains(Blocks.stained_glass)){
+            blocksAllowedToMine.removeIf(a -> a.equals(Blocks.stained_glass) || a.equals(Blocks.stained_glass_pane));
+        }
+
+    }
+
+    @Override
+    public void onDisable() {
+        Autosell.disable();
+        aote = false;
+        if (mineBaritone != null) // nullpointerexception crash sometimes if detected player right after turning on the macro
+            mineBaritone.disableBaritone();
+        KeybindHandler.resetKeybindState();
+    }
+
+    @Override
+    public void onTick(TickEvent.Phase phase){
+        if(phase != TickEvent.Phase.START || !enabled)
+            return;
+
+
+        if(MightyMiner.config.powAutosell){
+            if(Autosell.isEnabled())
+                return;
+            if(Autosell.shouldStart()) {
+                mineBaritone.disableBaritone();
+                Autosell.enable();
+                return;
+            }
+        }
+
+        if(rotation.rotating){
+            KeybindHandler.resetKeybindState();
+            return;
+        }
+
+        updateState();
+
+        if(aote || (currentState != State.NORMAL && currentState != State.UTurn)){
+            // disable antistuck
+            lastX = 10000;
+            lastZ = 10000;
+            cooldown.reset();
+        }
+
+        //aote
+        if (aote) {
+            if(!saved){
+                rotation.reset();
+                KeybindHandler.resetKeybindState();
+                savedPitch = mc.thePlayer.rotationPitch;
+                savedItemIndex = mc.thePlayer.inventory.currentItem;
+                aoteTick = 12;
+                saved = true;
+            }
+
+            if(aoteTick > 0) {
+                aoteTick --;
+                rotation.initAngleLock(AngleUtils.get360RotationYaw(), 89, 500);
+                return;
+            }
+
+
+            mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void", "End");
+            KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
+
+
+            if (BlockUtils.inCenterOfBlock() || !PlayerUtils.isPossibleToAOTE()) {
+                aote = false;
+                rotation.reset();
+                rotation.easeTo(AngleUtils.get360RotationYaw(), savedPitch, 500);
+                mc.thePlayer.inventory.currentItem = savedItemIndex;
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
+            }
+            return;
+        } else {
+            saved = false;
+        }
+
+        //state handling
+        switch (currentState){
+            case TREASURE:
+
+                switch(treasureState){
+                    case INIT: case SOLVING:
+                        if(MightyMiner.config.powBlueCheeseSwitch)
+                            mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese");
+                        KeybindHandler.resetKeybindState();
+                        break;
+                    case WALKING:
+                        if(targetBlockPos == null) return;
+
+                        switch(mineBaritone.getState()){
+                            case IDLE:
+                                if(BlockUtils.getPlayerLoc().equals(targetBlockPos))
+                                    treasureState = TreasureState.SOLVING;
+                                else {
+                                    mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pickonimbus");
+                                    mineBaritone.goTo(targetBlockPos);
+                                }
+                                break;
+                            case FAILED:
+                                terminateTreasureSolving();
+                                break;
+                        }
+                        break;
+                    case RETURNING:
+
+                        switch(mineBaritone.getState()){
+                            case IDLE:
+                                if(returnBlockPos == null || BlockUtils.getPlayerLoc().equals(returnBlockPos)){
+                                    mineBaritone.disableBaritone();
+                                    currentState = treasureCacheState;
+                                } else mineBaritone.goTo(returnBlockPos);
+                                break;
+                            case FAILED:
+                                terminateTreasureSolving();
+                                break;
+                        }
+                        break;
+
+                }
+                break;
+
+            case UTurn: case NORMAL:
+
+                if (cooldown.hasReached(5000)) {
+                    if(Math.abs(mc.thePlayer.posX - lastX) < 0.2f && Math.abs(mc.thePlayer.posZ - lastZ) < 0.2f){
+                        new Thread(antistuck).start();
+                    }
+                    cooldown.reset();
+                    lastX = mc.thePlayer.posX;
+                    lastZ = mc.thePlayer.posZ;
+                }
+
+                if(frontShouldMineSlow()){
+                    if(havePotentialObstacles()
+                            && !BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) && !BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane)
+                            && PlayerUtils.notAtCenter(playerYaw)
+                            && MightyMiner.config.powCenter
+                            && MightyMiner.config.powMineGemstone)
+                        aote = true;
+                }
+
+                if(frontShouldMineSlow())
+                    rotation.initAngleLock(playerYaw, shouldLookDown() ? 60 : 27, 200);
+
+
+                if(MightyMiner.config.powPickaxeSwitch)
+                    mc.thePlayer.inventory.currentItem = frontShouldMineSlow() ? PlayerUtils.getItemInHotbar("Drill", "Gauntlet") : PlayerUtils.getItemInHotbar("Pickaxe");
+                else
+                    mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pickaxe");
+
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindW, shouldWalkForward() || currentState == State.UTurn);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
+                this.checkMiningSpeedBoost();
+                break;
+        }
+
+
+
+    }
+
+    private void updateState(){
+
+        if(!chestQueue.isEmpty()) {
+            if(currentState != State.TREASURE)
+                treasureState = TreasureState.INIT;
+
+            currentState = State.TREASURE;
+        }
+
+        switch (currentState) {
+            case TREASURE:
+                switch (treasureState){
+                    case INIT:
+                        treasureInitialTime = System.currentTimeMillis();
+                        currentChest = chestQueue.poll();
+                        for(BlockPos blockPos : BlockUtils.getAllBlocksInLine2d(BlockUtils.getPlayerLoc(), currentChest)){
+                            if(MathUtils.getDistanceBetweenTwoBlock(currentChest, blockPos) < 3.3f && !BlockUtils.getBlock(blockPos).equals(Blocks.chest) && !BlockUtils.getBlock(blockPos.down()).equals(Blocks.air)){
+                                targetBlockPos = blockPos;
+                                break;
+                            }
+                        }
+
+                        returnBlockPos = null;
+                        for (int i = 0; i < 7; i++) {
+                            if (BlockUtils.getRelativeBlockPos(0, 0, i).equals(currentChest) || BlockUtils.getRelativeBlockPos(0, 1, i).equals(currentChest)) {
+                                returnBlockPos = BlockUtils.getRelativeBlockPos(0, 0, i + 1);
+                            }
+                        }
+                        if(returnBlockPos == null){
+                            if(!isInsideBox(new OffsetBox(1, -1, 1, 0, 7, 0), targetBlockPos, playerYaw))
+                                returnBlockPos = BlockUtils.getPlayerLoc();
+                        }
+                        treasureState = TreasureState.WALKING;
+
+                        break;
+                    case FINISHED:
+                        treasureState = chestQueue.isEmpty() ? TreasureState.RETURNING : TreasureState.INIT;
+                        break;
+                }
+                if((System.currentTimeMillis() - treasureInitialTime) / 1000f > 10 && treasureState != TreasureState.RETURNING) {
+                    treasureState = TreasureState.RETURNING;
+                    LogUtils.debugLog("Completed treasure due to timeout");
+                    chestQueue.poll();
+                    return;
+                }
+            case NORMAL:
+                if(shouldTurn(5)) {
+                    turnState = 1 - turnState;
+                    uTurnCachePos = BlockUtils.getPlayerLoc();
+                    playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
+                    currentState = State.UTurn;
+                }
+                break;
+            case UTurn:
+                if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), uTurnCachePos) > MightyMiner.config.powLaneWidth || shouldTurn(3)) {
+                    playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
+                    currentState = State.NORMAL;
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onLastRender(RenderWorldLastEvent event) {
+
+        if(!chestQueue.isEmpty())
+            chestQueue.forEach(a -> renderer.renderAABB(a, Color.BLUE));
+        if(!solvedOrSolvingChests.isEmpty())
+            solvedOrSolvingChests.forEach(a -> renderer.renderAABB(a, Color.GREEN));
+        if(targetBlockPos != null)
+            renderer.renderAABB(targetBlockPos, Color.BLACK);
+
+        if(rotation.rotating){
+            rotation.update();
+        } else if(!frontShouldMineSlow()
+                && (currentState == State.UTurn || currentState == State.NORMAL)
+                && !aote
+                && !Autosell.isEnabled()
+                && !(mineBaritone.getState() == AutoMineBaritone.BaritoneState.EXECUTING)){
+            rotation.updateInCircle(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate);
+        }
+    }
+
+    @Override
+    public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
+        if(event.type == RenderGameOverlayEvent.ElementType.TEXT){
+            mc.fontRendererObj.drawString(currentState + " " + treasureState, 5 , 5, -1);
+            mc.fontRendererObj.drawString("Chests in waiting queue: " + chestQueue.size() + " | Chests in finished queue: " + solvedOrSolvingChests.size() + "/3", 5 , 17, -1);
+        }
+    }
+
+    @Override
+    public void onMessageReceived(String message){
+        if(message.contains("You have successfully picked the lock on this chest")){
+            treasureState = TreasureState.FINISHED;
+        }
+        if(message.contains("You uncovered a treasure chest!")){
+            KeybindHandler.resetKeybindState();
+            executor.submit(addChestToQueue);
+        }
+    }
+
+
+    @Override
+    public void onPacketReceived(Packet<?> packet){
+        if(currentState == State.TREASURE && treasureState == TreasureState.SOLVING && treasureInitialTime > 200 && packet instanceof S2APacketParticles && currentChest != null){
+            if(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT){
+                try {
+                    if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - (currentChest.getX() + 0.5f)) < 0.7f && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - (currentChest.getY() + 0.5f)) < 0.7f && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - (currentChest.getZ() + 0.5f)) < 0.7f) {
+                        rotation.initAngleLock(
+                                AngleUtils.getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
+                                AngleUtils.getRequiredPitch(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, (((S2APacketParticles) packet).getYCoordinate()) - (mc.thePlayer.posY + 1.62d), ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
+                                300);
+                    }
+                }catch (Exception ignored){}
+            }
+        }
+    }
+
+    void terminateTreasureSolving(){
+        mineBaritone.disableBaritone();
+        if(chestQueue.isEmpty()) {
+            currentState = treasureCacheState;
+        } else {
+            treasureState = TreasureState.INIT;
+        }
+    }
+
+
+    Runnable addChestToQueue = () -> {
+
+        ThreadUtils.sleep(200);
+        Logger.log("Adding chest to queue");
+
+        List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 3, 0, -7, 7),
+                new ArrayList<>(solvedOrSolvingChests), 0, 256, new BlockData<>(Blocks.chest));
+
+        if(foundBlocks.isEmpty()){
+            LogUtils.addMessage("That chest was impossible to solve");
+            return;
+        }
+
+        BlockPos chest = foundBlocks.get(0);
+        solvedOrSolvingChests.add(chest);
+        chestQueue.add(chest);
+
+        if(currentState != State.TREASURE)
+            treasureCacheState = currentState;
+    };
+
+    boolean shouldWalkForward(){
+        int blocksEmpty = 0;
+        for(int i = 1; i <= 4; i++){
+            if(i <= 3){
+                if(mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, i, playerYaw)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, i, playerYaw)))
+                    return true;
+            }
+            BlockPos check = BlockUtils.getRelativeBlockPos(0, 0, i, playerYaw);
+            if(getBlock(check).equals(Blocks.air) || mineSlowBlocks.contains(getBlock(check)))
+                ++blocksEmpty;
+            if(getBlock(check.up()).equals(Blocks.air) || mineSlowBlocks.contains(getBlock(check.up())))
+                ++blocksEmpty;
+        }
+        return blocksEmpty >= 6;
+    }
+
+
+    int getRotAmount(){
+        // see if have obstacles sideways
+        if(scanBox(new OffsetBox(-3, 3, 1, 0, 0, 0), blocksAllowedToMine, null, playerYaw)){
+            if(scanBox(new OffsetBox(3, 0, 1, 0, 0, 0), blocksAllowedToMine, null, playerYaw))
+                return -90;
+            else if(scanBox(new OffsetBox(-3, 0, 1, 0, 0, 0), blocksAllowedToMine, null, playerYaw))
+                return 90 ;
+            else return 180;
+        } else
+            return turnState == 1 ? 90 : -90; // both sides can be walked, oscillate between 90 and -90 to increase area mined
+    }
+
+
+    boolean shouldLookDown(){
+        BlockPos front = getRelativeBlockPos(0, 0, 1);
+        return (shouldLookAtCenter(front) && isPassable(front.up())) || (shouldLookAtCenter(getPlayerLoc()) && isPassable(getPlayerLoc().up()));
+    }
+
+    boolean frontShouldMineSlow(){
+        BlockPos front = getRelativeBlockPos(0, 0, 1);
+        return mineSlowBlocks.contains(getBlock(front)) || mineSlowBlocks.contains(getBlock(front.up())) || getBlock(getPlayerLoc()).equals(Blocks.stained_glass_pane) ||  getBlock(getPlayerLoc().up()).equals(Blocks.stained_glass_pane);
+    }
+
+    boolean havePotentialObstacles(){
+        return scanBox(new OffsetBox(1, -1, 0, 1, 0, 1), null, mineSlowBlocks, playerYaw)
+                || getBlock(getPlayerLoc()).equals(Blocks.stained_glass_pane) || getBlock(getPlayerLoc().up()).equals(Blocks.stained_glass_pane);
+    }
+
+    boolean shouldTurn(int checkRadius){
+        return scanBox(new OffsetBox(0, 0, 0, 1, 0, checkRadius), blocksAllowedToMine, null, playerYaw);
+    }
+
+    Runnable antistuck = () -> {
+        ThreadUtils.sleep(20);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindS, true);
+        ThreadUtils.sleep(350);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindS, false);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindD, true);
+        ThreadUtils.sleep(350);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindD, false);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindA, true);
+        ThreadUtils.sleep(350);
+        KeybindHandler.setKeyBindState(KeybindHandler.keybindA, false);
+    };
+
+
+    BaritoneConfig getAutomineConfig(){
+        return new BaritoneConfig(
+                MiningType.DYNAMIC,
+                false,
+                true,
+                false,
+                250,
+                8,
+                new ArrayList<Block>(){
+                    {
+                        add(Blocks.chest);
+                        add(Blocks.stained_glass);
+                        add(Blocks.stained_glass_pane);
+                        add(Blocks.prismarine);
+                        add(Blocks.wool);
+                    }
+                },
+                null,
+                256,
+                0
+        );
+    }
+
 }

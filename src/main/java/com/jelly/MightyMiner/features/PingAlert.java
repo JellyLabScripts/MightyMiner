@@ -41,10 +41,10 @@ public class PingAlert {
             } catch (UnsupportedOperationException e) {
                 LogUtils.debugLog("Notifications are not supported on this system");
             }
-            pingAlertClock.schedule(100);
+            pingAlertClock.schedule(500);
             numPings--;
         } else if (!pingAlertClock.isScheduled()) {
-            pingAlertClock.schedule(100);
+            pingAlertClock.schedule(500);
         }
     }
 

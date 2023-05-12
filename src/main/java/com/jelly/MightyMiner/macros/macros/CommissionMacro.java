@@ -1380,17 +1380,23 @@ public class CommissionMacro extends Macro {
                                                 }
                                                 break;
                                             case USE_AOTV:
-                                                if (nextActionDelay.hasReached(100)) {
+                                                if (nextActionDelay.hasReached(200)) {
                                                     // Making player use Aspect of the Void
                                                     LogUtils.debugLog("Making player use Aspect of the Void");
-                                                    mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem());
+                                                    if (mc.thePlayer.getHeldItem() != null) {
+                                                        mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem());
 
-                                                    // Switching to next action
-                                                    nextActionDelay.reset();
-                                                    warpToEmissaryState = WarpToEmissaryState.ARRIVE_CHECK;
+                                                        // Switching to next action
+                                                        nextActionDelay.reset();
+                                                        warpToEmissaryState = WarpToEmissaryState.ARRIVE_CHECK;
 
-                                                    // Resetting State
-                                                    emissaryWarpState = EmissaryWarpState.HOLD_AOTV;
+                                                        // Resetting State
+                                                        emissaryWarpState = EmissaryWarpState.HOLD_AOTV;
+                                                    } else {
+                                                        // Switching to previous action
+                                                        nextActionDelay.reset();
+                                                        emissaryWarpState = EmissaryWarpState.HOLD_AOTV;
+                                                    }
                                                 }
                                                 break;
                                             case NONE:
@@ -1995,17 +2001,23 @@ public class CommissionMacro extends Macro {
                                 }
                                 break;
                             case USE_AOTV:
-                                if (nextActionDelay.hasReached(100)) {
+                                if (nextActionDelay.hasReached(200)) {
                                     // Making player use Aspect of the Void
                                     LogUtils.debugLog("Making player use Aspect of the Void");
-                                    mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem());
+                                    if (mc.thePlayer.getHeldItem() != null) {
+                                        mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem());
 
-                                    // Switching to next action
-                                    nextActionDelay.reset();
-                                    navigatingState = NavigatingState.ARRIVE_CHECK;
+                                        // Switching to next action
+                                        nextActionDelay.reset();
+                                        navigatingState = NavigatingState.ARRIVE_CHECK;
 
-                                    // Resetting State
-                                    navigatingWarpState = NavigatingWarpState.HOLD_AOTV;
+                                        // Resetting State
+                                        navigatingWarpState = NavigatingWarpState.HOLD_AOTV;
+                                    } else {
+                                        // Switching to previous action
+                                        nextActionDelay.reset();
+                                        navigatingWarpState = NavigatingWarpState.HOLD_AOTV;
+                                    }
                                 }
                                 break;
                             case NONE:

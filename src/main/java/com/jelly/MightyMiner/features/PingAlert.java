@@ -18,6 +18,12 @@ public class PingAlert {
 
     public static void sendPingAlert() {
         pingAlertPlaying = true;
+        try {
+            SystemTray tray = SystemTray.getSystemTray();
+            createNotification("You got staff checked go in minecraft and verify the situation", tray, TrayIcon.MessageType.WARNING);
+        } catch (UnsupportedOperationException e) {
+            LogUtils.debugLog("Notifications are not supported on this system");
+        }
         numPings = 15;
     }
 
@@ -35,12 +41,6 @@ public class PingAlert {
 
         if (pingAlertClock.isScheduled() && pingAlertClock.passed()) {
             mc.theWorld.playSound(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, "random.orb", 10.0F, 1.0F, false);
-            try {
-                SystemTray tray = SystemTray.getSystemTray();
-                createNotification("You got staff checked go in minecraft and verify the situation", tray, TrayIcon.MessageType.WARNING);
-            } catch (UnsupportedOperationException e) {
-                LogUtils.debugLog("Notifications are not supported on this system");
-            }
             pingAlertClock.schedule(500);
             numPings--;
         } else if (!pingAlertClock.isScheduled()) {

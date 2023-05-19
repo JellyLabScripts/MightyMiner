@@ -21,8 +21,8 @@ public class WarpCoordinateUtils {
             route.add(new BlockPos(38, 142, 6));
             route.add(new BlockPos(39, 134, 22));
         } else if (routeNumber == 2) {
-            route.add(new BlockPos(4, 155, -12));
-            route.add(new BlockPos(27, 145, -6));
+            route.add(new BlockPos(6, 155, -10));
+            route.add(new BlockPos(38, 142, 6));
             route.add(new BlockPos(39, 134, 22));
         } else if (routeNumber == 3) {
             route.add(new BlockPos(6, 155, -10));
@@ -33,7 +33,7 @@ public class WarpCoordinateUtils {
             route.add(new BlockPos(35, 145, 1));
             route.add(new BlockPos(39, 134, 22));
         } else if (routeNumber == 5) {
-            route.add(new BlockPos(4, 155, -12));
+            route.add(new BlockPos(3, 165, -12));
             route.add(new BlockPos(35, 145, 1));
             route.add(new BlockPos(39, 134, 22));
         }

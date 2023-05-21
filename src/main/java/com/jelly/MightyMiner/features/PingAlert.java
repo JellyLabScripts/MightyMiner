@@ -2,6 +2,7 @@ package com.jelly.MightyMiner.features;
 
 import com.jelly.MightyMiner.utils.Clock;
 import com.jelly.MightyMiner.utils.LogUtils;
+import com.jelly.MightyMiner.utils.NotificationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -17,13 +18,10 @@ public class PingAlert {
     private static boolean pingAlertPlaying = false;
 
     public static void sendPingAlert() {
-        pingAlertPlaying = true;
-        try {
-            SystemTray tray = SystemTray.getSystemTray();
-            createNotification("You got staff checked go in minecraft and verify the situation", tray, TrayIcon.MessageType.WARNING);
-        } catch (UnsupportedOperationException e) {
-            LogUtils.debugLog("Notifications are not supported on this system");
+        if (!pingAlertPlaying) {
+            NotificationHelper.notify("You got staff checked. You may verify the situation.", true);
         }
+        pingAlertPlaying = true;
         numPings = 15;
     }
 
@@ -46,33 +44,5 @@ public class PingAlert {
         } else if (!pingAlertClock.isScheduled()) {
             pingAlertClock.schedule(500);
         }
-    }
-
-    public static void createNotification(String text, SystemTray tray, TrayIcon.MessageType messageType) {
-        new Thread(() -> {
-
-
-            if(Minecraft.isRunningOnMac) {
-                try {
-                    Runtime.getRuntime().exec(new String[]{"osascript", "-e", "display notification"});
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                TrayIcon trayIcon = new TrayIcon(new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR), "Mighty Miner Failsafe Notification");
-                trayIcon.setToolTip("Mighty Miner Failsafe Notification");
-                try {
-                    tray.add(trayIcon);
-                } catch (AWTException e) {
-                    throw new RuntimeException(e);
-                }
-
-                trayIcon.displayMessage("Mighty Miner - Failsafes", text, messageType);
-
-                tray.remove(trayIcon);
-            }
-
-        }).start();
-
     }
 }

@@ -131,7 +131,6 @@ public class Failsafes {
                 bedrockCount++;
             }
         }
-        LogUtils.debugLog(bedrockCount + "");
         if (bedrockCount > MightyMiner.config.bedrockBackupThreshold) {
             bedrockFailsafeFake(false);
             return;

@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -122,6 +123,17 @@ public class Failsafes {
             if (!lastWorldChange.hasReached(1500)) {
                 bedrockFailsafeFake(true);
             }
+            return;
+        }
+        int bedrockCount = 0;
+        for (BlockPos bp : BlockPos.getAllInBox(mc.thePlayer.getPosition().add(5, 5, 5), mc.thePlayer.getPosition().add(-5, -5, -5))) {
+            if (mc.theWorld.getBlockState(bp).getBlock().equals(Blocks.bedrock)) {
+                bedrockCount++;
+            }
+        }
+        LogUtils.debugLog(bedrockCount + "");
+        if (bedrockCount > MightyMiner.config.bedrockBackupThreshold) {
+            bedrockFailsafeFake(false);
             return;
         }
 

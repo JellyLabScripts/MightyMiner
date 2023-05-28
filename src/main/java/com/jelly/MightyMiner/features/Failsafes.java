@@ -120,9 +120,9 @@ public class Failsafes {
         }
         if (selfCount >= 2) {
             if (!lastWorldChange.hasReached(1500)) {
-                bedrockFailsafeFake(true
-                );
+                bedrockFailsafeFake(true);
             }
+            return;
         }
 
         if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer == null){

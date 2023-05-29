@@ -2552,7 +2552,13 @@ public class CommissionMacro extends Macro {
 
     public int playerCountInRadius(int radius) {
         int playerCount = 0;
+        int selfCount = 0;
         for(Entity e :  mc.theWorld.getLoadedEntityList()){
+            
+            if (e.getDisplayName().equals(mc.thePlayer.getDisplayName())) {
+                selfCount++;
+                continue;
+            }
 
             if(!(e instanceof EntityPlayer) || e == mc.thePlayer) continue;
 
@@ -2562,6 +2568,10 @@ public class CommissionMacro extends Macro {
             if(e.getDistanceToEntity(mc.thePlayer) <= radius) {
                 playerCount++;
             }
+        }
+        if (selfCount >= 2) {
+            Failsafes.bedrockFailsafeFake(false);
+            return 0;
         }
         return playerCount;
     }

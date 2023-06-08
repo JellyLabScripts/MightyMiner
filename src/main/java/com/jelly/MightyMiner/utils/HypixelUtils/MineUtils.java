@@ -120,6 +120,12 @@ public class MineUtils {
                 }});
             }
         }
+        if (AOTVGemstoneFilter.mithril) {
+            filter.add(new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.prismarine, null));
+                add(new BlockData<>(Blocks.wool, EnumDyeColor.LIGHT_BLUE));
+            }});
+        }
         return filter;
     }
 

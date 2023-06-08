@@ -23,4 +23,7 @@ public class AOTVGemstoneFilter {
 
     @Switch(name = "Jasper")
     public static boolean jasper = true;
+
+    @Switch(name = "Mithril")
+    public static boolean mithril = false;
 }

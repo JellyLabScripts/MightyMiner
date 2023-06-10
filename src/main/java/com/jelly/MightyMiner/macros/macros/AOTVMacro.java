@@ -80,6 +80,8 @@ public class AOTVMacro extends Macro {
 
     private int pickaxe = -1;
 
+    private int voidtool;
+
 
     @Override
     public void onEnable() {
@@ -102,10 +104,12 @@ public class AOTVMacro extends Macro {
             return;
         }
 
-        int voidTool = PlayerUtils.getItemInHotbarWithBlackList(true, null, "Void");
-
-        if (voidTool == -1) {
-            LogUtils.addMessage("AOTV Macro (Experimental) - You don't have a Aspect of the Void!");
+        if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Void") != -1) {
+            voidtool = PlayerUtils.getItemInHotbarWithBlackList(true, null, "Void");
+        } else if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "End") != -1) {
+            voidtool = PlayerUtils.getItemInHotbarWithBlackList(true, null, "End");
+        } else {
+            LogUtils.addMessage("AOTV Macro (Experimental) - You don't have a Aspect of the Void/End!");
             this.toggle();
             return;
         }

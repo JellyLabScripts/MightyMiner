@@ -429,7 +429,7 @@ public class AOTVMacro extends Macro {
 
 
                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
-                mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarWithBlackList(true, null, "Void");
+                mc.thePlayer.inventory.currentItem = voidtool;
 
                 if (!rotation.rotating)
                     rotation.initAngleLock(waypoint, MightyMiner.config.aotvCameraWaypointSpeed);

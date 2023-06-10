@@ -151,6 +151,10 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Dropdown(name = "Mithril macro priority 4", category = MITHRIL_MACRO, subcategory = "Mining", options = { "Clay / Gray Wool", "Prismarine", "Blue Wool", "Titanium"}, size = 2)
     public int mithPriority4 = 0;
 
+    @VigilanceName(name = "Block", category = MITHRIL_MACRO, subcategory = "Mining")
+    @DualOption(name = "Block", left = "Mithril", right = "Gold", category = MITHRIL_MACRO, subcategory = "Mining")
+    public boolean mithBlock = false;
+
     @VigilanceName(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")
     @Switch(name = "Shift when mining", category = MITHRIL_MACRO, subcategory = "Miscellaneous")
     public boolean mithShiftWhenMine = true;

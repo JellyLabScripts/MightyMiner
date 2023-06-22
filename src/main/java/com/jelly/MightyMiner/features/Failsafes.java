@@ -65,6 +65,7 @@ public class Failsafes {
                 macro.toggle();
             }
         }
+        UngrabUtils.regrabMouse();
     }
 
     @SubscribeEvent(receiveCanceled=true, priority=HIGHEST)

@@ -217,7 +217,7 @@ public class PowderMacro extends Macro {
                 KeybindHandler.resetKeybindState();
                 savedPitch = mc.thePlayer.rotationPitch;
                 savedItemIndex = mc.thePlayer.inventory.currentItem;
-                aoteTick = 12;
+                aoteTick = 1;
                 saved = true;
             }
 
@@ -318,7 +318,7 @@ public class PowderMacro extends Macro {
                 else
                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pickaxe");
 
-                KeybindHandler.setKeyBindState(KeybindHandler.keybindW, shouldWalkForward() || currentState == State.UTurn);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindW, shouldWalkForward());
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
                 this.checkMiningSpeedBoost();
                 break;
@@ -491,7 +491,7 @@ public class PowderMacro extends Macro {
             if(getBlock(check.up()).equals(Blocks.air) || mineSlowBlocks.contains(getBlock(check.up())))
                 ++blocksEmpty;
         }
-        return blocksEmpty >= 6;
+        return blocksEmpty >= 6);
     }
 
 

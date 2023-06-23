@@ -515,14 +515,14 @@ public class CommissionMacro extends Macro {
         }
 
         // Check if player has a Juju / Terminator / Aurora
-        if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Juju", "Terminator", "Aurora") == -1) {
+        if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Juju", "Terminator", "Aurora", "Frozen") == -1) {
             LogUtils.addMessage("You don't have a Juju/Terminator/Aurora");
             LogUtils.debugLog("Player does not have Juju/Terminator/Aurora");
             MacroHandler.disableScript();
             return;
         } else {
             LogUtils.debugLog("Player has Juju/Terminator/Aurora");
-            weaponSlot = PlayerUtils.getItemInHotbar("Juju", "Terminator", "Aurora");
+            weaponSlot = PlayerUtils.getItemInHotbar("Juju", "Terminator", "Aurora", "Frozen");
         }
 
         // Setting up

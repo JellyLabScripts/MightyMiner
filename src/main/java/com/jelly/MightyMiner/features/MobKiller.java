@@ -265,7 +265,7 @@ public class MobKiller {
 
                     if (AngleUtils.isDiffLowerThan(mc.thePlayer.rotationYaw, 89, 0.5f)) {
                         if (attackDelay.hasReached(MightyMiner.config.mobKillerAttackDelay) && target.distance() < 6) {
-                            KeybindHandler.onTick(mc.gameSettings.keyBindAttack);
+                            KeybindHandler.onTick(mc.gameSettings.keyBindUseItem);
                             attackDelay.reset();
                         }
                     }

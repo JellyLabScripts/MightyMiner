@@ -83,6 +83,7 @@ public class AOTVMacro extends Macro {
 
     @Override
     public void onEnable() {
+        MacroHandler.miningSpeedActive = false;
         if (MightyMiner.aotvWaypoints.getSelectedRoute() == null) {
             LogUtils.addMessage("No route selected!");
             this.toggle();

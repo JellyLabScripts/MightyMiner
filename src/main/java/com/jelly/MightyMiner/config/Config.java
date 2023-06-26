@@ -102,7 +102,7 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     public int gemGemstoneType = 0;
 
     @VigilanceName(name = "Mining Shape", category = POWDER_MACRO, subcategory = "Mining")
-    @Dropdown(name = "Mining Shape", description = "The shape you want the powder macro to mine in", category = POWDER_MACRO, subcategory = "Mining", options = {"Limacon", "Ellipse"})
+    @Dropdown(name = "Mining Shape", description = "The shape you want the powder macro to mine in", category = POWDER_MACRO, subcategory = "Mining", options = {"Limacon", "Ellipse", "Straight Line"})
     public int powMiningShape = 0;
 
     @VigilanceName(name = "Mine gemstones", category = POWDER_MACRO, subcategory = "Mining")

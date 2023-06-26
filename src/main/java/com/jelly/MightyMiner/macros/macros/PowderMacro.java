@@ -146,7 +146,27 @@ public class PowderMacro extends Macro {
             this.toggle();
             return;
         }
+        if (MightyMiner.config.powMiningShape == 2) {
+            mineSlowBlocks.addAll(blocksAllowedToMine);
+            if (!MightyMiner.config.powMineGemstone) {
+                LogUtils.addMessage("Mine Gemstone is required to be on");
+                mineSlowBlocks.clear();
+                mineSlowBlocks.add(Blocks.prismarine);
+                mineSlowBlocks.add(Blocks.stained_glass_pane);
+                mineSlowBlocks.add(Blocks.stained_glass);
+                mineSlowBlocks.add(Blocks.wool);
+                this.toggle();
+                return;
+            }
+        }
 
+        if (MightyMiner.config.powMiningShape < 2 && mineSlowBlocks.size() > 4) {
+            mineSlowBlocks.clear();
+            mineSlowBlocks.add(Blocks.prismarine);
+            mineSlowBlocks.add(Blocks.stained_glass_pane);
+            mineSlowBlocks.add(Blocks.stained_glass);
+            mineSlowBlocks.add(Blocks.wool);
+        }
 
         mineBaritone = new AutoMineBaritone(getAutomineConfig());
 
@@ -170,7 +190,7 @@ public class PowderMacro extends Macro {
         } else if(!MightyMiner.config.powMineGemstone && blocksAllowedToMine.contains(Blocks.stained_glass)){
             blocksAllowedToMine.removeIf(a -> a.equals(Blocks.stained_glass) || a.equals(Blocks.stained_glass_pane));
         }
-
+        executor.submit(addChestToQueue);
     }
 
     @Override
@@ -254,15 +274,17 @@ public class PowderMacro extends Macro {
                     case INIT: case SOLVING:
                         if(MightyMiner.config.powBlueCheeseSwitch)
                             mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese");
-                        KeybindHandler.resetKeybindState();
+                            KeybindHandler.updateKeys(false, false, false, false, true, false, false, false);
                         break;
                     case WALKING:
                         if(targetBlockPos == null) return;
 
                         switch(mineBaritone.getState()){
                             case IDLE:
-                                if(BlockUtils.getPlayerLoc().equals(targetBlockPos))
+                                if(BlockUtils.getPlayerLoc().equals(targetBlockPos)) {
                                     treasureState = TreasureState.SOLVING;
+                                    KeybindHandler.resetKeybindState();
+                                }
                                 else {
                                     mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pickonimbus");
                                     mineBaritone.goTo(targetBlockPos);
@@ -409,7 +431,9 @@ public class PowderMacro extends Macro {
                 && !aote
                 && !Autosell.isEnabled()
                 && !(mineBaritone.getState() == AutoMineBaritone.BaritoneState.EXECUTING)){
-            this.rotation.updateInCircle(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate);
+            if(MightyMiner.config.powMiningShape < 2) {
+                rotation.updateMousePath(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate, MightyMiner.config.powMiningShape);
+            }
         }
     }
 
@@ -468,7 +492,7 @@ public class PowderMacro extends Macro {
                 new ArrayList<>(solvedOrSolvingChests), 0, 256, new BlockData<>(Blocks.chest));
 
         if(foundBlocks.isEmpty()){
-            LogUtils.addMessage("That chest was impossible to solve");
+            LogUtils.addMessage("No chest detected/chest out of range");
             return;
         }
 
@@ -493,7 +517,7 @@ public class PowderMacro extends Macro {
             if(getBlock(check.up()).equals(Blocks.air) || mineSlowBlocks.contains(getBlock(check.up())))
                 ++blocksEmpty;
         }
-        return blocksEmpty >= 6);
+        return blocksEmpty >= 6;
     }
 
 

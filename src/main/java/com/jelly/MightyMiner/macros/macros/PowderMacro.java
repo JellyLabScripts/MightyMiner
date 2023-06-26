@@ -274,7 +274,7 @@ public class PowderMacro extends Macro {
                     case INIT: case SOLVING:
                         if(MightyMiner.config.powBlueCheeseSwitch)
                             mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese");
-                            KeybindHandler.updateKeys(false, false, false, false, true, false, false, false);
+                        KeybindHandler.updateKeys(false, false, false, false, true, false, false, false);
                         break;
                     case WALKING:
                         if(targetBlockPos == null) return;

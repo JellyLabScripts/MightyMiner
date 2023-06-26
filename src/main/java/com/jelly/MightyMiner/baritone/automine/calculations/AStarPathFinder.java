@@ -75,7 +75,7 @@ public class AStarPathFinder {
 
         } else { // 1 loop for ALL block types
             for (ArrayList<BlockData<?>> block: blockType) {
-                foundBlocks.addAll(BlockUtils.findBlockInCube(10, blackListedPos, 0, 256, block));
+                foundBlocks.addAll(BlockUtils.findBlockInCube(pathFinderBehaviour.getSearchRadius(), blackListedPos, 0, 256, block));
             }
                 possiblePaths.addAll(getPossiblePaths(foundBlocks));
 
@@ -164,11 +164,11 @@ public class AStarPathFinder {
                     }
                 } else {
                     if (MineUtils.getMithrilColorBasedOnPriority(2).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
-                        cost += 8.5D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                        cost += 12.5D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
                     } else if (MineUtils.getMithrilColorBasedOnPriority(1).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
-                        cost += 5.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                        cost += 8.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
                     } else if (MineUtils.getMithrilColorBasedOnPriority(0).stream().anyMatch(blockData -> BlockUtils.isBlock(blockData, node.getPos()))) {
-                        cost += 3.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
+                        cost += 4.0D * (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
                     } else {
                         cost += (Math.abs(AngleUtils.getActualRotationYaw(mc.thePlayer.rotationYaw) - AngleUtils.getRequiredYawSide(node.getPos())) + Math.abs(mc.thePlayer.rotationPitch - AngleUtils.getRequiredPitchSide(node.getPos()))) / 540.0d;
                     }

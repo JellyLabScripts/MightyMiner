@@ -316,6 +316,12 @@ public class AOTVMacro extends Macro {
                 mc.mouseHelper.grabMouseCursor();
                 tpStuckTimer.reset();
                 waitAfterKillTimer.reset();
+                timeBetweenLastWaypoint.reset();
+                tooFastTp = false;
+                firstTp = true;
+                reScan = true;
+                tping = false;
+                currentState = State.MINING;
                 return;
             } else if (!FuelFilling.isRefueling()) {
                 if (!waitAfterKillTimer.hasReached(500)) return;

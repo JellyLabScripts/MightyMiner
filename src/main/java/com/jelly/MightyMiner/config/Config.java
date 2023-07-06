@@ -11,7 +11,6 @@ import com.jelly.MightyMiner.gui.AOTVGemstoneFilter;
 import com.jelly.MightyMiner.gui.AOTVWaypointsPage;
 import com.jelly.MightyMiner.hud.MobKillerHUD;
 import com.jelly.MightyMiner.hud.CommissionMacroHUD;
-import com.jelly.MightyMiner.macros.macros.CommissionMacro;
 
 public class Config extends cc.polyfrost.oneconfig.config.Config {
 
@@ -248,9 +247,8 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Slider(name = "Space from cobblestone to the center", subcategory = "Targeting", description = "Increase if macro destroys cobblestone too often", category = AOTV_MACRO, min = 0f, max = 0.35f)
     public float aotvMiningCobblestoneAccuracy = 0.15f;
 
-    @VigilanceName(name = "Auto yog killer", category = AOTV_MACRO, subcategory = "Yogs")
-    @Switch(name = "Auto yog killer", description = "Warning: Early alpha. For more configuration options go to MobKiller", category = AOTV_MACRO, subcategory = "Yogs")
-    public boolean aotvKillYogs = true;
+    @Switch(name = "Auto Mob Killer", description = "Warning: Early alpha. For more configuration options go to MobKiller. It's going to kill mobs such as \"Yog\", \"Thys\", \"Automaton\"", category = AOTV_MACRO, subcategory = "Mobs")
+    public boolean autoKillMobs = true;
 
     @VigilanceName(name = "Stop if any cobblestone on the route has been destroyed", category = AOTV_MACRO, subcategory = "Mining")
     @Switch(name = "Stop if any cobblestone on the route has been destroyed", category = AOTV_MACRO, subcategory = "Mining")

@@ -121,22 +121,22 @@ public class Failsafes {
                 selfCount++;
             }
         }
-        if (selfCount >= 2) {
-            if (!lastWorldChange.hasReached(1500)) {
-                bedrockFailsafeFake(true);
-            }
-            return;
-        }
-        int bedrockCount = 0;
-        for (BlockPos bp : BlockPos.getAllInBox(mc.thePlayer.getPosition().add(5, 5, 5), mc.thePlayer.getPosition().add(-5, -5, -5))) {
-            if (mc.theWorld.getBlockState(bp).getBlock().equals(Blocks.bedrock)) {
-                bedrockCount++;
-            }
-        }
-        if (bedrockCount > MightyMiner.config.bedrockBackupThreshold) {
-            bedrockFailsafeFake(false);
-            return;
-        }
+//        if (selfCount >= 2) {
+//            if (!lastWorldChange.hasReached(1500)) {
+//                bedrockFailsafeFake(true);
+//            }
+//            return;
+//        }
+//        int bedrockCount = 0;
+//        for (BlockPos bp : BlockPos.getAllInBox(mc.thePlayer.getPosition().add(5, 5, 5), mc.thePlayer.getPosition().add(-5, -5, -5))) {
+//            if (mc.theWorld.getBlockState(bp).getBlock().equals(Blocks.bedrock)) {
+//                bedrockCount++;
+//            }
+//        }
+//        if (bedrockCount > MightyMiner.config.bedrockBackupThreshold) {
+//            bedrockFailsafeFake(false);
+//            return;
+//        }
 
         if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer == null){
             someoneIsCloseTimer = new Timer();

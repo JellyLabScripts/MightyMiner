@@ -74,16 +74,18 @@ public class Failsafes {
         if (mc.thePlayer == null || mc.theWorld == null)
             return;
 
-        if (event.update.getBlock().equals(Blocks.bedrock) && new Vec3(event.pos).distanceTo(mc.thePlayer.getPositionVector()) < 6) {
-            changesToBedrock++;
-        }
-        if (blockChangeTimer.hasReached(1000)) {
-            if (changesToBedrock > MightyMiner.config.bedrockThreshold) {
-                PingAlert.sendPingAlert();
-                bedrockFailsafeFake(false);
+        if (MightyMiner.config.bedrockFailsafe) {
+            if (event.update.getBlock().equals(Blocks.bedrock) && new Vec3(event.pos).distanceTo(mc.thePlayer.getPositionVector()) < 6) {
+                changesToBedrock++;
             }
-            blockChangeTimer.reset();
-            changesToBedrock = 0;
+            if (blockChangeTimer.hasReached(1000)) {
+                if (changesToBedrock > MightyMiner.config.bedrockThreshold) {
+                    PingAlert.sendPingAlert();
+                    bedrockFailsafeFake(false);
+                }
+                blockChangeTimer.reset();
+                changesToBedrock = 0;
+            }
         }
     }
 
@@ -127,15 +129,17 @@ public class Failsafes {
             }
             return;
         }
-        int bedrockCount = 0;
-        for (BlockPos bp : BlockPos.getAllInBox(mc.thePlayer.getPosition().add(5, 5, 5), mc.thePlayer.getPosition().add(-5, -5, -5))) {
-            if (mc.theWorld.getBlockState(bp).getBlock().equals(Blocks.bedrock)) {
-                bedrockCount++;
+        if (MightyMiner.config.bedrockFailsafe) {
+            int bedrockCount = 0;
+            for (BlockPos bp : BlockPos.getAllInBox(mc.thePlayer.getPosition().add(5, 5, 5), mc.thePlayer.getPosition().add(-5, -5, -5))) {
+                if (mc.theWorld.getBlockState(bp).getBlock().equals(Blocks.bedrock)) {
+                    bedrockCount++;
+                }
             }
-        }
-        if (bedrockCount > MightyMiner.config.bedrockBackupThreshold) {
-            bedrockFailsafeFake(false);
-            return;
+            if (bedrockCount > MightyMiner.config.bedrockBackupThreshold) {
+                bedrockFailsafeFake(false);
+                return;
+            }
         }
 
         if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer == null){

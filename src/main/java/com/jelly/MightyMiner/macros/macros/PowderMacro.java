@@ -3,6 +3,7 @@ package com.jelly.MightyMiner.macros.macros;
 import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
 import com.jelly.MightyMiner.utils.*;
@@ -155,6 +156,35 @@ public class PowderMacro extends Macro {
                                 getPitchRotationTime(getRequiredPitchCenter(targetChest), 30, 250, 500)));
                 KeybindHandler.resetKeybindState();
                 break;
+            case TREASURE_SOLVE:
+                if (MightyMiner.config.powGreatExplorer) {
+                    if (mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos().equals(targetChest)) {
+                        KeybindHandler.rightClick();
+                        currentState = State.NORMAL;
+                        return;
+                    }
+
+                    float yaw = getRequiredYawCenter(targetChest);
+                    float pitch = getRequiredPitchCenter(targetChest);
+
+                    if (AngleUtils.getAngleDifference(yaw, mc.thePlayer.rotationYaw) > 0.5 ||
+                            AngleUtils.getAngleDifference(pitch, mc.thePlayer.rotationPitch) > 0.5) {
+                        if (rotator.rotating) {
+                            return;
+                        }
+
+                        rotator.initAngleLock(yaw, pitch,
+                                Math.max(getYawRotationTime(getRequiredYawCenter(targetChest), 45, 250, 500),
+                                        getPitchRotationTime(getRequiredPitchCenter(targetChest), 30, 250, 500)));
+
+                        return;
+                    }
+
+                    if (mc.objectMouseOver == null || !mc.objectMouseOver.getBlockPos().equals(targetChest)) {
+                        KeybindHandler.leftClick();
+                    }
+                }
+                break;
         }
 
         if(currentState == State.NORMAL || !timeoutTimer.passed())
@@ -231,13 +261,16 @@ public class PowderMacro extends Macro {
             System.out.println(railwayOnLeftOrRight());
 
             // TODO: SCAN RAILWAYS
+        } else if (message.contains("You must pick the lock on this chest to open it!")) {
+            Logger.log("You don't have great explorer so no need for it to be enabled");
+            MightyMiner.config.powGreatExplorer = false;
         }
 
     }
 
     @Override
     public void onPacketReceived(Packet<?> packet){
-        if(currentState != State.TREASURE_SOLVE || !(packet instanceof S2APacketParticles) || targetChest == null)
+        if(currentState != State.TREASURE_SOLVE || !(packet instanceof S2APacketParticles) || targetChest == null || MightyMiner.config.powGreatExplorer)
             return;
 
         if(!(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT))

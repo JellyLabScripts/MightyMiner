@@ -340,13 +340,17 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Slider(name = "Player detection radius", description = "Trigger failsafe if there is player inside the given radius of player", category = FAILSAFES, min = 1, max = 30, subcategory = "Player detection failsafe")
     public int playerRad = 10;
 
+    @VigilanceName(name = "Bedrock failsafe", category = FAILSAFES, subcategory = "Bedrock failsafe")
+    @Switch(name = "Bedrock failsafe", category = FAILSAFES, subcategory = "Bedrock failsafe")
+    public boolean bedrockFailsafe = true;
+
     @VigilanceName(name = "Bedrock/s check threshold", category = FAILSAFES, subcategory = "Bedrock failsafe")
-    @Slider(name = "Bedrock/s check threshold", description = "Amount of bedrock that needs to spawn in a second for the failsafe to trigger", category = FAILSAFES, min = 8, max = 25, subcategory = "Player detection failsafe")
+    @Slider(name = "Bedrock/s check threshold", description = "Amount of bedrock that needs to spawn in a second for the failsafe to trigger", category = FAILSAFES, min = 8, max = 25, subcategory = "Bedrock failsafe")
     public int bedrockThreshold = 12;
 
     @VigilanceName(name = "Bedrock check threshold", category = FAILSAFES, subcategory = "Bedrock failsafe")
-    @Slider(name = "Bedrock check threshold", description = "Amount of bedrock that needs to be around a player to trigger the failsafe", category = FAILSAFES, min = 8, max = 35, subcategory = "Player detection failsafe")
-    public int bedrockBackupThreshold = 30;
+    @Slider(name = "Bedrock check threshold", description = "Amount of bedrock that needs to be around a player to trigger the failsafe", category = FAILSAFES, min = 8, max = 500, subcategory = "Bedrock failsafe")
+    public int bedrockBackupThreshold = 40;
 
     @Slider(name = "Player detection threshold until disable", category = FAILSAFES, min = 1, max = 10, subcategory = "Player detection failsafe")
     public int playerDetectionThreshold = 3;

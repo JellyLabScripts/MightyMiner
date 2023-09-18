@@ -104,6 +104,10 @@ public class Config extends cc.polyfrost.oneconfig.config.Config {
     @Dropdown(name = "Mining Shape", description = "The shape you want the powder macro to mine in", category = POWDER_MACRO, subcategory = "Mining", options = {"Limacon", "Ellipse"})
     public int powMiningShape = 0;
 
+    @VigilanceName(name = "Great Explorer", category = POWDER_MACRO, subcategory = "Mining")
+    @Switch(name = "Great Explorer", description = "Right clicks chests to instantly open them. Only works with the perk.", category = POWDER_MACRO, subcategory = "Mining")
+    public boolean powGreatExplorer = false;
+
     @VigilanceName(name = "Mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
     @Switch(name = "Mine gemstones", description = "Make sure you have a drill that is able to mine gemstones", category = POWDER_MACRO, subcategory = "Mining")
     public boolean powMineGemstone = true;

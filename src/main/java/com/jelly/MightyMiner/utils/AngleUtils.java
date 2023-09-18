@@ -317,4 +317,11 @@ public class AngleUtils {
         return blockSideToMine;
     }
 
+    public static int getYawRotationTime(float target_yaw, int angle_per_unit, int time_per_unit, int min){
+        return (int) Math.max(min, getAngleDifference(target_yaw, getActualRotationYaw()) / angle_per_unit * time_per_unit);
+    }
+    public static int getPitchRotationTime(float target_pitch, int angle_per_unit, int time_per_unit, int min){
+        return (int) Math.max(min, Math.abs(target_pitch - mc.thePlayer.rotationPitch) / angle_per_unit * time_per_unit);
+    }
+
 }

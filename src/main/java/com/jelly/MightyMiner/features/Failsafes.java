@@ -4,6 +4,7 @@ import com.jelly.MightyMiner.MightyMiner;
 import com.jelly.MightyMiner.events.BlockChangeEvent;
 import com.jelly.MightyMiner.events.ReceivePacketEvent;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
+import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.macros.macros.CommissionMacro;
 import com.jelly.MightyMiner.player.Rotation;
@@ -74,6 +75,8 @@ public class Failsafes {
         if (mc.thePlayer == null || mc.theWorld == null)
             return;
 
+        if (macros.stream().noneMatch(Macro::isEnabled)) return;
+
         if (MightyMiner.config.bedrockFailsafe) {
             if (event.update.getBlock().equals(Blocks.bedrock) && new Vec3(event.pos).distanceTo(mc.thePlayer.getPositionVector()) < 6) {
                 changesToBedrock++;
@@ -113,8 +116,6 @@ public class Failsafes {
         if (event.phase == TickEvent.Phase.END) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;
 
-        if (!MightyMiner.config.playerFailsafe) return;
-
         if (macros.stream().noneMatch(Macro::isEnabled)) return;
 
         int selfCount = 0;
@@ -142,18 +143,20 @@ public class Failsafes {
             }
         }
 
-        if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer == null){
-            someoneIsCloseTimer = new Timer();
-        } else if (!PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer != null) {
-            someoneIsCloseTimer = null;
-        }
+        if (MightyMiner.config.playerFailsafe) {
+            if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer == null){
+                someoneIsCloseTimer = new Timer();
+            } else if (!PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer != null) {
+                someoneIsCloseTimer = null;
+            }
 
-        if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer != null && someoneIsCloseTimer.hasReached(MightyMiner.config.playerDetectionThreshold)) {
-            PingAlert.sendPingAlert();
-            DisableMacros();
-            KeybindHandler.resetKeybindState();
-            LogUtils.addMessage("Someone is close, disabling macros");
-            someoneIsCloseTimer = null;
+            if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad) && someoneIsCloseTimer != null && someoneIsCloseTimer.hasReached(MightyMiner.config.playerDetectionThreshold)) {
+                PingAlert.sendPingAlert();
+                DisableMacros();
+                KeybindHandler.resetKeybindState();
+                LogUtils.addMessage("Someone is close, disabling macros");
+                someoneIsCloseTimer = null;
+            }
         }
     }
 

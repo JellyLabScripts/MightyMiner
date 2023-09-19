@@ -16,6 +16,7 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -137,6 +138,8 @@ public class PowderMacro extends Macro {
                 if(chestQueue.isEmpty())
                     return;
 
+                KeybindHandler.resetKeybindState();
+
                 currentState = State.TREASURE_WALK;
                 targetChest = chestQueue.poll();
                 timeoutTimer.schedule(10000);
@@ -145,22 +148,28 @@ public class PowderMacro extends Macro {
 
                 hasObstaclesToChest = trace != null && !trace.getBlockPos().equals(targetChest);
                 break;
-
             case TREASURE_WALK:
+                if (mc.theWorld.getBlockState(targetChest).getBlock() != Blocks.chest || isOpen()) {
+                    currentState = State.NORMAL;
+                    return;
+                }
                 if(MathUtils.getDistanceBetweenTwoBlock(targetChest, getPlayerLoc()) >= 3.3f)
                     return;
 
                 currentState = State.TREASURE_SOLVE;
                 rotator.easeTo(getRequiredYawCenter(targetChest), getRequiredPitchCenter(targetChest),
-                        Math.max(getYawRotationTime(getRequiredYawCenter(targetChest), 45, 250, 500),
-                                getPitchRotationTime(getRequiredPitchCenter(targetChest), 30, 250, 500)));
+                        Math.max(getYawRotationTime(getRequiredYawCenter(targetChest), 45, 150, 350),
+                                getPitchRotationTime(getRequiredPitchCenter(targetChest), 30, 150, 350)));
                 KeybindHandler.resetKeybindState();
                 break;
             case TREASURE_SOLVE:
+                if (mc.theWorld.getBlockState(targetChest).getBlock() != Blocks.chest || isOpen()) {
+                    currentState = State.NORMAL;
+                    return;
+                }
                 if (MightyMiner.config.powGreatExplorer) {
                     if (mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos().equals(targetChest)) {
                         KeybindHandler.rightClick();
-                        currentState = State.NORMAL;
                         return;
                     }
 
@@ -288,6 +297,13 @@ public class PowderMacro extends Macro {
                 getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
                 getRequiredPitch(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, (((S2APacketParticles) packet).getYCoordinate()) - (mc.thePlayer.posY + 1.62d), ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
                 (int) (300 + Math.random() * 200));
+    }
+
+    public boolean isOpen() {
+        TileEntityChest chest = (TileEntityChest) mc.theWorld.getTileEntity(targetChest);
+        if (chest == null) return false;
+        int state = chest.numPlayersUsing;
+        return state > 0;
     }
 
 

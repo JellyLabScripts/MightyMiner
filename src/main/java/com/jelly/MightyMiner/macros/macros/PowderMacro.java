@@ -176,7 +176,7 @@ public class PowderMacro extends Macro {
                 if (MightyMiner.config.powGreatExplorer) {
                     if (mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos().equals(targetChest)) {
                         if (rightClickDelay == 0) {
-                            rightClickDelay = 10;
+                            rightClickDelay = 8 + MathHelper.getRandomIntegerInRange(new Random(), 0, 5);
                             KeybindHandler.rightClick();
                         }
                         return;

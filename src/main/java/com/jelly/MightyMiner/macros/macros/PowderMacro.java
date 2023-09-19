@@ -59,6 +59,7 @@ public class PowderMacro extends Macro {
     private State currentState;
     private boolean hasObstaclesToChest;
     private float rotationYawAxis;
+    private int rightClickDelay;
 
     @Override
     protected void onEnable() {
@@ -66,6 +67,7 @@ public class PowderMacro extends Macro {
         solvedOrSolvingChests.clear();
         rotationYawAxis = getClosest();
         currentState = State.NORMAL;
+        rightClickDelay = 6;
     }
 
     @Override
@@ -78,6 +80,10 @@ public class PowderMacro extends Macro {
     public void onTick(TickEvent.Phase phase) {
 
         if(phase == TickEvent.Phase.END) return;
+
+        if (rightClickDelay > 0) {
+            rightClickDelay--;
+        }
 
         updateState();
 
@@ -169,7 +175,10 @@ public class PowderMacro extends Macro {
                 }
                 if (MightyMiner.config.powGreatExplorer) {
                     if (mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos().equals(targetChest)) {
-                        KeybindHandler.rightClick();
+                        if (rightClickDelay == 0) {
+                            rightClickDelay = 10;
+                            KeybindHandler.rightClick();
+                        }
                         return;
                     }
 

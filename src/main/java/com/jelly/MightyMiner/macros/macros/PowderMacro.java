@@ -35,7 +35,7 @@ import static com.jelly.MightyMiner.utils.AngleUtils.*;
 public class PowderMacro extends Macro {
 
     private final Block[] stoneBlocks = {Blocks.stone, Blocks.coal_ore, Blocks.iron_ore, Blocks.gold_ore, Blocks.lapis_ore, Blocks.emerald_ore, Blocks.redstone_ore, Blocks.diamond_ore};
-    private final Block[] obstacleBlocks = {Blocks.stained_glass, Blocks.stained_glass_pane, Blocks.prismarine, Blocks.chest};
+    private final Block[] obstacleBlocks = {Blocks.stained_glass, Blocks.stained_glass_pane, Blocks.wool, Blocks.prismarine, Blocks.chest};
 
     private final Block[] caveBlocks = {Blocks.bedrock, Blocks.flowing_water, Blocks.water, Blocks.flowing_lava, Blocks.lava,
             Blocks.dirt,  Blocks.stained_hardened_clay, Blocks.hardened_clay, Blocks.wooden_slab, Blocks.log, Blocks.log2, // goblin holdout

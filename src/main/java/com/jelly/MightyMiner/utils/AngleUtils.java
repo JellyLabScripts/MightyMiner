@@ -6,9 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Tuple;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -322,6 +320,106 @@ public class AngleUtils {
     }
     public static int getPitchRotationTime(float target_pitch, int angle_per_unit, int time_per_unit, int min){
         return (int) Math.max(min, Math.abs(target_pitch - mc.thePlayer.rotationPitch) / angle_per_unit * time_per_unit);
+    }
+
+    public static BlockPos bresenham(Vec3 start, Vec3 end) {
+        int x1 = MathHelper.floor_double(end.xCoord);
+        int y1 = MathHelper.floor_double(end.yCoord);
+        int z1 = MathHelper.floor_double(end.zCoord);
+        int x0 = MathHelper.floor_double(start.xCoord);
+        int y0 = MathHelper.floor_double(start.yCoord);
+        int z0 = MathHelper.floor_double(start.zCoord);
+
+        if (mc.theWorld.getBlockState(new BlockPos(x0, y0, z0)).getBlock() != Blocks.air) {
+            return new BlockPos(x0, y0, z0);
+        }
+
+        int iterations = 200;
+
+        while (iterations-- >= 0) {
+            if (x0 == x1 && y0 == y1 && z0 == z1) {
+                return new BlockPos(end);
+            }
+
+            boolean hasNewX = true;
+            boolean hasNewY = true;
+            boolean hasNewZ = true;
+
+            double newX = 999.0;
+            double newY = 999.0;
+            double newZ = 999.0;
+
+            if (x1 > x0) {
+                newX = (double) x0 + 1.0;
+            } else if (x1 < x0) {
+                newX = (double) x0 + 0.0;
+            } else {
+                hasNewX = false;
+            }
+            if (y1 > y0) {
+                newY = (double) y0 + 1.0;
+            } else if (y1 < y0) {
+                newY = (double) y0 + 0.0;
+            } else {
+                hasNewY = false;
+            }
+            if (z1 > z0) {
+                newZ = (double) z0 + 1.0;
+            } else if (z1 < z0) {
+                newZ = (double) z0 + 0.0;
+            } else {
+                hasNewZ = false;
+            }
+
+            double stepX = 999.0;
+            double stepY = 999.0;
+            double stepZ = 999.0;
+
+
+            double dx = end.xCoord - start.xCoord;
+            double dy = end.yCoord - start.yCoord;
+            double dz = end.zCoord - start.zCoord;
+
+            if (hasNewX) {
+                stepX = (newX - start.xCoord) / dx;
+            }
+            if (hasNewY) {
+                stepY = (newY - start.yCoord) / dy;
+            }
+            if (hasNewZ) {
+                stepZ = (newZ - start.zCoord) / dz;
+            }
+            if (stepX == -0.0) {
+                stepX = -1.0E-4;
+            }
+            if (stepY == -0.0) {
+                stepY = -1.0E-4;
+            }
+            if (stepZ == -0.0) {
+                stepZ = -1.0E-4;
+            }
+
+            EnumFacing enumfacing;
+            if (stepX < stepY && stepX < stepZ) {
+                enumfacing = x1 > x0 ? EnumFacing.WEST : EnumFacing.EAST;
+                start = new Vec3(newX, start.yCoord + dy * stepX, start.zCoord + dz * stepX);
+            } else if (stepY < stepZ) {
+                enumfacing = y1 > y0 ? EnumFacing.DOWN : EnumFacing.UP;
+                start = new Vec3(start.xCoord + dx * stepY, newY, start.zCoord + dz * stepY);
+            } else {
+                enumfacing = z1 > z0 ? EnumFacing.NORTH : EnumFacing.SOUTH;
+                start = new Vec3(start.xCoord + dx * stepZ, start.yCoord + dy * stepZ, newZ);
+            }
+            x0 = MathHelper.floor_double(start.xCoord) - (enumfacing == EnumFacing.EAST ? 1 : 0);
+            y0 = MathHelper.floor_double(start.yCoord) - (enumfacing == EnumFacing.UP ? 1 : 0);
+            z0 = MathHelper.floor_double(start.zCoord) - (enumfacing == EnumFacing.SOUTH ? 1 : 0);
+
+            if (mc.theWorld.getBlockState(new BlockPos(x0, y0, z0)).getBlock() != Blocks.air) {
+                return new BlockPos(x0, y0, z0);
+            }
+        }
+
+        return null;
     }
 
 }

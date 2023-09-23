@@ -114,8 +114,20 @@ public class PowderMacro extends Macro {
             case TREASURE_WALK:
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
                 KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, !fitsPlayer(getRelativeBlockPos(0, -1, 1)));
-                float instantaneous_required_yaw = getRequiredYawCenter(targetChest);
-                float target_pitch = hasObstaclesToChest ? 30 : getRequiredPitchCenter(targetChest);
+
+                float instantaneous_required_yaw;
+                float target_pitch;
+
+                EnumFacing facing = EnumFacing.fromAngle(mc.thePlayer.rotationYaw);
+                BlockPos nextTo = getPlayerLoc().offset(facing);
+
+                if (hasObstaclesToChest && mc.theWorld.getBlockState(nextTo).getBlock() != Blocks.air) {
+                    instantaneous_required_yaw = getRequiredYawCenter(nextTo);
+                    target_pitch = getRequiredPitchCenter(nextTo);
+                } else {
+                    instantaneous_required_yaw = getRequiredYawCenter(targetChest);
+                    target_pitch = hasObstaclesToChest ? 30 : getRequiredPitchCenter(targetChest);
+                }
 
                 rotator.initAngleLock(instantaneous_required_yaw, target_pitch,
                         Math.max(getYawRotationTime(instantaneous_required_yaw, 45, 200, 500), getPitchRotationTime(target_pitch, 30, 200, 500)));
@@ -150,13 +162,12 @@ public class PowderMacro extends Macro {
                 targetChest = chestQueue.poll();
                 timeoutTimer.schedule(10000);
 
-                hasObstaclesToChest = false;
+                Vec3 feetCenter = getBlockCenter(getPlayerLoc());
+                Vec3 targetCenter = getBlockCenter(targetChest);
 
-                for (BlockPos pos : getAllBlocksInLine2d(getPlayerLoc(), targetChest)) {
-                    if (mc.theWorld.getBlockState(pos).getBlock() != Blocks.air) {
-                        hasObstaclesToChest = true;
-                    }
-                }
+                BlockPos trace = bresenham(feetCenter, new Vec3(targetCenter.xCoord, feetCenter.yCoord, targetCenter.zCoord));
+
+                hasObstaclesToChest = trace != null && !trace.equals(targetChest);
 
                 break;
             case TREASURE_WALK:

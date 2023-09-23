@@ -150,9 +150,14 @@ public class PowderMacro extends Macro {
                 targetChest = chestQueue.poll();
                 timeoutTimer.schedule(10000);
 
-                MovingObjectPosition trace = mc.theWorld.rayTraceBlocks(BlockUtils.getBlockCenter(getPlayerLoc()), BlockUtils.getBlockCenter(targetChest));
+                hasObstaclesToChest = false;
 
-                hasObstaclesToChest = trace != null && !trace.getBlockPos().equals(targetChest);
+                for (BlockPos pos : getAllBlocksInLine2d(getPlayerLoc(), targetChest)) {
+                    if (mc.theWorld.getBlockState(pos).getBlock() != Blocks.air) {
+                        hasObstaclesToChest = true;
+                    }
+                }
+
                 break;
             case TREASURE_WALK:
                 if (mc.theWorld.getBlockState(targetChest).getBlock() != Blocks.chest || isOpen()) {

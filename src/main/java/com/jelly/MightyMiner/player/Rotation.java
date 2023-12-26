@@ -79,9 +79,36 @@ public class Rotation {
     }
 
 
-    public void updateInCircle(float radius, int blocksInFront, float rotationYawAxis, int rate){
+    public void updateInEllipse(float semi_minor_axis, float semi_major_axis, int blocksInFront, float rotationYawAxis, int rate){
         if(rotating) return;
 
+        double deltaTime = (System.currentTimeMillis() - previousTime) / 1000.0f;
+        previousTime = System.currentTimeMillis();
+
+        if(deltaTime > 0.1)
+            return;
+
+        phase += ((rate + Math.random() * rate / 2.0f) * deltaTime);
+        phase %= (2 * Math.PI);
+
+        float x = (float) (semi_major_axis * Math.sin(phase));
+        float y = (float) (semi_minor_axis * Math.cos(phase)) - 0.5f;
+
+        float yaw = getYawFromParametricEquation(x, blocksInFront, rotationYawAxis);
+        float pitch = getPitchFromParametricEquation(x, y, blocksInFront, rotationYawAxis);
+
+        if(getAngleDifference(yaw, getActualRotationYaw()) > 15 || Math.abs(pitch - mc.thePlayer.rotationPitch) > 15){
+            easeTo(yaw, pitch,
+                    Math.max(getYawRotationTime(yaw, 45, 200, 300), getPitchRotationTime(pitch, 30, 200, 300)));
+            return;
+        }
+
+        rotateInstantlyTo(yaw, pitch);
+    }
+
+
+    public void updateInLimacon(float radius, int blocksInFront, float rotationYawAxis, int rate){
+        if(rotating) return;
 
         double deltaTime = (System.currentTimeMillis() - previousTime) / 1000.0f;
         previousTime = System.currentTimeMillis();
@@ -93,7 +120,6 @@ public class Rotation {
         phase %= (2 * Math.PI);
 
 
-
         // here we use parametric equations (We use a Limaçon here (https://en.wikipedia.org/wiki/Lima%C3%A7on))
         // E.g. circle -> x = rcost, y = rsint, t = phase
 
@@ -102,37 +128,41 @@ public class Rotation {
         // parametric form -> x = a/2 + b cos t + a/2 cos 2t, y = b sin t + a/2 sin 2t
         // one which works is b = 0.3, a = 1
 
+        float x, y;
+
         float a = 1;
         float b = 0.35f;
         float k = radius + 0.5f; // scale factor which scales up the whole loop (+0.5f is just an approximation)
         float c = -1.35f; // translates the whole graph c units right (negative -> left)
 
-        float p = (float) (k * (a/2.0 + b * Math.cos(phase) + a/2.0 * Math.cos(2 * phase)) + c);
-        float q = (float) (k * (b * Math.sin(phase) + a/2.0 * Math.sin(2 * phase)));
+        x = (float) (k * (a / 2.0 + b * Math.cos(phase) + a / 2.0 * Math.cos(2 * phase)) + c);
+        y = (float) (k * (b * Math.sin(phase) + a / 2.0 * Math.sin(2 * phase)));
 
         //just need to input the corresponding parametric equations :)
 
-        //Dürer folium also works
-        //double p = k * (Math.cos(phase) + Math.cos(3*phase));
-        //double q = k / 1.5f * (Math.sin(phase) + Math.sin(3*phase));
-
-        float yaw;
-        float pitch;
-        if (rotationYawAxis % 180 == 0) {
-            yaw = getRequiredYaw(p, blocksInFront * BlockUtils.getUnitZ(rotationYawAxis));
-            pitch = getRequiredPitch(p, q, blocksInFront * BlockUtils.getUnitZ(rotationYawAxis));
-        } else {
-            yaw = getRequiredYaw(blocksInFront * BlockUtils.getUnitX(rotationYawAxis), p);
-            pitch = getRequiredPitch(blocksInFront * BlockUtils.getUnitX(rotationYawAxis), q, p);
-        }
+        float yaw = getYawFromParametricEquation(x, blocksInFront, rotationYawAxis);
+        float pitch = getPitchFromParametricEquation(x, y, blocksInFront, rotationYawAxis);
 
         if(getAngleDifference(yaw, getActualRotationYaw()) > 15 || Math.abs(pitch - mc.thePlayer.rotationPitch) > 15){
-            easeTo(yaw, pitch, 200);
+            easeTo(yaw, pitch,
+                    Math.max(getYawRotationTime(yaw, 45, 200, 300), getPitchRotationTime(pitch, 30, 200, 300)));
             return;
         }
         rotateInstantlyTo(yaw, pitch);
 
 
+    }
+
+    public float getYawFromParametricEquation(float x, int blocksInFront, float rotationYawAxis) {
+        return rotationYawAxis % 180 == 0 ?
+                getRequiredYaw(x, blocksInFront * BlockUtils.getUnitZ(rotationYawAxis)) :
+                getRequiredYaw(blocksInFront * BlockUtils.getUnitX(rotationYawAxis), x);
+    }
+
+    public float getPitchFromParametricEquation(float x, float y, int blocksInFront, float rotationYawAxis){
+        return rotationYawAxis % 180 == 0 ?
+                getRequiredPitch(x, y, blocksInFront * BlockUtils.getUnitZ(rotationYawAxis)) :
+                getRequiredPitch(blocksInFront * BlockUtils.getUnitX(rotationYawAxis), y, x);
     }
 
     public void rotateInstantlyTo(float yaw, float pitch){

@@ -128,9 +128,9 @@ public class AOTVMacro extends Macro {
             return;
         }
 
-        if (MightyMiner.config.aotvKillYogs) {
+        if (MightyMiner.config.autoKillMobs && MightyMiner.config.macroType == 3) {
             MightyMiner.mobKiller.toggle();
-            MobKiller.setMobsNames(false, "Yog");
+            MobKiller.setMobsNames(false, "Yog", "Thyst", "Automaton");
             if (MightyMiner.config.useHyperionUnderPlayer) {
                 MobKiller.scanRange = Math.min(5, MightyMiner.config.mobKillerScanRange);
             } else {
@@ -339,7 +339,7 @@ public class AOTVMacro extends Macro {
         }
 
 
-        if (MightyMiner.config.aotvKillYogs) {
+        if (MightyMiner.config.autoKillMobs) {
             if (MobKiller.hasTarget()) {
 
                 if (baritone != null && baritone.getState() != AutoMineBaritone.BaritoneState.IDLE) {

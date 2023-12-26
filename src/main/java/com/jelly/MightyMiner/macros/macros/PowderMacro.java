@@ -1,470 +1,340 @@
 package com.jelly.MightyMiner.macros.macros;
 
 import com.jelly.MightyMiner.MightyMiner;
-import com.jelly.MightyMiner.baritone.automine.AutoMineBaritone;
-import com.jelly.MightyMiner.baritone.automine.config.MiningType;
-import com.jelly.MightyMiner.baritone.automine.config.BaritoneConfig;
 import com.jelly.MightyMiner.baritone.automine.logging.Logger;
-import com.jelly.MightyMiner.features.Autosell;
 import com.jelly.MightyMiner.handlers.KeybindHandler;
 import com.jelly.MightyMiner.handlers.MacroHandler;
 import com.jelly.MightyMiner.macros.Macro;
 import com.jelly.MightyMiner.player.Rotation;
-import com.jelly.MightyMiner.render.BlockRenderer;
 import com.jelly.MightyMiner.utils.*;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockData;
 import com.jelly.MightyMiner.utils.BlockUtils.BlockUtils;
 import com.jelly.MightyMiner.utils.BlockUtils.Box;
-import com.jelly.MightyMiner.utils.BlockUtils.OffsetBox;
-import com.jelly.MightyMiner.utils.PlayerUtils;
-import com.jelly.MightyMiner.utils.Timer;
 import com.jelly.MightyMiner.utils.Utils.MathUtils;
 import com.jelly.MightyMiner.utils.Utils.ThreadUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import static com.jelly.MightyMiner.utils.AngleUtils.*;
+
 import static com.jelly.MightyMiner.utils.BlockUtils.BlockUtils.*;
+import static com.jelly.MightyMiner.utils.AngleUtils.*;
 
 
 public class PowderMacro extends Macro {
 
-    List<Block> blocksAllowedToMine = new ArrayList<Block>() {
-        {
-            add(Blocks.stone);
-            add(Blocks.air);
-            add(Blocks.coal_ore);
-            add(Blocks.iron_ore);
-            add(Blocks.emerald_ore);
-            add(Blocks.gold_ore);
-            add(Blocks.redstone_ore);
-            add(Blocks.lapis_ore);
-            add(Blocks.lit_redstone_ore);
-            add(Blocks.diamond_ore);
-            add(Blocks.prismarine);
-            add(Blocks.chest);
-        }
-    };
-    List<Block> mineSlowBlocks = new ArrayList<Block>(){
-        {
-            add(Blocks.prismarine);
-            add(Blocks.stained_glass_pane);
-            add(Blocks.stained_glass);
-            add(Blocks.wool);
-        }
-    };
-    //base stuff
-    Rotation rotation = new Rotation();
-    AutoMineBaritone mineBaritone;
-    BlockRenderer renderer = new BlockRenderer();
-    ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Block[] stoneBlocks = {Blocks.stone, Blocks.coal_ore, Blocks.iron_ore, Blocks.gold_ore, Blocks.lapis_ore, Blocks.emerald_ore, Blocks.redstone_ore, Blocks.diamond_ore};
+    private final Block[] obstacleBlocks = {Blocks.stained_glass, Blocks.stained_glass_pane, Blocks.wool, Blocks.prismarine, Blocks.chest};
 
-    //states
-    State currentState;
-    State treasureCacheState;
-    TreasureState treasureState = TreasureState.INIT;
+    private final Block[] caveBlocks = {Blocks.bedrock, Blocks.flowing_water, Blocks.water, Blocks.flowing_lava, Blocks.lava,
+            Blocks.dirt,  Blocks.stained_hardened_clay, Blocks.hardened_clay, Blocks.wooden_slab, Blocks.log, Blocks.log2, // goblin holdout
+            Blocks.red_flower, Blocks.yellow_flower, Blocks.clay, Blocks.leaves, Blocks.leaves2, Blocks.grass, Blocks.tallgrass, // jungle
+            Blocks.cobblestone, Blocks.stone_slab, Blocks.stone_slab2, Blocks.double_stone_slab2, Blocks.double_stone_slab, Blocks.wool, Blocks.stone_stairs, Blocks.stone_brick_stairs, Blocks.oak_fence, Blocks.cobblestone_wall, // precursor remnants
+            Blocks.spruce_stairs, Blocks.acacia_stairs, Blocks.birch_stairs, Blocks.dark_oak_stairs, Blocks.jungle_stairs, Blocks.oak_stairs}; // mithril deposits
 
-    enum State {
-        NORMAL,
-        TREASURE,
-        UTurn
+    private final Timer timer = new Timer();
+
+
+    private final Rotation rotator = new Rotation();
+    private final Queue<BlockPos> chestQueue = new LinkedList<>();
+    private final CircularFifoQueue<BlockPos> solvedOrSolvingChests = new CircularFifoQueue<>(3);
+    private BlockPos targetChest;
+    private final Clock timeoutTimer = new Clock();
+    private enum State {
+        NORMAL, TREASURE_WALK, TREASURE_SOLVE
     }
 
-    enum TreasureState {
-        INIT,
-        WALKING,
-        SOLVING,
-        FINISHED,
-        RETURNING
-
-    }
-
-    //mechanics
-    long treasureInitialTime;
-    float playerYaw;
-    int turnState = 0;
-    BlockPos uTurnCachePos;
-
-    //chests
-    BlockPos currentChest;
-    volatile Queue<BlockPos> chestQueue = new LinkedList<>();
-    volatile CircularFifoQueue<BlockPos> solvedOrSolvingChests = new CircularFifoQueue<>(3);
-    volatile BlockPos returnBlockPos;
-    BlockPos targetBlockPos;
-
-    //aote
-    boolean aote;
-    boolean saved;
-    int aoteTick;
-    float savedPitch;
-    int savedItemIndex;
-
-    //antistuck
-    double lastX;
-    double lastZ;
-    final Timer cooldown = new Timer();
-
+    private State currentState;
+    private boolean hasObstaclesToChest;
+    private float rotationYawAxis;
+    private int rightClickDelay;
 
     @Override
-    public void onEnable() {
-        MacroHandler.miningSpeedActive = false;
-        if(MightyMiner.config.playerFailsafe) {
-            if (PlayerUtils.isNearPlayer(MightyMiner.config.playerRad)) {
-                LogUtils.addMessage("Not starting, there is a player nearby");
-                this.toggle();
-                return;
-            }
-        }
-        if(MightyMiner.config.powBlueCheeseSwitch){
-            if(PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese") == -1){
-                LogUtils.addMessage("You don't have a blue cheese drill. Switch disabled");
-                MightyMiner.config.powBlueCheeseSwitch = false;
-            }
-        }
-
-        if(PlayerUtils.getItemInHotbar(true, "Drill", "Gauntlet", "Pickonimbus", "Pickaxe") == -1) {
-            LogUtils.addMessage("You don't have any mining tool!");
-            this.toggle();
-            return;
-        }
-
-        if (MightyMiner.config.powMineGemstone && PlayerUtils.getItemInHotbar(true, "Drill", "Gauntlet", "Pickonimbus") == -1) {
-            LogUtils.addMessage("You don't have a drill, gauntlet or pickonimbus in your hotbar to mine gemstones (in case of pathing)");
-            this.toggle();
-            return;
-        }
-
-
-        mineBaritone = new AutoMineBaritone(getAutomineConfig());
-
-        rotation.reset();
-
-        currentState = State.NORMAL;
-        treasureState = TreasureState.INIT;
-        turnState = 1;
-        treasureInitialTime = System.currentTimeMillis();
-        playerYaw = AngleUtils.getClosest();
-
+    protected void onEnable() {
         chestQueue.clear();
         solvedOrSolvingChests.clear();
-        renderer.renderMap.clear();
-
-        aote = false;
-
-        if(MightyMiner.config.powMineGemstone && !blocksAllowedToMine.contains(Blocks.stained_glass)){
-            blocksAllowedToMine.add(Blocks.stained_glass_pane);
-            blocksAllowedToMine.add(Blocks.stained_glass);
-        } else if(!MightyMiner.config.powMineGemstone && blocksAllowedToMine.contains(Blocks.stained_glass)){
-            blocksAllowedToMine.removeIf(a -> a.equals(Blocks.stained_glass) || a.equals(Blocks.stained_glass_pane));
-        }
-
+        rotationYawAxis = getClosest();
+        currentState = State.NORMAL;
+        rightClickDelay = 6;
     }
 
     @Override
-    public void onDisable() {
-        Autosell.disable();
-        aote = false;
-        if (mineBaritone != null) // nullpointerexception crash sometimes if detected player right after turning on the macro
-            mineBaritone.disableBaritone();
+    protected void onDisable() {
+        rotator.reset();
         KeybindHandler.resetKeybindState();
     }
 
     @Override
-    public void onTick(TickEvent.Phase phase){
-        if(phase != TickEvent.Phase.START || !enabled)
-            return;
+    public void onTick(TickEvent.Phase phase) {
 
+        if(phase == TickEvent.Phase.END) return;
 
-        if(MightyMiner.config.powAutosell){
-            if(Autosell.isEnabled())
-                return;
-            if(Autosell.shouldStart()) {
-                mineBaritone.disableBaritone();
-                Autosell.enable();
-                return;
-            }
-        }
-
-        if(rotation.rotating){
-            KeybindHandler.resetKeybindState();
-            return;
+        if (rightClickDelay > 0) {
+            rightClickDelay--;
         }
 
         updateState();
 
-        if(aote || (currentState != State.NORMAL && currentState != State.UTurn)){
-            // disable antistuck
-            lastX = 10000;
-            lastZ = 10000;
-            cooldown.reset();
-        }
+        switch(currentState) {
+            case NORMAL:
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindW, countObstaclesInLane(4, stoneBlocks) < 2);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, true);
 
-        //aote
-        if (aote) {
-            if(!saved){
-                rotation.reset();
-                KeybindHandler.resetKeybindState();
-                savedPitch = mc.thePlayer.rotationPitch;
-                savedItemIndex = mc.thePlayer.inventory.currentItem;
-                aoteTick = 12;
-                saved = true;
-            }
+                int closestLaneWithNoObstacles = getClosestLaneWithNoObstacles(6, obstacleBlocks);
 
-            if(aoteTick > 0) {
-                aoteTick --;
-                rotation.initAngleLock(AngleUtils.get360RotationYaw(), 89, 500);
-                return;
-            }
-
-
-            mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Void", "End");
-            KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, true);
-
-
-            if (BlockUtils.inCenterOfBlock() || !PlayerUtils.isPossibleToAOTE()) {
-                aote = false;
-                rotation.reset();
-                rotation.easeTo(AngleUtils.get360RotationYaw(), savedPitch, 500);
-                mc.thePlayer.inventory.currentItem = savedItemIndex;
-                KeybindHandler.setKeyBindState(KeybindHandler.keybindUseItem, false);
-            }
-            return;
-        } else {
-            saved = false;
-        }
-
-        //state handling
-        switch (currentState){
-            case TREASURE:
-
-                switch(treasureState){
-                    case INIT: case SOLVING:
-                        if(MightyMiner.config.powBlueCheeseSwitch)
-                            mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbarFromLore(true, "Blue Cheese");
-                        KeybindHandler.resetKeybindState();
-                        break;
-                    case WALKING:
-                        if(targetBlockPos == null) return;
-
-                        switch(mineBaritone.getState()){
-                            case IDLE:
-                                if(BlockUtils.getPlayerLoc().equals(targetBlockPos))
-                                    treasureState = TreasureState.SOLVING;
-                                else {
-                                    mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pickonimbus");
-                                    mineBaritone.goTo(targetBlockPos);
-                                }
-                                break;
-                            case FAILED:
-                                terminateTreasureSolving();
-                                break;
-                        }
-                        break;
-                    case RETURNING:
-
-                        switch(mineBaritone.getState()){
-                            case IDLE:
-                                if(returnBlockPos == null || BlockUtils.getPlayerLoc().equals(returnBlockPos)){
-                                    mineBaritone.disableBaritone();
-                                    currentState = treasureCacheState;
-                                } else mineBaritone.goTo(returnBlockPos);
-                                break;
-                            case FAILED:
-                                terminateTreasureSolving();
-                                break;
-                        }
-                        break;
-
+                if (closestLaneWithNoObstacles == 0) {
+                    alignWithBlock();
+                } else if (closestLaneWithNoObstacles < 0) {
+                    KeybindHandler.setKeyBindState(KeybindHandler.keybindA, true);
+                    KeybindHandler.setKeyBindState(KeybindHandler.keybindD, false);
+                } else {
+                    KeybindHandler.setKeyBindState(KeybindHandler.keybindA, false);
+                    KeybindHandler.setKeyBindState(KeybindHandler.keybindD, true);
                 }
+
+                if(countObstaclesInLane(10, caveBlocks) > 0) {
+                    rotationYawAxis += closestObstaclesLeftOrRight(20, caveBlocks) == 1 ? 90 : -90;
+                    rotationYawAxis = get360RotationYaw(rotationYawAxis);
+                }
+
                 break;
 
-            case UTurn: case NORMAL:
+            case TREASURE_WALK:
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindW, true);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, !fitsPlayer(getRelativeBlockPos(0, -1, 1)));
 
-                if (cooldown.hasReached(5000)) {
-                    if(Math.abs(mc.thePlayer.posX - lastX) < 0.2f && Math.abs(mc.thePlayer.posZ - lastZ) < 0.2f){
-                        new Thread(antistuck).start();
-                    }
-                    cooldown.reset();
-                    lastX = mc.thePlayer.posX;
-                    lastZ = mc.thePlayer.posZ;
+                float instantaneous_required_yaw;
+                float target_pitch;
+
+                EnumFacing facing = EnumFacing.fromAngle(mc.thePlayer.rotationYaw);
+                BlockPos nextTo = getPlayerLoc().offset(facing);
+
+                if (hasObstaclesToChest && mc.theWorld.getBlockState(nextTo).getBlock() != Blocks.air) {
+                    instantaneous_required_yaw = getRequiredYawCenter(nextTo);
+                    target_pitch = getRequiredPitchCenter(nextTo);
+                } else {
+                    instantaneous_required_yaw = getRequiredYawCenter(targetChest);
+                    target_pitch = hasObstaclesToChest ? 30 : getRequiredPitchCenter(targetChest);
                 }
 
-                if(frontShouldMineSlow()){
-                    if(havePotentialObstacles()
-                            && !BlockUtils.getRelativeBlock(0, 0, 0).equals(Blocks.stained_glass_pane) && !BlockUtils.getRelativeBlock(0, 1, 0).equals(Blocks.stained_glass_pane)
-                            && PlayerUtils.notAtCenter(playerYaw)
-                            && MightyMiner.config.powCenter
-                            && MightyMiner.config.powMineGemstone)
-                        aote = true;
-                }
-
-                if(frontShouldMineSlow())
-                    rotation.initAngleLock(playerYaw, shouldLookDown() ? 60 : 27, 200);
-
-
-                if(MightyMiner.config.powPickaxeSwitch)
-                    mc.thePlayer.inventory.currentItem = frontShouldMineSlow() ? PlayerUtils.getItemInHotbar("Drill", "Gauntlet") : PlayerUtils.getItemInHotbar("Pickaxe");
-                else
-                    mc.thePlayer.inventory.currentItem = PlayerUtils.getItemInHotbar("Drill", "Gauntlet", "Pickaxe");
-
-                KeybindHandler.setKeyBindState(KeybindHandler.keybindW, shouldWalkForward() || currentState == State.UTurn);
-                KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos() != null && mc.objectMouseOver.getBlockPos().getY() >= (int)mc.thePlayer.posY);
-                this.checkMiningSpeedBoost();
+                rotator.initAngleLock(instantaneous_required_yaw, target_pitch,
+                        Math.max(getYawRotationTime(instantaneous_required_yaw, 45, 200, 500), getPitchRotationTime(target_pitch, 30, 200, 500)));
                 break;
+
+            case TREASURE_SOLVE:
+                if(mc.objectMouseOver == null || mc.objectMouseOver.getBlockPos() == null)
+                    return;
+
+                BlockPos aimPos = mc.objectMouseOver.getBlockPos();
+                double chestDistance = MathUtils.getDistanceBetweenTwoPoints(mc.thePlayer.posX, mc.thePlayer.posY + 1.62D, mc.thePlayer.posZ,
+                        targetChest.getX() + 0.5D, targetChest.getY() + 0.5D, targetChest.getZ() + 0.5D);
+                double aimDistance = MathUtils.getDistanceBetweenTwoPoints(mc.thePlayer.posX, mc.thePlayer.posY + 1.62D, mc.thePlayer.posZ,
+                        aimPos.getX() + 0.5D, aimPos.getY() + 0.5D, aimPos.getZ() + 0.5D);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindAttack, aimDistance < chestDistance && !getBlock(aimPos).equals(Blocks.chest));
+                break;
+
         }
-
-
-
     }
 
-    private void updateState(){
 
-        if(!chestQueue.isEmpty()) {
-            if(currentState != State.TREASURE)
-                treasureState = TreasureState.INIT;
-
-            currentState = State.TREASURE;
-        }
+    private void updateState() {
 
         switch (currentState) {
-            case TREASURE:
-                switch (treasureState){
-                    case INIT:
-                        treasureInitialTime = System.currentTimeMillis();
-                        currentChest = chestQueue.poll();
-                        for(BlockPos blockPos : BlockUtils.getAllBlocksInLine2d(BlockUtils.getPlayerLoc(), currentChest)){
-                            if(MathUtils.getDistanceBetweenTwoBlock(currentChest, blockPos) < 3.3f && !BlockUtils.getBlock(blockPos).equals(Blocks.chest) && !BlockUtils.getBlock(blockPos.down()).equals(Blocks.air)){
-                                targetBlockPos = blockPos;
-                                break;
-                            }
-                        }
+            case NORMAL:
+                if(chestQueue.isEmpty())
+                    return;
 
-                        returnBlockPos = null;
-                        for (int i = 0; i < 7; i++) {
-                            if (BlockUtils.getRelativeBlockPos(0, 0, i).equals(currentChest) || BlockUtils.getRelativeBlockPos(0, 1, i).equals(currentChest)) {
-                                returnBlockPos = BlockUtils.getRelativeBlockPos(0, 0, i + 1);
-                            }
-                        }
-                        if(returnBlockPos == null){
-                            if(!isInsideBox(new OffsetBox(1, -1, 1, 0, 7, 0), targetBlockPos, playerYaw))
-                                returnBlockPos = BlockUtils.getPlayerLoc();
-                        }
-                        treasureState = TreasureState.WALKING;
+                KeybindHandler.resetKeybindState();
 
-                        break;
-                    case FINISHED:
-                        treasureState = chestQueue.isEmpty() ? TreasureState.RETURNING : TreasureState.INIT;
-                        break;
-                }
-                if((System.currentTimeMillis() - treasureInitialTime) / 1000f > 10 && treasureState != TreasureState.RETURNING) {
-                    treasureState = TreasureState.RETURNING;
-                    LogUtils.debugLog("Completed treasure due to timeout");
-                    chestQueue.poll();
+                currentState = State.TREASURE_WALK;
+                targetChest = chestQueue.poll();
+                timeoutTimer.schedule(10000);
+
+                Vec3 feetCenter = getBlockCenter(getPlayerLoc());
+                Vec3 targetCenter = getBlockCenter(targetChest);
+
+                BlockPos trace = bresenham(feetCenter, new Vec3(targetCenter.xCoord, feetCenter.yCoord, targetCenter.zCoord));
+
+                hasObstaclesToChest = trace != null && !trace.equals(targetChest);
+
+                break;
+            case TREASURE_WALK:
+                if (mc.theWorld.getBlockState(targetChest).getBlock() != Blocks.chest || isOpen()) {
+                    currentState = State.NORMAL;
                     return;
                 }
-            case NORMAL:
-                if(shouldTurn(5)) {
-                    turnState = 1 - turnState;
-                    uTurnCachePos = BlockUtils.getPlayerLoc();
-                    playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
-                    currentState = State.UTurn;
-                }
+                if(MathUtils.getDistanceBetweenTwoBlock(targetChest, getPlayerLoc()) >= 3.3f)
+                    return;
+
+                currentState = State.TREASURE_SOLVE;
+                rotator.easeTo(getRequiredYawCenter(targetChest), getRequiredPitchCenter(targetChest),
+                        Math.max(getYawRotationTime(getRequiredYawCenter(targetChest), 45, 150, 350),
+                                getPitchRotationTime(getRequiredPitchCenter(targetChest), 30, 150, 350)));
+                KeybindHandler.resetKeybindState();
                 break;
-            case UTurn:
-                if (MathUtils.getDistanceBetweenTwoBlock(BlockUtils.getPlayerLoc(), uTurnCachePos) > MightyMiner.config.powLaneWidth || shouldTurn(3)) {
-                    playerYaw = AngleUtils.get360RotationYaw(playerYaw + getRotAmount());
+            case TREASURE_SOLVE:
+                if (mc.theWorld.getBlockState(targetChest).getBlock() != Blocks.chest || isOpen()) {
                     currentState = State.NORMAL;
+                    return;
+                }
+                if (MightyMiner.config.powGreatExplorer) {
+                    if (mc.objectMouseOver != null && mc.objectMouseOver.getBlockPos().equals(targetChest)) {
+                        if (rightClickDelay == 0) {
+                            rightClickDelay = 8 + MathHelper.getRandomIntegerInRange(new Random(), 0, 5);
+                            KeybindHandler.rightClick();
+                        }
+                        return;
+                    }
+
+                    float yaw = getRequiredYawCenter(targetChest);
+                    float pitch = getRequiredPitchCenter(targetChest);
+
+                    if (AngleUtils.getAngleDifference(yaw, mc.thePlayer.rotationYaw) > 0.5 ||
+                            AngleUtils.getAngleDifference(pitch, mc.thePlayer.rotationPitch) > 0.5) {
+                        if (rotator.rotating) {
+                            return;
+                        }
+
+                        rotator.initAngleLock(yaw, pitch,
+                                Math.max(getYawRotationTime(getRequiredYawCenter(targetChest), 45, 250, 500),
+                                        getPitchRotationTime(getRequiredPitchCenter(targetChest), 30, 250, 500)));
+
+                        return;
+                    }
+
+                    if (mc.objectMouseOver == null || !mc.objectMouseOver.getBlockPos().equals(targetChest)) {
+                        KeybindHandler.leftClick();
+                    }
                 }
                 break;
         }
+
+        if(currentState == State.NORMAL || !timeoutTimer.passed())
+            return;
+
+        LogUtils.addMessage("Timeout due to unable to solve the chest");
+        currentState = State.NORMAL;
+        timeoutTimer.reset();
     }
+
+
+    private void alignWithBlock() {
+        double playerX = mc.thePlayer.posX;
+        double playerZ = mc.thePlayer.posZ;
+        double blockX = getPlayerLoc().getX() + 0.5;
+        double blockZ = getPlayerLoc().getZ() + 0.5;
+
+        switch (mc.thePlayer.getHorizontalFacing()) {
+            case NORTH:
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindA, playerX > blockX - 0.2);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindD, playerX < blockX + 0.2);
+                break;
+            case SOUTH:
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindA, playerX < blockX + 0.2);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindD, playerX > blockX - 0.2);
+                break;
+            case EAST:
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindA, playerZ > blockZ - 0.2);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindD, playerZ < blockZ + 0.2);
+                break;
+            case WEST:
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindA, playerZ < blockZ + 0.2);
+                KeybindHandler.setKeyBindState(KeybindHandler.keybindD, playerZ > blockZ - 0.2);
+                break;
+        }
+    }
+
 
     @Override
     public void onLastRender(RenderWorldLastEvent event) {
-
-        if(!chestQueue.isEmpty())
-            chestQueue.forEach(a -> renderer.renderAABB(a, Color.BLUE));
-        if(!solvedOrSolvingChests.isEmpty())
-            solvedOrSolvingChests.forEach(a -> renderer.renderAABB(a, Color.GREEN));
-        if(targetBlockPos != null)
-            renderer.renderAABB(targetBlockPos, Color.BLACK);
-
-        if(rotation.rotating){
-            rotation.update();
-        } else if(!frontShouldMineSlow()
-                && (currentState == State.UTurn || currentState == State.NORMAL)
-                && !aote
-                && !Autosell.isEnabled()
-                && !(mineBaritone.getState() == AutoMineBaritone.BaritoneState.EXECUTING)){
-            this.rotation.updateInCircle(MightyMiner.config.powRotateRadius, 3, playerYaw, MightyMiner.config.powRotateRate);
+        if(rotator.rotating)
+            rotator.update();
+        else if(currentState == State.NORMAL) {
+            if(MightyMiner.config.powMiningShape == 0)
+                rotator.updateInLimacon(1.5f, 3, rotationYawAxis, 8);
+            else
+                rotator.updateInEllipse(0.5f, 1f, Arrays.asList(stoneBlocks).contains(getFrontBlock()) ? 1 : 3, rotationYawAxis, 8);
         }
     }
 
     @Override
     public void onOverlayRenderEvent(RenderGameOverlayEvent event) {
         if(event.type == RenderGameOverlayEvent.ElementType.TEXT){
-            mc.fontRendererObj.drawString(currentState + " " + treasureState, 5 , 5, -1);
+            mc.fontRendererObj.drawString(currentState + " " + currentState, 5 , 5, -1);
             mc.fontRendererObj.drawString("Chests in waiting queue: " + chestQueue.size() + " | Chests in finished queue: " + solvedOrSolvingChests.size() + "/3", 5 , 17, -1);
         }
     }
 
     @Override
     public void onMessageReceived(String message){
-        if(message.contains("You have successfully picked the lock on this chest")){
-            treasureState = TreasureState.FINISHED;
-        }
         if(message.contains("You uncovered a treasure chest!")){
-            KeybindHandler.resetKeybindState();
-            executor.submit(addChestToQueue);
-        }
-    }
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    addChestToQueue();
+                }
+            }, 200);
+        } else if(message.contains("You have successfully picked the lock on this chest")) {
+            currentState = State.NORMAL;
+        } else if(message.contains("You cannot mine this close to an entrance")) {
+            if(currentState != State.NORMAL)
+                return;
 
+            System.out.println(railwayOnLeftOrRight());
+
+            // TODO: SCAN RAILWAYS
+        } else if (message.contains("You must pick the lock on this chest to open it!")) {
+            Logger.log("You don't have great explorer so no need for it to be enabled");
+            MightyMiner.config.powGreatExplorer = false;
+        }
+
+    }
 
     @Override
     public void onPacketReceived(Packet<?> packet){
-        if(currentState == State.TREASURE && treasureState == TreasureState.SOLVING && treasureInitialTime > 200 && packet instanceof S2APacketParticles && currentChest != null){
-            if(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT){
-                try {
-                    if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - (currentChest.getX() + 0.5f)) < 0.7f && Math.abs((((S2APacketParticles) packet).getYCoordinate()) - (currentChest.getY() + 0.5f)) < 0.7f && Math.abs((((S2APacketParticles) packet).getZCoordinate()) - (currentChest.getZ() + 0.5f)) < 0.7f) {
-                        rotation.initAngleLock(
-                                AngleUtils.getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
-                                AngleUtils.getRequiredPitch(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, (((S2APacketParticles) packet).getYCoordinate()) - (mc.thePlayer.posY + 1.62d), ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
-                                300);
-                    }
-                }catch (Exception ignored){}
-            }
-        }
+        if(currentState != State.TREASURE_SOLVE || !(packet instanceof S2APacketParticles) || targetChest == null || MightyMiner.config.powGreatExplorer)
+            return;
+
+        if(!(((S2APacketParticles) packet).getParticleType() == EnumParticleTypes.CRIT))
+            return;
+
+        if(Math.abs((((S2APacketParticles) packet).getXCoordinate()) - (targetChest.getX() + 0.5f)) >= 0.7f ||
+                Math.abs((((S2APacketParticles) packet).getYCoordinate()) - (targetChest.getY() + 0.5f)) >= 0.7f ||
+                Math.abs((((S2APacketParticles) packet).getZCoordinate()) - (targetChest.getZ() + 0.5f)) >= 0.7f)
+            return;
+
+        if(rotator.rotating)
+            rotator.reset();
+
+        rotator.initAngleLock(
+                getRequiredYaw(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
+                getRequiredPitch(((S2APacketParticles) packet).getXCoordinate() - mc.thePlayer.posX, (((S2APacketParticles) packet).getYCoordinate()) - (mc.thePlayer.posY + 1.62d), ((S2APacketParticles) packet).getZCoordinate() - mc.thePlayer.posZ),
+                (int) (300 + Math.random() * 200));
     }
 
-    void terminateTreasureSolving(){
-        mineBaritone.disableBaritone();
-        if(chestQueue.isEmpty()) {
-            currentState = treasureCacheState;
-        } else {
-            treasureState = TreasureState.INIT;
-        }
+    public boolean isOpen() {
+        TileEntityChest chest = (TileEntityChest) mc.theWorld.getTileEntity(targetChest);
+        if (chest == null) return false;
+        int state = chest.numPlayersUsing;
+        return state > 0;
     }
 
 
-    Runnable addChestToQueue = () -> {
-
-        ThreadUtils.sleep(200);
-        Logger.log("Adding chest to queue");
-
-        List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 3, 0, -7, 7),
+    private void addChestToQueue() {
+        LogUtils.debugLog("Adding chest to queue");
+        List<BlockPos> foundBlocks = BlockUtils.findBlock(new Box(-7, 7, 3, -1, -7, 7),
                 new ArrayList<>(solvedOrSolvingChests), 0, 256, new BlockData<>(Blocks.chest));
 
         if(foundBlocks.isEmpty()){
@@ -475,95 +345,73 @@ public class PowderMacro extends Macro {
         BlockPos chest = foundBlocks.get(0);
         solvedOrSolvingChests.add(chest);
         chestQueue.add(chest);
+    }
 
-        if(currentState != State.TREASURE)
-            treasureCacheState = currentState;
-    };
 
-    boolean shouldWalkForward(){
-        int blocksEmpty = 0;
-        for(int i = 1; i <= 4; i++){
-            if(i <= 3){
-                if(mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 0, i, playerYaw)) || mineSlowBlocks.contains(BlockUtils.getRelativeBlock(0, 1, i, playerYaw)))
-                    return true;
-            }
-            BlockPos check = BlockUtils.getRelativeBlockPos(0, 0, i, playerYaw);
-            if(getBlock(check).equals(Blocks.air) || mineSlowBlocks.contains(getBlock(check)))
-                ++blocksEmpty;
-            if(getBlock(check.up()).equals(Blocks.air) || mineSlowBlocks.contains(getBlock(check.up())))
-                ++blocksEmpty;
+
+    private int countObstaclesInLane(int range, Block... obstaclesToCheck) {
+        int obstacles = 0;
+        for(int i = 0; i <= range; i++){
+            BlockPos checkPos = getRelativeBlockPos(0, 0, i, rotationYawAxis);
+            if(Arrays.asList(obstaclesToCheck).contains(getBlock(checkPos)))
+                ++obstacles;
+            if(Arrays.asList(obstaclesToCheck).contains(getBlock(checkPos.up())))
+                ++obstacles;
+
         }
-        return blocksEmpty >= 6;
+        return obstacles;
+    }
+
+    // Returns -1 if the obstacle is on the left, 1 if the closest obstacle is on the right
+    private int closestObstaclesLeftOrRight(int halfScanRange, Block... obstaclesToCheck) {
+        for(int i = 0; i <= halfScanRange; i++){
+            if(Arrays.asList(obstaclesToCheck).contains(getBlock(getRelativeBlockPos(i, 0, 0, rotationYawAxis))))
+                return 1;
+            else if(Arrays.asList(obstaclesToCheck).contains(getBlock(getRelativeBlockPos(-i, 0, 0, rotationYawAxis))))
+                return -1;
+        }
+        return 1;
+    }
+
+    // Returns -1 if the railway is on the left, otherwise 1
+    private int railwayOnLeftOrRight() {
+        for(int i = 0; i <= 20; i++) {
+            for(int y = -20; y <= 20; y++) {
+                for(int j = 0; j <= 20; j++) {
+                    if(getRelativeBlock(i, y, j).equals(Blocks.rail))
+                        return 1;
+                }
+            }
+        }
+        return -1;
+
     }
 
 
-    int getRotAmount(){
-        // see if have obstacles sideways
-        if(scanBox(new OffsetBox(-3, 3, 1, 0, 0, 0), blocksAllowedToMine, null, playerYaw)){
-            if(scanBox(new OffsetBox(3, 0, 1, 0, 0, 0), blocksAllowedToMine, null, playerYaw))
-                return -90;
-            else if(scanBox(new OffsetBox(-3, 0, 1, 0, 0, 0), blocksAllowedToMine, null, playerYaw))
-                return 90 ;
-            else return 180;
-        } else
-            return turnState == 1 ? 90 : -90; // both sides can be walked, oscillate between 90 and -90 to increase area mined
-    }
+    private int getClosestLaneWithNoObstacles(int range, Block... obstaclesToCheck) {
+        boolean leftHaveObstacles = false, rightHaveObstacles = false;
+        for(int i = 0; i <= 5; i++){
+            for(int j = 0; j <= range; j++){
+                BlockPos checkPosRight = getRelativeBlockPos(i, 0, j, rotationYawAxis);
+                BlockPos checkPosLeft = getRelativeBlockPos(-i, 0, j, rotationYawAxis);
+                if(Arrays.asList(obstaclesToCheck).contains(getBlock(checkPosRight)) || Arrays.asList(obstaclesToCheck).contains(getBlock(checkPosRight.up()))) {
+                    rightHaveObstacles = true;
+                }
+                if(Arrays.asList(obstaclesToCheck).contains(getBlock(checkPosLeft)) || Arrays.asList(obstaclesToCheck).contains(getBlock(checkPosLeft.up()))) {
+                    leftHaveObstacles = true;
+                }
+            }
 
+            if(!leftHaveObstacles)
+                return -i;
+            else if(!rightHaveObstacles)
+                return i;
 
-    boolean shouldLookDown(){
-        BlockPos front = getRelativeBlockPos(0, 0, 1);
-        return (shouldLookAtCenter(front) && isPassable(front.up())) || (shouldLookAtCenter(getPlayerLoc()) && isPassable(getPlayerLoc().up()));
-    }
-
-    boolean frontShouldMineSlow(){
-        BlockPos front = getRelativeBlockPos(0, 0, 1);
-        return mineSlowBlocks.contains(getBlock(front)) || mineSlowBlocks.contains(getBlock(front.up())) || getBlock(getPlayerLoc()).equals(Blocks.stained_glass_pane) ||  getBlock(getPlayerLoc().up()).equals(Blocks.stained_glass_pane);
-    }
-
-    boolean havePotentialObstacles(){
-        return scanBox(new OffsetBox(1, -1, 0, 1, 0, 1), null, mineSlowBlocks, playerYaw)
-                || getBlock(getPlayerLoc()).equals(Blocks.stained_glass_pane) || getBlock(getPlayerLoc().up()).equals(Blocks.stained_glass_pane);
-    }
-
-    boolean shouldTurn(int checkRadius){
-        return scanBox(new OffsetBox(0, 0, 0, 1, 0, checkRadius), blocksAllowedToMine, null, playerYaw);
-    }
-
-    Runnable antistuck = () -> {
-        ThreadUtils.sleep(20);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindS, true);
-        ThreadUtils.sleep(350);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindS, false);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindD, true);
-        ThreadUtils.sleep(350);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindD, false);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindA, true);
-        ThreadUtils.sleep(350);
-        KeybindHandler.setKeyBindState(KeybindHandler.keybindA, false);
-    };
-
-
-    BaritoneConfig getAutomineConfig(){
-        return new BaritoneConfig(
-                MiningType.DYNAMIC,
-                false,
-                true,
-                false,
-                250,
-                8,
-                new ArrayList<Block>(){
-                    {
-                        add(Blocks.chest);
-                        add(Blocks.stained_glass);
-                        add(Blocks.stained_glass_pane);
-                        add(Blocks.prismarine);
-                        add(Blocks.wool);
-                    }
-                },
-                null,
-                256,
-                0
-        );
+            leftHaveObstacles = false;
+            rightHaveObstacles = false;
+        }
+        LogUtils.debugLog("No lane with no obstacles found!");
+        return 0;
     }
 
 }

@@ -61,6 +61,7 @@ public class AOTVWaypointsPage extends Page {
             try {
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                 String data = clipboard.getData(DataFlavor.stringFlavor).toString().trim();
+                System.out.println(data);
                 if (data.startsWith("#MightyMinerWaypoint#::")) {
                     data = data.replace("#MightyMinerWaypoint#::", "");
                     data = new String(Base64.getDecoder().decode(data));
@@ -98,8 +99,25 @@ public class AOTVWaypointsPage extends Page {
 
                     redrawRoutes();
 
+                } else if (new String(Base64.getDecoder().decode(data)).startsWith("{\"categories\":")) {
+                    data = new String(Base64.getDecoder().decode(data));
+                    System.out.println(data);
+                    CategoryList categoryList = MightyMiner.gson.fromJson(data, CategoryList.class);
+                    HashSet<WaypointCategory> categories = new HashSet<>(categoryList.categories);
+
+                    for (WaypointCategory category : categories) {
+                        AOTVWaypointsStructs.WaypointList list = new AOTVWaypointsStructs.WaypointList(category.name, false, false, new ArrayList<>());
+                        for (Waypoint waypoint : category.waypoints) {
+                            list.waypoints.add(new AOTVWaypointsStructs.Waypoint(waypoint.name, waypoint.x, waypoint.y, waypoint.z));
+                        }
+                        MightyMiner.aotvWaypoints.getRoutes().add(list);
+                        Notifications.INSTANCE.send("MightyMiner", "Imported route " + list.name + " from Skytils successfully!");
+                    }
+
+                    redrawRoutes();
                 } else if (Base64.getDecoder().decode(data).length > 0) {
                     data = new String(Base64.getDecoder().decode(data));
+                    System.out.println(data);
                     JsonElement element = MightyMiner.gson.fromJson(data, JsonElement.class);
                     if (element instanceof JsonObject) {
                         JsonObject object = (JsonObject) element;
@@ -386,7 +404,7 @@ public class AOTVWaypointsPage extends Page {
             tuple.getThird().keyTyped(key, keyCode);
             if (!tuple.getThird().isToggled() && tuple.getThird().getInput().length() > 0) {
                 try {
-                    tuple.getFirst().waypoints.get(tuple.getFirst().waypoints.indexOf(tuple.getSecond())).y = Integer.parseInt(tuple.getThird().getInput());
+                    tuple.getFirst().waypoints.get(tuple.getFirst().waypoints.indexOf(tuple.getSecond())).z = Integer.parseInt(tuple.getThird().getInput());
                     redrawRoutes();
                 } catch (Exception e) {
                     e.printStackTrace();

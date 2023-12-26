@@ -19,6 +19,7 @@ import com.jelly.MightyMiner.utils.HypixelUtils.MineUtils;
 
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
@@ -348,10 +349,16 @@ public class MithrilMacro extends Macro {
     private ArrayList<ArrayList<BlockData<?>>> getPriorityList() {
         ArrayList<ArrayList<BlockData<?>>> priorityList = new ArrayList<>();
 
-        priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1));
-        priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2));
-        priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3));
-        priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4));
+        if (MightyMiner.config.mithBlock) {
+            priorityList.add(new ArrayList<BlockData<?>>() {{
+                add(new BlockData<>(Blocks.gold_block, null));
+            }});
+        } else {
+            priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority1));
+            priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority2));
+            priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority3));
+            priorityList.add(MineUtils.getMithrilColorBasedOnPriority(MightyMiner.config.mithPriority4));
+        }
 
         return priorityList;
     }

@@ -475,20 +475,24 @@ public class CommissionMacro extends Macro {
             pigeonSlot = PlayerUtils.getItemInHotbar("Royal Pigeon");
         }
 
-        // Check if player has AOTV
-        if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Aspect of the Void") == -1) {
-            LogUtils.addMessage("You don't have an Aspect of the Void");
-            LogUtils.debugLog("Player does not have Aspect of the Void");
-            MacroHandler.disableScript();
-            return;
-        } else {
+        // Check if player has AOTV/AOTE
+        if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Aspect of the Void") != -1) {
             LogUtils.debugLog("Player has Aspect of the Void");
             aotvSlot = PlayerUtils.getItemInHotbar("Aspect of the Void");
+        } else if (PlayerUtils.getItemInHotbarWithBlackList(true, null, "Aspect of the End") != -1) {
+            LogUtils.debugLog("Player has Aspect of the End");
+            aotvSlot = PlayerUtils.getItemInHotbar("Aspect of the End");
+        }
+        else {
+            LogUtils.addMessage("You don't have an Aspect of the Void/End");
+            LogUtils.debugLog("Player does not have Aspect of the Void/End");
+            MacroHandler.disableScript();
+            return;
         }
 
         if (MightyMiner.config.commAutoPickonimbusSwapper) {
             hasPickonimbus = false;
-            for (Slot item: InventoryUtils.getInventorySlots()) {
+            for (Slot item : InventoryUtils.getInventorySlots()) {
                 String itemName = item.getStack().getDisplayName();
                 if (itemName.contains("Pickonimbus")) {
                     hasPickonimbus = true;

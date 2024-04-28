@@ -1,1 +1,1 @@
-# MightyMinerv2
+# MightyMinerV2

@@ -1,17 +1,26 @@
 package com.jelly.MightyMinerV2.Util;
 
+import com.jelly.MightyMinerV2.Mixin.Client.MixinMinecraft;
+import com.jelly.MightyMinerV2.Util.helper.Angle;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
 public class AngleUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
+    public static Angle getPlayerAngle(){
+        return new Angle(get360RotationYaw(), mc.thePlayer.rotationPitch);
+    }
+
     public static float get360RotationYaw(float yaw) {
         return (yaw % 360 + 360) % 360;
     }
 
-    public static float normalizeYaw(float yaw) {
+    // This is MathHelper::wrapAngleTo180_float
+    public static float normalizeAngle(float yaw) {
         float newYaw = yaw % 360F;
         if (newYaw < -180F) {
             newYaw += 360F;
@@ -86,5 +95,51 @@ public class AngleUtil {
 
     public static float getClosest(float yaw) {
         return ((int) (get360RotationYaw(yaw + 45) / 90)) * 90;
+    }
+
+    private static final double randomAddition = (Math.random() * 0.3 - 0.15);
+
+    public static Angle getRotation(Vec3 to) {
+        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), to, false);
+    }
+
+    public static Angle getRotation(Vec3 to, boolean randomness) {
+        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), to, randomness);
+    }
+
+    public static Angle getRotation(Entity to) {
+        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), to.getPositionVector().addVector(0, Math.min(((to.height * 0.85) + randomAddition), 1.7), 0), false);
+    }
+
+    public static Angle getRotation(BlockPos pos) {
+        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), new Vec3(pos).addVector(0.5, 0.5, 0.5), false);
+    }
+
+    public static Angle getRotation(BlockPos pos, boolean randomness) {
+        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), new Vec3(pos).addVector(0.5, 0.5, 0.5), randomness);
+    }
+
+    public static Angle getRotation(Vec3 from, Vec3 to, boolean randomness) {
+        double xDiff = to.xCoord - from.xCoord;
+        double yDiff = to.yCoord - from.yCoord;
+        double zDiff = to.zCoord - from.zCoord;
+
+        double dist = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
+
+        float yaw = (float) Math.toDegrees(Math.atan2(zDiff, xDiff)) - 90F;
+        float pitch = (float) -Math.toDegrees(Math.atan2(yDiff, dist));
+
+        if (randomness) {
+            yaw += (float) ((Math.random() - 1) * 4);
+            pitch += (float) ((Math.random() - 1) * 4);
+        }
+
+        return new Angle(yaw, pitch);
+    }
+
+    // Todo: More testing
+    public static Angle getNeededChange(Angle startAngle, Angle endAngle){
+        float yawChange = normalizeAngle(normalizeAngle(endAngle.getYaw()) - normalizeAngle(startAngle.getYaw()));
+        return new Angle(yawChange, endAngle.getPitch() - startAngle.getPitch());
     }
 }

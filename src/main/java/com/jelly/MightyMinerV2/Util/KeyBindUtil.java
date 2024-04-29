@@ -1,6 +1,7 @@
 package com.jelly.MightyMinerV2.Util;
 
 import com.google.common.collect.ImmutableMap;
+import com.jelly.MightyMinerV2.Mixin.Client.MixinMinecraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.MathHelper;
@@ -33,21 +34,15 @@ public class KeyBindUtil {
     };
 
     public static void rightClick() {
-        if (!ReflectionUtils.invoke(mc, "func_147121_ag")) {
-            ReflectionUtils.invoke(mc, "rightClickMouse");
-        }
+        ((MixinMinecraft) mc).rightClick();
     }
 
     public static void leftClick() {
-        if (!ReflectionUtils.invoke(mc, "func_147116_af")) {
-            ReflectionUtils.invoke(mc, "clickMouse");
-        }
+        ((MixinMinecraft) mc).leftClick();
     }
 
     public static void middleClick() {
-        if (!ReflectionUtils.invoke(mc, "func_147112_ai")) {
-            ReflectionUtils.invoke(mc, "middleClickMouse");
-        }
+        ((MixinMinecraft) mc).middleClick();
     }
 
     public static void onTick(KeyBinding key) {
@@ -166,7 +161,7 @@ public class KeyBindUtil {
         double[] delta = {orig.xCoord - dest.xCoord, orig.zCoord - dest.zCoord};
         float requiredAngle = (float) (MathHelper.atan2(delta[0], -delta[1]) * (180.0 / Math.PI));
 
-        float angleDifference = AngleUtil.normalizeYaw(requiredAngle - mc.thePlayer.rotationYaw) * -1;
+        float angleDifference = AngleUtil.normalizeAngle(requiredAngle - mc.thePlayer.rotationYaw) * -1;
 
         keyBindMap.forEach((yaw, key) -> {
             if (Math.abs(yaw - angleDifference) < 67.5 || Math.abs(yaw - (angleDifference + 360.0)) < 67.5) {
@@ -178,7 +173,7 @@ public class KeyBindUtil {
 
     public static List<KeyBinding> getNeededKeyPresses(float neededYaw) {
         List<KeyBinding> keys = new ArrayList<>();
-        neededYaw = AngleUtil.normalizeYaw(neededYaw - mc.thePlayer.rotationYaw) * -1;
+        neededYaw = AngleUtil.normalizeAngle(neededYaw - mc.thePlayer.rotationYaw) * -1;
         float finalNeededYaw = neededYaw;
         keyBindMap.forEach((yaw, key) -> {
             if (Math.abs(yaw - finalNeededYaw) < 67.5 || Math.abs(yaw - (finalNeededYaw + 360.0)) < 67.5) {

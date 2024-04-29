@@ -1,8 +1,11 @@
 package com.jelly.MightyMinerV2;
 
+import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jelly.MightyMinerV2.Command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.MightyMinerV2.Config.MightyMinerConfig;
+import com.jelly.MightyMinerV2.Handler.RotationHandler;
 import com.jelly.MightyMinerV2.Util.LogUtil;
 import com.jelly.MightyMinerV2.Util.ReflectionUtils;
 import com.jelly.MightyMinerV2.Util.ScoreboardUtil;
@@ -66,11 +69,13 @@ public class MightyMiner {
 
     private void initializeListeners() {
         // Initialize Listeners
+        MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
         MinecraftForge.EVENT_BUS.register(new TablistUtil());
     }
 
     private void initializeCommands() {
         // Initialize Commands
+        CommandManager.register(new OsamaTestCommandNobodyTouchPleaseLoveYou());
     }
 }

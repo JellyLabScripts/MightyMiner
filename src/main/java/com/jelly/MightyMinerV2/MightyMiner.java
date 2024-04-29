@@ -5,8 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.jelly.MightyMinerV2.Config.MightyMinerConfig;
 import com.jelly.MightyMinerV2.Util.LogUtil;
 import com.jelly.MightyMinerV2.Util.ReflectionUtils;
+import com.jelly.MightyMinerV2.Util.ScoreboardUtil;
+import com.jelly.MightyMinerV2.Util.TablistUtil;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -63,6 +66,8 @@ public class MightyMiner {
 
     private void initializeListeners() {
         // Initialize Listeners
+        MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
+        MinecraftForge.EVENT_BUS.register(new TablistUtil());
     }
 
     private void initializeCommands() {

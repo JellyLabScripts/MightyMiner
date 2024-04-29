@@ -166,6 +166,12 @@ public class InventoryUtil {
         KeyBinding.onTick(mc.gameSettings.keyBindInventory.getKeyCode());
     }
 
+    public static void closeScreen() {
+        if (mc.currentScreen != null && mc.thePlayer != null) {
+            mc.thePlayer.closeScreen();
+        }
+    }
+
     public static Slot getSlotOfId(int id) {
         for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
             if (slot.slotNumber == id) {
@@ -220,6 +226,14 @@ public class InventoryUtil {
         int lowerChestSize = chest.getLowerChestInventory().getSizeInventory();
         ItemStack lastSlot = chest.getLowerChestInventory().getStackInSlot(lowerChestSize - 1);
         return lastSlot != null && lastSlot.getItem() != null;
+    }
+
+    public static boolean isInventoryEmpty() {
+        for (int i = 0; i < mc.thePlayer.inventory.getSizeInventory(); i++) {
+            if (mc.thePlayer.inventory.getStackInSlot(i) == null) continue;
+            return false;
+        }
+        return true;
     }
 
     public static enum ClickType {

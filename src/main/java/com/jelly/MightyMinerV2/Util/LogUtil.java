@@ -14,12 +14,11 @@ public class LogUtil {
         ERROR,
         DEBUG
     }
+
     private static final Long MsgAppearTime = 1000L;
     private static final Minecraft mc = Minecraft.getMinecraft();
     private static String lastDebugMessage = null;
     private static String lastWebhookMessage = null;
-
-
 
     public synchronized static void sendLog(ChatComponentText chat) {
         if (mc.thePlayer == null || mc.theWorld == null) System.out.println("Mighty Miner" + chat.getUnformattedText());
@@ -31,6 +30,7 @@ public class LogUtil {
         switch (type) {
             case SUCCESS:
                 sendLog(new ChatComponentText("§l§2[Mighty Miner] §8» §a" + message));
+                break;
             case WARNING:
                 sendLog(new ChatComponentText("§l§6[Mighty Miner] §8» §e" + message));
                 break;
@@ -38,7 +38,6 @@ public class LogUtil {
                 sendLog(new ChatComponentText("§l§4[Mighty Miner] §8» §c" + message));
                 break;
             case DEBUG:
-
                 if (lastDebugMessage != null && lastDebugMessage.equals(message)) return;
                 if (MightyMinerConfig.debugMode && mc.thePlayer != null)
                     sendLog(new ChatComponentText("§3§lFarm Helper §8» §7" + message));
@@ -53,6 +52,4 @@ public class LogUtil {
         if (duration == null) duration = MsgAppearTime;
         Notifications.INSTANCE.send(title, message, duration);
     }
-
-
 }

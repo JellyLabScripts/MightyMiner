@@ -4,9 +4,11 @@
   "minVersion": "0.7",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "FML.MixinFMLHandshakeMessage"
+    "FML.MixinFMLHandshakeMessage",
+    "Network.MixinNetworkManager"
   ],
   "client": [
-    "Client.MixinMinecraft"
+    "Client.MixinMinecraft",
+    "Network.MixinNetHandlerPlayClient"
   ]
 }

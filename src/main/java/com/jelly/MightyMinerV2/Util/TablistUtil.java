@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TablistUtil {
-
     public static final Ordering<NetworkPlayerInfo> playerOrdering = Ordering.from(new PlayerComparator());
 
     private static final CopyOnWriteArrayList<String> cachedTablist = new CopyOnWriteArrayList<>();

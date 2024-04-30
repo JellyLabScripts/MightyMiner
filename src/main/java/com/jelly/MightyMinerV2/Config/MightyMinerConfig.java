@@ -73,19 +73,18 @@ public class MightyMinerConfig extends Config {
     )
     public static boolean debugMode = false;
 
-
-
     public MightyMinerConfig() {
-        super(new Mod("Mighty Miner", ModType.HYPIXEL, "/MightyMinerV2/icon-mod/icon.png"), "/MightMinerV2/config.json");
+//        super(new Mod("Mighty Miner", ModType.HYPIXEL, "/MightyMinerV2/icon-mod/icon.png"), "/MightMinerV2/config.json");
+        super(new Mod("Mighty Miner", ModType.HYPIXEL), "/MightMinerV2/config.json");
         initialize();
 
-        this.addDependency("macroType", "Macro Type", () -> {
-            return null;
-        });
-
-        this.addDependency("debugMode", "Debug Mode", () -> {
-            return null;
-        });
+//        this.addDependency("macroType", "Macro Type", () -> {
+//            return null;
+//        });
+//
+//        this.addDependency("debugMode", "Debug Mode", () -> {
+//            return null;
+//        });
 
         save();
     }

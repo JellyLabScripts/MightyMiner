@@ -1,6 +1,6 @@
 package com.jelly.MightyMinerV2.Util;
 
-import com.jelly.MightyMinerV2.Mixin.Client.MixinMinecraft;
+import com.jelly.MightyMinerV2.Mixin.Client.MinecraftAccessor;
 import com.jelly.MightyMinerV2.Util.helper.Angle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -100,23 +100,23 @@ public class AngleUtil {
     private static final double randomAddition = (Math.random() * 0.3 - 0.15);
 
     public static Angle getRotation(Vec3 to) {
-        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), to, false);
+        return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to, false);
     }
 
     public static Angle getRotation(Vec3 to, boolean randomness) {
-        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), to, randomness);
+        return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to, randomness);
     }
 
     public static Angle getRotation(Entity to) {
-        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), to.getPositionVector().addVector(0, Math.min(((to.height * 0.85) + randomAddition), 1.7), 0), false);
+        return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to.getPositionVector().addVector(0, Math.min(((to.height * 0.85) + randomAddition), 1.7), 0), false);
     }
 
     public static Angle getRotation(BlockPos pos) {
-        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), new Vec3(pos).addVector(0.5, 0.5, 0.5), false);
+        return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), new Vec3(pos).addVector(0.5, 0.5, 0.5), false);
     }
 
     public static Angle getRotation(BlockPos pos, boolean randomness) {
-        return getRotation(mc.thePlayer.getPositionEyes(((MixinMinecraft) mc).getTimer().renderPartialTicks), new Vec3(pos).addVector(0.5, 0.5, 0.5), randomness);
+        return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), new Vec3(pos).addVector(0.5, 0.5, 0.5), randomness);
     }
 
     public static Angle getRotation(Vec3 from, Vec3 to, boolean randomness) {

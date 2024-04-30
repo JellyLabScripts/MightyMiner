@@ -1,5 +1,6 @@
 package com.jelly.MightyMinerV2.Handler;
 
+import com.jelly.MightyMinerV2.Event.MotionUpdateEvent;
 import com.jelly.MightyMinerV2.Util.AngleUtil;
 import com.jelly.MightyMinerV2.Util.LogUtil;
 import com.jelly.MightyMinerV2.Util.helper.Angle;
@@ -10,7 +11,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.Deque;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class RotationHandler {
     private static RotationHandler instance;
@@ -20,6 +23,8 @@ public class RotationHandler {
         return instance;
     }
 
+    // Using this as a Queue
+    private final Deque<RotationConfiguration> rotations = new ConcurrentLinkedDeque<>();
     private final Minecraft mc = Minecraft.getMinecraft();
 
     @Getter
@@ -30,53 +35,125 @@ public class RotationHandler {
     private final Angle startRotation = new Angle(0f, 0f);
     private Target target = new Target(new Angle(0, 0));
 
-    @Getter
+    // I know there is a better way to do this. I'm unable to brain rn
+    private float lastBezierYaw = 0;
+    private float lastBezierPitch = 0;
+
     private float clientSideYaw = 0;
-    @Getter
     private float clientSidePitch = 0;
-    /* Not yet
-    @Getter
     private float serverSideYaw = 0;
-    @Getter
     private float serverSidePitch = 0;
-     */
 
     private int randomMultiplier1 = 1;
     private int randomMultiplier2 = 1;
 
     @Getter
     private RotationConfiguration configuration;
+    private final Random random = new Random();
 
-    void send(String msg){
+    // For Debug Purpose
+    void send(String msg) {
         LogUtil.send(msg, LogUtil.ELogType.SUCCESS);
+    }
+
+    // So that I can do RotationHandler.getInstance().queueRotation(config).start()
+    // But RotationHandler.getInstance().easeTo(config) works as well
+    // So both works. This is here to add more randomization.
+    // Or in case we need to look at a few things that we already know of, so we can just queue them and wait for it to finish.
+    public RotationHandler queueRotation(RotationConfiguration config) {
+        this.rotations.add(config);
+        return instance;
+    }
+
+    // Todo: Needs more testing and tweaking
+    // Todo: Improve code
+    // Todo: Remove Aids
+    public RotationHandler queueRotation(RotationConfiguration config, boolean splitRotations) {
+        if (!splitRotations) return queueRotation(config);
+        Angle startAngle = config.from().isPresent() ? config.from().get() : AngleUtil.getPlayerAngle();
+        Angle change = AngleUtil.getNeededChange(startAngle, config.target().get().getAngle());
+        double dist = pythagoras(change.getYaw(), change.getPitch());
+        long time = getTime(dist, config.time());
+
+        if (random.nextInt(180) > dist) {
+            return queueRotation(config);
+        }
+
+        float randomNumber = 0.5f + new Random().nextFloat() * 0.2f;
+        float newIntermediateTargetYaw = startAngle.getYaw() + change.getYaw() * randomNumber;
+        float newIntermediateTargetPitch = startAngle.getPitch() + change.getPitch() * randomNumber;
+        RotationConfiguration config1 = new RotationConfiguration(
+                new Angle(newIntermediateTargetYaw, newIntermediateTargetPitch),
+                (long) (time * randomNumber),
+                () -> LogUtil.send("First Rotation Ended", LogUtil.ELogType.DEBUG));
+
+        if (config.from().isPresent()) config1.from(config.from());
+
+        RotationConfiguration config2 = new RotationConfiguration(config.target().get(),
+                (long) (time * (1.1 - randomNumber)),
+                config.callback().orElse(() -> {
+                }));
+
+        queueRotation(config1);
+        queueRotation(config2);
+        return instance;
+    }
+
+    // For Queue
+    public void start() {
+        if (this.rotations.isEmpty()) {
+            send("Rotation queue is empty");
+            return;
+        }
+        this.easeTo(rotations.poll());
     }
 
     public void easeTo(RotationConfiguration configuration) {
         this.configuration = configuration;
         this.startTime = System.currentTimeMillis();
-        this.startRotation.setRotation(configuration.from());
+        this.startRotation.setRotation(configuration.from().orElse(AngleUtil.getPlayerAngle()));
+
+        // We will be using a Target object always as the end. We won't switch between angle/rotation and we will always use a Target Object.
+        // We are always setting a target object in RotationConfiguration so we dont have to check if target.isPresent(), it will always be present
+        // unless it was changed/removed manually.
         this.target = configuration.target().get();
-        Angle targetAngle = this.target.getAngle();
 
-        Angle change = AngleUtil.getNeededChange(this.startRotation, targetAngle);
-        this.endTime = this.startTime + getTime(Math.sqrt(Math.pow(change.getYaw(), 2) + Math.pow(change.getPitch(), 2)), configuration.time());
-        this.clientSideYaw = this.startRotation.getYaw();
-        this.clientSidePitch = this.startRotation.getPitch();
+        Angle change = AngleUtil.getNeededChange(this.startRotation, this.target.getTargetAngle());
+        this.endTime = this.startTime + getTime(pythagoras(change.getYaw(), change.getPitch()), configuration.time());
 
-        Random rand = new Random();
-        this.randomMultiplier1 = rand.nextBoolean() ? 1 : -1;
-        this.randomMultiplier2 = rand.nextBoolean() ? 1 : -1;
+        // These multipliers define which way the rotation curves. This is randomized so that the curve is randomized
+        this.randomMultiplier1 = random.nextBoolean() ? 1 : -1;
+        this.randomMultiplier2 = random.nextBoolean() ? 1 : -1;
 
-        send("Started. Start: " + this.startRotation + ", End: " + this.target.getAngle() + ", YawRN: " + mc.thePlayer.rotationYaw);
+        this.lastBezierYaw = 0;
+        this.lastBezierPitch = 0;
+
+        if (configuration.rotationType() == RotationConfiguration.RotationType.SERVER) {
+            if (serverSideYaw == 0 && serverSidePitch == 0) {
+                serverSideYaw = mc.thePlayer.rotationYaw;
+                serverSidePitch = mc.thePlayer.rotationPitch;
+            } else {
+                this.startRotation.setYaw(AngleUtil.get360RotationYaw(serverSideYaw));
+                this.startRotation.setPitch(serverSidePitch);
+            }
+        }
+
         this.enabled = true;
     }
 
     public void reset() {
-        enabled = false;
-        configuration = null;
-        startTime = 0;
-        endTime = 0;
-        send("Ended. YawRN: " + mc.thePlayer.rotationYaw);
+        this.enabled = false;
+        this.configuration = null;
+        this.target = null;
+        this.rotations.clear();
+        this.startTime = this.endTime = 0L;
+        this.clientSideYaw = this.clientSidePitch
+                = this.serverSideYaw = this.serverSidePitch
+                = this.lastBezierYaw = this.lastBezierPitch = 0;
+    }
+
+    private double pythagoras(float yaw, float pitch) {
+        return Math.sqrt(yaw * yaw + pitch * pitch);
     }
 
     private long getTime(double pythagoras, long time) {
@@ -101,40 +178,96 @@ public class RotationHandler {
             return;
 
         if (System.currentTimeMillis() >= this.endTime) {
-            // disable
-            if (configuration.callback().isPresent()) {
-                configuration.callback().get().run();
-            }
-
-            Angle changeToEnd = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), target.getAngle());
-            mc.thePlayer.rotationYaw += changeToEnd.getYaw();
-            mc.thePlayer.rotationPitch += changeToEnd.getPitch();
-            reset();
+            handleRotationEnd();
             return;
         }
 
-        float timeProgress = (System.currentTimeMillis() - startTime) / (float) (endTime - startTime);
-        float rotationProgress = configuration.easeOutBack().apply(timeProgress);
+        Angle bezierAngle = getBezierAngle();
 
-        Angle targetAngle = this.target.getAngle();
-        float change = AngleUtil.getNeededChange(this.startRotation, targetAngle).getYaw() / 5;
-
-        Angle c1 = new Angle(this.startRotation.getYaw() + change * randomMultiplier1, this.startRotation.getPitch() + (change / 2) * randomMultiplier2);
-        Angle c2 = new Angle(targetAngle.getYaw() - change * randomMultiplier2, targetAngle.getPitch() - (change / 2) * randomMultiplier1);
-
-        Angle newAngle = interpolate(rotationProgress, this.startRotation, c1, c2, targetAngle);
-
-        clientSideYaw = AngleUtil.get360RotationYaw(mc.thePlayer.rotationYaw += newAngle.getYaw() - clientSideYaw);
-        clientSidePitch = mc.thePlayer.rotationPitch += newAngle.getPitch() - clientSidePitch;
+        mc.thePlayer.rotationYaw += bezierAngle.getYaw() - lastBezierYaw;
+        mc.thePlayer.rotationPitch += bezierAngle.getPitch() - lastBezierPitch;
+        lastBezierYaw = bezierAngle.getYaw();
+        lastBezierPitch = bezierAngle.getPitch();
     }
 
-    private Angle interpolate(float rotationProgress, Angle start, Angle c1, Angle c2, Angle end){
-        double newX = bezier(rotationProgress, start.getYaw(), c1.getYaw(), c2.getYaw(), end.getYaw());
-        double newY = bezier(rotationProgress, start.getPitch(), c1.getPitch(), c2.getPitch(), end.getPitch());
-        return new Angle((float) newX, (float) newY);
+    private Angle getBezierAngle() {
+        float timeProgress = (System.currentTimeMillis() - this.startTime) / (float) (this.endTime - this.startTime);
+        float rotationProgress = configuration.easeFunction().apply(timeProgress);
+
+        Angle bezierEnd = AngleUtil.getNeededChange(this.startRotation, this.target.getTargetAngle());
+        Angle control1 = new Angle(bezierEnd.getYaw() * 0.05f * this.randomMultiplier1, bezierEnd.getYaw() * 0.1f * this.randomMultiplier2);
+        Angle control2 = new Angle(bezierEnd.getYaw() - bezierEnd.getYaw() * 0.05f * this.randomMultiplier2, bezierEnd.getPitch() - bezierEnd.getYaw() * 0.1f * this.randomMultiplier1);
+
+        double bezierYawSoFar = bezier(rotationProgress, control1.getYaw(), control2.getYaw(), bezierEnd.getYaw());
+        double bezierPitchSoFar = bezier(rotationProgress, control1.getPitch(), control2.getPitch(), bezierEnd.getPitch());
+        return new Angle((float) bezierYawSoFar, (float) bezierPitchSoFar);
     }
 
-    private double bezier(float t, float start, float c1, float c2, float end) {
-        return Math.pow((1 - t), 3) * start + 3 * Math.pow((1 - t), 2) * t * c1 + 3 * (1 - t) * Math.pow(t, 2) * c2 + Math.pow(t, 3) * end;
+    private double bezier(float t, float c1, float c2, float end) {
+        return 3 * Math.pow((1 - t), 2) * t * c1 + 3 * (1 - t) * Math.pow(t, 2) * c2 + Math.pow(t, 3) * end;
+    }
+
+    private void handleRotationEnd() {
+        if (this.configuration.followTarget()) {
+            this.easeTo(configuration);
+            return;
+        }
+
+        configuration.callback().ifPresent(Runnable::run);
+
+        if (!this.rotations.isEmpty()) {
+            this.easeTo(this.rotations.poll());
+            return;
+        }
+
+        if (this.configuration.rotationType() == RotationConfiguration.RotationType.SERVER && this.configuration.easeBackToClientSide()) {
+            RotationConfiguration newConf = new RotationConfiguration(AngleUtil.getPlayerAngle(), this.configuration.time(), RotationConfiguration.RotationType.SERVER, () -> {
+            });
+            this.easeTo(newConf);
+            return;
+        }
+
+        Angle change = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), target.getTargetAngle());
+        mc.thePlayer.rotationYaw += change.getYaw();
+        mc.thePlayer.rotationPitch += change.getPitch();
+        reset();
+    }
+
+//    private double bezier(float t, float start, float c1, float c2, float end) {
+//        return Math.pow((1 - t), 3) * start + 3 * Math.pow((1 - t), 2) * t * c1 + 3 * (1 - t) * Math.pow(t, 2) * c2 + Math.pow(t, 3) * end;
+//    }
+
+    @SubscribeEvent(receiveCanceled = true)
+    public void onMotionUpdatePre(MotionUpdateEvent.Pre event) {
+        if (!enabled || this.configuration == null || this.configuration.rotationType() != RotationConfiguration.RotationType.SERVER)
+            return;
+
+        if (System.currentTimeMillis() >= this.endTime) {
+            handleRotationEnd();
+            if (!enabled) return;
+        }
+
+        clientSideYaw = mc.thePlayer.rotationYaw;
+        clientSidePitch = mc.thePlayer.rotationPitch;
+
+        Angle bezierAngle = getBezierAngle();
+
+        serverSideYaw += bezierAngle.getYaw() - lastBezierYaw;
+        serverSidePitch += bezierAngle.getPitch() - lastBezierPitch;
+
+        mc.thePlayer.rotationYaw = serverSideYaw;
+        mc.thePlayer.rotationPitch = serverSidePitch;
+
+        lastBezierYaw = bezierAngle.getYaw();
+        lastBezierPitch = bezierAngle.getPitch();
+    }
+
+    @SubscribeEvent(receiveCanceled = true)
+    public void onMotionUpdatePost(MotionUpdateEvent.Post event) {
+        if (!enabled || this.configuration == null || this.configuration.rotationType() != RotationConfiguration.RotationType.SERVER)
+            return;
+
+        mc.thePlayer.rotationYaw = clientSideYaw;
+        mc.thePlayer.rotationPitch = clientSidePitch;
     }
 }

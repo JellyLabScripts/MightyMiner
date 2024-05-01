@@ -2,7 +2,6 @@ package com.jelly.MightyMinerV2.Handler;
 
 import com.jelly.MightyMinerV2.Event.MotionUpdateEvent;
 import com.jelly.MightyMinerV2.Util.AngleUtil;
-import com.jelly.MightyMinerV2.Util.LogUtil;
 import com.jelly.MightyMinerV2.Util.helper.Angle;
 import com.jelly.MightyMinerV2.Util.helper.RotationConfiguration;
 import com.jelly.MightyMinerV2.Util.helper.Target;
@@ -11,9 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.util.Deque;
+import java.util.Queue;
 import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class RotationHandler {
     private static RotationHandler instance;
@@ -23,7 +22,7 @@ public class RotationHandler {
         return instance;
     }
 
-    private final Deque<RotationConfiguration> rotations = new ConcurrentLinkedDeque<>();
+    private final Queue<RotationConfiguration> rotations = new PriorityBlockingQueue<>();
     private final Minecraft mc = Minecraft.getMinecraft();
 
     @Getter

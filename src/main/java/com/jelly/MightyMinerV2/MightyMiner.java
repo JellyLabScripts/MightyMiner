@@ -70,12 +70,13 @@ public class MightyMiner {
     private void initializeListeners() {
         // Initialize Listeners
         MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
+        MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
         MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
         MinecraftForge.EVENT_BUS.register(new TablistUtil());
     }
 
     private void initializeCommands() {
         // Initialize Commands
-        CommandManager.register(new OsamaTestCommandNobodyTouchPleaseLoveYou());
+        CommandManager.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
     }
 }

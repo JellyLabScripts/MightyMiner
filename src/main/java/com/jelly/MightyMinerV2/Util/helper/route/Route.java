@@ -3,6 +3,7 @@ package com.jelly.MightyMinerV2.Util.helper.route;
 import com.google.gson.annotations.Expose;
 import com.jelly.MightyMinerV2.Config.MightyMinerConfig;
 import com.jelly.MightyMinerV2.Util.RenderUtil;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 
 import java.util.LinkedList;
@@ -17,9 +18,7 @@ public class Route {
     }
 
     public void insert(final int index, final RouteWaypoint waypoint) {
-        waypoint.routeIndex = index;
         this.waypoints.add(index, waypoint);
-        this.updateIndex(index + 1, this.waypoints.size(), 1);
     }
 
     public void remove(final RouteWaypoint waypoint) {
@@ -30,7 +29,6 @@ public class Route {
 
     public void remove(final int index) {
         this.waypoints.remove(index);
-        this.updateIndex(index, this.waypoints.size(), -1);
     }
 
     public RouteWaypoint get(final int index) {
@@ -42,7 +40,6 @@ public class Route {
     }
 
     public void replace(final int index, final RouteWaypoint waypoint) {
-        waypoint.routeIndex = index;
         this.waypoints.set(index, waypoint);
     }
 
@@ -50,23 +47,14 @@ public class Route {
         return index - 1 == this.waypoints.size();
     }
 
-    private void updateIndex(final int startIndex, final int endIndex, final int amount) {
-        for (int i = startIndex; i < endIndex; i++) {
-            this.waypoints.get(i).routeIndex += amount;
-        }
-    }
-
     public void drawRoute() {
         for (int i = 0; i < this.waypoints.size(); i++) {
             RouteWaypoint currWaypoint = this.get(i);
-            RouteWaypoint prevWaypoint = this.get(i - 1);
-            currWaypoint.draw();
+            RenderUtil.drawBox(new AxisAlignedBB(currWaypoint.getX(), currWaypoint.getY(), currWaypoint.getZ(), currWaypoint.getX() + 1, currWaypoint.getY() + 1, currWaypoint.getZ() + 1), MightyMinerConfig.routeBuilderNodeColor.toJavaColor());
+            RenderUtil.drawText(String.valueOf(i + 1), currWaypoint.getX() + 0.5, currWaypoint.getY() + 1, currWaypoint.getZ() + 0.5, 1);
             if (this.waypoints.size() == 1) continue;
-            RenderUtil.drawTracer(
-                    new Vec3(prevWaypoint.getX() + 0.5, prevWaypoint.getY() + 0.5, prevWaypoint.getZ() + 0.5),
-                    new Vec3(currWaypoint.getX() + 0.5, currWaypoint.getY() + 0.5, currWaypoint.getZ() + 0.5),
-                    MightyMinerConfig.routeBuilderTracerColor.toJavaColor()
-            );
+            RouteWaypoint prevWaypoint = this.get(i - 1);
+            RenderUtil.drawTracer(new Vec3(prevWaypoint.getX() + 0.5, prevWaypoint.getY() + 0.5, prevWaypoint.getZ() + 0.5), new Vec3(currWaypoint.getX() + 0.5, currWaypoint.getY() + 0.5, currWaypoint.getZ() + 0.5), MightyMinerConfig.routeBuilderTracerColor.toJavaColor());
         }
     }
 }

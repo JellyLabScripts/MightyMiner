@@ -16,19 +16,19 @@ import java.util.Optional;
 @Accessors(fluent = true)
 public class RotationConfiguration {
     private final Minecraft mc = Minecraft.getMinecraft();
-    private Angle from;
+    private Optional<Angle> from = Optional.empty();
     private Optional<Angle> to = Optional.empty();
-    private Optional<Target> target = Optional.empty();
+    private Optional<Target> target;
     private Optional<Runnable> callback;
     private long time;
-    private boolean goingBackToClientSide = false;
+    private boolean easeBackToClientSide = false;
     private boolean followTarget = false;
     private RotationType rotationType = RotationType.CLIENT;
-    private Ease easeOutBack = Ease.values()[new Random().nextInt(Ease.values().length - 1)];
+    private Ease easeFunction = Ease.values()[new Random().nextInt(Ease.values().length - 1)];
     private boolean randomness = false;
 
     public RotationConfiguration(Angle from, Angle to, long time, RotationType rotationType, Runnable callback) {
-        this.from = from;
+        this.from = Optional.of(from);
         this.to = Optional.ofNullable(to);
         this.target = Optional.of(new Target(to));
         this.time = time;
@@ -37,7 +37,7 @@ public class RotationConfiguration {
     }
 
     public RotationConfiguration(Angle from, Target target, long time, RotationType rotationType, Runnable callback) {
-        this.from = from;
+        this.from = Optional.of(from);
         this.time = time;
         this.target = Optional.ofNullable(target);
         this.rotationType = rotationType;
@@ -45,8 +45,6 @@ public class RotationConfiguration {
     }
 
     public RotationConfiguration(Angle to, long time, Runnable callback) {
-//        this.from = AngleHandler.getInstance().getConfiguration() != null && RotationHandler.getInstance().getConfiguration().goingBackToClientSide() ? new Rotation(RotationHandler.getInstance().getServerSideYaw(), RotationHandler.getInstance().getServerSidePitch()) : new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
-        this.from = AngleUtil.getPlayerAngle();
         this.to = Optional.ofNullable(to);
         this.target = Optional.of(new Target(to));
         this.time = time;
@@ -54,8 +52,6 @@ public class RotationConfiguration {
     }
 
     public RotationConfiguration(Angle to, long time, RotationType rotationType, Runnable callback) {
-//        this.from = AngleHandler.getInstance().getConfiguration() != null && RotationHandler.getInstance().getConfiguration().goingBackToClientSide() ? new Rotation(RotationHandler.getInstance().getServerSideYaw(), RotationHandler.getInstance().getServerSidePitch()) : new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
-        this.from = AngleUtil.getPlayerAngle();
         this.to = Optional.ofNullable(to);
         this.target = Optional.of(new Target(to));
         this.time = time;
@@ -64,16 +60,12 @@ public class RotationConfiguration {
     }
 
     public RotationConfiguration(Target target, long time, Runnable callback) {
-//        this.from = AngleHandler.getInstance().getConfiguration() != null && RotationHandler.getInstance().getConfiguration().goingBackToClientSide() ? new Rotation(RotationHandler.getInstance().getServerSideYaw(), RotationHandler.getInstance().getServerSidePitch()) : new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
-        this.from = AngleUtil.getPlayerAngle();
         this.time = time;
         this.target = Optional.ofNullable(target);
         this.callback = Optional.ofNullable(callback);
     }
 
     public RotationConfiguration(Target target, long time, RotationType rotationType, Runnable callback) {
-//        this.from = AngleHandler.getInstance().getConfiguration() != null && RotationHandler.getInstance().getConfiguration().goingBackToClientSide() ? new Rotation(RotationHandler.getInstance().getServerSideYaw(), RotationHandler.getInstance().getServerSidePitch()) : new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
-        this.from = AngleUtil.getPlayerAngle();
         this.time = time;
         this.target = Optional.ofNullable(target);
         this.rotationType = rotationType;

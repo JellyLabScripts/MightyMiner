@@ -8,7 +8,10 @@
     "Network.MixinNetworkManager"
   ],
   "client": [
-    "Client.MixinMinecraft",
-    "Network.MixinNetHandlerPlayClient"
+    "Client.EntityPlayerSPAccessor",
+    "Client.MinecraftAccessor",
+    "Client.MixinEntityPlayerSP",
+    "Network.MixinNetHandlerPlayClient",
+    "Render.MixinModelBiped"
   ]
 }

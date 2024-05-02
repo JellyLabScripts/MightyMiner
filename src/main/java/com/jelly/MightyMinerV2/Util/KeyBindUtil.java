@@ -1,7 +1,7 @@
 package com.jelly.MightyMinerV2.Util;
 
 import com.google.common.collect.ImmutableMap;
-import com.jelly.MightyMinerV2.Mixin.Client.MixinMinecraft;
+import com.jelly.MightyMinerV2.Mixin.Client.MinecraftAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.MathHelper;
@@ -34,15 +34,15 @@ public class KeyBindUtil {
     };
 
     public static void rightClick() {
-        ((MixinMinecraft) mc).rightClick();
+        ((MinecraftAccessor) mc).rightClick();
     }
 
     public static void leftClick() {
-        ((MixinMinecraft) mc).leftClick();
+        ((MinecraftAccessor) mc).leftClick();
     }
 
     public static void middleClick() {
-        ((MixinMinecraft) mc).middleClick();
+        ((MinecraftAccessor) mc).middleClick();
     }
 
     public static void onTick(KeyBinding key) {

@@ -8,8 +8,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 
-import java.util.Optional;
-
 public class Target {
     private Vec3 vec;
     @Getter
@@ -40,19 +38,19 @@ public class Target {
     }
 
     // Ensures Rotation Always Ends
-    public Optional<Angle> getTargetAngle() {
+    public Angle getTargetAngle() {
         if (blockPos != null) {
-            return Optional.of(AngleUtil.getRotation(blockPos));
+            return AngleUtil.getRotation(blockPos);
         }
 
         if (vec != null) {
-            return Optional.of(AngleUtil.getRotation(vec));
+            return AngleUtil.getRotation(vec);
         }
 
         if (entity != null) {
-            return Optional.of(AngleUtil.getRotation(entity.getPositionVector().addVector(0, additionalY, 0)));
+            return AngleUtil.getRotation(entity.getPositionVector().addVector(0, additionalY, 0));
         }
 
-        return Optional.of(angle);
+        return angle;
     }
 }

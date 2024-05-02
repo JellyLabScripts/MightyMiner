@@ -1,11 +1,14 @@
 package com.jelly.MightyMinerV2.Feature;
 
+import com.jelly.MightyMinerV2.Feature.impl.RouteBuilder;
 import com.jelly.MightyMinerV2.Util.LogUtil;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Getter
 public class FeatureManager {
     private static FeatureManager instance;
     private final List<IFeature> features = new ArrayList<>();
@@ -17,7 +20,11 @@ public class FeatureManager {
         return instance;
     }
 
-    public void EnableAll() {
+    public FeatureManager(){
+        addFeature(RouteBuilder.getInstance());
+    }
+
+    public void enableAll() {
         for (IFeature feature : features) {
             if (feature.shouldStartAtLaunch() && !feature.isEnabled()) {
                 feature.start();
@@ -27,7 +34,7 @@ public class FeatureManager {
         }
     }
 
-    public void DisableAll() {
+    public void disableAll() {
         for (IFeature feature : features) {
             if (feature.isEnabled()) {
                 feature.stop();
@@ -54,7 +61,7 @@ public class FeatureManager {
     }
 
     public void resetAllStates() {
-        features.forEach(IFeature::resetFailsafeAfterStop);
+        features.forEach(IFeature::resetStatesAfterStop);
     }
 
     public void disableCurrentRunning(IFeature sender) {

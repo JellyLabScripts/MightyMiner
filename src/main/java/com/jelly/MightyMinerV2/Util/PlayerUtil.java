@@ -12,6 +12,10 @@ import java.util.function.Predicate;
 public class PlayerUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
+    public static BlockPos getBlockStandingOn(){
+        return new BlockPos(mc.thePlayer.posX, Math.ceil(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
+    }
+
     public static Entity getEntityCuttingOtherEntity(Entity e) {
         return getEntityCuttingOtherEntity(e, entity -> true);
     }

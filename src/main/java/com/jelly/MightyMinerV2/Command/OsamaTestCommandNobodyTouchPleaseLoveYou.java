@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.MightyMinerV2.Handler.RotationHandler;
+import com.jelly.MightyMinerV2.Util.KeyBindUtil;
 import com.jelly.MightyMinerV2.Util.LogUtil;
 import com.jelly.MightyMinerV2.Util.RenderUtil;
 import com.jelly.MightyMinerV2.Util.helper.Angle;
@@ -46,9 +47,10 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
         Target t1 = new Target(new Angle(-10, 0));
         entTodraw = (Entity) Minecraft.getMinecraft().theWorld.loadedEntityList.stream().filter(ent -> ent instanceof EntityLivingBase && ent != Minecraft.getMinecraft().thePlayer).toArray()[0];
         Target t2 = new Target(entTodraw);
-        RotationConfiguration conf = new RotationConfiguration(t2, 1000, RotationConfiguration.RotationType.CLIENT, () -> LogUtil.send("Second Rotation Ended", LogUtil.ELogType.SUCCESS));
+        t2.additionalY(1.5f);
+        RotationConfiguration conf = new RotationConfiguration(t2, 1000, RotationConfiguration.RotationType.SERVER, KeyBindUtil::leftClick);
         conf.followTarget(true);
-//        conf.easeBackToClientSide(true);
+        conf.easeBackToClientSide(true);
         RotationHandler.getInstance().easeTo(conf);
     }
 
@@ -65,7 +67,12 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
     @SubCommand
     public void stop() {
-        RotationHandler.getInstance().reset();
+//        RotationHandler.getInstance().reset();
+        if (RotationHandler.getInstance().getConfiguration() != null) {
+            RotationHandler.getInstance().getConfiguration().followTarget(false);
+        } else {
+            RotationHandler.getInstance().reset();
+        }
     }
 
     @SubscribeEvent

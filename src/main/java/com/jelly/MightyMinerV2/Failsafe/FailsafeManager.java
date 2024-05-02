@@ -45,7 +45,7 @@ public class FailsafeManager {
         hadEmergency = false;
         DelayChooseFailsafe.reset();
         onTickDelay.reset();
-        failsafes.forEach(Failsafe::resetStates);
+//        failsafes.forEach(Failsafe::);
     }
 
     public void resetAfterMacroDisable() {
@@ -54,12 +54,12 @@ public class FailsafeManager {
     }
 
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onBlockChange(BlockChangeEvent event) {
-        if (mc.thePlayer == null || mc.theWorld == null) return;
-
-        failsafes.forEach(failsafe -> failsafe.onBlockChange(event));
-    }
+//    @SubscribeEvent(priority = EventPriority.HIGHEST)
+//    public void onBlockChange(BlockChangeEvent event) {
+//        if (mc.thePlayer == null || mc.theWorld == null) return;
+//
+//        failsafes.forEach(failsafe -> failsafe.onBlockChange(event));
+//    }
 
 
 

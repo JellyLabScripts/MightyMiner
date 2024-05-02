@@ -2,15 +2,15 @@ package com.jelly.MightyMinerV2.Config;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.core.OneColor;
+import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
-import cc.polyfrost.oneconfig.config.migration.VigilanceName;
-import com.jelly.MightyMinerV2.Config.Struct.WayPoint;
+import com.jelly.MightyMinerV2.Feature.impl.RouteBuilder;
 import net.minecraft.client.Minecraft;
-import org.jetbrains.annotations.NotNull;
+import org.lwjgl.input.Keyboard;
 
 import java.io.File;
-import java.util.*;
 
 @SuppressWarnings({"unused", "DefaultAnnotationParam"})
 public class MightyMinerConfig extends Config {
@@ -24,6 +24,7 @@ public class MightyMinerConfig extends Config {
     private transient static final String GEMSTONE = "Gemstone";
     private transient static final String POWDER = "Powder";
     private transient static final String AOTV = "AOTV";
+    private transient static final String ROUTE_BUILDER = "Route Builder";
     private transient static final String AUTO_SELL = "Auto Sell";
     private transient static final String FAILSAFE = "Failsafe";
     private transient static final String HUD = "HUD";
@@ -32,8 +33,6 @@ public class MightyMinerConfig extends Config {
     private transient static final String EXPERIMENTAL = "Experimental";
 
     private transient static final File WAYPOINTS_FILE = new File(mc.mcDataDir, "mm_waypoints.json");
-
-    public static List<WayPoint> wayPoints = new ArrayList<>();
 
     public static enum MacroType {
         MITHRIL,
@@ -62,6 +61,44 @@ public class MightyMinerConfig extends Config {
     )
     public static int macroType = 0;
 
+    //<editor-fold desc="Route Builder">
+    @KeyBind(
+            name = "Enable RouteBuilder",
+            description = "They key to click to enable RouteBuilder",
+            category = ROUTE_BUILDER,
+            size = 2
+    )
+    public static OneKeyBind routeBuilder = new OneKeyBind(Keyboard.KEY_LBRACKET);
+
+    @KeyBind(
+            name = "Add Block To Route",
+            description = "The Key to click to add the block player is standing on block to the route",
+            category = ROUTE_BUILDER
+    )
+    public static OneKeyBind routeBuilderAddKeybind = new OneKeyBind(Keyboard.KEY_P);
+
+    @KeyBind(
+            name = "Remove Block From Route",
+            description = "The Key To Remove the block player is standing on from the route",
+            category = ROUTE_BUILDER
+    )
+    public static OneKeyBind routeBuilderRemoveKeybind = new OneKeyBind(Keyboard.KEY_O);
+
+    @Color(
+            name = "Route Node Color",
+            description = "The Color of The Blocks On a Route",
+            category = ROUTE_BUILDER
+    )
+    public static OneColor routeBuilderNodeColor = new OneColor(0, 255, 255, 100);
+
+    @Color(
+            name = "Route Tracer Color",
+            description = "The Color of The Line Between Blocks On a Route",
+            category = ROUTE_BUILDER
+    )
+    public static OneColor routeBuilderTracerColor = new OneColor(0, 255, 255, 100);
+    //</editor-fold>
+
 //
 //    DEBUG SETTINGS
 //
@@ -74,17 +111,9 @@ public class MightyMinerConfig extends Config {
     public static boolean debugMode = false;
 
     public MightyMinerConfig() {
-//        super(new Mod("Mighty Miner", ModType.HYPIXEL, "/MightyMinerV2/icon-mod/icon.png"), "/MightMinerV2/config.json");
         super(new Mod("Mighty Miner", ModType.HYPIXEL), "/MightMinerV2/config.json");
         initialize();
-
-//        this.addDependency("macroType", "Macro Type", () -> {
-//            return null;
-//        });
-//
-//        this.addDependency("debugMode", "Debug Mode", () -> {
-//            return null;
-//        });
+        registerKeyBind(routeBuilder, RouteBuilder.getInstance()::toggle);
 
         save();
     }

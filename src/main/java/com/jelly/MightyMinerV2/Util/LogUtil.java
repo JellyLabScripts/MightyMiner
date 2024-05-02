@@ -22,7 +22,7 @@ public class LogUtil {
 
     public synchronized static void sendLog(ChatComponentText chat) {
         if (mc.thePlayer == null || mc.theWorld == null) System.out.println("Mighty Miner" + chat.getUnformattedText());
-        mc.thePlayer.addChatMessage(chat);
+        else mc.thePlayer.addChatMessage(chat);
     }
 
     public static void send(String message, ELogType type) {

@@ -7,7 +7,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 
 @Data
-@EqualsAndHashCode(exclude = "vec")
+@EqualsAndHashCode(exclude = {"vec", "transportMethod"})
 public class RouteWaypoint {
     @Expose
     private int x;

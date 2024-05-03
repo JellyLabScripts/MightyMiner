@@ -7,11 +7,13 @@ import com.jelly.MightyMinerV2.Feature.IFeature;
 import com.jelly.MightyMinerV2.Handler.RotationHandler;
 import com.jelly.MightyMinerV2.Util.AngleUtil;
 import com.jelly.MightyMinerV2.Util.KeyBindUtil;
+import com.jelly.MightyMinerV2.Util.PlayerUtil;
 import com.jelly.MightyMinerV2.Util.helper.Clock;
 import com.jelly.MightyMinerV2.Util.helper.RotationConfiguration;
 import com.jelly.MightyMinerV2.Util.helper.Target;
 import com.jelly.MightyMinerV2.Util.helper.route.Route;
 import com.jelly.MightyMinerV2.Util.helper.route.RouteWaypoint;
+import com.jelly.MightyMinerV2.Util.helper.route.TransportMethod;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
@@ -55,7 +57,6 @@ public class AutoAotv implements IFeature {
 
     @Override
     public void start() {
-
     }
 
     @Override
@@ -82,24 +83,71 @@ public class AutoAotv implements IFeature {
     private boolean enabled = false;
     private Route routeToFollow;
     private int currentRouteIndex = -1;
+    private int targetRouteIndex = -1;
     private State state = State.STARTING;
 
-    public void enable(Route routeToFollow) {
+    public void queueRoute(final Route routeToFollow) {
+        this.routeToFollow = routeToFollow;
+    }
+
+    public void goTo(final int index) {
+        if (this.routeToFollow == null || this.routeToFollow.isEmpty()) {
+            error("No Route Was Selected or its empty.");
+            return;
+        }
+        this.targetRouteIndex = index;
+        this.currentRouteIndex = this.getCurrentIndex() - 1;
+        this.normalizeIndexes();
+        this.enabled = true;
+    }
+
+    public void enable(final Route routeToFollow) {
         this.routeToFollow = routeToFollow;
         this.enabled = true;
+        this.targetRouteIndex = -1;
+        this.normalizeIndexes();
+        this.currentRouteIndex = -1;
 
         success("Enabling AutoAotv.");
+    }
+
+    public void pause() {
+        this.enabled = false;
+        this.timer.reset();
+        RotationHandler.getInstance().reset();
+        this.resetStatesAfterStop();
+
+        success("Pausing AutoAotv");
     }
 
     public void disable() {
         this.enabled = false;
         this.routeToFollow = null;
         this.timer.reset();
+        this.targetRouteIndex = -1;
         this.currentRouteIndex = -1;
         RotationHandler.getInstance().reset();
         this.resetStatesAfterStop();
 
         success("Disabling Aotv");
+    }
+
+    private void normalizeIndexes() {
+        this.targetRouteIndex = this.normalizeIndex(this.targetRouteIndex);
+        this.currentRouteIndex = this.normalizeIndex(this.currentRouteIndex);
+        if (this.targetRouteIndex < this.currentRouteIndex) {
+            this.targetRouteIndex += this.routeToFollow.size();
+        }
+    }
+
+    private int normalizeIndex(final int index) {
+        return (index + this.routeToFollow.size()) % this.routeToFollow.size();
+    }
+
+    public int getCurrentIndex() {
+        int index = this.routeToFollow.indexOf(new RouteWaypoint(PlayerUtil.getBlockStandingOn(), TransportMethod.ETHERWARP));
+        if (index != -1) return index;
+        return this.routeToFollow.indexOf(this.routeToFollow.getClosest(PlayerUtil.getBlockStandingOn()).get());
     }
 
     @SubscribeEvent
@@ -112,7 +160,7 @@ public class AutoAotv implements IFeature {
                 break;
             }
             case DETECT_ROUTE: {
-                if (this.routeToFollow.isEnd(this.currentRouteIndex++)) {
+                if (this.currentRouteIndex++ == this.targetRouteIndex) {
                     this.swapState(State.END_VERIFY, 0);
                     return;
                 }
@@ -120,6 +168,8 @@ public class AutoAotv implements IFeature {
                 break;
             }
             case ROTATION: {
+                // Todo: add check to detect if it can look at next block or not
+                // Todo: improve the time thing
                 RouteWaypoint nextPoint = this.routeToFollow.get(this.currentRouteIndex);
                 int time;
                 if (nextPoint.getTransportMethod().ordinal() == 0) {
@@ -143,6 +193,7 @@ public class AutoAotv implements IFeature {
 
                 RouteWaypoint target = this.routeToFollow.get(this.currentRouteIndex);
 
+                // Todo: add a better method to verify if rotation was completed or not
                 if (!AngleUtil.isLookingAt(target.toVec3(), 2f)) return;
                 int sneakTime = 0;
                 if (target.getTransportMethod().ordinal() == 1) {
@@ -154,30 +205,40 @@ public class AutoAotv implements IFeature {
             }
             case AOTV: {
                 if (this.timer.isScheduled() && !this.timer.passed()) return;
-
+                // Todo: test Etherwarp
                 KeyBindUtil.rightClick();
                 KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                 RotationHandler.getInstance().reset();
-                this.swapState(State.AOTV_VERIFY, 0);
+                this.swapState(State.AOTV_VERIFY, 2000);
                 break;
             }
             case AOTV_VERIFY:
                 break;
             case END_VERIFY:
-                this.disable();
+                if (this.routeToFollow.size() == this.targetRouteIndex - 1) {
+                    this.disable();
+                } else {
+                    this.pause();
+                }
                 break;
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled = true)
     public void onPacketReceive(PacketEvent.Received event) {
         if (!this.enabled || this.state != State.AOTV_VERIFY) return;
+        if (this.timer.isScheduled() && this.timer.passed()) {
+            error("Did not receive teleport packet in time. Disabling");
+            this.disable();
+            return;
+        }
         if (!(event.packet instanceof S08PacketPlayerPosLook)) return;
-        // Add checks to verify teleport
+
+        // Todo: Add checks to verify teleport
         this.swapState(State.STARTING, 0);
         S08PacketPlayerPosLook pack = (S08PacketPlayerPosLook) event.packet;
         Vec3 pos = new Vec3(pack.getX(), pack.getY(), pack.getZ());
-        if(pos.distanceTo(this.routeToFollow.get(this.currentRouteIndex).toVec3()) > 6){
+        if (pos.distanceTo(this.routeToFollow.get(this.currentRouteIndex).toVec3()) > 6) {
             this.swapState(State.ROTATION, 0);
         }
     }

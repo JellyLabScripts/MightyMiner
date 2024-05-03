@@ -36,9 +36,9 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
             LogUtil.send("Selected Route is empty.", LogUtil.ELogType.SUCCESS);
             return;
         }
-        AutoAotv.getInstance().enable(RouteHandler.getInstance().getSelectedRoute());
+        AutoAotv.getInstance().queueRoute(RouteHandler.getInstance().getSelectedRoute());
+        AutoAotv.getInstance().goTo(36);
     }
-
 
     @SubscribeEvent
     public void onRender(RenderWorldLastEvent event) {

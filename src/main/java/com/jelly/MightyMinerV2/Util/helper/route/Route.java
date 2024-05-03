@@ -4,10 +4,13 @@ import com.google.gson.annotations.Expose;
 import com.jelly.MightyMinerV2.Config.MightyMinerConfig;
 import com.jelly.MightyMinerV2.Util.RenderUtil;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class Route {
     @Expose
@@ -35,6 +38,10 @@ public class Route {
         return this.waypoints.get((index + this.waypoints.size()) % this.waypoints.size());
     }
 
+    public Optional<RouteWaypoint> getClosest(final BlockPos pos) {
+        return this.waypoints.stream().min(Comparator.comparingDouble(wp -> wp.toVec3().squareDistanceTo(new Vec3(pos))));
+    }
+
     public int indexOf(final RouteWaypoint waypoint) {
         return this.waypoints.indexOf(waypoint);
     }
@@ -60,5 +67,9 @@ public class Route {
             RouteWaypoint prevWaypoint = this.get(i - 1);
             RenderUtil.drawTracer(new Vec3(prevWaypoint.getX() + 0.5, prevWaypoint.getY() + 0.5, prevWaypoint.getZ() + 0.5), new Vec3(currWaypoint.getX() + 0.5, currWaypoint.getY() + 0.5, currWaypoint.getZ() + 0.5), MightyMinerConfig.routeBuilderTracerColor.toJavaColor());
         }
+    }
+
+    public int size() {
+        return this.waypoints.size();
     }
 }

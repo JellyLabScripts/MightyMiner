@@ -6,9 +6,6 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.MightyMinerV2.Feature.impl.RouteBuilder;
 import com.jelly.MightyMinerV2.Handler.RouteHandler;
 import com.jelly.MightyMinerV2.Util.LogUtil;
-import com.jelly.MightyMinerV2.Util.PlayerUtil;
-import com.jelly.MightyMinerV2.Util.helper.route.Route;
-import com.jelly.MightyMinerV2.Util.helper.route.RouteWaypoint;
 import com.jelly.MightyMinerV2.Util.helper.route.TransportMethod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
@@ -52,9 +49,9 @@ public class RouteBuilderCommand {
     }
 
     @SubCommand
-    public void add() {
+    public void add(final String name) {
         if (!RouteBuilder.getInstance().isRunning()) return;
-        RouteBuilder.getInstance().addToRoute();
+        RouteBuilder.getInstance().addToRoute(name.equalsIgnoreCase("aotv") ? TransportMethod.AOTV : TransportMethod.ETHERWARP);
     }
 
     @SubCommand

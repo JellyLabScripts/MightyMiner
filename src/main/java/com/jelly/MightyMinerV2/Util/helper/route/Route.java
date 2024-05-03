@@ -44,7 +44,11 @@ public class Route {
     }
 
     public boolean isEnd(final int index) {
-        return index - 1 == this.waypoints.size();
+        return index + 1 == this.waypoints.size();
+    }
+
+    public boolean isEmpty() {
+        return this.waypoints.isEmpty();
     }
 
     public void drawRoute() {

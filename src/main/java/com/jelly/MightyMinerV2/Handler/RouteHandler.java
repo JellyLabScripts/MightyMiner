@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 
+@Getter
 public class RouteHandler {
     public static RouteHandler instance;
 
@@ -25,12 +26,10 @@ public class RouteHandler {
         return instance;
     }
 
-    @Getter
     @Expose
     private final HashMap<String, Route> routes = new HashMap<String, Route>() {{
         put("Default", new Route());
     }};
-    @Getter
     private Route selectedRoute = this.routes.get("Default");
     private volatile boolean dirty = false;
 
@@ -48,12 +47,12 @@ public class RouteHandler {
         this.markDirty();
     }
 
-    public void addToCurrentRoute(final BlockPos block) {
+    public void addToCurrentRoute(final BlockPos block, final TransportMethod method) {
         if (this.selectedRoute == this.routes.get("Default")) {
             LogUtil.send("Cannot Edit Default Route.", LogUtil.ELogType.ERROR);
             return;
         }
-        final RouteWaypoint waypoint = new RouteWaypoint(block, TransportMethod.ETHERWARP);
+        final RouteWaypoint waypoint = new RouteWaypoint(block, method);
         if (this.selectedRoute.indexOf(waypoint) != -1) return;
         this.selectedRoute.insert(waypoint);
         this.markDirty();
@@ -96,7 +95,7 @@ public class RouteHandler {
 
     @SubscribeEvent
     public void onRender(RenderWorldLastEvent event) {
-        // remove this and move it inside gemstone macro
+        // move it inside gemstone macro
         this.selectedRoute.drawRoute();
     }
 }

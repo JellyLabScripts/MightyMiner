@@ -25,6 +25,7 @@ public class MightyMinerConfig extends Config {
     private transient static final String POWDER = "Powder";
     private transient static final String AOTV = "AOTV";
     private transient static final String ROUTE_BUILDER = "Route Builder";
+    private transient static final String DELAY = "Delays";
     private transient static final String AUTO_SELL = "Auto Sell";
     private transient static final String FAILSAFE = "Failsafe";
     private transient static final String HUD = "HUD";
@@ -71,11 +72,18 @@ public class MightyMinerConfig extends Config {
     public static OneKeyBind routeBuilder = new OneKeyBind(Keyboard.KEY_LBRACKET);
 
     @KeyBind(
-            name = "Add Block To Route",
+            name = "Add Block To Route(AOTV)",
             description = "The Key to click to add the block player is standing on block to the route",
             category = ROUTE_BUILDER
     )
-    public static OneKeyBind routeBuilderAddKeybind = new OneKeyBind(Keyboard.KEY_P);
+    public static OneKeyBind routeBuilderAotvAddKeybind = new OneKeyBind(Keyboard.KEY_P);
+
+    @KeyBind(
+            name = "Add Block To Route(ETHERWARP)",
+            description = "The Key to click to add the block player is standing on block to the route",
+            category = ROUTE_BUILDER
+    )
+    public static OneKeyBind routeBuilderEtherwarpAddKeybind = new OneKeyBind(Keyboard.KEY_I);
 
     @KeyBind(
             name = "Remove Block From Route",
@@ -97,6 +105,29 @@ public class MightyMinerConfig extends Config {
             category = ROUTE_BUILDER
     )
     public static OneColor routeBuilderTracerColor = new OneColor(0, 255, 255, 100);
+    //</editor-fold>
+
+
+    //<editor-fold desc="Delays">
+    //<editor-fold desc="AutoAotv">
+    @Slider(
+            name = "Aotv Look Delay (Right Click)",
+            description = "Rotation time to look at next block while aotving",
+            category = DELAY,
+            subcategory = "AutoAotv",
+            min = 50, max = 1000
+    )
+    public static int delayAutoAotvLookDelay = 250;
+
+    @Slider(
+            name = "Aotv Look Delay (Etherwarp)",
+            description = "Rotation time to look at next block while Etherwarping",
+            category = DELAY,
+            subcategory = "AutoAotv",
+            min = 50, max = 2000
+    )
+    public static int delayAutoAotvEtherwarpLookDelay = 500;
+    //</editor-fold>
     //</editor-fold>
 
 //

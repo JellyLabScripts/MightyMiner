@@ -11,7 +11,7 @@ import net.minecraft.util.Vec3;
 public class AngleUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
-    public static Angle getPlayerAngle(){
+    public static Angle getPlayerAngle() {
         return new Angle(get360RotationYaw(), mc.thePlayer.rotationPitch);
     }
 
@@ -138,8 +138,13 @@ public class AngleUtil {
     }
 
     // Todo: More testing
-    public static Angle getNeededChange(Angle startAngle, Angle endAngle){
+    public static Angle getNeededChange(Angle startAngle, Angle endAngle) {
         float yawChange = normalizeAngle(normalizeAngle(endAngle.getYaw()) - normalizeAngle(startAngle.getYaw()));
         return new Angle(yawChange, endAngle.getPitch() - startAngle.getPitch());
+    }
+
+    public static boolean isLookingAt(Vec3 vec, float distance) {
+        Angle change = getNeededChange(getPlayerAngle(), getRotation(vec));
+        return Math.abs(change.getYaw()) <= distance && Math.abs(change.getPitch()) <= distance;
     }
 }

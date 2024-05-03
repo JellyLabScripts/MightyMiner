@@ -7,21 +7,18 @@ import com.jelly.MightyMinerV2.Feature.IFeature;
 import com.jelly.MightyMinerV2.Handler.RouteHandler;
 import com.jelly.MightyMinerV2.Util.LogUtil;
 import com.jelly.MightyMinerV2.Util.PlayerUtil;
-import com.jelly.MightyMinerV2.Util.helper.route.Route;
 import com.jelly.MightyMinerV2.Util.helper.route.RouteWaypoint;
 import com.jelly.MightyMinerV2.Util.helper.route.TransportMethod;
 import lombok.Getter;
-import net.minecraft.util.BlockPos;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Getter
 public class RouteBuilder implements IFeature {
     private static RouteBuilder instance;
+
     public static RouteBuilder getInstance() {
         if (instance == null) {
             instance = new RouteBuilder();
@@ -91,8 +88,14 @@ public class RouteBuilder implements IFeature {
     public void onKeyEvent(InputEvent.KeyInputEvent event) {
         if (!this.isRunning()) return;
 
-        if (MightyMinerConfig.routeBuilderAddKeybind.isActive()) {
-            this.addToRoute();
+        if (MightyMinerConfig.routeBuilderAotvAddKeybind.isActive()) {
+            this.addToRoute(TransportMethod.AOTV);
+            LogUtil.send("Added Aotv", LogUtil.ELogType.SUCCESS);
+        }
+
+        if (MightyMinerConfig.routeBuilderEtherwarpAddKeybind.isActive()) {
+            this.addToRoute(TransportMethod.ETHERWARP);
+            LogUtil.send("Added Etherwarp", LogUtil.ELogType.SUCCESS);
         }
 
         if (MightyMinerConfig.routeBuilderRemoveKeybind.isActive()) {
@@ -100,8 +103,8 @@ public class RouteBuilder implements IFeature {
         }
     }
 
-    public void addToRoute() {
-        RouteHandler.getInstance().addToCurrentRoute(PlayerUtil.getBlockStandingOn());
+    public void addToRoute(final TransportMethod method) {
+        RouteHandler.getInstance().addToCurrentRoute(PlayerUtil.getBlockStandingOn(), method);
     }
 
     public void removeFromRoute() {

@@ -17,10 +17,15 @@ import com.jelly.MightyMinerV2.Util.helper.route.TransportMethod;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.util.Optional;
+
+// This works knowing that the blocks between every node is clear and traversable
+// The checks to see if player can go between two nodes or not must be checked beforehand otherwise it'll just bug.
 @Getter
 public class AutoAotv implements IFeature {
     private static AutoAotv instance;
@@ -85,9 +90,14 @@ public class AutoAotv implements IFeature {
     private int currentRouteIndex = -1;
     private int targetRouteIndex = -1;
     private State state = State.STARTING;
+    private boolean isQueued = false;
 
     public void queueRoute(final Route routeToFollow) {
+        if (this.enabled) return;
         this.routeToFollow = routeToFollow;
+        this.currentRouteIndex = -1;
+        this.targetRouteIndex = -1;
+        this.isQueued = true;
     }
 
     public void goTo(final int index) {
@@ -96,9 +106,13 @@ public class AutoAotv implements IFeature {
             return;
         }
         this.targetRouteIndex = index;
-        this.currentRouteIndex = this.getCurrentIndex() - 1;
+        this.currentRouteIndex = this.getCurrentIndex(PlayerUtil.getBlockStandingOn()) - 1;
         this.normalizeIndexes();
         this.enabled = true;
+    }
+
+    public void gotoNext() {
+        this.goTo(this.targetRouteIndex + 1);
     }
 
     public void enable(final Route routeToFollow) {
@@ -122,6 +136,7 @@ public class AutoAotv implements IFeature {
 
     public void disable() {
         this.enabled = false;
+        this.isQueued = false;
         this.routeToFollow = null;
         this.timer.reset();
         this.targetRouteIndex = -1;
@@ -144,10 +159,19 @@ public class AutoAotv implements IFeature {
         return (index + this.routeToFollow.size()) % this.routeToFollow.size();
     }
 
-    public int getCurrentIndex() {
-        int index = this.routeToFollow.indexOf(new RouteWaypoint(PlayerUtil.getBlockStandingOn(), TransportMethod.ETHERWARP));
+    // Needs more work (trust me)
+    private int getLookTime(final RouteWaypoint waypoint) {
+        if (waypoint.getTransportMethod().ordinal() == 0) {
+            return MightyMinerConfig.delayAutoAotvLookDelay;
+        }
+        return MightyMinerConfig.delayAutoAotvEtherwarpLookDelay;
+    }
+
+    // Todo: Add Check to see if player can go to next block of the closestBlock
+    public int getCurrentIndex(final BlockPos playerBlock) {
+        int index = this.routeToFollow.indexOf(new RouteWaypoint(playerBlock, TransportMethod.ETHERWARP));
         if (index != -1) return index;
-        return this.routeToFollow.indexOf(this.routeToFollow.getClosest(PlayerUtil.getBlockStandingOn()).get());
+        return this.routeToFollow.getClosest(playerBlock).map(routeWaypoint -> this.routeToFollow.indexOf(routeWaypoint)).orElse(-1);
     }
 
     @SubscribeEvent
@@ -168,19 +192,14 @@ public class AutoAotv implements IFeature {
                 break;
             }
             case ROTATION: {
-                // Todo: add check to detect if it can look at next block or not
                 // Todo: improve the time thing
                 RouteWaypoint nextPoint = this.routeToFollow.get(this.currentRouteIndex);
-                int time;
-                if (nextPoint.getTransportMethod().ordinal() == 0) {
-                    time = MightyMinerConfig.delayAutoAotvLookDelay;
-                } else {
-                    time = MightyMinerConfig.delayAutoAotvEtherwarpLookDelay;
-                }
+
                 RotationHandler.getInstance().easeTo(
-                        new RotationConfiguration(new Target(nextPoint.toVec3()), time, () -> {
-                        }).followTarget(true)
-                );
+                        new RotationConfiguration(new Target(nextPoint.toVec3()),
+                                this.getLookTime(nextPoint),
+                                () -> {})
+                                .followTarget(true));
                 this.swapState(State.ROTATION_VERIFY, 2000);
                 break;
             }
@@ -190,7 +209,6 @@ public class AutoAotv implements IFeature {
                     this.disable();
                     return;
                 }
-
                 RouteWaypoint target = this.routeToFollow.get(this.currentRouteIndex);
 
                 // Todo: add a better method to verify if rotation was completed or not
@@ -212,32 +230,38 @@ public class AutoAotv implements IFeature {
                 this.swapState(State.AOTV_VERIFY, 2000);
                 break;
             }
-            case AOTV_VERIFY:
-                break;
-            case END_VERIFY:
-                if (this.routeToFollow.size() == this.targetRouteIndex - 1) {
+            case AOTV_VERIFY: {
+                if (this.timer.isScheduled() && this.timer.passed()) {
+                    error("Did not receive teleport packet in time. Disabling");
                     this.disable();
-                } else {
-                    this.pause();
+                    return;
                 }
                 break;
+            }
+            case END_VERIFY: {
+                // Todo: add something to verify if player is at the end or not preferably something that checks for distance from end
+                /*
+                    RouteWaypoint target = this.routeToFollow.get(this.targetRouteIndex);
+                    BlockPos playerBlock = PlayerUtil.getBlockStandingOn();
+                    // Distance Check Here
+                 */
+
+                if (this.isQueued) this.pause();
+                else this.disable();
+                break;
+            }
         }
     }
 
     @SubscribeEvent(receiveCanceled = true)
     public void onPacketReceive(PacketEvent.Received event) {
         if (!this.enabled || this.state != State.AOTV_VERIFY) return;
-        if (this.timer.isScheduled() && this.timer.passed()) {
-            error("Did not receive teleport packet in time. Disabling");
-            this.disable();
-            return;
-        }
         if (!(event.packet instanceof S08PacketPlayerPosLook)) return;
 
-        // Todo: Add checks to verify teleport
         this.swapState(State.STARTING, 0);
-        S08PacketPlayerPosLook pack = (S08PacketPlayerPosLook) event.packet;
-        Vec3 pos = new Vec3(pack.getX(), pack.getY(), pack.getZ());
+        S08PacketPlayerPosLook packet = (S08PacketPlayerPosLook) event.packet;
+
+        Vec3 pos = new Vec3(packet.getX(), packet.getY(), packet.getZ());
         if (pos.distanceTo(this.routeToFollow.get(this.currentRouteIndex).toVec3()) > 6) {
             this.swapState(State.ROTATION, 0);
         }
@@ -249,12 +273,6 @@ public class AutoAotv implements IFeature {
     }
 
     enum State {
-        STARTING,
-        DETECT_ROUTE,
-        ROTATION,
-        ROTATION_VERIFY,
-        AOTV,
-        AOTV_VERIFY,
-        END_VERIFY
+        STARTING, DETECT_ROUTE, ROTATION, ROTATION_VERIFY, AOTV, AOTV_VERIFY, END_VERIFY
     }
 }

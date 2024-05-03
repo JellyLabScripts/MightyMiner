@@ -29,7 +29,6 @@ public class RouteBuilderCommand {
 
     @SubCommand
     public void list() {
-        if (!RouteBuilder.getInstance().isRunning()) return;
         StringBuilder sb = new StringBuilder();
         sb.append("Available Routes: ");
 
@@ -44,7 +43,6 @@ public class RouteBuilderCommand {
 
     @SubCommand
     public void select(final String routeName) {
-        if (!RouteBuilder.getInstance().isRunning()) return;
         RouteHandler.getInstance().selectRoute(routeName);
     }
 

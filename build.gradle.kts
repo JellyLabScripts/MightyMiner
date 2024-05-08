@@ -63,6 +63,14 @@ repositories {
     maven("https://repo.polyfrost.cc/releases")
     maven("https://repo.essential.gg/repository/maven-public")
     maven("https://jitpack.io")
+    exclusiveContent {
+        forRepository {
+            mavenCentral()
+        }
+        filter {
+            includeGroup("org.projectlombok")
+        }
+    }
 }
 
 val shadowImpl: Configuration by configurations.creating {

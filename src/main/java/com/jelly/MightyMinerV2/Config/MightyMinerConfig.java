@@ -141,6 +141,13 @@ public class MightyMinerConfig extends Config {
     )
     public static boolean debugMode = false;
 
+    @Switch(
+            name = "Full Blocks",
+            category = MISCELLANEOUS,
+            description = "Gives a full block hitbox to blocks without a full block hitbox"
+    )
+    public static boolean fullblock = false;
+
     public MightyMinerConfig() {
         super(new Mod("Mighty Miner", ModType.HYPIXEL), "/MightMinerV2/config.json");
         initialize();

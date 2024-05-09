@@ -26,7 +26,6 @@ public class LogUtil {
     }
 
     public static void send(String message, ELogType type) {
-        ChatComponentText chat = new ChatComponentText(message);
         switch (type) {
             case SUCCESS:
                 sendLog(new ChatComponentText("§l§2[Mighty Miner] §8» §a" + message));

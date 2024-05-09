@@ -40,9 +40,9 @@ public class LogUtil {
             case DEBUG:
                 if (lastDebugMessage != null && lastDebugMessage.equals(message)) return;
                 if (MightyMinerConfig.debugMode && mc.thePlayer != null)
-                    sendLog(new ChatComponentText("§3§lFarm Helper §8» §7" + message));
+                    sendLog(new ChatComponentText("§l§9[Mighty Miner] §8» §9" + message));
                 else
-                    System.out.println("[Farm Helper] " + message);
+                    System.out.println("[Mighty Miner] " + message);
                 lastDebugMessage = message;
         }
     }

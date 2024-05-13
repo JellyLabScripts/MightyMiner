@@ -89,9 +89,9 @@ public class GameStateHandler {
     //       I doubt it will cause any problems tho
     @SubscribeEvent
     public void onTablistFooterUpdate(UpdateTablistFooterEvent event){
-        final String footer = String.join(" ", event.footer);
-        this.godpotActive = footer.contains("You have a God Potion active!");
-        this.cookieActive = !footer.contains("Cookie Buff Not active!");
+        final String footer = String.join(" ", event.footer).toLowerCase();
+        this.godpotActive = footer.contains("you have a god potion active!");
+        this.cookieActive = !footer.contains("cookie buff not active!");
     }
 
     @SubscribeEvent

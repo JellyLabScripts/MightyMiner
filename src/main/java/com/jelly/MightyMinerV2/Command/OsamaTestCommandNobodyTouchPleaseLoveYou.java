@@ -16,6 +16,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.awt.*;
+import java.util.List;
 
 @Command(value = "set")
 public class OsamaTestCommandNobodyTouchPleaseLoveYou {
@@ -30,9 +31,6 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
     @Main
     public void main() {
-        final String footer = String.join(" ", TablistUtil.getCachedTablistFooter());
-        LogUtil.send(footer, LogUtil.ELogType.SUCCESS);
-        LogUtil.send("NotActive: " + footer.contains("Cookie Buff Not active!"), LogUtil.ELogType.SUCCESS);
         LogUtil.send("IsCookieActive: " + GameStateHandler.getInstance().isCookieActive(), LogUtil.ELogType.SUCCESS);
         LogUtil.send("IsGodpotActive: " + GameStateHandler.getInstance().isGodpotActive(), LogUtil.ELogType.SUCCESS);
     }

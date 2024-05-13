@@ -88,10 +88,17 @@ public class GameStateHandler {
     // Todo: Consider Changing Logic. Its very simple because i cant test rn.
     //       I doubt it will cause any problems tho
     @SubscribeEvent
-    public void onTablistFooterUpdate(UpdateTablistFooterEvent event){
-        final String footer = String.join(" ", event.footer).toLowerCase();
-        this.godpotActive = footer.contains("you have a god potion active!");
-        this.cookieActive = !footer.contains("cookie buff not active!");
+    public void onTablistFooterUpdate(UpdateTablistFooterEvent event) {
+        final List<String> footer = event.footer;
+        for (int i = 0; i < footer.size(); i++) {
+            if (footer.get(i).contains("Active Effects")) {
+                this.godpotActive = footer.get(++i).contains("You have a God Potion active!");
+            }
+            if(footer.get(i).contains("Cookie Buff")){
+                this.cookieActive = !footer.get(++i).contains("Not active!");
+                break;
+            }
+        }
     }
 
     @SubscribeEvent
@@ -111,6 +118,4 @@ public class GameStateHandler {
             break;
         }
     }
-
-
 }

@@ -7,6 +7,7 @@ import com.jelly.MightyMinerV2.Command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.MightyMinerV2.Command.RouteBuilderCommand;
 import com.jelly.MightyMinerV2.Config.MightyMinerConfig;
 import com.jelly.MightyMinerV2.Feature.FeatureManager;
+import com.jelly.MightyMinerV2.Handler.GameStateHandler;
 import com.jelly.MightyMinerV2.Handler.RotationHandler;
 import com.jelly.MightyMinerV2.Util.LogUtil;
 import com.jelly.MightyMinerV2.Util.ReflectionUtils;
@@ -103,6 +104,7 @@ public class MightyMiner {
         // Initialize Listeners
         FeatureManager.getInstance().getFeatures().forEach(MinecraftForge.EVENT_BUS::register);
 
+        MinecraftForge.EVENT_BUS.register(GameStateHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(RouteHandler.getInstance());
 

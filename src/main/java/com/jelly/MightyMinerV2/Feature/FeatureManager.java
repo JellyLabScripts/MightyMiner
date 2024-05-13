@@ -1,6 +1,6 @@
 package com.jelly.MightyMinerV2.Feature;
 
-import com.jelly.MightyMinerV2.Feature.impl.AutoAotv;
+import com.jelly.MightyMinerV2.Feature.impl.RouteNavigator;
 import com.jelly.MightyMinerV2.Feature.impl.RouteBuilder;
 import com.jelly.MightyMinerV2.Util.LogUtil;
 import lombok.Getter;
@@ -23,7 +23,7 @@ public class FeatureManager {
 
     public FeatureManager() {
         addFeature(RouteBuilder.getInstance());
-        addFeature(AutoAotv.getInstance());
+        addFeature(RouteNavigator.getInstance());
     }
 
     public void enableAll() {

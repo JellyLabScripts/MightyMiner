@@ -68,7 +68,7 @@ public class MixinNetworkManager {
                 String clean = mightyMinerV2$cleanSB(string);
                 if (!clean.equals(mightyMinerV2$cachedScoreboard.get(index)) || !mightyMinerV2$cachedScoreboard.containsKey(index)) {
                     mightyMinerV2$cachedScoreboard.put(index, clean);
-                    MinecraftForge.EVENT_BUS.post(new UpdateScoreboardLineEvent(clean));
+                    MinecraftForge.EVENT_BUS.post(new UpdateScoreboardLineEvent(string, clean));
                 }
                 index++;
                 if (index > 15) break;

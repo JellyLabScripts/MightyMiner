@@ -14,7 +14,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 
-public class Tickglide {
+public class BlockUtil {
 
     public static Block getBlockBeingMined(World world, EntityPlayer player) {
         Vec3 vec3 = player.getPositionVector();

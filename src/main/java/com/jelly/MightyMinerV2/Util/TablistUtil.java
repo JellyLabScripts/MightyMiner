@@ -2,6 +2,7 @@ package com.jelly.MightyMinerV2.Util;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
+import lombok.Getter;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.world.WorldSettings;
@@ -15,15 +16,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class TablistUtil {
     public static final Ordering<NetworkPlayerInfo> playerOrdering = Ordering.from(new PlayerComparator());
 
+    @Getter
     private static final CopyOnWriteArrayList<String> cachedTablist = new CopyOnWriteArrayList<>();
-
-    public static List<String> getTabList() {
-        return cachedTablist;
-    }
+    @Getter
+    private static final CopyOnWriteArrayList<String> cachedTablistFooter = new CopyOnWriteArrayList<>();
 
     public static void setCachedTablist(List<String> tablist) {
         cachedTablist.clear();
         cachedTablist.addAll(tablist);
+    }
+
+    public static void setCachedTabListFooter(List<String> tabListFooter) {
+        cachedTablistFooter.clear();
+        cachedTablistFooter.addAll(tabListFooter);
     }
 
     @SideOnly(Side.CLIENT)

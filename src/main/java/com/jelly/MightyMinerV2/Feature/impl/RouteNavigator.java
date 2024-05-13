@@ -22,17 +22,15 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.util.Optional;
-
 // This works knowing that the blocks between every node is clear and traversable
 // The checks to see if player can go between two nodes or not must be checked beforehand otherwise it'll just bug.
 @Getter
-public class AutoAotv implements IFeature {
-    private static AutoAotv instance;
+public class RouteNavigator implements IFeature {
+    private static RouteNavigator instance;
 
-    public static AutoAotv getInstance() {
+    public static RouteNavigator getInstance() {
         if (instance == null) {
-            instance = new AutoAotv();
+            instance = new RouteNavigator();
             FeatureManager.getInstance().addFeature(instance);
         }
         return instance;

@@ -94,6 +94,7 @@ public class MixinNetHandlerPlayClient {
         if (footer.equals(mightyMinerV2$previousFooter)) return;
         mightyMinerV2$previousFooter.clear();
         mightyMinerV2$previousFooter.addAll(footer);
+        TablistUtil.setCachedTabListFooter(footer);
         MinecraftForge.EVENT_BUS.post(new UpdateTablistFooterEvent(footer));
     }
 }

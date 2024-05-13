@@ -5,10 +5,12 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 
 @Getter
 public class UpdateScoreboardLineEvent extends Event {
-    private final String line;
+    private final String dirtyLine;
+    private final String cleanLine;
 
-    public UpdateScoreboardLineEvent(String line) {
-        this.line = line;
+    public UpdateScoreboardLineEvent(final String dirtyLine, final String cleanLine) {
+        this.dirtyLine = dirtyLine;
+        this.cleanLine = cleanLine;
     }
 
 }

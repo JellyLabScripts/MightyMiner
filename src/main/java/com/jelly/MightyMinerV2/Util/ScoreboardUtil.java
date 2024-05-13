@@ -60,12 +60,11 @@ public class ScoreboardUtil {
             scores = list;
         }
 
-
         for (Score score : scores) {
             ScorePlayerTeam team = scoreboard.getPlayersTeam(score.getPlayerName());
             String playerName = ScorePlayerTeam.formatPlayerName(team, score.getPlayerName());
-            scoreboardLines.add(playerName);
-            cleanScoreboardLines.add(cleanSB(playerName));
+            scoreboardLines.add(0, playerName);
+            cleanScoreboardLines.add(0, cleanSB(playerName));
         }
 
         if (previousScoreboard.equals(cleanScoreboardLines)) return;
@@ -77,7 +76,7 @@ public class ScoreboardUtil {
         MinecraftForge.EVENT_BUS.post(new UpdateScoreboardListEvent(scoreboardLines, cleanScoreboardLines, currentTime));
     }
 
-    private static String cleanSB(String scoreboard) {
+    public static String cleanSB(String scoreboard) {
         StringBuilder cleaned = new StringBuilder();
 
         for (char c : StringUtils.stripControlCodes(scoreboard).toCharArray()) {

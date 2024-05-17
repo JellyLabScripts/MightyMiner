@@ -107,6 +107,7 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(GameStateHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(RouteHandler.getInstance());
+        MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
 
         MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
         MinecraftForge.EVENT_BUS.register(new TablistUtil());

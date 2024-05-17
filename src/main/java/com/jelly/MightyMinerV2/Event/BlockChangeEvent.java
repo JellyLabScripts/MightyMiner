@@ -10,12 +10,10 @@ public class BlockChangeEvent extends Event {
     public BlockPos pos;
     public IBlockState old;
     public IBlockState update;
-    public IBlockAccess world;
 
-    public BlockChangeEvent(@NotNull  BlockPos pos, @NotNull IBlockState old, @NotNull IBlockState update, @NotNull IBlockAccess world) {
+    public BlockChangeEvent(BlockPos pos, IBlockState old, IBlockState update) {
         this.pos = pos;
         this.old = old;
         this.update = update;
-        this.world = world;
     }
 }

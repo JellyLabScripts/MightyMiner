@@ -4,9 +4,10 @@
   "minVersion": "0.7",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "Client.MixinChunk",
+    "Client.MixinFullBlock",
     "FML.MixinFMLHandshakeMessage",
-    "Network.MixinNetworkManager",
-    "Client.MixinFullBlock"
+    "Network.MixinNetworkManager"
   ],
   "client": [
     "Client.EntityPlayerSPAccessor",

@@ -22,8 +22,9 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-// This works knowing that the blocks between every node is clear and traversable
-// The checks to see if player can go between two nodes or not must be checked beforehand otherwise it'll just bug.
+// This works under the assumption that the blocks between every node are clear and traversable.
+// Checks to determine if the player can move between two nodes must be done beforehand; otherwise, it will cause bugs.
+
 @Getter
 public class RouteNavigator implements IFeature {
     private static RouteNavigator instance;
@@ -31,7 +32,6 @@ public class RouteNavigator implements IFeature {
     public static RouteNavigator getInstance() {
         if (instance == null) {
             instance = new RouteNavigator();
-            FeatureManager.getInstance().addFeature(instance);
         }
         return instance;
     }
@@ -40,7 +40,7 @@ public class RouteNavigator implements IFeature {
 
     @Override
     public String getName() {
-        return "AutoAotv";
+        return "RouteNavigator";
     }
 
     @Override
@@ -70,6 +70,7 @@ public class RouteNavigator implements IFeature {
     @Override
     public void resetStatesAfterStop() {
         this.state = State.STARTING;
+        RotationHandler.getInstance().reset();
     }
 
     @Override
@@ -126,7 +127,6 @@ public class RouteNavigator implements IFeature {
     public void pause() {
         this.enabled = false;
         this.timer.reset();
-        RotationHandler.getInstance().reset();
         this.resetStatesAfterStop();
 
         success("Pausing AutoAotv");
@@ -139,7 +139,6 @@ public class RouteNavigator implements IFeature {
         this.timer.reset();
         this.targetRouteIndex = -1;
         this.currentRouteIndex = -1;
-        RotationHandler.getInstance().reset();
         this.resetStatesAfterStop();
 
         success("Disabling Aotv");

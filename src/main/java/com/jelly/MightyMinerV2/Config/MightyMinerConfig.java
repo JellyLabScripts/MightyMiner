@@ -62,6 +62,24 @@ public class MightyMinerConfig extends Config {
     )
     public static int macroType = 0;
 
+    //<editor-fold desc="Mithril">
+    @Slider(
+            name = "Rotation Time",
+            category = MITHRIL,
+            description = "Time it takes to rotate to the next block while mining mithril",
+            min = 50, max = 1000
+    )
+    public static int mithrilMinerRotationTime = 300;
+
+    @Slider(
+            name = "Rotation Time Randomization",
+            category = MITHRIL,
+            min = 50, max = 1000
+    )
+    public static int mithrilMinerRotationTimeRandomizer = 300;
+
+    //</editor-fold>
+
     //<editor-fold desc="Route Builder">
     @KeyBind(
             name = "Enable RouteBuilder",

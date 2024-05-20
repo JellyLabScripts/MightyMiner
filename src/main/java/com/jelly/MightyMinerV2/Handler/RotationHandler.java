@@ -10,9 +10,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
-import java.util.concurrent.PriorityBlockingQueue;
 
 public class RotationHandler {
     private static RotationHandler instance;
@@ -22,7 +23,7 @@ public class RotationHandler {
         return instance;
     }
 
-    private final Queue<RotationConfiguration> rotations = new PriorityBlockingQueue<>();
+    private final Queue<RotationConfiguration> rotations = new LinkedList<>();
     private final Minecraft mc = Minecraft.getMinecraft();
 
     @Getter
@@ -48,8 +49,8 @@ public class RotationHandler {
     private RotationConfiguration configuration;
     private final Random random = new Random();
 
-    public RotationHandler queueRotation(RotationConfiguration config) {
-        this.rotations.add(config);
+    public RotationHandler queueRotation(RotationConfiguration... configs) {
+        this.rotations.addAll(Arrays.asList(configs));
         return instance;
     }
 

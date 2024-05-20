@@ -16,6 +16,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class BlockUtil {
@@ -46,7 +47,7 @@ public class BlockUtil {
     // Priority - [GrayWool, Prismarine, BlueWool, Titanium]
     // The higher the priority, the higher the chance of it getting picked
     public static List<BlockPos> getValidMithrilPositions(int[] priority) {
-        final MinHeap blocks = new MinHeap(500);
+        final MinHeap<BlockPos> blocks = new MinHeap<>(500);
         final BlockPos playerHeadPos = PlayerUtil.getBlockStandingOn().add(0, 2, 0);
         final Vec3 posEyes = mc.thePlayer.getPositionEyes(1);
         for (int x = -4; x < 5; x++) {
@@ -55,7 +56,7 @@ public class BlockUtil {
                     final BlockPos pos = playerHeadPos.add(x, y, z);
                     if (!hasVisibleSide(pos)) continue;
 
-                    final double hardness = getBlockStrength(mc.theWorld.getBlockState(pos));
+                    final double hardness = getBlockStrength(pos);
                     if (hardness < 500 || hardness > 2000 || hardness == 600) continue;
 
                     final double distance = posEyes.distanceTo(new Vec3(pos));
@@ -85,7 +86,9 @@ public class BlockUtil {
         }
     }
 
-    public static int getBlockStrength(IBlockState blockState) {
+    public static int getBlockStrength(final BlockPos pos) {
+        final IBlockState blockState = mc.theWorld.getBlockState(pos);
+
         if (blockState == null) {
             return 30;
         }
@@ -158,8 +161,8 @@ public class BlockUtil {
         return 5000;
     }
 
-    public static float getMiningTime(float getBlockStrength, int miningSpeed) {
-        return (getBlockStrength * 30) / miningSpeed;
+    public static int getMiningTime(final BlockPos pos, final int miningSpeed) {
+        return (int) Math.ceil((getBlockStrength(pos) * 30) / (float) miningSpeed);
     }
 
     public static Vec3 getSidePos(BlockPos block, EnumFacing face) {
@@ -197,10 +200,69 @@ public class BlockUtil {
 
     public static boolean hasVisibleSide(BlockPos block) {
         if (!mc.theWorld.isBlockFullCube(block)) return false;
-        final Vec3 eyePos = mc.thePlayer.getPositionEyes(1);
         for (EnumFacing side : BLOCK_SIDES.keySet()) {
             if (canSeeSide(block, side)) return true;
         }
         return false;
+    }
+
+    public static List<Vec3> bestPointsOnBestSide(final BlockPos block) {
+        return pointsOnBlockSide(block, getClosestVisibleSide(block)).stream()
+                .filter(RaytracingUtil::canSeePoint)
+                .sorted(Comparator.comparingDouble(i -> AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(i)).getValue()))
+                .collect(Collectors.toList());
+    }
+
+    public static List<Vec3> bestPointsOnVisibleSides(final BlockPos block) {
+        return pointsOnVisibleSides(block).stream()
+                .filter(RaytracingUtil::canSeePoint)
+                .sorted(Comparator.comparingDouble(mc.thePlayer.getPositionEyes(1)::distanceTo))
+                .collect(Collectors.toList());
+    }
+
+    // Should not use this because it wont ensure the points can be looked at
+    private static List<Vec3> pointsOnVisibleSides(final BlockPos block) {
+        final List<Vec3> points = new ArrayList<>();
+        for (EnumFacing side : getAllVisibleSides(block)) {
+            points.addAll(pointsOnBlockSide(block, side));
+        }
+        return points;
+    }
+
+    // Credits to GTC <3
+    private static List<Vec3> pointsOnBlockSide(final BlockPos block, final EnumFacing side) {
+        final List<Vec3> points = new ArrayList<>();
+
+        if (side != null) {
+            float[] it = BLOCK_SIDES.get(side);
+            for (int i = 0; i < 20; i++) {
+                float x = it[0];
+                float y = it[1];
+                float z = it[2];
+                if (x == 0.5f) x = randomVal();
+                if (y == 0.5f) y = randomVal();
+                if (z == 0.5f) z = randomVal();
+                Vec3 point = new Vec3(block).addVector(x, y, z);
+                if (!points.contains(point)) points.add(point);
+            }
+        } else {
+            for (float[] bside : BLOCK_SIDES.values()) {
+                for (int i = 0; i < 20; i++) {
+                    float x = bside[0];
+                    float y = bside[1];
+                    float z = bside[2];
+                    if (x == 0.5f) x = randomVal();
+                    if (y == 0.5f) y = randomVal();
+                    if (z == 0.5f) z = randomVal();
+                    Vec3 point = new Vec3(block).addVector(x, y, z);
+                    if (!points.contains(point)) points.add(point);
+                }
+            }
+        }
+        return points;
+    }
+
+    private static float randomVal() {
+        return (new Random().nextInt(6) + 2) / 10.0f;
     }
 }

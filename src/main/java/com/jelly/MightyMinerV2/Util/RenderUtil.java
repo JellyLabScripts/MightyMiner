@@ -23,6 +23,11 @@ import java.util.ArrayList;
 public class RenderUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
+    public static void drawPoint(Vec3 vec, Color color) {
+        drawBox(new AxisAlignedBB(vec.xCoord - 0.05, vec.yCoord - 0.05, vec.zCoord - 0.05,
+                vec.xCoord + 0.05, vec.yCoord + 0.05, vec.zCoord + 0.05), color);
+    }
+
     public static void drawBlockBox(BlockPos blockPos, Color color) {
         double x = blockPos.getX();
         double y = blockPos.getY();

@@ -3,6 +3,7 @@ package com.jelly.MightyMinerV2.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
+import com.jelly.MightyMinerV2.Feature.impl.MithrilMiner;
 import com.jelly.MightyMinerV2.Feature.impl.RouteNavigator;
 import com.jelly.MightyMinerV2.Handler.GameStateHandler;
 import com.jelly.MightyMinerV2.Handler.RouteHandler;
@@ -15,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -36,11 +38,25 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
     Entity entTodraw = null;
     List<BlockPos> blockToDraw = new ArrayList<>();
+    List<Vec3> points = new ArrayList<>();
 
     @Main
     public void main() {
-        blockToDraw.clear();
-        blockToDraw.addAll(BlockUtil.getValidMithrilPositions(new int[]{1, 1, 1, 1}));
+//        blockToDraw.clear();
+//        blockToDraw.addAll(BlockUtil.getValidMithrilPositions(new int[]{1, 1, 1, 1}));
+        if (BlockUtil.getBlockLookingAt(5f) != null) {
+            points.clear();
+            points.addAll(BlockUtil.bestPointsOnBestSide(BlockUtil.getBlockLookingAt(5f)));
+        }
+    }
+
+    @SubCommand
+    public void mine() {
+        if (!MithrilMiner.getInstance().isRunning()) {
+            MithrilMiner.getInstance().enable(1700, 200, new int[]{1, 1, 1, 1});
+        } else {
+            MithrilMiner.getInstance().stop();
+        }
     }
 
     @SubCommand
@@ -67,6 +83,10 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
         if (!blockToDraw.isEmpty()) {
             RenderUtil.drawBlockBox(blockToDraw.get(0), new Color(255, 0, 0, 100));
+        }
+
+        if (!points.isEmpty()) {
+            points.forEach(it -> RenderUtil.drawPoint(it, new Color(255, 0, 0, 100)));
         }
     }
 }

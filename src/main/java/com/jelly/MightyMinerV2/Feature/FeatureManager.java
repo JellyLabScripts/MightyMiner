@@ -1,5 +1,6 @@
 package com.jelly.MightyMinerV2.Feature;
 
+import com.jelly.MightyMinerV2.Feature.impl.MithrilMiner;
 import com.jelly.MightyMinerV2.Feature.impl.RouteNavigator;
 import com.jelly.MightyMinerV2.Feature.impl.RouteBuilder;
 import com.jelly.MightyMinerV2.Util.LogUtil;
@@ -24,6 +25,7 @@ public class FeatureManager {
     public FeatureManager() {
         addFeature(RouteBuilder.getInstance());
         addFeature(RouteNavigator.getInstance());
+        addFeature(MithrilMiner.getInstance());
     }
 
     public void enableAll() {

@@ -1,13 +1,11 @@
 package com.jelly.MightyMinerV2.Util.helper.heap;
 
-import net.minecraft.util.BlockPos;
-
-public class HeapNode {
-    public final BlockPos nodePos;
+public class HeapNode<T> {
+    public final T nodeVal;
     public final double nodeCost;
 
-    public HeapNode(final BlockPos nodePos, final double nodeCost) {
-        this.nodePos = nodePos;
+    public HeapNode(final T nodeVal, final double nodeCost) {
+        this.nodeVal = nodeVal;
         this.nodeCost = nodeCost;
     }
 }

@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 // Starts from 1
-public class MinHeap {
-    private HeapNode[] items;
+public class MinHeap<T> {
+    private HeapNode<T>[] items;
     private int size;
     private int capacity;
 
@@ -18,11 +18,11 @@ public class MinHeap {
         this.size = 0;
     }
 
-    public void add(BlockPos pos, double cost) {
-        add(new HeapNode(pos, cost));
+    public void add(T pos, double cost) {
+        add(new HeapNode<>(pos, cost));
     }
 
-    public void add(HeapNode elem) {
+    public void add(HeapNode<T> elem) {
         if (this.size >= capacity) {
             this.capacity *= 2;
             this.items = Arrays.copyOf(this.items, this.capacity);
@@ -41,17 +41,17 @@ public class MinHeap {
     }
 
     public void swap(int i1, int i2) {
-        HeapNode temp = this.items[i1];
+        HeapNode<T> temp = this.items[i1];
         this.items[i1] = this.items[i2];
         this.items[i2] = temp;
     }
 
-    public List<BlockPos> getBlocks() {
-        final List<BlockPos> blocks = new ArrayList<>();
+    public List<T> getBlocks() {
+        final List<T> blocks = new ArrayList<>();
         for (int i = 1; i < this.items.length; i++) {
-            final HeapNode node = this.items[i];
+            final HeapNode<T> node = this.items[i];
             if (node == null) break;
-            blocks.add(node.nodePos);
+            blocks.add(node.nodeVal);
         }
         return blocks;
     }

@@ -72,6 +72,11 @@ public class RotationConfiguration {
         this.callback = Optional.ofNullable(callback);
     }
 
+    public RotationConfiguration setTarget(final Target target) {
+        this.target = Optional.of(target);
+        return this;
+    }
+
     public enum RotationType {
         SERVER,
         CLIENT

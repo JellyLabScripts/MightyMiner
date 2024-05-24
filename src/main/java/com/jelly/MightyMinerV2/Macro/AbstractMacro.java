@@ -29,7 +29,6 @@ public abstract class AbstractMacro {
         analyzeDelay.schedule(delay);
     }
 
-
     @Setter
     public void setBreakTime(double delay, double timeBefore) {
         BreakTime.schedule((long) delay);
@@ -89,9 +88,4 @@ public abstract class AbstractMacro {
         setEnabled(false);
         onDisable();
     }
-
-
-
-
-
 }

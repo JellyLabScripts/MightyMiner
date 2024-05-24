@@ -1,5 +1,6 @@
 package com.jelly.MightyMinerV2.Util;
 
+import baritone.pathing.movement.MovementHelper;
 import com.jelly.MightyMinerV2.Util.LogUtil.ELogType;
 import com.jelly.MightyMinerV2.Util.helper.Angle;
 import com.jelly.MightyMinerV2.Util.helper.heap.MinHeap;
@@ -103,9 +104,9 @@ public class BlockUtil {
             visitedPositions.add(hash);
             // Todo: Cost requires more testing.
             blocks.add(pos,
-                angleChange * 0.2
-                    + hardness / (50.0 * priority[getPriorityIndex((int) hardness)])
-                    + distance);
+                angleChange * 0.15
+                    + hardness / (150.0 * priority[getPriorityIndex((int) hardness)])
+                    + distance * 0.5);
 
           }
         }
@@ -124,8 +125,10 @@ public class BlockUtil {
   }
 
   private static boolean canStandOn(final BlockPos pos) {
+    final IBlockState posUpState = mc.theWorld.getBlockState(pos.up());
     return !mc.theWorld.isAirBlock(pos)
-        && mc.theWorld.isAirBlock(pos.add(0, 1, 0))
+        && (posUpState.getBlock() instanceof BlockAir
+        || posUpState.getBlock() instanceof BlockCarpet)
         && mc.theWorld.isAirBlock(pos.add(0, 2, 0));
   }
 

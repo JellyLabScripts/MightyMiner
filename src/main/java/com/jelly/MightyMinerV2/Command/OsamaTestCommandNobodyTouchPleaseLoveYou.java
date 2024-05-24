@@ -8,6 +8,7 @@ import com.jelly.MightyMinerV2.Feature.impl.RouteNavigator;
 import com.jelly.MightyMinerV2.Handler.GameStateHandler;
 import com.jelly.MightyMinerV2.Handler.RouteHandler;
 import com.jelly.MightyMinerV2.Util.*;
+import com.jelly.MightyMinerV2.Util.LogUtil.ELogType;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.state.IBlockState;
@@ -27,66 +28,77 @@ import java.util.List;
 
 @Command(value = "set")
 public class OsamaTestCommandNobodyTouchPleaseLoveYou {
-    private static OsamaTestCommandNobodyTouchPleaseLoveYou instance;
 
-    public static OsamaTestCommandNobodyTouchPleaseLoveYou getInstance() {
-        if (instance == null) instance = new OsamaTestCommandNobodyTouchPleaseLoveYou();
-        return instance;
+  private static OsamaTestCommandNobodyTouchPleaseLoveYou instance;
+
+  public static OsamaTestCommandNobodyTouchPleaseLoveYou getInstance() {
+    if (instance == null) {
+      instance = new OsamaTestCommandNobodyTouchPleaseLoveYou();
+    }
+    return instance;
+  }
+
+  private final Minecraft mc = Minecraft.getMinecraft();
+
+  Entity entTodraw = null;
+  List<BlockPos> blockToDraw = new ArrayList<>();
+  List<Vec3> points = new ArrayList<>();
+
+  @Main
+  public void main() {
+    this.blockToDraw.clear();
+    this.blockToDraw.add(PlayerUtil.getBlockStandingOn());
+//    blockToDraw.addAll(BlockUtil.getBestMithrilBlocks(new int[]{1, 1, 1, 1}));
+    LogUtil.send("Dist: " + PlayerUtil.getBlockStandingOn().distanceSqToCenter(
+        mc.thePlayer.posX,
+        mc.thePlayer.posY - 0.5,
+        mc.thePlayer.posZ
+    ), ELogType.SUCCESS);
+  }
+
+  private boolean canStandOn(final BlockPos pos) {
+    return mc.theWorld.isBlockFullCube(pos)
+        && mc.theWorld.isAirBlock(pos.add(0, 1, 0))
+        && mc.theWorld.isAirBlock(pos.add(0, 2, 0));
+  }
+
+  @SubCommand
+  public void mine() {
+    if (!MithrilMiner.getInstance().isRunning()) {
+      MithrilMiner.getInstance().enable(new int[]{1, 1, 1, 1});
+    } else {
+      MithrilMiner.getInstance().stop();
+    }
+  }
+
+  @SubCommand
+  public void clear() {
+    blockToDraw.clear();
+    entTodraw = null;
+  }
+
+  @SubCommand
+  public void aotv() {
+    if (RouteHandler.getInstance().getSelectedRoute().isEmpty()) {
+      LogUtil.send("Selected Route is empty.", LogUtil.ELogType.SUCCESS);
+      return;
+    }
+    RouteNavigator.getInstance().queueRoute(RouteHandler.getInstance().getSelectedRoute());
+    RouteNavigator.getInstance().goTo(36);
+  }
+
+  @SubscribeEvent
+  public void onRender(RenderWorldLastEvent event) {
+    if (entTodraw != null) {
+      RenderUtil.drawBox(((EntityLivingBase) entTodraw).getEntityBoundingBox(), Color.CYAN);
     }
 
-    private final Minecraft mc = Minecraft.getMinecraft();
-
-    Entity entTodraw = null;
-    List<BlockPos> blockToDraw = new ArrayList<>();
-    List<Vec3> points = new ArrayList<>();
-
-    @Main
-    public void main() {
-//        blockToDraw.clear();
-//        blockToDraw.addAll(BlockUtil.getValidMithrilPositions(new int[]{1, 1, 1, 1}));
-        if (BlockUtil.getBlockLookingAt(5f) != null) {
-            points.clear();
-            points.addAll(BlockUtil.bestPointsOnBestSide(BlockUtil.getBlockLookingAt(5f)));
-        }
+    if (!blockToDraw.isEmpty()) {
+      blockToDraw.forEach(it -> RenderUtil.drawBlockBox(it, new Color(0, 255, 255, 50)));
     }
 
-    @SubCommand
-    public void mine() {
-        if (!MithrilMiner.getInstance().isRunning()) {
-            MithrilMiner.getInstance().enable(1700, 200, new int[]{1, 1, 1, 1});
-        } else {
-            MithrilMiner.getInstance().stop();
-        }
+    if (!points.isEmpty()) {
+      points.forEach(it -> RenderUtil.drawPoint(it, new Color(255, 0, 0, 100)));
     }
-
-    @SubCommand
-    public void clear() {
-        blockToDraw.clear();
-        entTodraw = null;
-    }
-
-    @SubCommand
-    public void aotv() {
-        if (RouteHandler.getInstance().getSelectedRoute().isEmpty()) {
-            LogUtil.send("Selected Route is empty.", LogUtil.ELogType.SUCCESS);
-            return;
-        }
-        RouteNavigator.getInstance().queueRoute(RouteHandler.getInstance().getSelectedRoute());
-        RouteNavigator.getInstance().goTo(36);
-    }
-
-    @SubscribeEvent
-    public void onRender(RenderWorldLastEvent event) {
-        if (entTodraw != null) {
-            RenderUtil.drawBox(((EntityLivingBase) entTodraw).getEntityBoundingBox(), Color.CYAN);
-        }
-
-        if (!blockToDraw.isEmpty()) {
-            RenderUtil.drawBlockBox(blockToDraw.get(0), new Color(255, 0, 0, 100));
-        }
-
-        if (!points.isEmpty()) {
-            points.forEach(it -> RenderUtil.drawPoint(it, new Color(255, 0, 0, 100)));
-        }
-    }
+  }
 }

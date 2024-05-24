@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "Client.MixinChunk",
+    "Client.MixinEntityLivingBase",
     "Client.MixinFullBlock",
     "FML.MixinFMLHandshakeMessage",
     "Network.MixinNetworkManager"

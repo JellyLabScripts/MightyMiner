@@ -29,10 +29,7 @@ public class Clock {
         if (paused) {
             return remainingTime;
         }
-        if (endTime - System.currentTimeMillis() < 0) {
-            return 0;
-        }
-        return endTime - System.currentTimeMillis();
+        return Math.max(0, endTime - System.currentTimeMillis());
     }
 
     public boolean passed() {

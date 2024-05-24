@@ -18,6 +18,7 @@ import net.minecraft.world.World;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import net.minecraftforge.event.world.NoteBlockEvent.Play;
 
 
 public class BlockUtil {
@@ -61,25 +62,19 @@ public class BlockUtil {
   }
 
   public static List<BlockPos> getBestMithrilBlocks(final int[] priority) {
-    final long time = System.nanoTime();
     final MinHeap<BlockPos> blocks = new MinHeap<>(500);
     final Set<Long> visitedPositions = new HashSet<>();
     final List<BlockPos> walkableBlocks =
-        getWalkableBlocksAround(
-            new BlockPos(mc.thePlayer.posX, Math.floor(mc.thePlayer.posY) - 1, mc.thePlayer.posZ));
+        getWalkableBlocksAround(PlayerUtil.getBlockStandingOnFloor());
 
     for (final BlockPos blockPos : walkableBlocks) {
       final Vec3 blockCenter = new Vec3(blockPos).addVector(0.5, mc.thePlayer.eyeHeight, 0.5);
-      for (int x = -4; x < 5; x++) {
-        for (int z = -4; z < 5; z++) {
-          for (int y = -3; y < 5; y++) {
+      for (int x = -3; x < 4; x++) {
+        for (int z = -3; z < 4; z++) {
+          for (int y = -2; y < 4; y++) {
             final BlockPos pos = blockPos.add(x, y + 2, z);
             final long hash = longHash(pos.getX(), pos.getY(), pos.getZ());
             if (visitedPositions.contains(hash)) {
-              continue;
-            }
-
-            if (!hasVisibleSide(pos)) {
               continue;
             }
 
@@ -90,6 +85,10 @@ public class BlockUtil {
 
             final double distance = blockCenter.distanceTo(new Vec3(pos));
             if (distance > 4) {
+              continue;
+            }
+
+            if (!hasVisibleSide(pos)) {
               continue;
             }
 
@@ -112,8 +111,6 @@ public class BlockUtil {
         }
       }
     }
-
-    LogUtil.send("Time: " + (System.nanoTime() - time) / 1e6, ELogType.SUCCESS);
     return blocks.getBlocks();
   }
 
@@ -277,6 +274,10 @@ public class BlockUtil {
   public static List<EnumFacing> getAllVisibleSides(BlockPos block) {
     final List<EnumFacing> sides = new ArrayList<>();
     for (EnumFacing face : BLOCK_SIDES.keySet()) {
+      if (face != null && !mc.theWorld.getBlockState(block).getBlock()
+          .shouldSideBeRendered(mc.theWorld, block.offset(face), face)) {
+        continue;
+      }
       if (canSeeSide(block, face)) {
         sides.add(face);
       }
@@ -292,6 +293,10 @@ public class BlockUtil {
     double dist = Double.MAX_VALUE;
     EnumFacing face = null;
     for (EnumFacing side : BLOCK_SIDES.keySet()) {
+      if (side != null && !mc.theWorld.getBlockState(block).getBlock()
+          .shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
+        continue;
+      }
       final double distanceToThisSide = eyePos.distanceTo(getSidePos(block, side));
       if (canSeeSide(block, side) && distanceToThisSide < dist) {
         if (side == null && face != null) {
@@ -308,7 +313,11 @@ public class BlockUtil {
     if (!mc.theWorld.isBlockFullCube(block)) {
       return false;
     }
-    for (EnumFacing side : BLOCK_SIDES.keySet()) {
+    for (EnumFacing side : EnumFacing.values()) {
+      if (!mc.theWorld.getBlockState(block).getBlock()
+          .shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
+        continue;
+      }
       if (canSeeSide(block, side)) {
         return true;
       }

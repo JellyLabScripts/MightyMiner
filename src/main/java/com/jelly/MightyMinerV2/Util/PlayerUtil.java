@@ -16,6 +16,10 @@ public class PlayerUtil {
         return new BlockPos(mc.thePlayer.posX, Math.ceil(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
     }
 
+    public static BlockPos getBlockStandingOnFloor(){
+        return new BlockPos(mc.thePlayer.posX, Math.floor(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
+    }
+
     public static Entity getEntityCuttingOtherEntity(Entity e) {
         return getEntityCuttingOtherEntity(e, entity -> true);
     }

@@ -47,8 +47,13 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @Main
   public void main() {
     this.blockToDraw.clear();
-    blockToDraw.addAll(BlockUtil.getBestMithrilBlocks(new int[]{1, 1, 1, 1}));
-    LogUtil.send("IsOnGround: " + mc.thePlayer.onGround, ELogType.SUCCESS);
+    this.blockToDraw.add(PlayerUtil.getBlockStandingOn());
+//    blockToDraw.addAll(BlockUtil.getBestMithrilBlocks(new int[]{1, 1, 1, 1}));
+    LogUtil.send("Dist: " + PlayerUtil.getBlockStandingOn().distanceSqToCenter(
+        mc.thePlayer.posX,
+        mc.thePlayer.posY - 0.5,
+        mc.thePlayer.posZ
+    ), ELogType.SUCCESS);
   }
 
   private boolean canStandOn(final BlockPos pos) {

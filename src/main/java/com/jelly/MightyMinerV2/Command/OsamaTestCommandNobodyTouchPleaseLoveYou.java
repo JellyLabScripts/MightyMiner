@@ -3,6 +3,7 @@ package com.jelly.MightyMinerV2.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
+import com.jelly.MightyMinerV2.Feature.impl.AutoCommissionClaim;
 import com.jelly.MightyMinerV2.Feature.impl.MithrilMiner;
 import com.jelly.MightyMinerV2.Feature.impl.RouteNavigator;
 import com.jelly.MightyMinerV2.Handler.GameStateHandler;
@@ -46,14 +47,9 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    this.blockToDraw.clear();
-    this.blockToDraw.add(PlayerUtil.getBlockStandingOn());
-//    blockToDraw.addAll(BlockUtil.getBestMithrilBlocks(new int[]{1, 1, 1, 1}));
-    LogUtil.send("Dist: " + PlayerUtil.getBlockStandingOn().distanceSqToCenter(
-        mc.thePlayer.posX,
-        mc.thePlayer.posY - 0.5,
-        mc.thePlayer.posZ
-    ), ELogType.SUCCESS);
+    entTodraw = EntityUtil.getCeanna().orElse(null);
+    LogUtil.send("Entity Found: " + entTodraw, ELogType.SUCCESS);
+    mc.theWorld.playerEntities.forEach(System.out::println);
   }
 
   private boolean canStandOn(final BlockPos pos) {
@@ -68,6 +64,15 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       MithrilMiner.getInstance().enable(new int[]{1, 1, 1, 1});
     } else {
       MithrilMiner.getInstance().stop();
+    }
+  }
+
+  @SubCommand
+  public void claim(){
+    if(!AutoCommissionClaim.getInstance().isRunning()){
+      AutoCommissionClaim.getInstance().start();
+    }else {
+      AutoCommissionClaim.getInstance().stop();
     }
   }
 

@@ -6,21 +6,15 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.MightyMinerV2.Feature.impl.AutoCommissionClaim;
 import com.jelly.MightyMinerV2.Feature.impl.MithrilMiner;
 import com.jelly.MightyMinerV2.Feature.impl.RouteNavigator;
-import com.jelly.MightyMinerV2.Handler.GameStateHandler;
 import com.jelly.MightyMinerV2.Handler.RouteHandler;
 import com.jelly.MightyMinerV2.Util.*;
 import com.jelly.MightyMinerV2.Util.LogUtil.ELogType;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.awt.*;
@@ -47,9 +41,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    entTodraw = EntityUtil.getCeanna().orElse(null);
-    LogUtil.send("Entity Found: " + entTodraw, ELogType.SUCCESS);
-    mc.theWorld.playerEntities.forEach(System.out::println);
+    LogUtil.send("CurrentComm: " + CommissionUtil.getCurrentCommission(), ELogType.SUCCESS);
   }
 
   private boolean canStandOn(final BlockPos pos) {

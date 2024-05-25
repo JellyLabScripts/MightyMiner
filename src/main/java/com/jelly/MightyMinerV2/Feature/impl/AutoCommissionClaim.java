@@ -8,7 +8,6 @@ import com.jelly.MightyMinerV2.Util.InventoryUtil;
 import com.jelly.MightyMinerV2.Util.InventoryUtil.ClickMode;
 import com.jelly.MightyMinerV2.Util.InventoryUtil.ClickType;
 import com.jelly.MightyMinerV2.Util.KeyBindUtil;
-import com.jelly.MightyMinerV2.Util.LogUtil;
 import com.jelly.MightyMinerV2.Util.helper.Clock;
 import com.jelly.MightyMinerV2.Util.helper.RotationConfiguration;
 import com.jelly.MightyMinerV2.Util.helper.RotationConfiguration.RotationType;
@@ -132,10 +131,8 @@ public class AutoCommissionClaim implements IFeature {
         // because why not
         if (entityLookingAt.equals(this.ceanna)) {
           KeyBindUtil.leftClick();
-          log("Left Click");
         } else {
           mc.playerController.interactWithEntitySendPacket(mc.thePlayer, this.ceanna.get());
-          log("Packet Click");
         }
 
         this.swapState(State.CLAIMING, 500);

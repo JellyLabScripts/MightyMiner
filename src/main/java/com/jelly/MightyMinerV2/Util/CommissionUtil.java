@@ -1,14 +1,40 @@
 package com.jelly.MightyMinerV2.Util;
 
+import com.jelly.MightyMinerV2.Macro.impl.commissionmacro.helper.Commission;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.ContainerChest;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.gen.structure.StructureStrongholdPieces.ChestCorridor;
 
 public class CommissionUtil {
 
   private static final Minecraft mc = Minecraft.getMinecraft();
+
+  public static Commission getCurrentCommission() {
+    Commission comm = null;
+    boolean foundCommission = false;
+    for (final String text : TablistUtil.getCachedTablist()) {
+      if (!foundCommission) {
+        if (text.equalsIgnoreCase("Commissions:")) {
+          foundCommission = true;
+        }
+        continue;
+      }
+
+      if (comm == null) {
+        comm = Commission.getCommission(text.split(": ")[0].trim());
+      }
+
+      if (text.contains("DONE")) {
+        comm = Commission.COMMISSION_CLAIM;
+        break;
+      }
+
+      if (text.isEmpty()) {
+        break;
+      }
+    }
+    return comm;
+  }
 
   public static int getClaimableCommissionSlot() {
     if (!(mc.thePlayer.openContainer instanceof ContainerChest)) {

@@ -2,17 +2,15 @@ package com.jelly.MightyMinerV2.Feature.impl;
 
 import com.jelly.MightyMinerV2.Config.MightyMinerConfig;
 import com.jelly.MightyMinerV2.Event.BlockChangeEvent;
+import com.jelly.MightyMinerV2.Event.BlockDestroyEvent;
 import com.jelly.MightyMinerV2.Feature.IFeature;
 import com.jelly.MightyMinerV2.Handler.RotationHandler;
-import com.jelly.MightyMinerV2.MightyMiner;
 import com.jelly.MightyMinerV2.Util.*;
-import com.jelly.MightyMinerV2.Util.helper.Angle;
 import com.jelly.MightyMinerV2.Util.helper.Clock;
 import com.jelly.MightyMinerV2.Util.helper.RotationConfiguration;
 import com.jelly.MightyMinerV2.Util.helper.Target;
 import java.awt.Color;
 import java.util.Comparator;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
@@ -22,10 +20,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
-import scala.reflect.internal.ReificationSupport.ReificationSupportImpl.MaybeTypeTreeOriginal$;
 
+// Code here is terrible
+// Help me fix it or fix it pls
 public class MithrilMiner implements IFeature {
 
   private static MithrilMiner instance;
@@ -41,17 +39,19 @@ public class MithrilMiner implements IFeature {
   private final Random random = new Random();
   @Getter
   private boolean enabled = false;
+  @Getter
+  private float walkDirection = 0f;
   private State state = State.STARTING;
   private BoostState boostState = BoostState.INACTIVE;
   private final Clock timer = new Clock();
-  private int miningSpeed = 100;          // Mainly for TickGliding
+  private int miningSpeed = 200;          // Mainly for TickGliding
   private int miningTime = 0;             // For TickGliding
   private int speedBoost = 0;             // Boost Percentage
   private int[] priority = {1, 1, 1, 1};  // Priority - [GrayWool, Prismarine, BlueWool, Titanium]
   private BlockPos targetBlock = null;
-  private BlockPos blockToWalkTo = null;
-  @Getter
-  private float walkDirection = 0f;
+  private Vec3 targetPoint = null;
+  private BlockPos destBlock = null;
+  private int breakAttemptTime = 0;
 
   @Override
   public String getName() {
@@ -85,11 +85,12 @@ public class MithrilMiner implements IFeature {
   @Override
   public void stop() {
     this.enabled = false;
-    this.miningSpeed = 100;
+    this.miningSpeed = 200;
     this.miningTime = 0;
     this.speedBoost = 0;
     this.walkDirection = 0f;
-    this.blockToWalkTo = null;
+    this.destBlock = null;
+    this.targetPoint = null;
     KeyBindUtil.releaseAllExcept();
     this.resetStatesAfterStop();
 
@@ -116,7 +117,7 @@ public class MithrilMiner implements IFeature {
 
   // No TickGlide
   public void enable(final int[] priority) {
-    this.enable(100, 100, priority);
+    this.enable(200, 100, priority);
   }
 
   public void enable(final int miningSpeed, final int speedBoost, final int[] priority) {
@@ -130,14 +131,17 @@ public class MithrilMiner implements IFeature {
 
   @SubscribeEvent
   public void onTick(final TickEvent.ClientTickEvent event) {
-    if (mc.thePlayer == null || mc.theWorld == null || mc.currentScreen != null
-        || !this.isRunning()) {
+    if (mc.thePlayer == null || mc.theWorld == null || mc.currentScreen != null || !this.isRunning()) {
       return;
     }
 
     switch (this.state) {
       case STARTING:
         this.swapState(State.CHOOSING_BLOCK, 0);
+
+        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindAttack, true);
+        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
+        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, MightyMinerConfig.mithrilMinerSneakWhileMining);
 
         if (this.boostState == BoostState.AVAILABLE) {
           this.swapState(State.SPEED_BOOST, 250);
@@ -156,11 +160,6 @@ public class MithrilMiner implements IFeature {
         this.boostState = BoostState.ACTIVE;
         break;
       case CHOOSING_BLOCK:
-        // player is probably falling
-        if (mc.theWorld.isAirBlock(PlayerUtil.getBlockStandingOn())) {
-          return;
-        }
-
         final List<BlockPos> blocks = BlockUtil.getBestMithrilBlocks(priority);
         if (blocks.size() < 2) {
           error("Cannot find enough mithril blocks to mine.");
@@ -169,101 +168,85 @@ public class MithrilMiner implements IFeature {
         }
 
         this.targetBlock = blocks.get(blocks.get(0).equals(this.targetBlock) ? 1 : 0);
-        final int boostMult = this.boostState == BoostState.ACTIVE ? this.speedBoost / 100 : 1;
-        this.miningTime =
-            BlockUtil.getMiningTime(this.targetBlock, this.miningSpeed * boostMult) * 2;
-        success(
-            "Hardness: " + BlockUtil.getBlockStrength(this.targetBlock) + ", Time: " + miningTime);
-
-        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindAttack, true);
-        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak,
-            MightyMinerConfig.mithrilMinerSneakWhileMining
-        );
+        final int boostMultiplier = this.boostState == BoostState.ACTIVE ? this.speedBoost / 100 : 1;
+        this.miningTime = BlockUtil.getMiningTime(this.targetBlock, this.miningSpeed * boostMultiplier) * 2;
         this.swapState(State.ROTATING, 0);
 
         log("State: Choosing Block. Chosen Block Was: " + this.targetBlock);
         // fall through
       case ROTATING:
         final List<Vec3> points = BlockUtil.bestPointsOnBestSide(this.targetBlock);
-        // Should never happen idk
         if (points.isEmpty()) {
           this.swapState(State.STARTING, 0);
           log("Cannot find points to look at");
           break;
         }
 
+        this.targetPoint = points.get(0);
+
         RotationHandler.getInstance().reset();
         RotationHandler.getInstance().queueRotation(
             new RotationConfiguration(
-                new Target(points.get(0)),
+                new Target(targetPoint),
                 this.getRandomRotationTime(),
                 RotationConfiguration.RotationType.CLIENT,
-                null));
+                null)
+        );
 
         if (this.random.nextBoolean()) {
+          this.targetPoint = points.get(points.size() - 1);
           RotationHandler.getInstance().queueRotation(
-              new RotationConfiguration(new Target(points.get(points.size() - 1)),
+              new RotationConfiguration(
+                  new Target(targetPoint),
                   this.getRandomRotationTime() * 2L,
                   RotationConfiguration.RotationType.CLIENT,
-                  null));
+                  null)
+          );
         }
         RotationHandler.getInstance().start();
 
-        if (mc.thePlayer.getPositionEyes(1)
-            .distanceTo(new Vec3(this.targetBlock).addVector(0.5, 0.5, 0.5)) > 4) {
+        if (this.targetPoint != null && mc.thePlayer.getPositionEyes(1).distanceTo(this.targetPoint) > 4) {
           this.swapState(State.WALKING, 1000);
-          this.blockToWalkTo = BlockUtil.getWalkableBlocksAround(
-                  PlayerUtil.getBlockStandingOnFloor()
-              ).stream()
-              .min(Comparator.comparingDouble(this.targetBlock::distanceSq))
-              .orElse(null);
+          this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOnFloor()).stream()
+              .min(Comparator.comparingDouble(this.targetBlock::distanceSq)).orElse(null);
         } else {
           this.swapState(State.BREAKING, 1000);
+          break;
         }
-
         log("Rotation Started");
         // fall through
       case WALKING:
-        if (this.blockToWalkTo != null && this.blockToWalkTo.distanceSqToCenter(
-            mc.thePlayer.posX,
-            mc.thePlayer.posY - 0.5,
-            mc.thePlayer.posZ
-        ) > 0.01) {
-          this.walkDirection = AngleUtil.getRotation(this.blockToWalkTo).getYaw();
+        boolean walk = false;
+        boolean sneak = MightyMinerConfig.mithrilMinerSneakWhileMining;
 
-          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, true);
-          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
+        if (this.destBlock != null && this.destBlock.distanceSqToCenter(mc.thePlayer.posX, this.destBlock.getY() + 0.5, mc.thePlayer.posZ) > 0.04) {
+          this.walkDirection = AngleUtil.getRotation(this.destBlock).getYaw();
+          walk = sneak = true;
         } else {
-          this.blockToWalkTo = null;
+          this.destBlock = null;
           this.swapState(State.BREAKING, (int) this.timer.getRemainingTime());
-          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
-          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak,
-              MightyMinerConfig.mithrilMinerSneakWhileMining
-          );
         }
 
-        log("Started Walk. Dist to travel: " +
-            (this.blockToWalkTo != null ? this.blockToWalkTo.distanceSqToCenter(
-                mc.thePlayer.posX,
-                mc.thePlayer.posY - 0.5,
-                mc.thePlayer.posZ
-            ) : "NONE"));
+        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, walk);
+        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, sneak);
+
+        log("Started Walk. Walk: " + walk + ", Sneak: " + sneak);
         // fall through
       case BREAKING:
-        if (!Objects.equals(BlockUtil.getBlockLookingAt(), this.targetBlock)) {
+        if (!this.targetBlock.equals(BlockUtil.getBlockLookingAt())) {
           if (this.hasTimerEnded()) {
-            log("Could not look at block!");
             this.swapState(State.STARTING, 0);
           }
           break;
         }
+
+        if (this.breakAttemptTime > 60) {
+          this.swapState(State.STARTING, 0);
+          this.breakAttemptTime = 0;
+        }
+
         if (--this.miningTime <= 0) {
           this.swapState(State.STARTING, 0);
-
-          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
-          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak,
-              MightyMinerConfig.mithrilMinerSneakWhileMining
-          );
         }
 
         log("Breaking Block");
@@ -283,6 +266,15 @@ public class MithrilMiner implements IFeature {
   }
 
   @SubscribeEvent
+  public void blockDestroyEvent(final BlockDestroyEvent event) {
+    if (!this.isRunning() || !event.getBlock().equals(this.targetBlock)) {
+      return;
+    }
+
+    this.breakAttemptTime = 0;
+  }
+
+  @SubscribeEvent
   public void onRender(final RenderWorldLastEvent event) {
     if (!this.isRunning()) {
       return;
@@ -290,8 +282,8 @@ public class MithrilMiner implements IFeature {
     if (this.targetBlock != null) {
       RenderUtil.drawBlockBox(this.targetBlock, new Color(0, 255, 255, 50));
     }
-    if (this.blockToWalkTo != null) {
-      RenderUtil.drawBlockBox(this.blockToWalkTo, new Color(0, 255, 0, 50));
+    if (this.destBlock != null) {
+      RenderUtil.drawBlockBox(this.destBlock, new Color(0, 255, 0, 50));
     }
   }
 
@@ -305,8 +297,7 @@ public class MithrilMiner implements IFeature {
   }
 
   private int getRandomRotationTime() {
-    return MightyMinerConfig.mithrilMinerRotationTime + (int) (this.random.nextFloat()
-        * MightyMinerConfig.mithrilMinerRotationTimeRandomizer);
+    return MightyMinerConfig.mithrilMinerRotationTime + (int) (this.random.nextFloat() * MightyMinerConfig.mithrilMinerRotationTimeRandomizer);
   }
 
   // DO NOT REARRANGE THIS

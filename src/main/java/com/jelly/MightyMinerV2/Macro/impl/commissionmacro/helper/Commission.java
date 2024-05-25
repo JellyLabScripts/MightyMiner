@@ -16,7 +16,7 @@ public enum Commission {
   CLIFFSIDE_TITANIUM("Cliffside Veins Titanium"),
   RAMPARTS_TITANIUM("Rampart's Quarry Titanium"),
   GOBLIN_SLAYER("Goblin Slayer"),
-  ICE_WALKER_SLAYER("Ice Walker Slayer"),
+  GLACITE_WALKER_SLAYER("Glacite Walker Slayer"),
   TREASURE_HOARDER_SLAYER("Treasure Hoarder Puncher	"),
   // Do not want this
 //  STAR_CENTRY_SLAYER("Star Sentry Puncher	"),

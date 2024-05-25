@@ -49,10 +49,10 @@ public class BlockUtil {
         if (!canStandOn(newPos)) {
           continue;
         }
-        if (!canStandOn(playerPos.add(i, 0, 0))) {
+        if (i != 0 && !canStandOn(playerPos.add(i, 0, 0))) {
           continue;
         }
-        if (!canStandOn(playerPos.add(0, 0, k))) {
+        if (k != 0 && !canStandOn(playerPos.add(0, 0, k))) {
           continue;
         }
 

@@ -41,7 +41,10 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    LogUtil.send("CurrentComm: " + CommissionUtil.getCurrentCommission(), ELogType.SUCCESS);
+//    LogUtil.send("CurrentComm: " + CommissionUtil.getCurrentCommission(), ELogType.SUCCESS);
+    blockToDraw.clear();
+//    blockToDraw.add(PlayerUtil.getBlockStandingOnFloor());
+    blockToDraw.addAll(BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOnFloor()));
   }
 
   private boolean canStandOn(final BlockPos pos) {
@@ -56,7 +59,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       int[] p = new int[]{1, 1, 1, 1};
       if (t.equals("t")) {
         LogUtil.send("Tita", ELogType.SUCCESS);
-        p[3] = 4;
+        p[3] = 10;
       }
       MithrilMiner.getInstance().enable(p);
     } else {

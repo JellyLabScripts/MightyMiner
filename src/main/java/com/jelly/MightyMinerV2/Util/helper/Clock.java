@@ -10,6 +10,12 @@ public class Clock {
     private boolean scheduled;
     @Getter
     private long endTime;
+    @Getter
+    private long startTime;
+
+    private void start(){
+        this.startTime = System.currentTimeMillis();
+    }
 
     public void schedule(long milliseconds) {
         this.endTime = System.currentTimeMillis() + milliseconds;
@@ -30,6 +36,10 @@ public class Clock {
             return remainingTime;
         }
         return Math.max(0, endTime - System.currentTimeMillis());
+    }
+
+    private long getTimePassed(){
+        return System.currentTimeMillis() - startTime;
     }
 
     public boolean passed() {

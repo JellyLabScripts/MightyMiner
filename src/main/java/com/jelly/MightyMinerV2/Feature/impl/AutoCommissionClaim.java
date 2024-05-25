@@ -155,7 +155,7 @@ public class AutoCommissionClaim implements IFeature {
         } else {
           success("No Commission To Claim");
         }
-        this.swapState(State.ENDING, 200);
+        this.swapState(State.ENDING, 500);
         break;
       case ENDING:
         if (!this.hasTimerEnded()) {

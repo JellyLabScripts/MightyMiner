@@ -51,19 +51,24 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   @SubCommand
-  public void mine() {
+  public void mine(final String t) {
     if (!MithrilMiner.getInstance().isRunning()) {
-      MithrilMiner.getInstance().enable(new int[]{1, 1, 1, 1});
+      int[] p = new int[]{1, 1, 1, 1};
+      if (t.equals("t")) {
+        LogUtil.send("Tita", ELogType.SUCCESS);
+        p[3] = 4;
+      }
+      MithrilMiner.getInstance().enable(p);
     } else {
       MithrilMiner.getInstance().stop();
     }
   }
 
   @SubCommand
-  public void claim(){
-    if(!AutoCommissionClaim.getInstance().isRunning()){
+  public void claim() {
+    if (!AutoCommissionClaim.getInstance().isRunning()) {
       AutoCommissionClaim.getInstance().start();
-    }else {
+    } else {
       AutoCommissionClaim.getInstance().stop();
     }
   }

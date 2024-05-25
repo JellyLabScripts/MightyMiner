@@ -105,9 +105,8 @@ public class BlockUtil {
             // Todo: Cost requires more testing.
             blocks.add(pos,
                 angleChange * 0.15
-                    + hardness / (150.0 * priority[getPriorityIndex((int) hardness)])
+                    + hardness / (500 * priority[getPriorityIndex((int) hardness)])
                     + distance * 0.5);
-
           }
         }
       }

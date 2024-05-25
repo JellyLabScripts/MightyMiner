@@ -172,6 +172,8 @@ public class MithrilMiner implements IFeature {
         final int boostMult = this.boostState == BoostState.ACTIVE ? this.speedBoost / 100 : 1;
         this.miningTime =
             BlockUtil.getMiningTime(this.targetBlock, this.miningSpeed * boostMult) * 2;
+        success(
+            "Hardness: " + BlockUtil.getBlockStrength(this.targetBlock) + ", Time: " + miningTime);
 
         KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindAttack, true);
         KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak,
@@ -248,12 +250,11 @@ public class MithrilMiner implements IFeature {
             ) : "NONE"));
         // fall through
       case BREAKING:
-        if (this.hasTimerEnded()) {
-          log("Could not look at block!");
-          this.swapState(State.STARTING, 0);
-          break;
-        }
         if (!Objects.equals(BlockUtil.getBlockLookingAt(), this.targetBlock)) {
+          if (this.hasTimerEnded()) {
+            log("Could not look at block!");
+            this.swapState(State.STARTING, 0);
+          }
           break;
         }
         if (--this.miningTime <= 0) {

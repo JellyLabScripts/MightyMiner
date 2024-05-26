@@ -1,6 +1,8 @@
 package com.jelly.MightyMinerV2.Util;
 
 import baritone.pathing.movement.MovementHelper;
+import com.jelly.MightyMinerV2.Config.MightyMinerConfig;
+import com.jelly.MightyMinerV2.MightyMiner;
 import com.jelly.MightyMinerV2.Util.LogUtil.ELogType;
 import com.jelly.MightyMinerV2.Util.helper.Angle;
 import com.jelly.MightyMinerV2.Util.helper.heap.MinHeap;
@@ -93,20 +95,12 @@ public class BlockUtil {
               continue;
             }
 
-            final Angle change = AngleUtil.getNeededChange(
-                AngleUtil.getPlayerAngle(),
-                AngleUtil.getRotation(pos));
-
-            final double angleChange = Math.sqrt(
-                change.getYaw() * change.getYaw()
-                    + change.getPitch() * change.getPitch());
+            final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
+            final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
 
             visitedPositions.add(hash);
             // Todo: Cost requires more testing.
-            blocks.add(pos,
-                angleChange * 0.15
-                    + hardness / (500 * priority[getPriorityIndex((int) hardness)])
-                    + distance * 0.5);
+            blocks.add(pos, (angleChange + hardness / 100 + distance) / priorityValue);
           }
         }
       }
@@ -260,7 +254,7 @@ public class BlockUtil {
   }
 
   public static int getMiningTime(final BlockPos pos, final int miningSpeed) {
-    return (int) Math.ceil((getBlockStrength(pos) * 30) / (float) miningSpeed);
+    return (int) Math.ceil((getBlockStrength(pos) * 30) / (float) miningSpeed) + MightyMinerConfig.mithrilMinerTickGlideOffset;
   }
 
   public static Vec3 getSidePos(BlockPos block, EnumFacing face) {

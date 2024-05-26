@@ -15,6 +15,7 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -42,7 +43,7 @@ public class MithrilMiner implements IFeature {
   @Getter
   private float walkDirection = 0f;
   private State state = State.STARTING;
-  private BoostState boostState = BoostState.INACTIVE;
+  private BoostState boostState = BoostState.AVAILABLE;
   private final Clock timer = new Clock();
   private int miningSpeed = 200;          // Mainly for TickGliding
   private int miningTime = 0;             // For TickGliding
@@ -102,7 +103,7 @@ public class MithrilMiner implements IFeature {
     this.timer.reset();
     RotationHandler.getInstance().reset();
     this.state = State.STARTING;
-    this.boostState = BoostState.INACTIVE;
+    this.boostState = BoostState.AVAILABLE;
   }
 
   @Override
@@ -206,11 +207,11 @@ public class MithrilMiner implements IFeature {
         RotationHandler.getInstance().start();
 
         if (this.targetPoint != null && mc.thePlayer.getPositionEyes(1).distanceTo(this.targetPoint) > 4) {
-          this.swapState(State.WALKING, 1000);
+          this.swapState(State.WALKING, 0);
           this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOnFloor()).stream()
               .min(Comparator.comparingDouble(this.targetBlock::distanceSq)).orElse(null);
         } else {
-          this.swapState(State.BREAKING, 1000);
+          this.swapState(State.BREAKING, 0);
           break;
         }
         log("Rotation Started");
@@ -224,7 +225,7 @@ public class MithrilMiner implements IFeature {
           walk = sneak = true;
         } else {
           this.destBlock = null;
-          this.swapState(State.BREAKING, (int) this.timer.getRemainingTime());
+          this.swapState(State.BREAKING, 0);
         }
 
         KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, walk);
@@ -234,13 +235,13 @@ public class MithrilMiner implements IFeature {
         // fall through
       case BREAKING:
         if (!this.targetBlock.equals(BlockUtil.getBlockLookingAt())) {
-          if (this.hasTimerEnded()) {
+          if (this.state == State.BREAKING && !RotationHandler.getInstance().isEnabled()) {
             this.swapState(State.STARTING, 0);
           }
           break;
         }
 
-        if (this.breakAttemptTime > 60) {
+        if (++this.breakAttemptTime > 60) {
           this.swapState(State.STARTING, 0);
           this.breakAttemptTime = 0;
         }
@@ -275,6 +276,24 @@ public class MithrilMiner implements IFeature {
   }
 
   @SubscribeEvent
+  public void onChatReceive(ClientChatReceivedEvent event) {
+    if (event.type != 0) {
+      return;
+    }
+    final String msg = event.message.getUnformattedText();
+    if (msg.contains("Mining Speed Boost is now available!")) {
+      this.boostState = BoostState.AVAILABLE;
+    }
+    if (msg.contains("You used your Mining Speed Boost Pickaxe Ability!")) {
+      this.boostState = BoostState.ACTIVE;
+    }
+    if (msg.contains("Your Mining Speed Boost has expired!") || (this.boostState != BoostState.ACTIVE && msg.contains(
+        "This ability is on cooldown for"))) {
+      this.boostState = BoostState.INACTIVE;
+    }
+  }
+
+  //  @SubscribeEvent
   public void onRender(final RenderWorldLastEvent event) {
     if (!this.isRunning()) {
       return;

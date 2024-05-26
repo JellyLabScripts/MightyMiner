@@ -78,11 +78,20 @@ public class MightyMinerConfig extends Config {
     )
     public static int mithrilMinerRotationTimeRandomizer = 300;
 
+    @Slider(
+        name = "Tick Glide Offset",
+        category = MITHRIL,
+        min = 0, max = 10
+    )
+    public static int mithrilMinerTickGlideOffset = 4;
+
     @Switch(
         name = "Sneak While Mining",
         category = MITHRIL
     )
     public static boolean mithrilMinerSneakWhileMining = false;
+
+
 
     //</editor-fold>
 

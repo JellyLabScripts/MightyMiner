@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.MightyMinerV2.Feature.impl.AutoCommissionClaim;
+import com.jelly.MightyMinerV2.Feature.impl.AutoInventory;
 import com.jelly.MightyMinerV2.Feature.impl.MithrilMiner;
 import com.jelly.MightyMinerV2.Feature.impl.RouteNavigator;
 import com.jelly.MightyMinerV2.Handler.RouteHandler;
@@ -41,7 +42,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    LogUtil.send("CurrentCommission: " + CommissionUtil.getCurrentCommission(), ELogType.SUCCESS);
+//    LogUtil.send("CurrentCommission: " + CommissionUtil.getCurrentCommission(), ELogType.SUCCESS);
+    AutoInventory.getInstance().retrieveSpeedBoost();
   }
 
   private boolean canStandOn(final BlockPos pos) {

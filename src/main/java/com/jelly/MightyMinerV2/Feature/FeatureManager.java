@@ -1,6 +1,7 @@
 package com.jelly.MightyMinerV2.Feature;
 
 import com.jelly.MightyMinerV2.Feature.impl.AutoCommissionClaim;
+import com.jelly.MightyMinerV2.Feature.impl.AutoInventory;
 import com.jelly.MightyMinerV2.Feature.impl.MithrilMiner;
 import com.jelly.MightyMinerV2.Feature.impl.RouteNavigator;
 import com.jelly.MightyMinerV2.Feature.impl.RouteBuilder;
@@ -27,6 +28,7 @@ public class FeatureManager {
   public FeatureManager() {
     addFeature(RouteBuilder.getInstance());
     addFeature(RouteNavigator.getInstance());
+    addFeature(AutoInventory.getInstance());
 
     addFeature(MithrilMiner.getInstance());
     addFeature(AutoCommissionClaim.getInstance());

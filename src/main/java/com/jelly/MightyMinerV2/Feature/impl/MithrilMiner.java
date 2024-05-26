@@ -195,7 +195,8 @@ public class MithrilMiner implements IFeature {
         );
 
         if (this.random.nextBoolean()) {
-          this.targetPoint = points.get(points.size() - 1);
+          final int halfwayMark = points.size() / 2;
+          this.targetPoint = points.get(random.nextInt(halfwayMark) + halfwayMark - 1);
           RotationHandler.getInstance().queueRotation(
               new RotationConfiguration(
                   new Target(targetPoint),

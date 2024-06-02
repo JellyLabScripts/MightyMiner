@@ -18,6 +18,7 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.world.World;
+import com.jelly.MightyMinerV2.Handler.BaritoneHandler;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -92,19 +93,11 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     RouteNavigator.getInstance().goTo(36);
   }
   @SubCommand
-  public void pathfind(final int x1, final int y1, final int z1, final int x2, final int y2, final int z2) {
-    World world = Minecraft.getMinecraft().theWorld;
-    BlockPos start = new BlockPos(x1, y1, z1);
-    BlockPos end = new BlockPos(x2, y2, z2);
+  public void pathfind(final int x, final int y, final int z) {
+    BlockPos end = new BlockPos(x, y, z);
+    BlockPos start = mc.thePlayer.getPosition();
 
-    List<BlockPos> path = PathfinderUtil.findPath(world, start, end);
-
-    if (path.isEmpty()) {
-      LogUtil.send("Could not find path", ELogType.ERROR);
-    } else {
-      LogUtil.send("Found path: " + path, ELogType.SUCCESS);
-      blockToDraw = path;
-    }
+    BaritoneHandler.walkToBlockPos(end);
   }
 
   @SubscribeEvent

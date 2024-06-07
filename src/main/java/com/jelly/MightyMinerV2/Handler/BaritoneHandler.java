@@ -7,15 +7,33 @@ import baritone.api.pathing.goals.GoalBlock;
 import baritone.api.pathing.goals.GoalNear;
 import baritone.api.process.PathingCommand;
 import baritone.api.process.PathingCommandType;
+import com.jelly.MightyMinerV2.Config.MightyMinerConfig;
 import com.jelly.MightyMinerV2.Event.BaritoneEventListener;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import java.util.Arrays;
+import java.util.List;
 
 public class BaritoneHandler {
     private static final Minecraft mc = Minecraft.getMinecraft();
     @Getter
     public static boolean pathing = false;
+
+    static {
+        BaritoneAPI.getSettings().chatDebug.value = true; // Enable chat debug
+        BaritoneAPI.getSettings().allowDiagonalAscend.value = true;
+        BaritoneAPI.getSettings().pathingMapDefaultSize.value = 2048;
+        BaritoneAPI.getSettings().maxFallHeightNoWater.value = 50;
+        List<Block> blacklist = Arrays.asList(Blocks.oak_fence, Blocks.oak_fence_gate);
+        BaritoneAPI.getSettings().blocksToAvoid.value = blacklist;
+        BaritoneAPI.getSettings().costHeuristic.value = 50.0;
+        BaritoneAPI.getSettings().yawSmoothingFactor.value = (float) MightyMinerConfig.yawsmoothingfactor;
+        BaritoneAPI.getSettings().pitchSmoothingFactor.value = (float) MightyMinerConfig.pitchsmoothingfactor;
+    }
+
 
     public static boolean isWalkingToGoalBlock() {
         return isWalkingToGoalBlock(0.75);
@@ -33,7 +51,7 @@ public class BaritoneHandler {
                 GoalNear goal1 = (GoalNear) BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().getGoal();
                 distance = mc.thePlayer.getDistance(goal1.getGoalPos().getX() + 0.5f, mc.thePlayer.posY, goal1.getGoalPos().getZ() + 0.5);
             } else {
-                distance = goal.isInGoal(mc.thePlayer.getPosition()) ? 0 : goal.heuristic();
+                distance = goal.isInGoal(mc.thePlayer.getPosition())? 0 : goal.heuristic();
             }
 //            System.out.println("Pathing result: " + BaritoneEventListener.pathEvent);
 //            System.out.println("Distance: " + distance);
@@ -43,7 +61,7 @@ public class BaritoneHandler {
                 pathing = false;
                 return false;
             }
-            return BaritoneEventListener.pathEvent != PathEvent.CANCELED;
+            return BaritoneEventListener.pathEvent!= PathEvent.CANCELED;
         }
         return false;
     }
@@ -75,3 +93,4 @@ public class BaritoneHandler {
         pathing = false;
     }
 }
+

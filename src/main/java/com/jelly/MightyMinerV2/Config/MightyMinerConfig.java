@@ -2,6 +2,7 @@ package com.jelly.MightyMinerV2.Config;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
@@ -180,6 +181,26 @@ public class MightyMinerConfig extends Config {
             description = "Gives a full block hitbox to blocks without a full block hitbox"
     )
     public static boolean fullblock = false;
+
+    //Baritone Configs
+
+    @Number(
+            name = "Yaw smoothing factor",
+            category = MISCELLANEOUS,
+            subcategory = "Baritone",
+            description = "The higher the faster it turns",
+            min = 0, max = 100
+    )
+    public static float yawsmoothingfactor = (float) 0.1;
+
+    @Number(
+            name = "Pitch smoothing factor",
+            category = MISCELLANEOUS,
+            subcategory = "Baritone",
+            description = "The higher the faster it turns",
+            min = 0, max = 100
+    )
+    public static float pitchsmoothingfactor = (float) 0.1;
 
     public MightyMinerConfig() {
         super(new Mod("Mighty Miner", ModType.HYPIXEL), "/MightMinerV2/config.json");

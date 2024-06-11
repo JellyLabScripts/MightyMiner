@@ -14,6 +14,7 @@ import com.jelly.MightyMinerV2.Util.ReflectionUtils;
 import com.jelly.MightyMinerV2.Util.ScoreboardUtil;
 import com.jelly.MightyMinerV2.Util.TablistUtil;
 import com.jelly.MightyMinerV2.Handler.RouteHandler;
+import com.jelly.MightyMinerV2.Handler.Waypoints.BaritoneWaypointHandler;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
@@ -23,12 +24,14 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import org.lwjgl.opengl.Display;
 
+import javax.naming.Name;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
 
 @Mod(modid = "MightyMinerV2", useMetadata = true)
 public class MightyMiner {
@@ -107,15 +110,47 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(GameStateHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(RouteHandler.getInstance());
-        MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
+
+        // Create a new instance of the BaritoneWaypointHandler class
+        BaritoneWaypointHandler handler = new BaritoneWaypointHandler();
+
+        // Get the names of all the graphs in the BaritoneWaypointHandler object
+        Set<String> graphNames = handler.getGraphNames();
+
+        // Create a new instance of the OsamaTestCommandNobodyTouchPleaseLoveYou class for each graph
+        for (String graphName : graphNames) {
+            // Pass the BaritoneWaypointHandler object, the graph name, and the graph object to the getInstance method
+            MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance(handler, graphName, handler.getGraph(graphName)));
+        }
 
         MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
         MinecraftForge.EVENT_BUS.register(new TablistUtil());
     }
 
+
+
     private void initializeCommands() {
         // Initialize Commands
-        CommandManager.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
+
+        // Create a new instance of the BaritoneWaypointHandler class
+        BaritoneWaypointHandler handler = new BaritoneWaypointHandler();
+
+        // Get the names of all the graphs in the BaritoneWaypointHandler object
+        Set<String> graphNames = handler.getGraphNames();
+
+        // Create a new instance of the OsamaTestCommandNobodyTouchPleaseLoveYou class for each graph
+        for (String graphName : graphNames) {
+            // Pass the BaritoneWaypointHandler object, the graph name, and the graph object to the constructor
+            CommandManager.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance(handler, graphName, handler.getGraph(graphName)));
+        }
+
         CommandManager.register(new RouteBuilderCommand());
     }
+
+
+
+
+
+
+
 }

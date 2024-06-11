@@ -58,11 +58,11 @@ sourceSets.main {
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
     maven("https://repo.spongepowered.org/maven/")
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://repo.polyfrost.cc/releases")
     maven("https://repo.essential.gg/repository/maven-public")
-    maven("https://jitpack.io")
     exclusiveContent {
         forRepository {
             mavenCentral()

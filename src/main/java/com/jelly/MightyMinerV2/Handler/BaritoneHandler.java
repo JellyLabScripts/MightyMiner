@@ -9,6 +9,7 @@ import baritone.api.process.PathingCommand;
 import baritone.api.process.PathingCommandType;
 import com.jelly.MightyMinerV2.Config.MightyMinerConfig;
 import com.jelly.MightyMinerV2.Event.BaritoneEventListener;
+import com.jelly.MightyMinerV2.Util.LogUtil;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
@@ -33,7 +34,6 @@ public class BaritoneHandler {
         BaritoneAPI.getSettings().yawSmoothingFactor.value = (float) MightyMinerConfig.yawsmoothingfactor;
         BaritoneAPI.getSettings().pitchSmoothingFactor.value = (float) MightyMinerConfig.pitchsmoothingfactor;
     }
-
 
     public static boolean isWalkingToGoalBlock() {
         return isWalkingToGoalBlock(0.75);
@@ -87,6 +87,30 @@ public class BaritoneHandler {
         BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().secretInternalSetGoalAndPath(pathingCommand);
         pathing = true;
     }
+
+    public static void walkThroughWaypoints(List<BlockPos> waypoints) {
+        // Print the list of waypoints in the chat
+        StringBuilder waypointsString = new StringBuilder("Waypoints: ");
+        for (BlockPos waypoint : waypoints) {
+            waypointsString.append(waypoint.toString()).append(" -> ");
+        }
+        waypointsString.setLength(waypointsString.length() - 4); // Remove the last " -> "
+        LogUtil.send(waypointsString.toString(), LogUtil.ELogType.SUCCESS);
+
+        // Move through the waypoints
+        for (int i = 0; i < waypoints.size(); i++) {
+            BlockPos waypoint = waypoints.get(i);
+            walkToBlockPos(waypoint);
+
+            // Calculate the next path if available and if there are more than one waypoint left in the list
+            if (i < waypoints.size() - 2) {
+                BlockPos nextWaypoint = waypoints.get(i + 1);
+                PathingCommand nextPathingCommand = new PathingCommand(new GoalBlock(nextWaypoint), PathingCommandType.REVALIDATE_GOAL_AND_PATH);
+                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().secretInternalSetGoalAndPath(nextPathingCommand);
+            }
+        }
+    }
+
 
     public static void stopPathing() {
         BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();

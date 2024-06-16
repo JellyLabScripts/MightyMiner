@@ -72,7 +72,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
         LogUtil.send("Tita", ELogType.SUCCESS);
         p[3] = 10;
       }
-      MithrilMiner.getInstance().enable(2134, 200, p);
+      MithrilMiner.getInstance().enable(p);
     } else {
       MithrilMiner.getInstance().stop();
     }

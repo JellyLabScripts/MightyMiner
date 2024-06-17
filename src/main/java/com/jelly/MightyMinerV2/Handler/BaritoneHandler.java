@@ -17,11 +17,17 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class BaritoneHandler {
     private static final Minecraft mc = Minecraft.getMinecraft();
     @Getter
     public static boolean pathing = false;
+    private static List<BlockPos> waypoints;
+    private static int currentWaypointIndex = 0;
+    private static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     static {
         BaritoneAPI.getSettings().chatDebug.value = true; // Enable chat debug
@@ -33,6 +39,60 @@ public class BaritoneHandler {
         BaritoneAPI.getSettings().costHeuristic.value = 50.0;
         BaritoneAPI.getSettings().yawSmoothingFactor.value = (float) MightyMinerConfig.yawsmoothingfactor;
         BaritoneAPI.getSettings().pitchSmoothingFactor.value = (float) MightyMinerConfig.pitchsmoothingfactor;
+    }
+
+    public static void walkThroughWaypoints(List<BlockPos> waypoints) {
+        BaritoneHandler.waypoints = waypoints;
+        currentWaypointIndex = 0;
+
+        // Print the list of waypoints in the chat
+        StringBuilder waypointsString = new StringBuilder("Waypoints: ");
+        for (BlockPos waypoint : waypoints) {
+            waypointsString.append(waypoint.toString()).append(" -> ");
+        }
+        waypointsString.setLength(waypointsString.length() - 4); // Remove the last " -> "
+        LogUtil.send(waypointsString.toString(), LogUtil.ELogType.SUCCESS);
+
+        // Start the pathing process
+        walkToNextWaypoint();
+    }
+
+    private static void walkToNextWaypoint() {
+        if (currentWaypointIndex >= waypoints.size()) {
+            stopPathing();
+            return;
+        }
+
+        BlockPos waypoint = waypoints.get(currentWaypointIndex);
+        walkToBlockPos(waypoint);
+
+        // Schedule periodic checks
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                checkPathingStatus();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 0, 100, TimeUnit.MILLISECONDS);
+    }
+
+    private static void checkPathingStatus() {
+        if (!pathing) return;
+
+        if (isWalkingToGoalBlock(0.5)) {
+            if (hasFailed()) {
+                LogUtil.send("Pathing failed to waypoint: " + waypoints.get(currentWaypointIndex).toString(), LogUtil.ELogType.ERROR);
+                stopPathing();
+            }
+        } else {
+            LogUtil.send("Reached waypoint: " + waypoints.get(currentWaypointIndex).toString(), LogUtil.ELogType.SUCCESS);
+            currentWaypointIndex++;
+            if (currentWaypointIndex < waypoints.size()) {
+                walkToNextWaypoint();
+            } else {
+                stopPathing();
+            }
+        }
     }
 
     public static boolean isWalkingToGoalBlock() {
@@ -51,17 +111,14 @@ public class BaritoneHandler {
                 GoalNear goal1 = (GoalNear) BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().getGoal();
                 distance = mc.thePlayer.getDistance(goal1.getGoalPos().getX() + 0.5f, mc.thePlayer.posY, goal1.getGoalPos().getZ() + 0.5);
             } else {
-                distance = goal.isInGoal(mc.thePlayer.getPosition())? 0 : goal.heuristic();
+                distance = goal.isInGoal(mc.thePlayer.getPosition()) ? 0 : goal.heuristic();
             }
-//            System.out.println("Pathing result: " + BaritoneEventListener.pathEvent);
-//            System.out.println("Distance: " + distance);
-//            System.out.println("Goal: " + goal);
             if (distance <= nearGoalDistance || BaritoneEventListener.pathEvent == PathEvent.AT_GOAL) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                 pathing = false;
                 return false;
             }
-            return BaritoneEventListener.pathEvent!= PathEvent.CANCELED;
+            return BaritoneEventListener.pathEvent != PathEvent.CANCELED;
         }
         return false;
     }
@@ -82,39 +139,12 @@ public class BaritoneHandler {
         pathing = true;
     }
 
-    public static void walkCloserToBlockPos(BlockPos blockPos, int range) {
-        PathingCommand pathingCommand = new PathingCommand(new GoalNear(blockPos, range), PathingCommandType.REVALIDATE_GOAL_AND_PATH);
-        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().secretInternalSetGoalAndPath(pathingCommand);
-        pathing = true;
-    }
-
-    public static void walkThroughWaypoints(List<BlockPos> waypoints) {
-        // Print the list of waypoints in the chat
-        StringBuilder waypointsString = new StringBuilder("Waypoints: ");
-        for (BlockPos waypoint : waypoints) {
-            waypointsString.append(waypoint.toString()).append(" -> ");
-        }
-        waypointsString.setLength(waypointsString.length() - 4); // Remove the last " -> "
-        LogUtil.send(waypointsString.toString(), LogUtil.ELogType.SUCCESS);
-
-        // Move through the waypoints
-        for (int i = 0; i < waypoints.size(); i++) {
-            BlockPos waypoint = waypoints.get(i);
-            walkToBlockPos(waypoint);
-
-            // Calculate the next path if available and if there are more than one waypoint left in the list
-            if (i < waypoints.size() - 2) {
-                BlockPos nextWaypoint = waypoints.get(i + 1);
-                PathingCommand nextPathingCommand = new PathingCommand(new GoalBlock(nextWaypoint), PathingCommandType.REVALIDATE_GOAL_AND_PATH);
-                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().secretInternalSetGoalAndPath(nextPathingCommand);
-            }
-        }
-    }
-
-
     public static void stopPathing() {
         BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
         pathing = false;
+        if (!scheduler.isShutdown()) {
+            scheduler.shutdownNow();
+        }
+        scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 }
-

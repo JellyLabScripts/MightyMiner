@@ -10,9 +10,9 @@ public class BaritoneWaypointHandler {
     public BaritoneWaypointHandler() {
         // Create a new graph for the first route
         Graph graph1 = new Graph();
-        Waypoint waypoint1 = new Waypoint(new Vec3(30, 64, -37), "Start");
-        Waypoint waypoint2 = new Waypoint(new Vec3(33, 64, -50), "Middle");
-        Waypoint waypoint3 = new Waypoint(new Vec3(48, 67, -59), "End");
+        Waypoint waypoint1 = new Waypoint(new Vec3(80, 72, 235), "Start");
+        Waypoint waypoint2 = new Waypoint(new Vec3(92, 70, 221), "Middle");
+        Waypoint waypoint3 = new Waypoint(new Vec3(116, 71, 218), "End");
         graph1.addWaypoint(waypoint1);
         graph1.addWaypoint(waypoint2);
         graph1.addWaypoint(waypoint3);

@@ -12,12 +12,15 @@ public class BaritoneWaypointHandler {
         Graph graph1 = new Graph();
         Waypoint waypoint1 = new Waypoint(new Vec3(80, 72, 235), "Start");
         Waypoint waypoint2 = new Waypoint(new Vec3(92, 70, 221), "Middle");
-        Waypoint waypoint3 = new Waypoint(new Vec3(116, 71, 218), "End");
+        Waypoint waypoint3 = new Waypoint(new Vec3(116, 71, 218), "Middle2");
+        Waypoint waypoint8 = new Waypoint(new Vec3(85, 70, 208), "End");
         graph1.addWaypoint(waypoint1);
         graph1.addWaypoint(waypoint2);
         graph1.addWaypoint(waypoint3);
+        graph1.addWaypoint(waypoint8);
         graph1.addEdge(waypoint1, waypoint2);
         graph1.addEdge(waypoint2, waypoint3);
+        graph1.addEdge(waypoint3, waypoint8);
 
         // Add the first graph to the map of graphs
         graphs.put("Example", graph1);

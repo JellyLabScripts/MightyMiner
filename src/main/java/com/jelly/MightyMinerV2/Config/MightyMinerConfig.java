@@ -36,6 +36,8 @@ public class MightyMinerConfig extends Config {
 
     private transient static final File WAYPOINTS_FILE = new File(mc.mcDataDir, "mm_waypoints.json");
 
+
+
     public static enum MacroType {
         MITHRIL,
         COMMISSION,
@@ -92,7 +94,11 @@ public class MightyMinerConfig extends Config {
     )
     public static boolean mithrilMinerSneakWhileMining = false;
 
-
+    @Switch(
+            name = "Gives Titanium a higher priority",
+            category = MITHRIL
+    )
+    public static boolean mithrilMinerTitaniumHighPriority = false;
 
     //</editor-fold>
 

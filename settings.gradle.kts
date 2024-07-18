@@ -12,6 +12,9 @@ pluginManagement {
         maven("https://repo.essential.gg/repository/maven-public/")
         maven("https://jitpack.io/")
     }
+    plugins {
+        kotlin("jvm") version "2.0.0"
+    }
 }
 
 rootProject.name = "MightyMinerV2"

@@ -3,6 +3,7 @@
 plugins {
     idea
     java
+    kotlin("jvm") version "1.8.22" // Add Kotlin JVM plugin
     id("cc.polyfrost.loom") version "0.10.0.+"
     id("dev.architectury.architectury-pack200") version "0.1.3"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -10,8 +11,7 @@ plugins {
     id("net.kyori.blossom") version "1.3.1"
 }
 
-//Constants:
-
+// Constants:
 val baseGroup: String by project
 val mcVersion: String by project
 val version: String by project
@@ -41,7 +41,7 @@ loom {
     }
     forge {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
-        // If you don't want mixins, remove this lines
+        // If you don't want mixins, remove these lines
         mixinConfig("mixins.$modid.json", "mixins.baritone.json")
     }
     // If you don't want mixins, remove these lines
@@ -104,15 +104,17 @@ dependencies {
         exclude(module = "SimpleTweaker")
         exclude(module = "launchwrapper")
     }
+
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 // Tasks:
 
-tasks.withType(JavaCompile::class) {
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-tasks.withType(Jar::class) {
+tasks.withType<Jar> {
     archiveBaseName.set(modName)
     manifest.attributes.run {
         this["FMLCorePluginContainsFMLMod"] = "true"
@@ -140,7 +142,6 @@ tasks.processResources {
     rename("(.+_at.cfg)", "META-INF/$1")
 }
 
-
 val remapJar by tasks.named<net.fabricmc.loom.task.RemapJarTask>("remapJar") {
     archiveClassifier.set("")
     from(tasks.shadowJar)
@@ -167,4 +168,3 @@ tasks.shadowJar {
 }
 
 tasks.assemble.get().dependsOn(tasks.remapJar)
-

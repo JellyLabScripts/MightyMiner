@@ -14,6 +14,8 @@ import com.jelly.MightyMinerV2.Handler.Waypoints.AStar;
 import com.jelly.MightyMinerV2.Handler.Waypoints.BaritoneWaypointHandler;
 import com.jelly.MightyMinerV2.Handler.Waypoints.Graph;
 import com.jelly.MightyMinerV2.Handler.Waypoints.Waypoint;
+import com.jelly.MightyMinerV2.Pathfinder.Pathfinding;
+import com.jelly.MightyMinerV2.Pathfinder.SmoothPathFollower;
 import com.jelly.MightyMinerV2.Util.LogUtil;
 import com.jelly.MightyMinerV2.Util.RenderUtil;
 import net.minecraft.client.Minecraft;
@@ -21,6 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -189,6 +192,26 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
         // Pathfind through the waypoints
         baritoneHandler.pathThrough(waypoints);
     }
+
+    @SubCommand
+    public void pathfinder(int startX, int startY, int startZ, int endX, int endY, int endZ) {
+        BlockPos start = new BlockPos(startX, startY, startZ);
+        BlockPos end = new BlockPos(endX, endY, endZ);
+
+        World world = Minecraft.getMinecraft().theWorld;
+
+        Pathfinding pathfinding = new Pathfinding();
+        List<BlockPos> path = pathfinding.findPath(world, start, end);
+
+        if (path != null && !path.isEmpty()) {
+            LogUtil.send("Path found, starting to move.", LogUtil.ELogType.SUCCESS);
+            SmoothPathFollower pathFollower = new SmoothPathFollower(0.5); // Provide the speed as a constructor argument
+            pathFollower.followPath(world, path); // Only need to pass the path
+        } else {
+            LogUtil.send("No path found from start to end.", LogUtil.ELogType.ERROR);
+        }
+    }
+
 
     @SubscribeEvent
     public void onRender(RenderWorldLastEvent event) {

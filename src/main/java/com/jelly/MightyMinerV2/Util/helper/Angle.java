@@ -6,8 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Angle {
-    private float yaw;
-    private float pitch;
+    public float yaw;
+    public float pitch;
 
     public Angle(float yaw, float pitch) {
         this.yaw = yaw;

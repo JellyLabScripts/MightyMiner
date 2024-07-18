@@ -31,6 +31,17 @@ public class AngleUtil {
         return newYaw;
     }
 
+    public static float normalizeYaw(float yaw) {
+        float newYaw = yaw % 360F;
+        if (newYaw < -180F) {
+            newYaw += 360F;
+        }
+        if (newYaw > 180F) {
+            newYaw -= 360F;
+        }
+        return newYaw;
+    }
+
     public static float get360RotationYaw() {
         if (mc.thePlayer == null)
             return 0;
@@ -147,4 +158,6 @@ public class AngleUtil {
         Angle change = getNeededChange(getPlayerAngle(), getRotation(vec));
         return Math.abs(change.getYaw()) <= distance && Math.abs(change.getPitch()) <= distance;
     }
+
+
 }

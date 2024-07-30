@@ -36,7 +36,6 @@ loom {
             property("mixin.debug", "true")
             property("asmhelper.verbose", "true")
             arg("--tweakClass", "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker")
-            arg("-Ddevauth.enabled", "true")
         }
     }
     forge {

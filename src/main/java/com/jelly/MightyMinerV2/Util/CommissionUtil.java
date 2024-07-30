@@ -1,6 +1,6 @@
 package com.jelly.MightyMinerV2.Util;
 
-import com.jelly.MightyMinerV2.Macro.impl.commissionmacro.helper.Commission;
+import com.jelly.MightyMinerV2.Macro.commissionmacro.helper.Commission;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;

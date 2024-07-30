@@ -1,4 +1,4 @@
-package com.jelly.MightyMinerV2.Macro.impl.commissionmacro.helper;
+package com.jelly.MightyMinerV2.Macro.commissionmacro.helper;
 
 import java.util.HashMap;
 

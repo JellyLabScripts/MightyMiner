@@ -1,9 +1,5 @@
-@file:Suppress("UnstableApiUsage")
-
 plugins {
-    idea
-    java
-    kotlin("jvm") version "1.8.22" // Add Kotlin JVM plugin
+    kotlin("jvm") version "1.9.0" // Add Kotlin JVM plugin
     id("cc.polyfrost.loom") version "0.10.0.+"
     id("dev.architectury.architectury-pack200") version "0.1.3"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -11,7 +7,6 @@ plugins {
     id("net.kyori.blossom") version "1.3.1"
 }
 
-// Constants:
 val baseGroup: String by project
 val mcVersion: String by project
 val version: String by project
@@ -36,12 +31,13 @@ loom {
             property("mixin.debug", "true")
             property("asmhelper.verbose", "true")
             arg("--tweakClass", "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker")
+            arg("-Ddevauth.enabled", "true")
         }
     }
     forge {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
         // If you don't want mixins, remove these lines
-        mixinConfig("mixins.$modid.json", "mixins.baritone.json")
+        mixinConfig("mixins.$modid.json")
     }
     // If you don't want mixins, remove these lines
     mixin {
@@ -56,20 +52,9 @@ sourceSets.main {
 // Dependencies:
 
 repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
     maven("https://repo.spongepowered.org/maven/")
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://repo.polyfrost.cc/releases")
-    maven("https://repo.essential.gg/repository/maven-public")
-    exclusiveContent {
-        forRepository {
-            mavenCentral()
-        }
-        filter {
-            includeGroup("org.projectlombok")
-        }
-    }
 }
 
 val shadowImpl: Configuration by configurations.creating {
@@ -80,31 +65,15 @@ dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
-
     compileOnly("cc.polyfrost:oneconfig-1.8.9-forge:0.2.2-alpha+")
     shadowImpl("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+")
-
     compileOnly("org.spongepowered:mixin:0.8.5")
     annotationProcessor("org.spongepowered:mixin:0.8.5")
-
     compileOnly("org.projectlombok:lombok:1.18.32")
     annotationProcessor("org.projectlombok:lombok:1.18.32")
-
     shadowImpl("org.java-websocket:Java-WebSocket:1.5.4")
-
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.0")
-
-    implementation("net.dv8tion:JDA:5.0.0-beta.13")
-
-    implementation("com.github.onixiya1337.baritone-fly:baritone-deobf:nirox-fly-SNAPSHOT")
-    shadowImpl("com.github.onixiya1337.baritone-fly:baritone-api-forge:nirox-fly-SNAPSHOT") {
-        exclude(module = "fastutil")
-        exclude(module = "lwjgl")
-        exclude(module = "SimpleTweaker")
-        exclude(module = "launchwrapper")
-    }
-
-    implementation(kotlin("stdlib-jdk8"))
+    shadowImpl("it.unimi.dsi:fastutil:8.2.1")
 }
 
 // Tasks:
@@ -123,7 +92,7 @@ tasks.withType<Jar> {
 
         // If you don't want mixins, remove these lines
         this["TweakClass"] = "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker"
-        this["MixinConfigs"] = "mixins.$modid.json, mixins.baritone.json"
+        this["MixinConfigs"] = "mixins.$modid.json"
     }
 }
 
@@ -147,11 +116,6 @@ val remapJar by tasks.named<net.fabricmc.loom.task.RemapJarTask>("remapJar") {
     input.set(tasks.shadowJar.get().archiveFile)
 }
 
-tasks.jar {
-    archiveClassifier.set("without-deps")
-    destinationDirectory.set(layout.buildDirectory.dir("badjars"))
-}
-
 tasks.shadowJar {
     destinationDirectory.set(layout.buildDirectory.dir("badjars"))
     archiveClassifier.set("all-dev")
@@ -164,6 +128,11 @@ tasks.shadowJar {
 
     // If you want to include other dependencies and shadow them, you can relocate them in here
     fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
+    relocate("it.unimi.dsi.fastutil") // Relocate FastUtil to avoid conflicts
+}
+tasks.jar {
+    archiveClassifier.set("without-deps")
+    destinationDirectory.set(layout.buildDirectory.dir("badjars"))
 }
 
 tasks.assemble.get().dependsOn(tasks.remapJar)

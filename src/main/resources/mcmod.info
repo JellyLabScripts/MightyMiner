@@ -1,14 +1,14 @@
 [
   {
-    "modid": "${modid}",
+    "modid": "mightyminerv2",
     "name": "MightyMiner V2",
     "description": "Best miner ever!!",
     "version": "${version}",
-    "mcversion": "${mcversion}",
+    "mcversion": "1.8.9",
     "url": "",
     "updateUrl": "",
     "authorList": [
-      "You"
+      "Me"
     ],
     "credits": "",
     "logoFile": "",

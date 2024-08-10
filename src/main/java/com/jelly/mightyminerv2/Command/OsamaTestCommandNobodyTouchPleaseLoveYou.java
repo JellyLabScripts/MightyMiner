@@ -10,11 +10,15 @@ import com.jelly.mightyminerv2.Feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.Feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.Feature.impl.MithrilMiner;
 import com.jelly.mightyminerv2.Feature.impl.RouteNavigator;
+import com.jelly.mightyminerv2.Handler.GraphHandler;
 import com.jelly.mightyminerv2.Handler.RouteHandler;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.Util.LogUtil;
+import com.jelly.mightyminerv2.Util.PlayerUtil;
 import com.jelly.mightyminerv2.Util.RenderUtil;
 import com.jelly.mightyminerv2.Util.StrafeUtil;
+import com.jelly.mightyminerv2.Util.helper.route.RouteWaypoint;
+import com.jelly.mightyminerv2.Util.helper.route.TransportMethod;
 import com.jelly.mightyminerv2.pathfinder.calculate.PathNode;
 import com.jelly.mightyminerv2.pathfinder.calculate.path.AStarPathFinder;
 import com.jelly.mightyminerv2.pathfinder.calculate.path.PathExecutor;
@@ -32,6 +36,7 @@ import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -56,6 +61,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @Getter
   private static OsamaTestCommandNobodyTouchPleaseLoveYou instance = new OsamaTestCommandNobodyTouchPleaseLoveYou();
   private final Minecraft mc = Minecraft.getMinecraft();
+  RouteWaypoint first;
+  RouteWaypoint second;
 
   Entity entTodraw = null;
   BlockPos block = null;
@@ -66,9 +73,9 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    if(StrafeUtil.enabled){
+    if (StrafeUtil.enabled) {
       StrafeUtil.enabled = false;
-    }else{
+    } else {
       StrafeUtil.enabled = true;
       StrafeUtil.yaw = 0;
     }
@@ -84,16 +91,16 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   @SubCommand
-  public void calc(){
+  public void calc() {
     BlockPos pos = new BlockPos(mc.thePlayer.posX, ceil(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
     MovementResult res = new MovementResult();
     double walkSpeed = mc.thePlayer.getAIMoveSpeed();
     CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-    for(Moves move: Moves.getEntries()){
+    for (Moves move : Moves.getEntries()) {
       res.reset();
       move.calculate(ctx, pos.getX(), pos.getY(), pos.getZ(), res);
       double cost = res.getCost();
-      if(cost >= 1e6){
+      if (cost >= 1e6) {
         continue;
       }
       LogUtil.send("Name: " + move.name() + ", Movement to: " + res.getDest() + ", Cost: " + cost);
@@ -105,6 +112,31 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     return mc.theWorld.isBlockFullCube(pos)
         && mc.theWorld.isAirBlock(pos.add(0, 1, 0))
         && mc.theWorld.isAirBlock(pos.add(0, 2, 0));
+  }
+
+  @SubCommand
+  public void f() {
+    BlockPos playerPos = PlayerUtil.getBlockStandingOn();
+    first = new RouteWaypoint(playerPos, TransportMethod.WALK);
+  }
+
+  @SubCommand
+  public void s() {
+    BlockPos playerPos = PlayerUtil.getBlockStandingOn();
+    second = new RouteWaypoint(playerPos, TransportMethod.WALK);
+  }
+
+  @SubCommand
+  public void graph() {
+    GraphHandler.getInstance().toggleEdit();
+  }
+
+  @SubCommand
+  public void findg() {
+//    GraphHandler.getInstance().stop();
+    List<RouteWaypoint> path = GraphHandler.getInstance().findPath(first, second);
+    blockToDraw.clear();
+    path.forEach(i -> blockToDraw.add(new BlockPos(i.toVec3())));
   }
 
   @SubCommand
@@ -160,6 +192,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     entTodraw = null;
     block = null;
     path = null;
+    first = null;
+    second = null;
   }
 
   @SubCommand
@@ -215,7 +249,18 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     }
 
     if (!blockToDraw.isEmpty()) {
-      blockToDraw.forEach(it -> RenderUtil.drawBlockBox(it, new Color(0, 255, 255, 50)));
+      for (int i = 0; i < blockToDraw.size(); i++) {
+        BlockPos curr = blockToDraw.get(i);
+        RenderUtil.drawBlockBox(curr, new Color(0, 255, 255, 50));
+        if (i + 1 < blockToDraw.size()) {
+          BlockPos n = blockToDraw.get(i + 1);
+          RenderUtil.drawTracer(
+              new Vec3(curr.getX(), curr.getY(), curr.getZ()).addVector(0.5, 1, 0.5),
+              new Vec3(n.getX(), n.getY(), n.getZ()).addVector(0.5, 1, 0.5),
+              new Color(0, 0, 0, 200)
+          );
+        }
+      }
     }
 
     if (!points.isEmpty()) {
@@ -224,6 +269,14 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
     if (this.block != null) {
       RenderUtil.drawBlockBox(this.block, new Color(255, 0, 0, 50));
+    }
+
+    if (this.first != null) {
+      RenderUtil.drawBlockBox(new BlockPos(this.first.toVec3()), new Color(0, 0, 0, 200));
+    }
+
+    if (this.second != null) {
+      RenderUtil.drawBlockBox(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
     }
   }
 

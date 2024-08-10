@@ -74,6 +74,7 @@ dependencies {
     shadowImpl("org.java-websocket:Java-WebSocket:1.5.4")
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.0")
     shadowImpl("it.unimi.dsi:fastutil:8.2.1")
+    implementation("com.google.code.gson:gson:2.11.0")
 }
 
 // Tasks:

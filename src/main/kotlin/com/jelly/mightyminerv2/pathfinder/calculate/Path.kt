@@ -51,6 +51,21 @@ class Path(start: PathNode, end: PathNode, val goal: Goal, val ctx: CalculationC
         currPoint = nextPos
       }
     }
+//    if(path.isNotEmpty()){
+//      smooth.add(path[0])
+//      var currPoint = 0
+//      var maxIters = 2000
+//
+//      while(currPoint + 1 < path.size && maxIters-- > 0){
+//        for(i in currPoint + 1 until path.size){
+//          if(!BlockUtil.blocksBetweenValid(ctx, path[currPoint], path[i])){
+//            smooth.add(path[i - 1])
+//            currPoint = i - 1
+//            break
+//          }
+//        }
+//      }
+//    }
     smoothPath = smooth
     return smoothPath
   }

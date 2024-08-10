@@ -1,0 +1,1024 @@
+{
+  "graph": {
+    "map": {
+      "{\"x\":-41,\"y\":138,\"z\":-13,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -28,
+          "y": 141,
+          "z": -14,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -61,
+          "y": 140,
+          "z": -11,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -49,
+          "y": 135,
+          "z": 20,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -61,
+          "y": 138,
+          "z": 11,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-27,\"y\":127,\"z\":157,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 0,
+          "y": 127,
+          "z": 143,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -66,
+          "y": 136,
+          "z": 151,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-99,\"y\":147,\"z\":2,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -81,
+          "y": 142,
+          "z": 9,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -107,
+          "y": 148,
+          "z": -13,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-61,\"y\":140,\"z\":-11,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -41,
+          "y": 138,
+          "z": -13,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -58,
+          "y": 146,
+          "z": -18,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-64,\"y\":161,\"z\":-39,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -73,
+          "y": 157,
+          "z": -38,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -25,
+          "y": 174,
+          "z": -55,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-145,\"y\":206,\"z\":-29,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -122,
+          "y": 199,
+          "z": -36,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":131,\"y\":148,\"z\":92,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 155,
+          "y": 147,
+          "z": 85,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 115,
+          "y": 153,
+          "z": 83,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-11,\"y\":148,\"z\":-62,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 0,
+          "y": 148,
+          "z": -69,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -11,
+          "y": 148,
+          "z": -50,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":87,\"y\":193,\"z\":-38,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 59,
+          "y": 189,
+          "z": -59,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 83,
+          "y": 193,
+          "z": -24,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-109,\"y\":193,\"z\":-43,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -100,
+          "y": 187,
+          "z": -56,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -122,
+          "y": 199,
+          "z": -36,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":0,\"y\":127,\"z\":143,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 0,
+          "y": 127,
+          "z": 72,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -27,
+          "y": 127,
+          "z": 157,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-84,\"y\":154,\"z\":-35,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -107,
+          "y": 148,
+          "z": -13,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -85,
+          "y": 155,
+          "z": -45,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -73,
+          "y": 157,
+          "z": -38,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":177,\"y\":149,\"z\":55,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 166,
+          "y": 149,
+          "z": 36,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 173,
+          "y": 149,
+          "z": 77,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":155,\"y\":147,\"z\":85,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 173,
+          "y": 149,
+          "z": 77,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 131,
+          "y": 148,
+          "z": 92,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-11,\"y\":148,\"z\":-50,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -11,
+          "y": 148,
+          "z": -62,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -8,
+          "y": 148,
+          "z": -42,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -3,
+          "y": 146,
+          "z": -43,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":9,\"y\":127,\"z\":50,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 0,
+          "y": 127,
+          "z": 72,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -13,
+          "y": 127,
+          "z": 48,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 37,
+          "y": 127,
+          "z": 40,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-111,\"y\":166,\"z\":-74,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -105,
+          "y": 164,
+          "z": -66,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -117,
+          "y": 169,
+          "z": -71,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":0,\"y\":148,\"z\":-69,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 11,
+          "y": 148,
+          "z": -62,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -11,
+          "y": 148,
+          "z": -62,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-100,\"y\":187,\"z\":-56,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -106,
+          "y": 185,
+          "z": -64,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -109,
+          "y": 193,
+          "z": -43,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":69,\"y\":196,\"z\":-17,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 83,
+          "y": 193,
+          "z": -24,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 69,
+          "y": 196,
+          "z": -17,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 69,
+          "y": 196,
+          "z": -17,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 55,
+          "y": 196,
+          "z": -15,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":115,\"y\":153,\"z\":83,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 131,
+          "y": 148,
+          "z": 92,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-131,\"y\":172,\"z\":-64,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -117,
+          "y": 169,
+          "z": -71,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -131,
+          "y": 173,
+          "z": -55,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":4,\"y\":146,\"z\":-43,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 11,
+          "y": 148,
+          "z": -50,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 8,
+          "y": 144,
+          "z": -22,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-107,\"y\":148,\"z\":-13,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -99,
+          "y": 147,
+          "z": 2,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -84,
+          "y": 154,
+          "z": -35,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":48,\"y\":135,\"z\":19,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 66,
+          "y": 133,
+          "z": 35,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 43,
+          "y": 134,
+          "z": 21,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 41,
+          "y": 135,
+          "z": 15,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":8,\"y\":144,\"z\":-22,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 4,
+          "y": 146,
+          "z": -43,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 20,
+          "y": 143,
+          "z": -4,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-61,\"y\":138,\"z\":11,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -49,
+          "y": 135,
+          "z": 20,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -41,
+          "y": 138,
+          "z": -13,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -81,
+          "y": 142,
+          "z": 9,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-115,\"y\":204,\"z\":-53,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -122,
+          "y": 199,
+          "z": -36,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-49,\"y\":135,\"z\":20,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -61,
+          "y": 138,
+          "z": 11,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -13,
+          "y": 127,
+          "z": 48,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -41,
+          "y": 138,
+          "z": -13,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":20,\"y\":143,\"z\":-4,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 8,
+          "y": 144,
+          "z": -22,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 41,
+          "y": 135,
+          "z": 15,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":93,\"y\":146,\"z\":39,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 93,
+          "y": 144,
+          "z": 51,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 66,
+          "y": 133,
+          "z": 35,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 106,
+          "y": 152,
+          "z": 41,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-58,\"y\":146,\"z\":-18,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -61,
+          "y": 140,
+          "z": -11,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -41,
+          "y": 138,
+          "z": -13,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-106,\"y\":185,\"z\":-64,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -131,
+          "y": 173,
+          "z": -55,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -100,
+          "y": 187,
+          "z": -56,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":93,\"y\":144,\"z\":51,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 93,
+          "y": 146,
+          "z": 39,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-25,\"y\":174,\"z\":-55,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -64,
+          "y": 161,
+          "z": -39,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 59,
+          "y": 189,
+          "z": -59,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":11,\"y\":148,\"z\":-62,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 0,
+          "y": 148,
+          "z": -69,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 11,
+          "y": 148,
+          "z": -50,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":55,\"y\":196,\"z\":-15,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 69,
+          "y": 196,
+          "z": -17,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 43,
+          "y": 197,
+          "z": -19,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 43,
+          "y": 197,
+          "z": -10,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-66,\"y\":136,\"z\":151,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -27,
+          "y": 127,
+          "z": 157,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":173,\"y\":149,\"z\":77,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 177,
+          "y": 149,
+          "z": 55,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 155,
+          "y": 147,
+          "z": 85,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":11,\"y\":148,\"z\":-50,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 11,
+          "y": 148,
+          "z": -62,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 8,
+          "y": 148,
+          "z": -42,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 4,
+          "y": 146,
+          "z": -43,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":106,\"y\":152,\"z\":41,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 93,
+          "y": 146,
+          "z": 39,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 131,
+          "y": 153,
+          "z": 33,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":83,\"y\":193,\"z\":-24,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 87,
+          "y": 193,
+          "z": -38,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 69,
+          "y": 196,
+          "z": -17,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":37,\"y\":127,\"z\":40,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 66,
+          "y": 133,
+          "z": 35,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 9,
+          "y": 127,
+          "z": 50,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":43,\"y\":197,\"z\":-19,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 55,
+          "y": 196,
+          "z": -15,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 43,
+          "y": 197,
+          "z": -10,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":0,\"y\":127,\"z\":72,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 0,
+          "y": 127,
+          "z": 143,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 9,
+          "y": 127,
+          "z": 50,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -13,
+          "y": 127,
+          "z": 48,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-73,\"y\":157,\"z\":-38,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -84,
+          "y": 154,
+          "z": -35,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -85,
+          "y": 155,
+          "z": -45,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -64,
+          "y": 161,
+          "z": -39,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":43,\"y\":197,\"z\":-10,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 43,
+          "y": 197,
+          "z": -19,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 55,
+          "y": 196,
+          "z": -15,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-131,\"y\":173,\"z\":-55,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -131,
+          "y": 172,
+          "z": -64,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -131,
+          "y": 173,
+          "z": -55,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -131,
+          "y": 173,
+          "z": -55,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -106,
+          "y": 185,
+          "z": -64,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":59,\"y\":189,\"z\":-59,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -25,
+          "y": 174,
+          "z": -55,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 87,
+          "y": 193,
+          "z": -38,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-10,\"y\":144,\"z\":-23,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -28,
+          "y": 141,
+          "z": -14,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -3,
+          "y": 146,
+          "z": -43,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-81,\"y\":142,\"z\":9,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -99,
+          "y": 147,
+          "z": 2,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -61,
+          "y": 138,
+          "z": 11,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":43,\"y\":134,\"z\":21,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 37,
+          "y": 127,
+          "z": 40,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-122,\"y\":199,\"z\":-36,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -109,
+          "y": 193,
+          "z": -43,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -115,
+          "y": 204,
+          "z": -53,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -145,
+          "y": 206,
+          "z": -29,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-8,\"y\":148,\"z\":-42,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -11,
+          "y": 148,
+          "z": -50,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -10,
+          "y": 144,
+          "z": -23,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-3,\"y\":146,\"z\":-43,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -10,
+          "y": 144,
+          "z": -23,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -11,
+          "y": 148,
+          "z": -50,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-105,\"y\":164,\"z\":-66,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -85,
+          "y": 155,
+          "z": -45,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -111,
+          "y": 166,
+          "z": -74,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -117,
+          "y": 169,
+          "z": -71,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-13,\"y\":127,\"z\":48,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 9,
+          "y": 127,
+          "z": 50,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 0,
+          "y": 127,
+          "z": 72,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -49,
+          "y": 135,
+          "z": 20,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":41,\"y\":135,\"z\":15,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 20,
+          "y": 143,
+          "z": -4,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 43,
+          "y": 134,
+          "z": 21,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 48,
+          "y": 135,
+          "z": 19,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":166,\"y\":149,\"z\":36,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 131,
+          "y": 153,
+          "z": 33,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 177,
+          "y": 149,
+          "z": 55,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":131,\"y\":153,\"z\":33,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 166,
+          "y": 149,
+          "z": 36,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 106,
+          "y": 152,
+          "z": 41,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-28,\"y\":141,\"z\":-14,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -10,
+          "y": 144,
+          "z": -23,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -41,
+          "y": 138,
+          "z": -13,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":66,\"y\":133,\"z\":35,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 48,
+          "y": 135,
+          "z": 19,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 93,
+          "y": 146,
+          "z": 39,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 37,
+          "y": 127,
+          "z": 40,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-85,\"y\":155,\"z\":-45,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -84,
+          "y": 154,
+          "z": -35,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -105,
+          "y": 164,
+          "z": -66,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -73,
+          "y": 157,
+          "z": -38,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":8,\"y\":148,\"z\":-42,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": 11,
+          "y": 148,
+          "z": -50,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 8,
+          "y": 144,
+          "z": -22,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-117,\"y\":169,\"z\":-71,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -105,
+          "y": 164,
+          "z": -66,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -131,
+          "y": 172,
+          "z": -64,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -111,
+          "y": 166,
+          "z": -74,
+          "transportMethod": "WALK"
+        }
+      ]
+    }
+  }
+}

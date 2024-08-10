@@ -1,6 +1,7 @@
 package com.jelly.mightyminerv2;
 
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jelly.mightyminerv2.Command.OsamaTestCommandNobodyTouchPleaseLoveYou;
@@ -8,12 +9,16 @@ import com.jelly.mightyminerv2.Command.RouteBuilderCommand;
 import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Feature.FeatureManager;
 import com.jelly.mightyminerv2.Handler.GameStateHandler;
+import com.jelly.mightyminerv2.Handler.GraphHandler;
 import com.jelly.mightyminerv2.Handler.RotationHandler;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.ReflectionUtils;
 import com.jelly.mightyminerv2.Util.ScoreboardUtil;
 import com.jelly.mightyminerv2.Util.TablistUtil;
 import com.jelly.mightyminerv2.Handler.RouteHandler;
+import com.jelly.mightyminerv2.Util.helper.graph.Graph;
+import com.jelly.mightyminerv2.Util.helper.graph.GraphSerializer;
+import com.jelly.mightyminerv2.Util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.pathfinder.calculate.path.PathExecutor;
 import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
 import com.jelly.mightyminerv2.pathfinder.helper.player.IPlayerContext;
@@ -38,12 +43,17 @@ import java.nio.file.Paths;
 public class MightyMiner {
 
   public final String VERSION = "%%VERSION%%";
-  public static final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
+  public static final Gson gson = new GsonBuilder()
+      .registerTypeAdapter(new TypeToken<Graph<RouteWaypoint>>(){}.getType(), new GraphSerializer<RouteWaypoint>())
+      .excludeFieldsWithoutExposeAnnotation()
+      .setPrettyPrinting()
+      .create();
   public static MightyMinerConfig config;
   public static boolean isDebug = false;
   public static boolean sendNotSupportedMessage = false;
   private static final Minecraft mc = Minecraft.getMinecraft();
   public static final Path routePath = Paths.get("./config/MightyMinerV2/mighty_miner_routes.json");
+  public static final Path commRoutePath = Paths.get("./config/MightyMinerV2/comm_routes.json");
 
   public IPlayerContext playerContext = new PlayerContext(this, Minecraft.getMinecraft());
   public BlockStateAccessor bsa = null;
@@ -59,6 +69,7 @@ public class MightyMiner {
       try {
         coordFile.createNewFile();
       } catch (IOException e) {
+        System.out.println("Something went wrong while creating RouteFile");
         e.printStackTrace();
       }
     }
@@ -68,6 +79,25 @@ public class MightyMiner {
       RouteHandler.instance = gson.fromJson(reader, RouteHandler.class);
     } catch (Exception e) {
       System.out.println("Something is wrong with Routes. Please Notify the devs.");
+      e.printStackTrace();
+    }
+
+    File commRouteFile = commRoutePath.toFile();
+    if (!commRouteFile.exists()) {
+      commRouteFile.getParentFile().mkdirs();
+      try {
+        commRouteFile.createNewFile();
+      } catch (IOException e) {
+        System.out.println("Something went wrong while creating CommRouteFile");
+        e.printStackTrace();
+      }
+    }
+
+    try {
+      Reader reader = Files.newBufferedReader(commRoutePath);
+      GraphHandler.instance = gson.fromJson(reader, GraphHandler.class);
+    } catch (Exception e) {
+      System.out.println("Something is wrong with Comm Routes. Please Notify the devs.");
       e.printStackTrace();
     }
   }
@@ -109,6 +139,7 @@ public class MightyMiner {
     MinecraftForge.EVENT_BUS.register(GameStateHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(RouteHandler.getInstance());
+    MinecraftForge.EVENT_BUS.register(GraphHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
     MinecraftForge.EVENT_BUS.register(new TablistUtil());
     MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());

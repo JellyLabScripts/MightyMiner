@@ -3,6 +3,7 @@ package com.jelly.mightyminerv2.pathfinder.calculate
 import com.jelly.mightyminerv2.pathfinder.goal.Goal
 import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil
+import com.jelly.mightyminerv2.pathfinder.util.toVec3
 import com.jelly.mightyminerv2.pathfinder.util.world
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos
@@ -42,7 +43,7 @@ class Path(start: PathNode, end: PathNode, val goal: Goal, val ctx: CalculationC
         var nextPos = currPoint + 1
 
         for (i in (path.size - 1) downTo nextPos) {
-          if (BlockUtil.blocksBetweenValid(ctx, path[currPoint], path[i])) {
+          if (BlockUtil.bresenham(ctx, path[currPoint].toVec3(), path[i].toVec3())) {
             nextPos = i
             break
           }
@@ -88,7 +89,7 @@ class Path(start: PathNode, end: PathNode, val goal: Goal, val ctx: CalculationC
         var nextPos = currPoint + 1
 
         for (i in (path.size - 1) downTo nextPos) {
-          if (BlockUtil.blocksBetweenValid(ctx, path[currPoint], path[i])) {
+          if (BlockUtil.bresenham(ctx, path[currPoint].toVec3(), path[i].toVec3())) {
             nextPos = i
             break
           }

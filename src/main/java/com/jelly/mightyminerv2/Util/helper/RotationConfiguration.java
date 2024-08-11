@@ -3,6 +3,7 @@ package com.jelly.mightyminerv2.Util.helper;
 import java.util.Random;
 import java.util.function.Function;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -23,6 +24,8 @@ public class RotationConfiguration {
     private boolean easeBackToClientSide = false;
     private boolean followTarget = false;
     private RotationType rotationType = RotationType.CLIENT;
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Ease easeFunction = Ease.values()[new Random().nextInt(Ease.values().length - 1)];
     private boolean randomness = false;
 
@@ -81,6 +84,16 @@ public class RotationConfiguration {
         CLIENT
     }
 
+    public RotationConfiguration easeFunction(Ease ease){
+        this.easeFunction = ease;
+        return this;
+    }
+
+
+    public Ease easeFunction(){
+        return this.easeFunction;
+    }
+
     @Override
     public Object clone() {
         try {
@@ -105,7 +118,7 @@ public class RotationConfiguration {
             this.easingFunction = easingFunction;
         }
 
-        public float apply(float x) {
+        public float invoke(float x) {
             return easingFunction.apply(x);
         }
     }

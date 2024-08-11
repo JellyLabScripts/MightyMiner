@@ -1,6 +1,7 @@
 package com.jelly.mightyminerv2.pathfinder.movement.movements
 
 import com.jelly.mightyminerv2.MightyMiner
+import com.jelly.mightyminerv2.Util.LogUtil
 import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext
 import com.jelly.mightyminerv2.pathfinder.movement.Movement
 import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper
@@ -30,13 +31,19 @@ class MovementAscend(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement(m
       if (MovementHelper.isLadder(sourceState)) return
       if (MovementHelper.isLadder(destState) && !MovementHelper.canWalkIntoLadder(destState, destX - x, destZ - z)) return
 
-      val sourceMaxY = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY ?: y.toDouble()
-      val destMaxY = destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y + 1, destZ), destState)?.maxY ?: (y + 1.0)
+        // small = half block / stair
+        // big = fill block
 
-      res.cost = when {
-        destMaxY - sourceMaxY <= 0.5 -> ctx.cost.ONE_BLOCK_SPRINT_COST
-        destMaxY - sourceMaxY <= 1.125 -> ctx.cost.JUMP_ONE_BLOCK_COST
-        else -> ctx.cost.INF_COST                                           // Should never trigger. Maybe throw exception in case it triggers?
+      val srcSmall = MovementHelper.isBottomSlab(sourceState);
+      val destSmall = MovementHelper.isBottomSlab(destState);
+
+      val destSmallStair = MovementHelper.isValidStair(destState, destX - x, destZ - z);
+
+      if(!srcSmall == !destSmall && !destSmallStair){
+        res.cost = ctx.cost.JUMP_ONE_BLOCK_COST
+      }
+      else if(!srcSmall){
+          res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
       }
     }
   }

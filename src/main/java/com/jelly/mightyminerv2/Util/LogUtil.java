@@ -37,7 +37,7 @@ public class LogUtil {
       return;
     }
     if (MightyMinerConfig.debugMode && mc.thePlayer != null) {
-      sendMessage(new ChatComponentText("§7" + message));
+      sendMessage(new ChatComponentText("§l§2[Mighty Miner] §8» §7" + message));
     } else {
       System.out.println("[Mighty Miner] " + message);
     }

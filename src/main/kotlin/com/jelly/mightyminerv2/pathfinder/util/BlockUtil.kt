@@ -46,23 +46,25 @@ object BlockUtil {
                 world.getBlockState(block).block is BlockStairs
     }
 
-    fun blocksBetweenValid(ctx: CalculationContext = CalculationContext(MightyMiner.instance), startPoss: BlockPos, endPoss: BlockPos): Boolean {
-        val blocksBetween = bresenham(ctx, startPoss.toVec3(), endPoss.toVec3())
-        if (blocksBetween.isEmpty()) {
-            return false
-        }
-        for (i in blocksBetween.indices) {
-            val curr = blocksBetween[i]
-            if (!MovementHelper.canStandOn(ctx.bsa, curr.x, curr.y, curr.z)) {
-                return false
-            }
-            if (i == 0) continue
-            if (!canWalkOn(ctx, blocksBetween[i - 1], curr)) {
-                return false
-            }
-        }
-        return true
-    }
+//    fun blocksBetweenValid(ctx: CalculationContext = CalculationContext(MightyMiner.instance), startPoss: BlockPos, endPoss: BlockPos): Boolean {
+//        val blocksBetween = bresenham(ctx, startPoss.toVec3(), endPoss.toVec3())
+//        if (blocksBetween.isEmpty()) {
+//            return false
+//        }
+//        for (i in blocksBetween.indices) {
+//            val curr = blocksBetween[i]
+//            if (!MovementHelper.canStandOn(ctx.bsa, curr.x, curr.y, curr.z)
+//                || !MovementHelper.canWalkThrough(ctx.bsa, curr.x, curr.y + 1, curr.z)
+//                || !MovementHelper.canWalkThrough(ctx.bsa, curr.x, curr.y + 2, curr.z)) {
+//                return false
+//            }
+//            if (i == 0) continue
+//            if (!canWalkOn(ctx, blocksBetween[i - 1], curr)) {
+//                return false
+//            }
+//        }
+//        return true
+//    }
 
     fun getDirectionToWalkOnStairs(state: IBlockState): EnumFacing {
         return when (state.block.getMetaFromState(state)) {
@@ -107,18 +109,27 @@ object BlockUtil {
         if (!endState.block.material.isSolid) {
             return endPos.y - startPos.y <= 1
         }
-        if (endState.block is BlockStairs) {
-            return MovementHelper.isValidStair(endState,endPos.x - startPos.x,endPos.z - startPos.z);
+        val sourceMaxY =
+            startState.block.getCollisionBoundingBox(ctx.world, startPos, startState)?.maxY
+                ?: startPos.y.toDouble()
+        val destMaxY = endState.block.getCollisionBoundingBox(ctx.world, endPos, endState)?.maxY
+            ?: (startPos.y + 1.0)
+        if (endState.block is BlockStairs && destMaxY - sourceMaxY > 1.0) {
+            return MovementHelper.isValidStair(
+                endState,
+                endPos.x - startPos.x,
+                endPos.z - startPos.z
+            );
         }
-        val sourceMaxY = startState.block.getCollisionBoundingBox(ctx.world, startPos, startState)?.maxY?: startPos.y.toDouble()
-        val destMaxY = endState.block.getCollisionBoundingBox(ctx.world, endPos, endState)?.maxY?: (startPos.y + 1.0)
         return destMaxY - sourceMaxY <= .5
     }
 
-    fun bresenham(ctx: CalculationContext, start: Vec3, end: Vec3): List<BlockPos> {
+    fun bresenham(ctx: CalculationContext, start: Vec3, end: Vec3): Boolean {
+        println("Start: $start, End: $end")
         var start0 = start
         val bsa = ctx.mm.bsa
-        val blocks = mutableListOf(start0.toBlockPos())
+        val blocks = mutableListOf<Pair<IBlockState, BlockPos>>()
+
         val x1 = MathHelper.floor_double(end.xCoord)
         val y1 = MathHelper.floor_double(end.yCoord)
         val z1 = MathHelper.floor_double(end.zCoord)
@@ -126,11 +137,12 @@ object BlockUtil {
         var y0 = MathHelper.floor_double(start0.yCoord)
         var z0 = MathHelper.floor_double(start0.zCoord)
 
+        blocks.add(Pair(bsa.get(x0, y0, z0), BlockPos(start)))
+
         var iterations = 200
-        yeet@ while (iterations-- >= 0) {
+        while (iterations-- >= 0) {
             if (x0 == x1 && y0 == y1 && z0 == z1) {
-                blocks.add(end.toBlockPos())
-                return blocks
+                return true
             }
             var hasNewX = true
             var hasNewY = true
@@ -186,28 +198,54 @@ object BlockUtil {
             y0 = MathHelper.floor_double(start0.yCoord) - if (enumfacing == EnumFacing.UP) 1 else 0
             z0 = MathHelper.floor_double(start0.zCoord) - if (enumfacing == EnumFacing.SOUTH) 1 else 0
 
-            if (bsa.get(x0, y0, z0).block == Blocks.air) {
-                for(i in 1..2){
-                    if(MovementHelper.canStandOn(bsa, x0, y0 - i, z0)){
-                        blocks.add(BlockPos(x0, y0 - i, z0))
-                        continue@yeet
+            var currState = ctx.bsa.get(x0, y0, z0)
+            var i = 0
+            if (!MovementHelper.canStandOn(bsa, x0, y0, z0, currState) || !MovementHelper.canWalkThrough(bsa, x0, y0 + 1, z0) || !MovementHelper.canWalkThrough(bsa, x0, y0 + 2, z0)) {
+                i = -3
+                while (++i <= 3) {
+                    if (i == 0) continue
+                    currState = bsa.get(x0, y0 + i, z0)
+                    if (!MovementHelper.canStandOn(ctx.bsa, x0, y0 + i, z0, currState)) {
+                        continue
                     }
-                }
-                return emptyList()
-            } else{
-                // this has a massive flaw
-                // lets say the ground block is non air
-                // the block above is air
-                // y0 + 2 might or might not be air but we arent checking for that which is a flaw and now im gonna shit my pants from schizophrenia
-                for(i in 1..3){
-                    if(bsa.get(x0, y0 + i, z0).block == Blocks.air){
-                        blocks.add(BlockPos(x0, y0 + i - 1, z0))
-                        continue@yeet
+                    if (!MovementHelper.canWalkThrough(bsa, x0, y0 + i + 1, z0)) {
+                        i++
+                        continue
                     }
+                    if (!MovementHelper.canWalkThrough(bsa, x0, y0 + i + 2, z0)) {
+                        i += 2
+                        continue
+                    }
+
+                    break
+
                 }
-                return emptyList()
             }
+
+            val last = blocks.last()
+            println("Last: $last, Curr: $currState, CurrPos: ${BlockPos(x0, y0 + i, z0)}")
+            println("YDiff: ${last.second.y - (y0 + i)}")
+            if (last.second.y - (y0 + i) != 0) {
+                val srcSmall = MovementHelper.isBottomSlab(last.first);
+                val destSmall = MovementHelper.isBottomSlab(currState);
+
+                val dX = x0 - last.second.x
+                val dZ = z0 - last.second.z
+                var destSmallStair = false
+                if (dZ == 0 || dZ == 0) {
+                    destSmallStair = MovementHelper.isValidStair(currState, dX, dZ);
+                }
+                println("SrcSmall: $srcSmall, DestSmall: $destSmall, DestSmallStair: $destSmallStair")
+
+                if (!srcSmall == !destSmall && !destSmallStair) {
+                    println("Had to jump")
+                    return false
+                }
+            }
+            println()
+
+            blocks.add(Pair(currState, BlockPos(x0, y0 + i, z0)))
         }
-        return blocks
+        return false
     }
 }

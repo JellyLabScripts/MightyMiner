@@ -6,7 +6,6 @@ public class Clock {
     private long remainingTime;
     @Getter
     private boolean paused;
-    @Getter
     private boolean scheduled;
     @Getter
     private long endTime;
@@ -65,5 +64,9 @@ public class Clock {
         paused = false;
         endTime = 0;
         remainingTime = 0;
+    }
+
+    public boolean isScheduled(){
+        return this.scheduled;
     }
 }

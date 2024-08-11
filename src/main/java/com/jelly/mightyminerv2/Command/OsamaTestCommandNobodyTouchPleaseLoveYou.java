@@ -17,6 +17,7 @@ import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.PlayerUtil;
 import com.jelly.mightyminerv2.Util.RenderUtil;
 import com.jelly.mightyminerv2.Util.StrafeUtil;
+import com.jelly.mightyminerv2.Util.helper.route.Route;
 import com.jelly.mightyminerv2.Util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.Util.helper.route.TransportMethod;
 import com.jelly.mightyminerv2.pathfinder.calculate.PathNode;
@@ -73,12 +74,15 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    if (StrafeUtil.enabled) {
-      StrafeUtil.enabled = false;
-    } else {
-      StrafeUtil.enabled = true;
-      StrafeUtil.yaw = 0;
-    }
+    IBlockState state = mc.theWorld.getBlockState(PlayerUtil.getBlockStandingOn());
+    System.out.println(state.getBlock());
+    System.out.println(state.getBlock().isBlockNormalCube());
+//    if (StrafeUtil.enabled) {
+//      StrafeUtil.enabled = false;
+//    } else {
+//      StrafeUtil.enabled = true;
+//      StrafeUtil.yaw = 0;
+//    }
 //    BlockPos pos = new BlockPos(mc.thePlayer.posX, ceil(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
 //    this.block = pos;
 //    IBlockState state = mc.theWorld.getBlockState(pos);
@@ -135,8 +139,11 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   public void findg() {
 //    GraphHandler.getInstance().stop();
     List<RouteWaypoint> path = GraphHandler.getInstance().findPath(first, second);
+    Route route = new Route();
+    path.forEach(k -> route.insert(k));
     blockToDraw.clear();
-    path.forEach(i -> blockToDraw.add(new BlockPos(i.toVec3())));
+//    path.forEach(i -> blockToDraw.add(new BlockPos(i.toVec3())));
+    RouteNavigator.getInstance().enable(route);
   }
 
   @SubCommand
@@ -157,9 +164,9 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   public void between() {
     if (this.block != null) {
       this.blockToDraw.clear();
-      List<BlockPos> bs = BlockUtil.INSTANCE.bresenham(new CalculationContext(MightyMiner.instance),
-          new Vec3(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ), new Vec3(this.block));
-      this.blockToDraw.addAll(bs);
+//      List<BlockPos> bs = BlockUtil.INSTANCE.bresenham(new CalculationContext(MightyMiner.instance),
+//          new Vec3(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ), new Vec3(this.block));
+//      this.blockToDraw.addAll(bs);
     }
   }
 
@@ -225,19 +232,19 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
         this.path = path;
         LogUtil.send("Time Took: " + ((end - start) / 1e6));
         blockToDraw.clear();
-        blockToDraw.addAll(path.getSmoothedPath());
-        if (go == 1) {
-          PathExecutor.INSTANCE.start(path);
-        } else {
-          LogUtil.send("go is not 1. not pathing");
-        }
+        blockToDraw.addAll(go == 1 ? path.getSmoothedPath() : path.getPath());
+//        if (go == 1) {
+//          PathExecutor.INSTANCE.start(path);
+//        } else {
+//          LogUtil.send("go is not 1. not pathing");
+//        }
       } catch (Exception e) {
         e.printStackTrace();
       }
     }, 0, TimeUnit.MILLISECONDS);
   }
 
-  @SubCommand(aliases = {"s"})
+  @SubCommand
   public void stop() {
     PathExecutor.INSTANCE.stop();
   }
@@ -284,7 +291,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   public void trav() {
     double walkSpeed = mc.thePlayer.getAIMoveSpeed();
     CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-    BlockPos pp = new BlockPos(mc.thePlayer.posX, ceil(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
+    BlockPos pp = PlayerUtil.getBlockStandingOn();
     EnumFacing d = mc.thePlayer.getHorizontalFacing();
     MovementResult res = new MovementResult();
     Movement trav = new MovementTraverse(MightyMiner.instance, pp, pp.add(d.getFrontOffsetX(), d.getFrontOffsetY(), d.getFrontOffsetZ()));
@@ -297,7 +304,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @SubCommand
   public void asc() {
     CalculationContext ctx = new CalculationContext(MightyMiner.instance);
-    BlockPos pp = new BlockPos(mc.thePlayer.posX, ceil(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
+    BlockPos pp = PlayerUtil.getBlockStandingOn();
     EnumFacing d = mc.thePlayer.getHorizontalFacing();
     MovementResult res = new MovementResult();
     Movement trav = new MovementAscend(MightyMiner.instance, pp, pp.add(d.getFrontOffsetX(), d.getFrontOffsetY() + 1, d.getFrontOffsetZ()));
@@ -310,7 +317,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   public void desc() {
     double walkSpeed = mc.thePlayer.getAIMoveSpeed();
     CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-    BlockPos pp = new BlockPos(mc.thePlayer.posX, ceil(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
+    BlockPos pp = PlayerUtil.getBlockStandingOn();
     EnumFacing d = mc.thePlayer.getHorizontalFacing();
     MovementResult res = new MovementResult();
     Movement trav = new MovementDescend(MightyMiner.instance, pp, pp.add(d.getFrontOffsetX(), d.getFrontOffsetY() - 1, d.getFrontOffsetZ()));
@@ -323,7 +330,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   public void diag() {
     double walkSpeed = mc.thePlayer.getAIMoveSpeed();
     CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-    BlockPos pp = new BlockPos(mc.thePlayer.posX, ceil(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
+    BlockPos pp = PlayerUtil.getBlockStandingOn();
     MovementResult res = new MovementResult();
     Movement diag = new MovementDiagonal(MightyMiner.instance, pp, pp.add(1, 0, 1));
     diag.calculateCost(ctx, res);

@@ -150,7 +150,7 @@ public class RotationHandler {
 
     private Angle getBezierAngle() {
         float timeProgress = (System.currentTimeMillis() - this.startTime) / (float) (this.endTime - this.startTime);
-        float rotationProgress = configuration.easeFunction().apply(timeProgress);
+        float rotationProgress = configuration.easeFunction().invoke(timeProgress);
 
         Angle bezierEnd = AngleUtil.getNeededChange(this.startRotation, this.target.getTargetAngle());
         Angle control1 = new Angle(bezierEnd.getYaw() * 0.05f * this.randomMultiplier1, bezierEnd.getYaw() * 0.1f * this.randomMultiplier2);

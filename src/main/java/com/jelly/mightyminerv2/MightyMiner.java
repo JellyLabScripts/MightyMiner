@@ -23,9 +23,14 @@ import com.jelly.mightyminerv2.pathfinder.calculate.path.PathExecutor;
 import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
 import com.jelly.mightyminerv2.pathfinder.helper.player.IPlayerContext;
 import com.jelly.mightyminerv2.pathfinder.helper.player.PlayerContext;
+import java.io.InputStream;
+import java.nio.file.CopyOption;
+import java.nio.file.StandardCopyOption;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -86,7 +91,7 @@ public class MightyMiner {
     if (!commRouteFile.exists()) {
       commRouteFile.getParentFile().mkdirs();
       try {
-        commRouteFile.createNewFile();
+        Files.copy(getClass().getResourceAsStream("/comm_routes.json"), commRoutePath, StandardCopyOption.REPLACE_EXISTING);
       } catch (IOException e) {
         System.out.println("Something went wrong while creating CommRouteFile");
         e.printStackTrace();

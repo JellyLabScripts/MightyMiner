@@ -10,11 +10,11 @@ import kotlin.math.abs
 object MovementHelper {
 
     fun canWalkThrough(bsa: BlockStateAccessor, x: Int, y: Int, z: Int, state: IBlockState = bsa.get(x, y, z)): Boolean {
-        val canWalk = canWalkThroughBlockState(bsa.get(x, y, z))
+        val canWalk = canWalkThroughBlockState(state)
         if (canWalk != null) {
             return canWalk
         }
-        return canWalkThroughPosition(bsa, x, y, z, bsa.get(x, y, z))
+        return canWalkThroughPosition(bsa, x, y, z, state)
     }
 
     fun canWalkThroughBlockState(state: IBlockState): Boolean? {
@@ -95,16 +95,16 @@ object MovementHelper {
         return block.isPassable(bsa.access, bsa.isPassableBlockPos.set(x, y, z))
     }
 
-
     fun canStandOn(bsa: BlockStateAccessor, x: Int, y: Int, z: Int, state: IBlockState = bsa.get(x, y, z)): Boolean {
         val block = state.block
         return when {
-            state.block.isNormalCube -> true
+            block.isNormalCube -> true
             block == Blocks.ladder -> true
             block == Blocks.farmland || block == Blocks.grass -> true
             block == Blocks.ender_chest || block == Blocks.chest || block == Blocks.trapped_chest -> true
             block == Blocks.glass || block == Blocks.stained_glass -> true
             block is BlockStairs -> true
+            block == Blocks.sea_lantern -> true
             isWotah(state) -> {
                 val up = bsa.get(x, y + 1, z).block
                 if (up == Blocks.waterlily || up == Blocks.carpet) {

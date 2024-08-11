@@ -39,7 +39,7 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
             var ascend = false
             var descend = false
             var destState = ctx.bsa.get(destX, y, destZ)
-            if (!MovementHelper.canWalkThrough(ctx.bsa, destX, y + 1, destZ, destState)) {
+            if (!MovementHelper.canWalkThrough(ctx.bsa, destX, y + 1, destZ)) {
                 ascend = true
                 if (!MovementHelper.canWalkThrough(ctx.bsa, x, y + 3, z) || !MovementHelper.canStandOn(ctx.bsa, destX, y + 1, destZ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y + 2, destZ)) {
                     return
@@ -47,7 +47,7 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
                 destState = ctx.bsa.get(destX, y + 1, destZ);
                 res.y = y + 1
             } else {
-                if (!MovementHelper.canStandOn(ctx.bsa, destX, y, destZ)) {
+                if (!MovementHelper.canStandOn(ctx.bsa, destX, y, destZ, destState)) {
                     descend = true
                     if (!MovementHelper.canStandOn(ctx.bsa, destX, y - 1, destZ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y, destZ)) {
                         return
@@ -89,8 +89,9 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
                 return
             }
 
+            val sourceMaxY = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY ?: y.toDouble()
+
             if (ascend) {
-                val sourceMaxY = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY ?: y.toDouble()
                 val destMaxY = destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y + 1, destZ), destState)?.maxY ?: (y + 1.0)
                 when {
                     destMaxY - sourceMaxY <= 0.5 -> res.cost = cost * SQRT_2
@@ -101,14 +102,12 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
             }
 
             if (descend) {
-                val sourceMaxY = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY ?: y.toDouble()
                 val destMaxY = destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y - 1, destZ), destState)?.maxY ?: (y + 1.0)
                 when {
                     sourceMaxY - destMaxY <= 0.5 -> res.cost = cost * SQRT_2
                     sourceMaxY - destMaxY <= 1.0 -> res.cost = ctx.cost.N_BLOCK_FALL_COST[1] + cost * SQRT_2
                     else -> res.cost = ctx.cost.INF_COST
                 }
-                return
             }
         }
     }

@@ -31,15 +31,15 @@ class MovementAscend(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement(m
       if (MovementHelper.isLadder(sourceState)) return
       if (MovementHelper.isLadder(destState) && !MovementHelper.canWalkIntoLadder(destState, destX - x, destZ - z)) return
 
-        // small = half block / stair
+        // small = half block / stair - in this case it doesnt matter which way the source stair(if it is a stair) is facing
         // big = fill block
-
+      // this logic is actually fucking sick ngl
       val srcSmall = MovementHelper.isBottomSlab(sourceState);
       val destSmall = MovementHelper.isBottomSlab(destState);
 
       val destSmallStair = MovementHelper.isValidStair(destState, destX - x, destZ - z);
 
-      if(!srcSmall == !destSmall && !destSmallStair){
+      if(!srcSmall == !(destSmall || destSmallStair)){
         res.cost = ctx.cost.JUMP_ONE_BLOCK_COST
       }
       else if(!srcSmall){

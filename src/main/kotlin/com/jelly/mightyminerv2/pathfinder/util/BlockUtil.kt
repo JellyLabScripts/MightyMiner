@@ -127,7 +127,7 @@ object BlockUtil {
     fun bresenham(ctx: CalculationContext, start: Vec3, end: Vec3): Boolean {
         println("Start: $start, End: $end")
         var start0 = start
-        val bsa = ctx.mm.bsa
+        val bsa = ctx.bsa
         val blocks = mutableListOf<Pair<IBlockState, BlockPos>>()
 
         val x1 = MathHelper.floor_double(end.xCoord)
@@ -223,26 +223,23 @@ object BlockUtil {
             }
 
             val last = blocks.last()
-            println("Last: $last, Curr: $currState, CurrPos: ${BlockPos(x0, y0 + i, z0)}")
-            println("YDiff: ${last.second.y - (y0 + i)}")
+//            println("Last: $last, Curr: $currState, CurrPos: ${BlockPos(x0, y0 + i, z0)}")
+//            println("YDiff: ${last.second.y - (y0 + i)}")
             if (last.second.y - (y0 + i) != 0) {
                 val srcSmall = MovementHelper.isBottomSlab(last.first);
                 val destSmall = MovementHelper.isBottomSlab(currState);
 
                 val dX = x0 - last.second.x
                 val dZ = z0 - last.second.z
-                var destSmallStair = false
-                if (dZ == 0 || dZ == 0) {
-                    destSmallStair = MovementHelper.isValidStair(currState, dX, dZ);
-                }
-                println("SrcSmall: $srcSmall, DestSmall: $destSmall, DestSmallStair: $destSmallStair")
+                var destSmallStair = MovementHelper.isValidStair(currState, dX, dZ);
+//                println("SrcSmall: $srcSmall, DestSmall: $destSmall, DestSmallStair: $destSmallStair")
 
-                if (!srcSmall == !destSmall && !destSmallStair) {
-                    println("Had to jump")
+                if (!srcSmall == !(destSmall || destSmallStair)) {
+//                    println("Had to jump")
                     return false
                 }
             }
-            println()
+//            println()
 
             blocks.add(Pair(currState, BlockPos(x0, y0 + i, z0)))
         }

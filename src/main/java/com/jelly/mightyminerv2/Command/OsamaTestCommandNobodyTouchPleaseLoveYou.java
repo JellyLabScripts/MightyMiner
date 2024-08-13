@@ -1,6 +1,7 @@
 package com.jelly.mightyminerv2.Command;
 
 import static java.lang.Math.ceil;
+import static java.lang.Math.log;
 
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
@@ -9,14 +10,18 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.mightyminerv2.Feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.Feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.Feature.impl.MithrilMiner;
+import com.jelly.mightyminerv2.Feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.Feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.Handler.GraphHandler;
 import com.jelly.mightyminerv2.Handler.RouteHandler;
+import com.jelly.mightyminerv2.Macro.commissionmacro.helper.Commission;
 import com.jelly.mightyminerv2.MightyMiner;
+import com.jelly.mightyminerv2.Util.CommissionUtil;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.PlayerUtil;
 import com.jelly.mightyminerv2.Util.RenderUtil;
 import com.jelly.mightyminerv2.Util.StrafeUtil;
+import com.jelly.mightyminerv2.Util.TablistUtil;
 import com.jelly.mightyminerv2.Util.helper.route.Route;
 import com.jelly.mightyminerv2.Util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.Util.helper.route.TransportMethod;
@@ -26,6 +31,7 @@ import com.jelly.mightyminerv2.pathfinder.calculate.path.PathExecutor;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
 import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext;
 import com.jelly.mightyminerv2.pathfinder.movement.Movement;
+import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper;
 import com.jelly.mightyminerv2.pathfinder.movement.MovementResult;
 import com.jelly.mightyminerv2.pathfinder.movement.Moves;
 import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementAscend;
@@ -34,15 +40,20 @@ import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementDiagonal;
 import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementTraverse;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import kotlin.Pair;
 import lombok.Getter;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
@@ -71,27 +82,14 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   List<Vec3> points = new ArrayList<>();
   int tick = 0;
   Path path;
+  AStarPathFinder pathfinder;
+  PathNode curr;
 
   @Main
   public void main() {
-    IBlockState state = mc.theWorld.getBlockState(PlayerUtil.getBlockStandingOn());
-    System.out.println(state.getBlock());
-    System.out.println(state.getBlock().isBlockNormalCube());
-//    if (StrafeUtil.enabled) {
-//      StrafeUtil.enabled = false;
-//    } else {
-//      StrafeUtil.enabled = true;
-//      StrafeUtil.yaw = 0;
-//    }
-//    BlockPos pos = new BlockPos(mc.thePlayer.posX, ceil(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
-//    this.block = pos;
-//    IBlockState state = mc.theWorld.getBlockState(pos);
-//    LogUtil.send("CurrMax: " + state.getBlock().getCollisionBoundingBox(mc.theWorld, pos, state).maxY);
-//    for(PathNode node: path.getNode()){
-//      if(node.getBlock().equals(pos)){
-//        LogUtil.send("Found Block. Node: " + node + ", Parent: " + node.getParentNode());
-//      }
-//    }
+    mc.theWorld.playerEntities.forEach(i -> System.out.println("Name :  " + i.getName() + ", DisplayNameString : " + i.getDisplayNameString() + ", CustomNameTag" + i.getCustomNameTag() + ", Pos : " + i.getPositionVector()));
+    TablistUtil.getTabListPlayersSkyblock().forEach(System.out::println);
+    mc.getNetHandler().getPlayerInfoMap().forEach(it -> System.out.println(it.getGameProfile().getName()));
   }
 
   @SubCommand
@@ -146,13 +144,18 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     RouteNavigator.getInstance().enable(route);
   }
 
+  String[] name = {"Ice Walker", "Goblin"};
   @SubCommand
-  public void k() {
-    if (AutoMobKiller.getInstance().isRunning()) {
-      AutoMobKiller.getInstance().stop();
-    } else {
-      AutoMobKiller.getInstance().start();
-    }
+  public void k(int i){
+    AutoMobKiller.getInstance().enable(name[i]);
+//    this.c = !this.c;
+  }
+
+  @SubCommand
+  public void stop(){
+    RouteNavigator.getInstance().disable();
+    AutoMobKiller.getInstance().stop();
+    Pathfinder.getInstance().stop();
   }
 
   @SubCommand
@@ -201,6 +204,10 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     path = null;
     first = null;
     second = null;
+    pathfinder = null;
+    curr = null;
+//    c = false;
+//    cc.clear();
   }
 
   @SubCommand
@@ -214,64 +221,28 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   @SubCommand
-  public void go(int go) {
-    Multithreading.schedule(() -> {
-      try {
-        double walkSpeed = mc.thePlayer.getAIMoveSpeed();
-        CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-        AStarPathFinder pathfinder = new AStarPathFinder(MathHelper.floor_double(mc.thePlayer.posX),
-            MathHelper.ceiling_double_int(mc.thePlayer.posY) - 1, MathHelper.floor_double(mc.thePlayer.posZ),
-            new Goal(this.block.getX(), this.block.getY(), this.block.getZ(), ctx), ctx);
-        long start = System.nanoTime();
-        Path path = pathfinder.calculatePath();
-        long end = System.nanoTime();
-        if (path == null) {
-          LogUtil.send("No Path Found");
-          return;
-        }
-        this.path = path;
-        LogUtil.send("Time Took: " + ((end - start) / 1e6));
-        blockToDraw.clear();
-        blockToDraw.addAll(go == 1 ? path.getSmoothedPath() : path.getPath());
-//        if (go == 1) {
-//          PathExecutor.INSTANCE.start(path);
-//        } else {
-//          LogUtil.send("go is not 1. not pathing");
-//        }
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }, 0, TimeUnit.MILLISECONDS);
+  public void c(){
+    BlockPos pp = PlayerUtil.getBlockStandingOn();
+    this.curr = this.pathfinder.getClosedSet().get(PathNode.Companion.longHash(pp.getX(), pp.getY(), pp.getZ()));
+    LogUtil.send("Curr: " + curr);
   }
 
   @SubCommand
-  public void stop() {
-    PathExecutor.INSTANCE.stop();
+  public void go(int go) {
+    if(first == null || second == null) {
+      LogUtil.error("First or sec is null");
+      return;
+    }
+    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), new BlockPos(first.toVec3()));
+    Pathfinder.getInstance().queue(new BlockPos(first.toVec3()), new BlockPos(second.toVec3()));
+
+    Pathfinder.getInstance().start();
   }
 
   @SubscribeEvent
   public void onRender(RenderWorldLastEvent event) {
     if (entTodraw != null) {
       RenderUtil.drawBox(((EntityLivingBase) entTodraw).getEntityBoundingBox(), Color.CYAN);
-    }
-
-    if (!blockToDraw.isEmpty()) {
-      for (int i = 0; i < blockToDraw.size(); i++) {
-        BlockPos curr = blockToDraw.get(i);
-        RenderUtil.drawBlockBox(curr, new Color(0, 255, 255, 50));
-        if (i + 1 < blockToDraw.size()) {
-          BlockPos n = blockToDraw.get(i + 1);
-          RenderUtil.drawTracer(
-              new Vec3(curr.getX(), curr.getY(), curr.getZ()).addVector(0.5, 1, 0.5),
-              new Vec3(n.getX(), n.getY(), n.getZ()).addVector(0.5, 1, 0.5),
-              new Color(0, 0, 0, 200)
-          );
-        }
-      }
-    }
-
-    if (!points.isEmpty()) {
-      points.forEach(it -> RenderUtil.drawPoint(it, new Color(255, 0, 0, 100)));
     }
 
     if (this.block != null) {
@@ -285,6 +256,35 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     if (this.second != null) {
       RenderUtil.drawBlockBox(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
     }
+
+    if(pathfinder != null){
+      pathfinder.getClosedSet().values().forEach(it -> RenderUtil.drawBlockBox(it.getBlock(), new Color(213, 124, 124, 100)));
+    }
+
+    if(path != null){
+      path.getPath().forEach(tit -> RenderUtil.drawBlockBox(tit, new Color(255, 0, 0, 200)));
+    }
+
+    if(curr != null){
+      RenderUtil.drawBlockBox(curr.getBlock(), new Color(0, 255, 0, 255));
+      if(curr.getParentNode() != null){
+        RenderUtil.drawBlockBox(curr.getParentNode().getBlock(), new Color(0, 0, 255, 255));
+      }
+    }
+//
+//    if(!cc.isEmpty()) {
+//      Pair<EntityPlayer, Pair<Double, Double>> best = cc.get(0);
+//      Vec3 pos = best.getFirst().getPositionVector();
+//      RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5), new Color(255, 0, 241, 150));
+//      RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord, pos.yCoord + 2.2, pos.zCoord, 1);
+//
+//      for(int i = 1; i < cc.size(); i++){
+//        best = cc.get(i);
+//        pos = best.getFirst().getPositionVector();
+//        RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5), new Color(123, 0, 234, 150));
+//        RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord, pos.yCoord + 2.2, pos.zCoord, 1);
+//      }
+//    }
   }
 
   @SubCommand

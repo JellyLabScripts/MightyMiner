@@ -29,7 +29,15 @@ class MovementDescend(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement(
             cost(ctx, x, y, z, destX, destZ, res)
         }
 
-        private fun cost(ctx: CalculationContext, x: Int, y: Int, z: Int, destX: Int, destZ: Int, res: MovementResult) {
+        private fun cost(
+            ctx: CalculationContext,
+            x: Int,
+            y: Int,
+            z: Int,
+            destX: Int,
+            destZ: Int,
+            res: MovementResult
+        ) {
             val destUpState = ctx.get(destX, y, destZ)
             if (!MovementHelper.canWalkThrough(ctx.bsa, destX, y + 2, destZ)
                 || !MovementHelper.canWalkThrough(ctx.bsa, destX, y + 1, destZ)
@@ -42,12 +50,56 @@ class MovementDescend(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement(
                 return
             }
             val destState = ctx.get(destX, y - 1, destZ)
-            if (!MovementHelper.canStandOn(ctx.bsa, destX, y - 1, destZ, destState) || MovementHelper.isLadder(destState)) {
+            if (!MovementHelper.canStandOn(
+                    ctx.bsa,
+                    destX,
+                    y - 1,
+                    destZ,
+                    destState
+                ) || MovementHelper.isLadder(destState)
+            ) {
                 freeFallCost(ctx, x, y, z, destX, destZ, destState, res)
                 return
             }
+
+            // small = half block / stair - in this case stair should be facing the player otherwise its descend instead of a walk
+            // big = fill block
+            val srcSmall = MovementHelper.isBottomSlab(sourceState);
+            val destSmall = MovementHelper.isBottomSlab(destState);
+
+            val srcSmallStair =
+                MovementHelper.isValidReversedStair(sourceState, destX - x, destZ - z);
+            val destSmallStair =
+                MovementHelper.isValidReversedStair(destState, destX - x, destZ - z);
+
+            // Todo: this can ** probably ** be simplified
+            if (!(srcSmall || srcSmallStair) == !(destSmall || destSmallStair)) {
+                if (destSmallStair) {
+                    res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
+                } else {
+                    res.cost =
+                        ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
+                }
+            } else if (!(destSmall || destSmallStair)) {
+                res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
+            } else if (!(srcSmall || srcSmallStair)) {
+                res.cost =
+                    ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
+            }
+
+//            if (srcSmall == destSmall && srcSmallStair == destSmallStair) {
+//                if (destSmallStair) {
+//                    res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
+//                } else {
+//                    ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
+//                }
+//            } else {
+//                res.cost =
+//                    ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
+//            }
             // forgot to add slab will add later
-            res.cost = ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
+//            res.cost =
+//                ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
         }
 
         fun freeFallCost(

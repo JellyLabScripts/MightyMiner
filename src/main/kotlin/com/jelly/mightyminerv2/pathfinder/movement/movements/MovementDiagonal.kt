@@ -38,6 +38,7 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
 
             var ascend = false
             var descend = false
+            val sourceState = ctx.get(x, y, z)
             var destState = ctx.bsa.get(destX, y, destZ)
             if (!MovementHelper.canWalkThrough(ctx.bsa, destX, y + 1, destZ)) {
                 ascend = true
@@ -49,7 +50,7 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
             } else {
                 if (!MovementHelper.canStandOn(ctx.bsa, destX, y, destZ, destState)) {
                     descend = true
-                    if (!MovementHelper.canStandOn(ctx.bsa, destX, y - 1, destZ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y, destZ)) {
+                    if (!MovementHelper.canStandOn(ctx.bsa, destX, y - 1, destZ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y, destZ) || MovementHelper.isBottomSlab(sourceState)) {
                         return
                     }
                     destState = ctx.bsa.get(destX, y - 1, destZ)
@@ -59,7 +60,6 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
 
             var cost = ctx.cost.ONE_BLOCK_WALK_COST
 
-            val sourceState = ctx.get(x, y, z)
             if (MovementHelper.isLadder(sourceState)) {
                 return
             }

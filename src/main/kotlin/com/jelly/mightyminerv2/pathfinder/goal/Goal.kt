@@ -21,10 +21,15 @@ class Goal(val goalX: Int, val goalY: Int, val goalZ: Int, val ctx: CalculationC
 
         if (goalY > y) {
             vertical *= 6.234399666206506
+//            vertical *= ctx.cost.JUMP_ONE_BLOCK_COST
         } else {
             vertical *= ctx.cost.N_BLOCK_FALL_COST[2] / 2.0
         }
 
         return (straight + diagonal * SQRT_2) * ctx.cost.ONE_BLOCK_SPRINT_COST + vertical
+    }
+
+    override fun toString(): String {
+        return "x: $goalX, y: $goalY, z: $goalZ"
     }
 }

@@ -2,6 +2,7 @@ package com.jelly.mightyminerv2.pathfinder.movement
 
 import com.jelly.mightyminerv2.MightyMiner
 import com.jelly.mightyminerv2.pathfinder.costs.ActionCosts
+import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor
 import net.minecraft.block.state.IBlockState
 import net.minecraft.potion.Potion
 
@@ -10,7 +11,7 @@ class CalculationContext(val mm: MightyMiner, sprintFactor: Double = 0.13, walkF
 
   val world = mm.playerContext.world
   val player = mm.playerContext.player
-  val bsa = mm.bsa!! // If this is a null pls fix ur brain dev
+  val bsa = BlockStateAccessor(mm)
   val jumpBoostAmplifier = player.getActivePotionEffect(Potion.jump)?.amplifier ?: -1;
   val cost = ActionCosts(sprintFactor, walkFactor, sneakFactor, jumpBoostAmplifier)
   val maxFallHeight = 20

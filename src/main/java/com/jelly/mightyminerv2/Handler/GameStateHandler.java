@@ -48,17 +48,17 @@ public class GameStateHandler {
   @Getter
   private boolean cookieActive = false;
 
-  @SubscribeEvent
-  public void onTick(ClientTickEvent event) {
-    if (mc.theWorld != null) {
-      try {
-        MightyMiner.instance.bsa = new BlockStateAccessor(MightyMiner.instance);
-      } catch (Exception e) {
-        MightyMiner.instance.bsa = null;
-        e.printStackTrace();
-      }
-    }
-  }
+//  @SubscribeEvent
+//  public void onTick(ClientTickEvent event) {
+//    if (mc.theWorld != null) {
+//      try {
+//        MightyMiner.instance.bsa = new BlockStateAccessor(MightyMiner.instance);
+//      } catch (Exception e) {
+//        MightyMiner.instance.bsa = null;
+//        e.printStackTrace();
+//      }
+//    }
+//  }
 
   @SubscribeEvent
   public void onWorldUnload(WorldEvent.Unload event) {

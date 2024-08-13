@@ -202,10 +202,5 @@ object PathExecutor {
         if (!this.enabled) return;
         this.path.forEach { RenderUtil.drawBlockBox(it, Color(0, 255, 255, 50)) }
         RenderUtil.drawBlockBox(this.path[this.targetIndex], Color(255, 0, 0, 100))
-
-        // for debugging
-        val vec =
-            mc.thePlayer.lookVec.add(AngleUtil.calcVec3FromRotation(Angle(StrafeUtil.yaw, 0f)))
-        RenderUtil.drawPoint(Vec3(vec.xCoord * 2, vec.yCoord * 2, vec.zCoord * 2), Color.RED)
     }
 }

@@ -25,16 +25,17 @@ public class MinHeap<T> {
 
     int index = 1;
     int small;
-    while (size > (small = index << 1)){
-      if(size > small + 1 && items[small].nodeCost > items[small+ 1].nodeCost){
+    while ((small = index << 1) <= size) {
+      if (small < size && items[small].nodeCost > items[small + 1].nodeCost) {
         small++;
       }
 
-      if(items[index].nodeCost > items[small].nodeCost){
+      if (items[index].nodeCost > items[small].nodeCost) {
         HeapNode<T> temp = items[index];
         items[index] = items[small];
         items[small] = temp;
-      }else{
+        index = small;
+      } else {
         break;
       }
     }

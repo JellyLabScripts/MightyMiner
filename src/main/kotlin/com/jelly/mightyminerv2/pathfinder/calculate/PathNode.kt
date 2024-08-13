@@ -24,7 +24,7 @@ class PathNode(var x: Int, var y: Int, var z: Int, val goal: Goal) {
   }
 
   override fun toString(): String {
-    return "PathNode(x: $x, y: $y, z: $z, totalCost: $totalCost)"
+    return "PathNode(x: $x, y: $y, z: $z, costSoFar: $costSoFar, costToEnd: $costToEnd totalCost: $totalCost)"
   }
 
   companion object {

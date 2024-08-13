@@ -155,7 +155,7 @@ object MovementHelper {
     }
 
     fun isValidStair(state: IBlockState, dx: Int, dz: Int): Boolean {
-        if (dx == 0 && dz == 0) return false
+        if (dx == dz) return false
         if (state.block !is BlockStairs) return false
         if (state.getValue(BlockStairs.HALF) != BlockStairs.EnumHalf.BOTTOM) return false
 
@@ -166,6 +166,22 @@ object MovementHelper {
             dz == 1 -> stairFacing == EnumFacing.SOUTH
             dx == -1 -> stairFacing == EnumFacing.WEST
             dx == 1 -> stairFacing == EnumFacing.EAST
+            else -> false
+        }
+    }
+
+    fun isValidReversedStair(state: IBlockState, dx: Int, dz: Int): Boolean {
+        if (dx == dz) return false
+        if (state.block !is BlockStairs) return false
+        if (state.getValue(BlockStairs.HALF) != BlockStairs.EnumHalf.BOTTOM) return false
+
+        val stairFacing = state.getValue(BlockStairs.FACING)
+
+        return when {
+            dz == 1 -> stairFacing == EnumFacing.NORTH
+            dz == -1 -> stairFacing == EnumFacing.SOUTH
+            dx == 1 -> stairFacing == EnumFacing.WEST
+            dx == -1 -> stairFacing == EnumFacing.EAST
             else -> false
         }
     }

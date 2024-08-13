@@ -4,6 +4,7 @@ import com.jelly.mightyminerv2.Feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.Feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.Feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.Feature.impl.MithrilMiner;
+import com.jelly.mightyminerv2.Feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.Feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.Feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.Util.LogUtil;
@@ -34,6 +35,7 @@ public class FeatureManager {
     addFeature(MithrilMiner.getInstance());
     addFeature(AutoCommissionClaim.getInstance());
     addFeature(AutoMobKiller.getInstance());
+    addFeature(Pathfinder.getInstance());
   }
 
   public void enableAll() {

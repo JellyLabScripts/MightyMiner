@@ -136,7 +136,7 @@ public class KeyBindUtil {
         return true;
     }
 
-    public static KeyBinding[] getHoldingKeybinds() {
+    public static KeyBinding[] getHeldKeybinds() {
         KeyBinding[] keybinds = new KeyBinding[allKeys.length];
         int i = 0;
         for (KeyBinding key : allKeys) {
@@ -148,11 +148,11 @@ public class KeyBindUtil {
         return keybinds;
     }
 
-    private static final Map<Integer, KeyBinding> keyBindMap = ImmutableMap.of(
-            0, mc.gameSettings.keyBindForward,
-            90, mc.gameSettings.keyBindLeft,
-            180, mc.gameSettings.keyBindBack,
-            -90, mc.gameSettings.keyBindRight
+    public static final Map<KeyBinding, Integer> keyBindMap = ImmutableMap.of(
+            mc.gameSettings.keyBindForward, 0,
+            mc.gameSettings.keyBindLeft, 90,
+            mc.gameSettings.keyBindBack, 180,
+            mc.gameSettings.keyBindRight, -90
     );
 
     public static List<KeyBinding> getNeededKeyPresses(Vec3 orig, Vec3 dest) {
@@ -163,7 +163,7 @@ public class KeyBindUtil {
 
         float angleDifference = AngleUtil.normalizeAngle(requiredAngle - mc.thePlayer.rotationYaw) * -1;
 
-        keyBindMap.forEach((yaw, key) -> {
+        keyBindMap.forEach((key, yaw) -> {
             if (Math.abs(yaw - angleDifference) < 67.5 || Math.abs(yaw - (angleDifference + 360.0)) < 67.5) {
                 keys.add(key);
             }
@@ -175,7 +175,7 @@ public class KeyBindUtil {
         List<KeyBinding> keys = new ArrayList<>();
         neededYaw = AngleUtil.normalizeAngle(neededYaw - mc.thePlayer.rotationYaw) * -1;
         float finalNeededYaw = neededYaw;
-        keyBindMap.forEach((yaw, key) -> {
+        keyBindMap.forEach((key, yaw) -> {
             if (Math.abs(yaw - finalNeededYaw) < 67.5 || Math.abs(yaw - (finalNeededYaw + 360.0)) < 67.5) {
                 keys.add(key);
             }

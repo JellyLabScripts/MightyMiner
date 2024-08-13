@@ -149,6 +149,7 @@ public class AngleUtil {
     }
 
     // Todo: More testing
+    // edit this prolly bad pls fix this
     public static Angle getNeededChange(Angle startAngle, Angle endAngle) {
         float yawChange = normalizeAngle(normalizeAngle(endAngle.getYaw()) - normalizeAngle(startAngle.getYaw()));
         return new Angle(yawChange, endAngle.getPitch() - startAngle.getPitch());
@@ -158,15 +159,4 @@ public class AngleUtil {
         Angle change = getNeededChange(getPlayerAngle(), getRotation(vec));
         return Math.abs(change.getYaw()) <= distance && Math.abs(change.getPitch()) <= distance;
     }
-    // from baritone
-    public static final double DEG_TO_RAD = Math.PI / 180.0;
-
-    public static Vec3 calcVec3FromRotation(Angle rotation) {
-        float f = MathHelper.cos(-rotation.getYaw() * (float) DEG_TO_RAD - (float) Math.PI);
-        float f1 = MathHelper.sin(-rotation.getYaw() * (float) DEG_TO_RAD - (float) Math.PI);
-        float f2 = -MathHelper.cos(-rotation.getPitch() * (float) DEG_TO_RAD);
-        float f3 = MathHelper.sin(-rotation.getPitch() * (float) DEG_TO_RAD);
-        return new Vec3((double) (f1 * f2), (double) f3, (double) (f * f2));
-    }
-
 }

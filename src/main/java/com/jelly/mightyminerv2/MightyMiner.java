@@ -26,6 +26,11 @@ import com.jelly.mightyminerv2.pathfinder.helper.player.PlayerContext;
 import java.io.InputStream;
 import java.nio.file.CopyOption;
 import java.nio.file.StandardCopyOption;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -47,6 +52,7 @@ import java.nio.file.Paths;
 @Mod(modid = "MightyMinerV2", useMetadata = true)
 public class MightyMiner {
 
+  private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
   public final String VERSION = "%%VERSION%%";
   public static final Gson gson = new GsonBuilder()
       .registerTypeAdapter(new TypeToken<Graph<RouteWaypoint>>(){}.getType(), new GraphSerializer<RouteWaypoint>())
@@ -61,7 +67,7 @@ public class MightyMiner {
   public static final Path commRoutePath = Paths.get("./config/MightyMinerV2/comm_routes.json");
 
   public IPlayerContext playerContext = new PlayerContext(this, Minecraft.getMinecraft());
-  public BlockStateAccessor bsa = null;
+//  public BlockStateAccessor bsa = null;
 
   @Mod.Instance
   public static MightyMiner instance;
@@ -154,5 +160,9 @@ public class MightyMiner {
   private void initializeCommands() {
     CommandManager.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
     CommandManager.register(new RouteBuilderCommand());
+  }
+
+  public static Executor executor(){
+    return executor;
   }
 }

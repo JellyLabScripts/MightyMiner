@@ -60,9 +60,7 @@ public class PathfindUtil {
         return;
       }
       PathExecutor.INSTANCE.start(path);
-      if (executor.getActiveCount() + executor.getQueue().size() == 1) {
-        processingPath = false;
-      }
+      processingPath = false;
       LogUtil.log("Created Thread");
     });
   }

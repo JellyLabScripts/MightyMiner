@@ -1,7 +1,6 @@
 package com.jelly.mightyminerv2.Command;
 
 import static java.lang.Math.ceil;
-import static java.lang.Math.log;
 
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
@@ -14,24 +13,19 @@ import com.jelly.mightyminerv2.Feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.Feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.Handler.GraphHandler;
 import com.jelly.mightyminerv2.Handler.RouteHandler;
-import com.jelly.mightyminerv2.Macro.commissionmacro.helper.Commission;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.Util.CommissionUtil;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.PlayerUtil;
 import com.jelly.mightyminerv2.Util.RenderUtil;
-import com.jelly.mightyminerv2.Util.StrafeUtil;
-import com.jelly.mightyminerv2.Util.TablistUtil;
 import com.jelly.mightyminerv2.Util.helper.route.Route;
 import com.jelly.mightyminerv2.Util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.Util.helper.route.TransportMethod;
 import com.jelly.mightyminerv2.pathfinder.calculate.PathNode;
 import com.jelly.mightyminerv2.pathfinder.calculate.path.AStarPathFinder;
-import com.jelly.mightyminerv2.pathfinder.calculate.path.PathExecutor;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
 import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext;
 import com.jelly.mightyminerv2.pathfinder.movement.Movement;
-import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper;
 import com.jelly.mightyminerv2.pathfinder.movement.MovementResult;
 import com.jelly.mightyminerv2.pathfinder.movement.Moves;
 import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementAscend;
@@ -40,24 +34,17 @@ import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementDiagonal;
 import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementTraverse;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import kotlin.Pair;
 import lombok.Getter;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.potion.Potion;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -66,11 +53,9 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 
 @Command(value = "set")
 public class OsamaTestCommandNobodyTouchPleaseLoveYou {
-
   @Getter
   private static OsamaTestCommandNobodyTouchPleaseLoveYou instance = new OsamaTestCommandNobodyTouchPleaseLoveYou();
   private final Minecraft mc = Minecraft.getMinecraft();
@@ -85,15 +70,16 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   Path path;
   AStarPathFinder pathfinder;
   PathNode curr;
+  List<Pair<EntityPlayer, Pair<Double, Double>>> mobs = new ArrayList<>();
+  boolean allowed = false;
 
   @Main
   public void main() {
-    mc.theWorld.playerEntities.forEach(i -> System.out.println(
-        "Name :  " + i.getName() + ", DisplayNameString : " + i.getDisplayNameString() + ", CustomNameTag" + i.getCustomNameTag() + ", Pos : "
-            + i.getPositionVector()));
-    TablistUtil.getTabListPlayersSkyblock().forEach(System.out::println);
-    mc.getNetHandler().getPlayerInfoMap()
-        .forEach(it -> System.out.println(it.getGameProfile().getName() + ", " + it.getPlayerTeam().getRegisteredName()));
+//    mobs = CommissionUtil.getMobList("Ice Walker", new HashSet<>());
+    allowed = !allowed;
+    if(allowed == false){
+      mobs.clear();
+    }
   }
 
   @SubCommand
@@ -228,7 +214,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @SubCommand
   public void c() {
     BlockPos pp = PlayerUtil.getBlockStandingOn();
-    this.curr = this.pathfinder.getClosedSet().get(PathNode.Companion.longHash(pp.getX(), pp.getY(), pp.getZ()));
+//    this.curr = this.pathfinder.getClosedSet().get(PathNode.Companion.longHash(pp.getX(), pp.getY(), pp.getZ()));
     LogUtil.send("Curr: " + curr);
   }
 
@@ -269,9 +255,16 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   @SubscribeEvent
+  public void onTick(ClientTickEvent event){
+    if(!allowed) return;
+    mobs = CommissionUtil.getMobListDebug("Ice Walker", new HashSet<>());
+  }
+
+  @SubscribeEvent
   public void onRender(RenderWorldLastEvent event) {
     if (entTodraw != null) {
-      RenderUtil.drawBox(((EntityLivingBase) entTodraw).getEntityBoundingBox(), Color.CYAN);
+      RenderUtil.drawBox(entTodraw.getEntityBoundingBox(), new Color(123, 214, 44, 150));
+      RenderUtil.drawBlockBox(new BlockPos(entTodraw.posX, Math.ceil(entTodraw.posY) - 1, entTodraw.posZ), new Color(123, 214, 44, 150));
     }
 
     if(!blockToDraw.isEmpty()){
@@ -290,9 +283,9 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       RenderUtil.drawBlockBox(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
     }
 
-    if (pathfinder != null) {
-      pathfinder.getClosedSet().values().forEach(it -> RenderUtil.drawBlockBox(it.getBlock(), new Color(213, 124, 124, 100)));
-    }
+//    if (pathfinder != null) {
+//      pathfinder.getClosedSet().values().forEach(it -> RenderUtil.drawBlockBox(it.getBlock(), new Color(213, 124, 124, 100)));
+//    }
 
     if (path != null) {
       path.getPath().forEach(tit -> RenderUtil.drawBlockBox(tit, new Color(255, 0, 0, 200)));
@@ -305,19 +298,19 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       }
     }
 //
-//    if(!cc.isEmpty()) {
-//      Pair<EntityPlayer, Pair<Double, Double>> best = cc.get(0);
-//      Vec3 pos = best.getFirst().getPositionVector();
-//      RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5), new Color(255, 0, 241, 150));
-//      RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord, pos.yCoord + 2.2, pos.zCoord, 1);
-//
-//      for(int i = 1; i < cc.size(); i++){
-//        best = cc.get(i);
-//        pos = best.getFirst().getPositionVector();
-//        RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5), new Color(123, 0, 234, 150));
-//        RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord, pos.yCoord + 2.2, pos.zCoord, 1);
-//      }
-//    }
+    if(!mobs.isEmpty()) {
+      Pair<EntityPlayer, Pair<Double, Double>> best = mobs.get(0);
+      Vec3 pos = best.getFirst().getPositionVector();
+      RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5), new Color(255, 0, 241, 150));
+      RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord, pos.yCoord + 2.2, pos.zCoord, 1);
+
+      for(int i = 1; i < mobs.size(); i++){
+        best = mobs.get(i);
+        pos = best.getFirst().getPositionVector();
+        RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5), new Color(123, 0, 234, 150));
+        RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord, pos.yCoord + 2.2, pos.zCoord, 1);
+      }
+    }
   }
 
   @SubCommand

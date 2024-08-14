@@ -40,7 +40,8 @@ public class MinHeap<T> {
       }
     }
 
-    return root.nodeVal;
+    // should throw exception but oh well
+    return root == null ? null : root.nodeVal;
   }
 
   private void heapDown(int index) {

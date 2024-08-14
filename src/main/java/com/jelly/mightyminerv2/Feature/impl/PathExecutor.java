@@ -7,6 +7,7 @@ import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.PlayerUtil;
 import com.jelly.mightyminerv2.Util.StrafeUtil;
 import com.jelly.mightyminerv2.Util.helper.Angle;
+import com.jelly.mightyminerv2.Util.helper.Clock;
 import com.jelly.mightyminerv2.Util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.Util.helper.RotationConfiguration.Ease;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
@@ -52,6 +53,9 @@ public class PathExecutor {
 
   private State state = State.STARTING_PATH;
 
+  private boolean allowSprint = true;
+  private Clock stuckTimer = new Clock();
+
   public void queuePath(Path path) {
     if (path.getPath().isEmpty()) {
       error("Path is empty");
@@ -85,9 +89,14 @@ public class PathExecutor {
     this.target = 0;
     this.previous = -1;
     this.state = State.END;
+    this.allowSprint = true;
     StrafeUtil.enabled = false;
     RotationHandler.getInstance().reset();
     KeyBindUtil.releaseAllExcept();
+  }
+
+  public void setAllowSprint(boolean sprint) {
+    this.allowSprint = sprint;
   }
 
   public boolean onTick() {
@@ -96,16 +105,28 @@ public class PathExecutor {
       return false;
     }
 
+    if(this.stuckTimer.isScheduled() && this.stuckTimer.passed()){
+      log("Stuck for a second.");
+      this.failed = true;
+      this.succeeded = false;
+      this.stop();
+    }
+
     if (this.curr == null) {
-//      log("blockpath is empty");
+      if (this.stuckTimer.isScheduled()) {
+        this.stuckTimer.reset();
+      }
+//      log("curr is null");
       if (this.pathQueue.isEmpty()) {
 //        log("pathqueue is empty");
         this.state = State.WAITING;
         return true;
       } else {
-//        log("pathqueue isnt empty");
+//        log("loading new path");
         this.blockPath.clear();
         this.map.clear();
+        this.previous = -1;
+        this.target = 0;
 
         this.curr = this.pathQueue.poll();
         this.blockPath.addAll(this.curr.getSmoothedPath());
@@ -116,6 +137,15 @@ public class PathExecutor {
 
         this.enabled = true;
         this.state = State.STARTING_PATH;
+      }
+    } else {
+      // stuck if player speed is less than 60% of normal player speed (sounded like a good number
+      if (Math.hypot(mc.thePlayer.motionX, mc.thePlayer.motionZ) < this.curr.getCtx().getCost().getNormalPlayerSpeed() * 0.6) {
+        if (!this.stuckTimer.isScheduled()) {
+          this.stuckTimer.schedule(1000);
+        } else if (this.stuckTimer.isScheduled()) {
+          this.stuckTimer.reset();
+        }
       }
     }
 
@@ -129,10 +159,10 @@ public class PathExecutor {
         .orElse(-1);
 
     if (current != -1 && current != previous) {
-      log("Standing on node " + current);
       this.previous = current;
       this.target = current + 1;
       this.state = State.TRAVERSING;
+      log("Standing on node " + current + ", Target: " + this.target + ", PathSize: " + this.blockPath.size());
       RotationHandler.getInstance().reset();
       if (this.target == this.blockPath.size()) {
         send("Path traversed");
@@ -151,7 +181,9 @@ public class PathExecutor {
     );
 
     double yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);
-    if (yawDiff > 10 && !RotationHandler.getInstance().isEnabled()) {
+    if (yawDiff > 10 && !RotationHandler.getInstance().
+
+        isEnabled()) {
       log("Started Rotation");
       RotationHandler.getInstance().easeTo(new RotationConfiguration(new Angle(yaw, 20f), 275, null).easeFunction(Ease.EASE_OUT_QUAD));
     }
@@ -165,7 +197,7 @@ public class PathExecutor {
         && target.getY() >= mc.thePlayer.posY
         && target.getY() - mc.thePlayer.posY < 0.1;
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
-    KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSprint, yawDiff < 40 && !shouldJump && mc.thePlayer.onGround);
+    KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSprint, this.allowSprint && yawDiff < 40 && !shouldJump && mc.thePlayer.onGround);
     if (shouldJump) {
       mc.thePlayer.jump();
       this.state = State.JUMPING;
@@ -182,11 +214,11 @@ public class PathExecutor {
     return this.enabled;
   }
 
-  public Path getPreviousPath(){
+  public Path getPreviousPath() {
     return this.prev;
   }
 
-  public Path getCurrentPath(){
+  public Path getCurrentPath() {
     return this.curr;
   }
 

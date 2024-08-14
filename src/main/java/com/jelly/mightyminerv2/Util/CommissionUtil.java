@@ -1,20 +1,16 @@
 package com.jelly.mightyminerv2.Util;
 
 import com.google.common.collect.ImmutableMap;
+import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Macro.commissionmacro.helper.Commission;
 import com.jelly.mightyminerv2.Util.helper.Angle;
-import com.jelly.mightyminerv2.Util.helper.heap.HeapNode;
-import com.jelly.mightyminerv2.Util.helper.heap.MinHeap;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import javax.swing.text.html.parser.Entity;
+import java.util.Set;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;
@@ -22,11 +18,8 @@ import net.minecraft.util.Vec3;
 
 public class CommissionUtil {
 
-  private static final Map<Commission, String> slayerMob = ImmutableMap.of(
-      Commission.GOBLIN_SLAYER, "Goblin",
-      Commission.GLACITE_WALKER_SLAYER, "Ice Walker",
-      Commission.TREASURE_HOARDER_SLAYER, "Treasure Hoarder"
-  );
+  private static final Map<Commission, String> slayerMob = ImmutableMap.of(Commission.GOBLIN_SLAYER, "Goblin", Commission.GLACITE_WALKER_SLAYER,
+      "Ice Walker", Commission.TREASURE_HOARDER_SLAYER, "Treasure Hoarder");
 
   private static final Minecraft mc = Minecraft.getMinecraft();
 
@@ -90,26 +83,61 @@ public class CommissionUtil {
 
     Angle playerAngle = new Angle(AngleUtil.get360RotationYaw(), 0);
     Vec3 playerPos = mc.thePlayer.getPositionVector();
-    mobs.sort(Comparator.comparingDouble(mob ->
-        mob.getPositionVector().distanceTo(playerPos)
-            + AngleUtil.getNeededChange(playerAngle, AngleUtil.getRotation(mob)).yaw)
-    );
+    mobs.sort(Comparator.comparingDouble(
+        mob -> mob.getPositionVector().distanceTo(playerPos) + AngleUtil.getNeededChange(playerAngle, AngleUtil.getRotation(mob)).yaw));
+    return mobs;
+  }
+
+//  public static List<EntityPlayer> getMobList(String mobName) {
+//    return getMobList(mobName, new HashSet<>());
+//  }
+
+  public static List<EntityPlayer> getMobList(String mobName, Set<EntityPlayer> mobsToIgnore) {
+    List<EntityPlayer> mobs = new ArrayList<>();
+    for (EntityPlayer mob : mc.theWorld.playerEntities) {
+      if (mob.getName().equals(mobName) && mob.isEntityAlive() && !mobsToIgnore.contains(mob)) {
+        mobs.add(mob);
+      }
+    }
+
+    Vec3 playerPos = mc.thePlayer.getPositionVector();
+    float normalizedYaw = AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw);
+    mobs.sort(Comparator.comparingDouble(mob -> {
+          Vec3 mobPos = mob.getPositionVector();
+          return (Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord)
+              + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2) * (MightyMinerConfig.commDistCost / 100f)
+              + (double) Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(mob).yaw))) * (MightyMinerConfig.commRotCost / 100f);
+        }
+    ));
     return mobs;
   }
 
   // right now i have no use for a list of mobs so this should do it
-  public static EntityPlayer getBestMob(String mobName, EntityPlayer mobToIgnore) {
-    if (!slayerMob.containsValue(mobName)) {
-      return null;
-    }
-    MinHeap<EntityPlayer> mobs = new MinHeap<>(100);
+  public static List<Pair<EntityPlayer, Pair<Double, Double>>> getMobListDebug(String mobName, Set<EntityPlayer> mobsToIgnore) {
+    List<Pair<EntityPlayer, Pair<Double, Double>>> mobs = new ArrayList<>();
     Vec3 playerPos = mc.thePlayer.getPositionVector();
+    float normalizedYaw = AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw);
     for (EntityPlayer mob : mc.theWorld.playerEntities) {
-      if (mob.getName().equals(mobName) && mob.isEntityAlive() && (mobToIgnore == null || !mobToIgnore.equals(mob))) {
-        mobs.add(new HeapNode<>(mob, mob.getPositionVector().distanceTo(playerPos) + Math.abs(AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw) - AngleUtil.getRotation(mob).yaw) * 0.5));
+      if (mob.getName().equals(mobName) && mob.isEntityAlive() && !mobsToIgnore.contains(mob)) {
+        Vec3 mobPos = mob.getPositionVector();
+        mobs.add(new Pair(mob, new Pair(
+            (Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord)
+                + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2) * (MightyMinerConfig.commDistCost / 100f),
+            (double) Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(mob).yaw))) * (MightyMinerConfig.commRotCost / 100f))));
       }
     }
 
-    return mobs.poll();
+//    mobs.sort(Comparator.comparingDouble(mob -> {
+//          Vec3 mobPos = mob.getPositionVector();
+//          return (Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord)
+//              + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2) * (MightyMinerConfig.commDistCost / 100f)
+//              + Math.abs(normalizedYaw - AngleUtil.getRotation(mob).yaw) * (MightyMinerConfig.commRotCost / 100f);
+//        }
+//    ));
+    mobs.sort(Comparator.comparing(a -> {
+      Pair<Double, Double> b = a.getSecond();
+      return b.getFirst() + b.getSecond();
+    }));
+    return mobs;
   }
 }

@@ -31,17 +31,6 @@ public class AngleUtil {
         return newYaw;
     }
 
-    public static float normalizeYaw(float yaw) {
-        float newYaw = yaw % 360F;
-        if (newYaw < -180F) {
-            newYaw += 360F;
-        }
-        if (newYaw > 180F) {
-            newYaw -= 360F;
-        }
-        return newYaw;
-    }
-
     public static float get360RotationYaw() {
         if (mc.thePlayer == null)
             return 0;
@@ -66,46 +55,6 @@ public class AngleUtil {
         float f2 = -MathHelper.cos(-pitch * 0.017453292F);
         float f3 = MathHelper.sin(-pitch * 0.017453292F);
         return new Vec3(f1 * f2, f3, f * f2);
-    }
-
-    public static float getClosestDiagonal() {
-        return getClosestDiagonal(get360RotationYaw());
-    }
-
-    public static float getClosestDiagonal(float yaw) {
-        return ((int) get360RotationYaw(yaw) / 90) * 90 + 45;
-    }
-
-    public static float getClosest30() {
-        if (get360RotationYaw() < 45) {
-            return 30f;
-        } else if (get360RotationYaw() < 90) {
-            return 60f;
-        } else if (get360RotationYaw() < 135) {
-            return 120f;
-        } else if (get360RotationYaw() < 180) {
-            return 150f;
-        } else if (get360RotationYaw() < 225) {
-            return 210f;
-        } else if (get360RotationYaw() < 270) {
-            return 240f;
-        } else if (get360RotationYaw() < 315) {
-            return 300f;
-        } else {
-            return 330f;
-        }
-    }
-
-    public static float getClosest45(float inputAngle) {
-        return (int) (get360RotationYaw(inputAngle + 22.5f) / 45) * 45;
-    }
-
-    public static float getClosest() {
-        return getClosest(get360RotationYaw());
-    }
-
-    public static float getClosest(float yaw) {
-        return ((int) (get360RotationYaw(yaw + 45) / 90)) * 90;
     }
 
     private static final double randomAddition = (Math.random() * 0.3 - 0.15);

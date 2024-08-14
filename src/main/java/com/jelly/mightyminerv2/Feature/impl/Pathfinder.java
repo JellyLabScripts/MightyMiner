@@ -7,6 +7,7 @@ import com.jelly.mightyminerv2.Feature.impl.PathExecutor.State;
 import com.jelly.mightyminerv2.Handler.RotationHandler;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.Util.LogUtil;
+import com.jelly.mightyminerv2.Util.PlayerUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import com.jelly.mightyminerv2.pathfinder.calculate.path.AStarPathFinder;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
@@ -29,17 +30,12 @@ public class Pathfinder implements IFeature {
   private boolean enabled = false;
   private Deque<Pair<BlockPos, BlockPos>> pathQueue = new ConcurrentLinkedDeque<>();
   private AStarPathFinder finder;
-
-  private Object pathfindLock = new Object();
-
   private PathExecutor pathExecutor = PathExecutor.getInstance();
 
-  boolean pathfinding = false;
-
+  private volatile boolean skipTick = false;
+  private volatile boolean pathfinding = false;
   private boolean failed = false;
   private boolean succeeded = false;
-
-  private boolean skipTick = false;
 
   @Override
   public String getName() {
@@ -77,7 +73,7 @@ public class Pathfinder implements IFeature {
     this.succeeded = false;
     this.failed = false;
     pathExecutor.start();
-    log("Started");
+    send("Started");
   }
 
   @Override
@@ -87,10 +83,13 @@ public class Pathfinder implements IFeature {
     this.skipTick = false;
     this.pathQueue.clear();
     this.resetStatesAfterStop();
+
+    send("stopped");
   }
 
   @Override
   public void resetStatesAfterStop() {
+    if(finder != null) finder.requestStop();
     pathExecutor.stop();
     RotationHandler.getInstance().reset();
   }
@@ -108,6 +107,25 @@ public class Pathfinder implements IFeature {
 
     this.pathQueue.offer(new Pair(start, end));
     log("Queued Path");
+  }
+
+  public void queue(BlockPos end) {
+    BlockPos start;
+    if (this.pathQueue.isEmpty()) {
+      if (this.pathExecutor.getCurrentPath() == null) {
+        start = PlayerUtil.getBlockStandingOn();
+      } else {
+        Goal goal = this.pathExecutor.getCurrentPath().getGoal();
+        start = new BlockPos(goal.getGoalX(), goal.getGoalY(), goal.getGoalZ());
+      }
+    } else {
+      start = this.pathQueue.peekLast().getFirst();
+    }
+    this.pathQueue.offer(new Pair(start, end));
+  }
+
+  public void setSprintState(boolean sprint){
+    pathExecutor.setAllowSprint(sprint);
   }
 
   @SubscribeEvent
@@ -131,34 +149,35 @@ public class Pathfinder implements IFeature {
       return;
     }
 
-    if (okToPath) {
-      log("okToPath");
-      if (this.pathQueue.isEmpty()) {
-        if (pathExecutor.getState() == State.WAITING) {
-          this.stop();
-          this.succeeded = true;
-          log("pathqueue empty stopping");
-          return;
-        }
+    if (!okToPath) {
+      return;
+    }
+    log("okToPath");
+    if (this.pathQueue.isEmpty()) {
+      log("Pathqueue is empty");
+      if (pathExecutor.getState() == State.WAITING && !this.pathfinding) {
+        this.stop();
+        this.succeeded = true;
+        log("pathqueue empty stopping");
         return;
       }
+      return;
+    }
 
-      if (this.pathfinding) {
-        return;
-      }
-      MightyMiner.executor().execute(() -> {
-        log("creating thread");
-        this.pathfinding = true;
+    if (this.pathfinding) {
+      return;
+    }
+
+    MightyMiner.executor().execute(() -> {
+      log("creating thread. wasPathfinding: " + this.pathfinding);
+      this.pathfinding = true;
+      try {
         Pair<BlockPos, BlockPos> startEnd = this.pathQueue.poll();
         BlockPos start = startEnd.getFirst();
         BlockPos end = startEnd.getSecond();
         double walkSpeed = mc.thePlayer.getAIMoveSpeed();
         CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-        finder = new AStarPathFinder(
-            start.getX(), start.getY(), start.getZ(),
-            new Goal(end.getX(), end.getY(), end.getZ(), ctx),
-            ctx
-        );
+        finder = new AStarPathFinder(start.getX(), start.getY(), start.getZ(), new Goal(end.getX(), end.getY(), end.getZ(), ctx), ctx);
         Path path = finder.calculatePath();
         log("done pathfinding");
         if (path != null) {
@@ -166,14 +185,16 @@ public class Pathfinder implements IFeature {
           PathExecutor.getInstance().queuePath(path);
           log("starting pathexec");
         } else {
-          LogUtil.send("No Path Found");
+          log("No Path Found");
           failed = true;
           stop();
         }
-        this.pathfinding = false;
-        this.skipTick = true;
-      });
-    }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      this.pathfinding = false;
+      this.skipTick = true;
+    });
   }
 
   public boolean completedPathTo(BlockPos pos) {

@@ -1,34 +1,33 @@
 package com.jelly.mightyminerv2.Feature.impl;
 
+import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Feature.IFeature;
 import com.jelly.mightyminerv2.Handler.RotationHandler;
-import com.jelly.mightyminerv2.Util.AngleUtil;
 import com.jelly.mightyminerv2.Util.CommissionUtil;
 import com.jelly.mightyminerv2.Util.KeyBindUtil;
-import com.jelly.mightyminerv2.Util.LogUtil;
-import com.jelly.mightyminerv2.Util.PathfindUtil;
+import com.jelly.mightyminerv2.Util.PlayerUtil;
 import com.jelly.mightyminerv2.Util.RenderUtil;
 import com.jelly.mightyminerv2.Util.helper.Clock;
 import com.jelly.mightyminerv2.Util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.Util.helper.Target;
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
+import javax.xml.xpath.XPathException;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import org.apache.commons.io.comparator.PathFileComparator;
 
 // Todo: Make it a universal mob killer perhaps?
 //  idk its not a combat macro
@@ -42,9 +41,12 @@ public class AutoMobKiller implements IFeature {
   private State state = State.STARTING;
   private Clock timer = new Clock();
   private Clock shutdownTimer = new Clock();
+  private Clock queueTimer = new Clock();
+  private Set<EntityPlayer> mobQueue = new HashSet<>();
   private Optional<EntityPlayer> targetMob = Optional.empty();
   private Optional<Vec3> entityLastPosition = Optional.empty();
   private String mobToKill = "";
+  private byte killAttempts = 0;
 
   @Override
   public String getName() {
@@ -82,10 +84,12 @@ public class AutoMobKiller implements IFeature {
   public void stop() {
     this.enabled = false;
     this.mobToKill = "";
+    this.killAttempts = 0;
     this.targetMob = Optional.empty();
     this.timer.reset();
     this.shutdownTimer.reset();
     this.resetStatesAfterStop();
+    Pathfinder.getInstance().stop();
 
     log("stopped");
   }
@@ -119,69 +123,84 @@ public class AutoMobKiller implements IFeature {
       return;
     }
 
+    if (this.queueTimer.passed()) {
+      log("Queue celared");
+      this.mobQueue.clear();
+      this.queueTimer.schedule(2000);
+    }
+
     switch (this.state) {
       case STARTING:
+        this.targetMob.ifPresent(this.mobQueue::add);
         this.changeState(State.FINDING_MOB, 0);
         log("Starting");
-        break;
       case FINDING_MOB:
-//        List<EntityPlayer> mobs = CommissionUtil.getCommissionMobs(this.mobToKill);
-        EntityPlayer bestMob = CommissionUtil.getBestMob(this.mobToKill, this.targetMob.orElse(null));
-//        if(bestMob.isDead && bestMob.getHealth() <= 0.0f){
-//          LogUtil.send("Mob is dead");
-//          return;
-//        }
-        if (bestMob == null) {
-          if (!this.shutdownTimer.isScheduled()) {
-            log("Cannot find mobs. Starting the 10 second timer");
-            this.shutdownTimer.schedule(10_000);
-          }
-
+        List<EntityPlayer> mobs = CommissionUtil.getMobList(this.mobToKill, this.mobQueue);
+//        List<EntityPlayer> mobs = new ArrayList<>();
+        if (mobs.isEmpty()) {
+//          if (!this.shutdownTimer.isScheduled()) {
+//            log("Cannot find mobs. Starting a 10 second timer");
+//            this.shutdownTimer.schedule(10_000);
+//          }
+          log("cannot find any mob");
+          this.stop();
           return;
-        } else if(this.shutdownTimer.isScheduled()) {
-          this.shutdownTimer.reset();
         }
 
-        this.targetMob = Optional.of(bestMob);
-        this.entityLastPosition = Optional.of(bestMob.getPositionVector());
+        EntityPlayer best = mobs.get(0);
+        this.targetMob = Optional.ofNullable(best);
+        this.entityLastPosition = Optional.of(best.getPositionVector());
         this.changeState(State.WALKING_TO_MOB, 0);
         break;
       case WALKING_TO_MOB:
         if (!this.targetMob.isPresent() || !this.entityLastPosition.isPresent()) {
           stop();
-          log("no target mob || no last position saved"); // idk why this would happen but better safe than sorry (aka im schizophrenic)
+          log("no target mob || no last position saved"); // idk why this would happen but better safe than sorry (im schizophrenic)
           return;
         }
         Vec3 mobPos = this.targetMob.get().getPositionVector();
-        PathfindUtil.goTo(MathHelper.floor_double(mobPos.xCoord), (int) Math.ceil(mobPos.yCoord) - 1, MathHelper.floor_double(mobPos.zCoord));
+
+        Pathfinder.getInstance().queue(new BlockPos(mobPos.xCoord, Math.ceil(mobPos.yCoord) - 1, mobPos.zCoord));
+        if (!Pathfinder.getInstance().isEnabled()) {
+          log("Pathfinder wasnt enabled. starting");
+          Pathfinder.getInstance().setSprintState(MightyMinerConfig.commMobKillerSprint);
+          Pathfinder.getInstance().start();
+        }
         this.changeState(State.WAITING_FOR_MOB, 0);
         break;
       case WAITING_FOR_MOB:
-        if (mc.thePlayer.getDistanceSqToEntity(this.targetMob.get()) < 8) { // 8 cuz why not
+        // next tick pos makes hits more accurate
+        if (PlayerUtil.getNextTickPosition().squareDistanceTo(this.targetMob.get().getPositionVector()) < 8) { // 8 cuz why not
           this.changeState(State.LOOKING_AT_MOB, 0);
-          PathfindUtil.stop(); // Should I stop?
+//          PathfindUtil.stop(); // Should I stop?
           return;
         }
 
-        if(!this.targetMob.get().isEntityAlive()){
-          this.changeState(State.FINDING_MOB, 0);
+        if (!this.targetMob.get().isEntityAlive()) {
+          this.changeState(State.STARTING, 0);
           return;
         }
 
+        // 3.xx blocks away from recorded pos so probably cant hit it
         if (this.targetMob.get().getPositionVector().squareDistanceTo(this.entityLastPosition.get()) > 4) {
-          if (mc.thePlayer.getDistanceSqToEntity(this.targetMob.get()) > 100) {
-            this.changeState(State.WALKING_TO_MOB, 0);
-          } else {
-            this.changeState(State.STARTING, 0);
-          }
-          PathfindUtil.stop();
+//          log("Going back to start");
+//          this.killAttempts++;
+//          this.entityLastPosition = Optional.ofNullable(this.targetMob.get().getPositionVector());
+          this.changeState(State.STARTING, 0);
+          log("target mob is far away. repathing");
+          Pathfinder.getInstance().stop();
           return;
         }
 
-        if (!PathfindUtil.isProcessingPath()) {
-          stop();
-          log("Not processing path. Stopping");
+        if (!Pathfinder.getInstance().isEnabled()) {
+//          if (Pathfinder.getInstance().failed()) {
+          log("Pathfinder not enabled");
+          this.changeState(State.STARTING, 0);
           return;
+//          }
+//          stop();
+//          log("Pathfinder stopped");
+//          return;
         }
         break;
       case LOOKING_AT_MOB:
@@ -191,6 +210,7 @@ public class AutoMobKiller implements IFeature {
         log("Rotating");
       case KILLING_MOB:
         if (!Objects.equals(mc.objectMouseOver.entityHit, this.targetMob.get())) {
+//          Pathfinder.getInstance().stop();
           if (!RotationHandler.getInstance().isEnabled()) {
             this.changeState(State.STARTING, 0);
             log("Failed to rotate. restarting");
@@ -198,18 +218,23 @@ public class AutoMobKiller implements IFeature {
           return;
         }
 
+//        this.killAttempts = 0;
         KeyBindUtil.leftClick();
+        RotationHandler.getInstance().reset();
         this.changeState(State.STARTING, 0);
         break;
     }
   }
 
   @SubscribeEvent
-  public void onRender(RenderWorldLastEvent event){
-    if(!this.isEnabled() || !this.targetMob.isPresent()) return;
+  public void onRender(RenderWorldLastEvent event) {
+    if (!this.isEnabled() || !this.targetMob.isPresent()) {
+      return;
+    }
     Vec3 pos = this.targetMob.get().getPositionVector();
 
-    RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5), new Color(255, 0, 241, 150));
+    RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5),
+        new Color(255, 0, 241, 150));
   }
 
   private void changeState(State state, int time) {

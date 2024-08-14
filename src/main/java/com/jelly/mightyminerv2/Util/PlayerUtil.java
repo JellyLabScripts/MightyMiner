@@ -20,6 +20,10 @@ public class PlayerUtil {
         return new BlockPos(mc.thePlayer.posX, Math.floor(mc.thePlayer.posY) - 1, mc.thePlayer.posZ);
     }
 
+    public static Vec3 getNextTickPosition() {
+        return mc.thePlayer.getPositionVector().addVector(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ);
+    }
+
     public static Entity getEntityCuttingOtherEntity(Entity e) {
         return getEntityCuttingOtherEntity(e, entity -> true);
     }

@@ -6,6 +6,7 @@ class ActionCosts(
     SNEAKING_MOVEMENT_FACTOR: Double = 0.03,
     JUMP_BOOST_LEVEL: Int = -1
 ) {
+    val normalPlayerSpeed = actionTime(getWalkingFriction(WALKING_MOVEMENT_FACTOR))
     val INF_COST = 1e6
     val N_BLOCK_FALL_COST: DoubleArray = generateNBlocksFallCost()
     val ONE_UP_LADDER_COST: Double = 1 / (0.12 * 9.8) // 1 / (0.12b/t upward velocity * gravity)
@@ -13,7 +14,7 @@ class ActionCosts(
 
     val JUMP_ONE_BLOCK_COST: Double
 
-    val ONE_BLOCK_WALK_COST = 1 / actionTime(getWalkingFriction(WALKING_MOVEMENT_FACTOR))
+    val ONE_BLOCK_WALK_COST = 1 / normalPlayerSpeed
     val ONE_BLOCK_SPRINT_COST = 1 / actionTime(getWalkingFriction(SPRINT_MOVEMENT_FACTOR))
     val ONE_BLOCK_SNEAK_COST = 1 / actionTime(getWalkingFriction(SNEAKING_MOVEMENT_FACTOR))
 

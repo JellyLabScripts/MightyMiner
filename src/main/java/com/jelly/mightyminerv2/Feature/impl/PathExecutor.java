@@ -38,6 +38,7 @@ public class PathExecutor {
   private final Minecraft mc = Minecraft.getMinecraft();
 
   private Deque<Path> pathQueue = new LinkedList<>();
+  private Path prev;
   private Path curr;
 
   private Map<Pair<Integer, Integer>, List<Pair<Integer, Integer>>> map = new HashMap<>();
@@ -95,7 +96,7 @@ public class PathExecutor {
       return false;
     }
 
-    if (this.blockPath.isEmpty()) {
+    if (this.curr == null) {
 //      log("blockpath is empty");
       if (this.pathQueue.isEmpty()) {
 //        log("pathqueue is empty");
@@ -103,6 +104,9 @@ public class PathExecutor {
         return true;
       } else {
 //        log("pathqueue isnt empty");
+        this.blockPath.clear();
+        this.map.clear();
+
         this.curr = this.pathQueue.poll();
         this.blockPath.addAll(this.curr.getSmoothedPath());
         for (int i = 0; i < this.blockPath.size(); i++) {
@@ -134,8 +138,8 @@ public class PathExecutor {
         send("Path traversed");
         this.succeeded = true;
         this.failed = false;
-        this.blockPath.clear();
-        this.map.clear();
+        this.prev = this.curr;
+        this.curr = null;
         return true;
       }
     }
@@ -149,7 +153,7 @@ public class PathExecutor {
     double yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);
     if (yawDiff > 10 && !RotationHandler.getInstance().isEnabled()) {
       log("Started Rotation");
-      RotationHandler.getInstance().easeTo(new RotationConfiguration(new Angle(yaw, 20f), 250, null).easeFunction(Ease.EASE_OUT_QUAD));
+      RotationHandler.getInstance().easeTo(new RotationConfiguration(new Angle(yaw, 20f), 275, null).easeFunction(Ease.EASE_OUT_QUAD));
     }
 
     StrafeUtil.enabled = true;
@@ -174,8 +178,16 @@ public class PathExecutor {
     return this.state;
   }
 
-  public boolean isEnabled(){
+  public boolean isEnabled() {
     return this.enabled;
+  }
+
+  public Path getPreviousPath(){
+    return this.prev;
+  }
+
+  public Path getCurrentPath(){
+    return this.curr;
   }
 
   public boolean failed() {

@@ -50,7 +50,7 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
             } else {
                 if (!MovementHelper.canStandOn(ctx.bsa, destX, y, destZ, destState)) {
                     descend = true
-                    if (!MovementHelper.canStandOn(ctx.bsa, destX, y - 1, destZ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y, destZ) || MovementHelper.isBottomSlab(sourceState)) {
+                    if (!MovementHelper.canStandOn(ctx.bsa, destX, y - 1, destZ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y, destZ)) {
                         return
                     }
                     destState = ctx.bsa.get(destX, y - 1, destZ)

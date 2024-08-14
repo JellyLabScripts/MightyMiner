@@ -133,7 +133,7 @@ public class GraphHandler {
       return;
     }
     for (Entry<RouteWaypoint, List<RouteWaypoint>> entry : this.graph.map.entrySet()) {
-      RenderUtil.drawBlockBox(new BlockPos(entry.getKey().toVec3()), new Color(101, 10, 142, 186));
+      RenderUtil.drawBlockBox(entry.getKey().toBlockPos(), new Color(101, 10, 142, 186));
       for (RouteWaypoint edge : entry.getValue()) {
         RenderUtil.drawTracer(entry.getKey().toVec3().addVector(0.5, 0.5, 0.5), edge.toVec3().addVector(0.5, 0.5, 0.5), new Color(194, 12, 164, 179));
       }

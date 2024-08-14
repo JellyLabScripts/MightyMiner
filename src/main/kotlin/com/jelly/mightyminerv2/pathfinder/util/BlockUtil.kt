@@ -1,12 +1,10 @@
 package com.jelly.mightyminerv2.pathfinder.util
 
-import com.jelly.mightyminerv2.MightyMiner
 import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext
 import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper
 import net.minecraft.block.BlockStairs
 import net.minecraft.block.material.Material
 import net.minecraft.block.state.IBlockState
-import net.minecraft.init.Blocks
 import net.minecraft.util.*
 import kotlin.math.abs
 
@@ -125,10 +123,8 @@ object BlockUtil {
     }
 
     fun bresenham(ctx: CalculationContext, start: Vec3, end: Vec3): Boolean {
-        println("Start: $start, End: $end")
         var start0 = start
         val bsa = ctx.bsa
-        val blocks = mutableListOf<Pair<IBlockState, BlockPos>>()
 
         val x1 = MathHelper.floor_double(end.xCoord)
         val y1 = MathHelper.floor_double(end.yCoord)
@@ -137,7 +133,7 @@ object BlockUtil {
         var y0 = MathHelper.floor_double(start0.yCoord)
         var z0 = MathHelper.floor_double(start0.zCoord)
 
-        blocks.add(Pair(bsa.get(x0, y0, z0), BlockPos(start)))
+        var last = Pair(bsa.get(x0, y0, z0), BlockPos(start))
 
         var iterations = 200
         while (iterations-- >= 0) {
@@ -209,22 +205,16 @@ object BlockUtil {
                         continue
                     }
                     if (!MovementHelper.canWalkThrough(bsa, x0, y0 + i + 1, z0)) {
-                        i++
                         continue
                     }
                     if (!MovementHelper.canWalkThrough(bsa, x0, y0 + i + 2, z0)) {
-                        i += 2
                         continue
                     }
-
                     break
 
                 }
             }
 
-            val last = blocks.last()
-//            println("Last: $last, Curr: $currState, CurrPos: ${BlockPos(x0, y0 + i, z0)}")
-//            println("YDiff: ${last.second.y - (y0 + i)}")
             if (last.second.y - (y0 + i) != 0) {
                 val srcSmall = MovementHelper.isBottomSlab(last.first);
                 val destSmall = MovementHelper.isBottomSlab(currState);
@@ -232,16 +222,13 @@ object BlockUtil {
                 val dX = x0 - last.second.x
                 val dZ = z0 - last.second.z
                 var destSmallStair = MovementHelper.isValidStair(currState, dX, dZ);
-//                println("SrcSmall: $srcSmall, DestSmall: $destSmall, DestSmallStair: $destSmallStair")
 
                 if (!srcSmall == !(destSmall || destSmallStair)) {
-//                    println("Had to jump")
                     return false
                 }
             }
-//            println()
 
-            blocks.add(Pair(currState, BlockPos(x0, y0 + i, z0)))
+            last = Pair(currState, BlockPos(x0, y0 + i, z0))
         }
         return false
     }

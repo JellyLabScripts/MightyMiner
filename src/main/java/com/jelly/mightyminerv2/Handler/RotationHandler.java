@@ -68,8 +68,8 @@ public class RotationHandler {
         Angle change = AngleUtil.getNeededChange(this.startRotation, this.target.getTargetAngle());
         this.endTime = this.startTime + getTime(pythagoras(change.getYaw(), change.getPitch()), configuration.time());
 
-        this.randomMultiplier1 = random.nextBoolean() ? 1 : -1;
-        this.randomMultiplier2 = random.nextBoolean() ? 1 : -1;
+        this.randomMultiplier1 = randomMultiplier2 = random.nextBoolean() ? 1 : -1;
+//        this.randomMultiplier2 = random.nextBoolean() ? 1 : -1;
 
         this.lastBezierYaw = 0;
         this.lastBezierPitch = 0;

@@ -18,9 +18,9 @@ public class RouteWaypoint {
   private int z;
   @Expose
   private TransportMethod transportMethod;
-  private Vec3 vec;
 
-  public RouteWaypoint(){}
+  public RouteWaypoint() {
+  }
 
   public RouteWaypoint(int x, int y, int z, TransportMethod transportMethod) {
     this.x = x;
@@ -34,10 +34,11 @@ public class RouteWaypoint {
   }
 
   public Vec3 toVec3() {
-    if (vec == null) {
-      vec = new Vec3(this.x, this.y, this.z);
-    }
-    return vec;
+    return new Vec3(this.x, this.y, this.z);
+  }
+
+  public BlockPos toBlockPos() {
+    return new BlockPos(this.x, this.y, this.z);
   }
 
   @Override

@@ -39,6 +39,8 @@ public class Pathfinder implements IFeature {
   private boolean failed = false;
   private boolean succeeded = false;
 
+  private boolean skipTick = false;
+
   @Override
   public String getName() {
     return "Pathfinder";
@@ -82,6 +84,7 @@ public class Pathfinder implements IFeature {
   public void stop() {
     this.enabled = false;
     this.pathfinding = false;
+    this.skipTick = false;
     this.pathQueue.clear();
     this.resetStatesAfterStop();
   }
@@ -107,7 +110,6 @@ public class Pathfinder implements IFeature {
     log("Queued Path");
   }
 
-
   @SubscribeEvent
   public void onTick(ClientTickEvent event) {
     if (!this.enabled) {
@@ -116,12 +118,28 @@ public class Pathfinder implements IFeature {
 
     boolean okToPath = pathExecutor.onTick();
 
+    // just to let pathexecutor update after path has been found
+    if (this.skipTick) {
+      this.skipTick = false;
+      return;
+    }
+
+    if (pathExecutor.failed()) {
+      log("pathexeutor failed");
+      this.failed = true;
+      this.stop();
+      return;
+    }
+
     if (okToPath) {
       log("okToPath");
-      if (this.pathQueue.isEmpty() && pathExecutor.getState() == State.WAITING) {
-        this.stop();
-        this.succeeded = true;
-        log("pathqueue empty stopping");
+      if (this.pathQueue.isEmpty()) {
+        if (pathExecutor.getState() == State.WAITING) {
+          this.stop();
+          this.succeeded = true;
+          log("pathqueue empty stopping");
+          return;
+        }
         return;
       }
 
@@ -153,15 +171,21 @@ public class Pathfinder implements IFeature {
           stop();
         }
         this.pathfinding = false;
+        this.skipTick = true;
       });
     }
   }
 
-  public boolean failed(){
+  public boolean completedPathTo(BlockPos pos) {
+    Path prev = pathExecutor.getPreviousPath();
+    return prev != null && prev.getGoal().isAtGoal(pos.getX(), pos.getY(), pos.getZ());
+  }
+
+  public boolean failed() {
     return !this.enabled && this.failed;
   }
 
-  public boolean succeeded(){
+  public boolean succeeded() {
     return !this.enabled && this.succeeded;
   }
 }

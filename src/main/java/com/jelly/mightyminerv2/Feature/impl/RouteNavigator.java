@@ -252,39 +252,36 @@ public class RouteNavigator implements IFeature {
         break;
       }
       case WALK:
-        if(this.currentRouteIndex == 0){
+        BlockPos source = this.routeToFollow.get(this.currentRouteIndex).toBlockPos();
+        if (this.currentRouteIndex == 0) {
           log("queued first");
-          RouteWaypoint wp = this.routeToFollow.get(this.currentRouteIndex);
           BlockPos p = PlayerUtil.getBlockStandingOn();
-          PathfindUtil.queue(p.getX(), p.getY(), p.getZ(), wp.getX(), wp.getY(), wp.getZ(), mc.thePlayer.getAIMoveSpeed());
+          Pathfinder.getInstance().queue(p, source);
         }
-        if(this.currentRouteIndex + 1 <= this.targetRouteIndex){
+        if (this.currentRouteIndex + 1 <= this.targetRouteIndex) {
           log("queued next");
-          RouteWaypoint source= this.routeToFollow.get(this.currentRouteIndex);
           RouteWaypoint target = this.routeToFollow.get(this.currentRouteIndex + 1);
-          PathfindUtil.queue(source.getX(), source.getY(), source.getZ(), target.getX(), target.getY(), target.getZ(), mc.thePlayer.getAIMoveSpeed());
+          Pathfinder.getInstance().queue(source, target.toBlockPos());
         }
-        if(!PathfindUtil.isProcessingPath()){
+        if (!Pathfinder.getInstance().isEnabled()) {
           log("Started");
-          PathfindUtil.start();
+          Pathfinder.getInstance().start();
         }
         this.swapState(State.WALK_VERIFY, 2000);
         log("Walking");
         break;
       case WALK_VERIFY:
-        if (PathfindUtil.pathfindSucceeded() || new RouteWaypoint(PlayerUtil.getBlockStandingOn(), TransportMethod.WALK).equals(
-            this.routeToFollow.get(this.currentRouteIndex))) {
-          log("Pathfind Finished. Succeeded: " + PathfindUtil.pathfindSucceeded() + ", Standing: " + new RouteWaypoint(
-              PlayerUtil.getBlockStandingOn(), TransportMethod.WALK).equals(
-              this.routeToFollow.get(this.currentRouteIndex)));
+        BlockPos targetPos = this.routeToFollow.get(this.currentRouteIndex).toBlockPos();
+        if (Pathfinder.getInstance().completedPathTo(targetPos) || PlayerUtil.getBlockStandingOn().equals(targetPos)) {
+          log("Completed path. going to next");
 //          PathfindUtil.stop();
           this.swapState(State.STARTING, 0);
           log("Done Walking");
           return;
         }
 
-        if (PathfindUtil.pathfindFailed()) {
-          error("Could not start pathfinding. Disabling");
+        if (Pathfinder.getInstance().failed()) {
+          error("Pathfinding failed");
           this.disable();
           return;
         }

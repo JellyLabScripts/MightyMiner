@@ -40,6 +40,7 @@ import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementDiagonal;
 import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementTraverse;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -87,9 +88,12 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    mc.theWorld.playerEntities.forEach(i -> System.out.println("Name :  " + i.getName() + ", DisplayNameString : " + i.getDisplayNameString() + ", CustomNameTag" + i.getCustomNameTag() + ", Pos : " + i.getPositionVector()));
+    mc.theWorld.playerEntities.forEach(i -> System.out.println(
+        "Name :  " + i.getName() + ", DisplayNameString : " + i.getDisplayNameString() + ", CustomNameTag" + i.getCustomNameTag() + ", Pos : "
+            + i.getPositionVector()));
     TablistUtil.getTabListPlayersSkyblock().forEach(System.out::println);
-    mc.getNetHandler().getPlayerInfoMap().forEach(it -> System.out.println(it.getGameProfile().getName()));
+    mc.getNetHandler().getPlayerInfoMap()
+        .forEach(it -> System.out.println(it.getGameProfile().getName() + ", " + it.getPlayerTeam().getRegisteredName()));
   }
 
   @SubCommand
@@ -145,14 +149,15 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   String[] name = {"Ice Walker", "Goblin"};
+
   @SubCommand
-  public void k(int i){
+  public void k(int i) {
     AutoMobKiller.getInstance().enable(name[i]);
 //    this.c = !this.c;
   }
 
   @SubCommand
-  public void stop(){
+  public void stop() {
     RouteNavigator.getInstance().disable();
     AutoMobKiller.getInstance().stop();
     Pathfinder.getInstance().stop();
@@ -160,16 +165,16 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @SubCommand
   public void b() {
-    this.block = new BlockPos((int) mc.thePlayer.posX, (int) mc.thePlayer.posY - 1, (int) mc.thePlayer.posZ);
+    this.block = PlayerUtil.getBlockStandingOn();
   }
 
   @SubCommand
   public void between() {
     if (this.block != null) {
       this.blockToDraw.clear();
-//      List<BlockPos> bs = BlockUtil.INSTANCE.bresenham(new CalculationContext(MightyMiner.instance),
-//          new Vec3(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ), new Vec3(this.block));
-//      this.blockToDraw.addAll(bs);
+      boolean bs = BlockUtil.INSTANCE.bresenham(new CalculationContext(MightyMiner.instance),
+          new Vec3(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ), new Vec3(this.block));
+      LogUtil.send("Walkable: " + bs);
     }
   }
 
@@ -221,7 +226,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   @SubCommand
-  public void c(){
+  public void c() {
     BlockPos pp = PlayerUtil.getBlockStandingOn();
     this.curr = this.pathfinder.getClosedSet().get(PathNode.Companion.longHash(pp.getX(), pp.getY(), pp.getZ()));
     LogUtil.send("Curr: " + curr);
@@ -229,20 +234,48 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @SubCommand
   public void go(int go) {
-    if(first == null || second == null) {
-      LogUtil.error("First or sec is null");
-      return;
-    }
-    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), new BlockPos(first.toVec3()));
-    Pathfinder.getInstance().queue(new BlockPos(first.toVec3()), new BlockPos(second.toVec3()));
-
-    Pathfinder.getInstance().start();
+//    if (first == null || second == null) {
+//      LogUtil.error("First or sec is null");
+//      return;
+//    }
+    Multithreading.schedule(() -> {
+      double walkSpeed = mc.thePlayer.getAIMoveSpeed();
+      CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
+      BlockPos first = PlayerUtil.getBlockStandingOn();
+      BlockPos second = this.block;
+      AStarPathFinder finder = new AStarPathFinder(
+          first.getX(), first.getY(), first.getZ(),
+          new Goal(second.getX(), second.getY(), second.getZ(), ctx),
+          ctx
+      );
+      Path path = finder.calculatePath();
+      if (path == null) {
+        LogUtil.send("No path found");
+      } else {
+        LogUtil.send("path found");
+        if (go == 0) {
+          LogUtil.send("Go is zero. SmoothPathSize: " + path.getSmoothedPath().size());
+          this.blockToDraw.addAll(path.getSmoothedPath());
+        } else {
+          LogUtil.send("Go is not zero. PathSize: " + path.getPath().size());
+          this.blockToDraw.addAll(path.getPath());
+        }
+      }
+    }, 0, TimeUnit.MILLISECONDS);
+//    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), new BlockPos(first.toVec3()));
+//    Pathfinder.getInstance().queue(new BlockPos(first.toVec3()), new BlockPos(second.toVec3()));
+//
+//    Pathfinder.getInstance().start();
   }
 
   @SubscribeEvent
   public void onRender(RenderWorldLastEvent event) {
     if (entTodraw != null) {
       RenderUtil.drawBox(((EntityLivingBase) entTodraw).getEntityBoundingBox(), Color.CYAN);
+    }
+
+    if(!blockToDraw.isEmpty()){
+      blockToDraw.forEach(b -> RenderUtil.drawBlockBox(b, new Color(255, 0, 0, 200)));
     }
 
     if (this.block != null) {
@@ -257,17 +290,17 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       RenderUtil.drawBlockBox(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
     }
 
-    if(pathfinder != null){
+    if (pathfinder != null) {
       pathfinder.getClosedSet().values().forEach(it -> RenderUtil.drawBlockBox(it.getBlock(), new Color(213, 124, 124, 100)));
     }
 
-    if(path != null){
+    if (path != null) {
       path.getPath().forEach(tit -> RenderUtil.drawBlockBox(tit, new Color(255, 0, 0, 200)));
     }
 
-    if(curr != null){
+    if (curr != null) {
       RenderUtil.drawBlockBox(curr.getBlock(), new Color(0, 255, 0, 255));
-      if(curr.getParentNode() != null){
+      if (curr.getParentNode() != null) {
         RenderUtil.drawBlockBox(curr.getParentNode().getBlock(), new Color(0, 0, 255, 255));
       }
     }

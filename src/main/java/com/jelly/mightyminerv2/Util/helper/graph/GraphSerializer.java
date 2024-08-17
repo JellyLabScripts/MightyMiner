@@ -39,8 +39,6 @@ public class GraphSerializer<T> implements JsonSerializer<Graph<T>>, JsonDeseria
       T key = context.deserialize(new JsonParser().parse(entry.getKey()), keyType);
       List<T> value = context.deserialize(entry.getValue(), valueType);
 
-      System.out.println("HEHEH");
-      System.out.println(value);
       graph.map.put(key, value);
     }
     return graph;

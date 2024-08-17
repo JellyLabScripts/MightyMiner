@@ -222,7 +222,8 @@ public class PathExecutor {
       strafeTimer.schedule(500);
     }
 
-    if (horizontalDistanceToTarget >= 10) {
+    if (horizontalDistanceToTarget >= 5) {
+      // makes it more human but decreases accuracy - removes that weird sliding effect
       if (this.allowInterpolation && !this.interpolated) {
         long timePassed = System.currentTimeMillis() - this.nodeChangeTime;
         if (timePassed < 250) {

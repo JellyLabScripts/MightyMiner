@@ -7,6 +7,7 @@ import com.jelly.mightyminerv2.Util.helper.Angle;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import kotlin.Pair;
@@ -95,7 +96,7 @@ public class CommissionUtil {
   public static List<EntityPlayer> getMobList(String mobName, Set<EntityPlayer> mobsToIgnore) {
     List<EntityPlayer> mobs = new ArrayList<>();
     for (EntityPlayer mob : mc.theWorld.playerEntities) {
-      if (mob.getName().equals(mobName) && mob.isEntityAlive() && !mobsToIgnore.contains(mob)) {
+      if (mob.getName().trim().equals(mobName) && mob.isEntityAlive() && !mobsToIgnore.contains(mob)) {
         mobs.add(mob);
       }
     }
@@ -118,7 +119,7 @@ public class CommissionUtil {
     Vec3 playerPos = mc.thePlayer.getPositionVector();
     float normalizedYaw = AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw);
     for (EntityPlayer mob : mc.theWorld.playerEntities) {
-      if (mob.getName().equals(mobName) && mob.isEntityAlive() && !mobsToIgnore.contains(mob)) {
+      if (mob.getName().trim().equals(mobName) && mob.isEntityAlive() && !mobsToIgnore.contains(mob)) {
         Vec3 mobPos = mob.getPositionVector();
         mobs.add(new Pair(mob, new Pair(
             (Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord)

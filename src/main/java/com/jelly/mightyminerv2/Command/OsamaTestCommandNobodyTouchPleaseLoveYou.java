@@ -76,6 +76,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @Main
   public void main() {
 //    mobs = CommissionUtil.getMobList("Ice Walker", new HashSet<>());
+//    mc.theWorld.playerEntities.forEach(it -> System.out.println("Name: " + it.getName() + ", Itself: " + it));
     allowed = !allowed;
     if(allowed == false){
       mobs.clear();
@@ -257,7 +258,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @SubscribeEvent
   public void onTick(ClientTickEvent event){
     if(!allowed) return;
-    mobs = CommissionUtil.getMobListDebug("Ice Walker", new HashSet<>());
+    mobs = CommissionUtil.getMobListDebug("Goblin", new HashSet<>());
   }
 
   @SubscribeEvent

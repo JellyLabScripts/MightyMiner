@@ -42,13 +42,10 @@ object MovementHelper {
             }
 
             block is BlockCauldron -> false
+            block == Blocks.ladder -> false
             else -> {
                 try {
-                    if (block.isPassable(null, null)) {
-                        true
-                    } else {
-                        false
-                    }
+                    block.isPassable(null, null)
                 } catch (exception: Throwable) {
                     println("The block ${state.block.localizedName} requires a special case due to the exception ${exception.message}")
                     null

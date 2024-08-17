@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.Feature.impl;
 
+import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Handler.RotationHandler;
 import com.jelly.mightyminerv2.Util.AngleUtil;
 import com.jelly.mightyminerv2.Util.KeyBindUtil;
@@ -105,7 +106,7 @@ public class PathExecutor {
       return false;
     }
 
-    if(this.stuckTimer.isScheduled() && this.stuckTimer.passed()){
+    if (this.stuckTimer.isScheduled() && this.stuckTimer.passed()) {
       log("Stuck for a second.");
       this.failed = true;
       this.succeeded = false;
@@ -122,7 +123,7 @@ public class PathExecutor {
         this.state = State.WAITING;
         return true;
       } else {
-//        log("loading new path");
+        log("loading new path");
         this.blockPath.clear();
         this.map.clear();
         this.previous = -1;
@@ -140,23 +141,34 @@ public class PathExecutor {
       }
     } else {
       // stuck if player speed is less than 60% of normal player speed (sounded like a good number
-      if (Math.hypot(mc.thePlayer.motionX, mc.thePlayer.motionZ) < this.curr.getCtx().getCost().getNormalPlayerSpeed() * 0.6) {
+      if (Math.hypot(mc.thePlayer.motionX, mc.thePlayer.motionZ) < 0.15) {
         if (!this.stuckTimer.isScheduled()) {
           this.stuckTimer.schedule(1000);
-        } else if (this.stuckTimer.isScheduled()) {
-          this.stuckTimer.reset();
         }
+      } else {
+        this.stuckTimer.reset();
       }
     }
 
     BlockPos playerPos = PlayerUtil.getBlockStandingOn();
-    int current = Optional.ofNullable(this.map.get(new Pair<>(playerPos.getX(), playerPos.getZ())))
-        .map(list -> list.stream()
-            .filter(it -> it.getFirst() <= mc.thePlayer.posY)
-            .max(Comparator.comparing(Pair::getFirst))
-            .map(Pair::getSecond)
-            .orElse(-1))
-        .orElse(-1);
+    // this is utterly useless but im useless as well
+    int current = -1;
+    List<Pair<Integer, Integer>> blocks = this.map.get(new Pair<>(playerPos.getX(), playerPos.getZ()));
+    if (blocks == null) {
+      current = -1;
+    } else if (blocks.size() == 1) {
+      current = blocks.get(0).getSecond();
+    } else {
+      Pair<Integer, Integer> best = blocks.get(0);
+      double y = mc.thePlayer.posY;
+      for (Pair<Integer, Integer> block : blocks) {
+        if ((block.getFirst() < y && block.getFirst() > best.getFirst()) ||
+            (block.getFirst() >= y && block.getFirst() < best.getFirst())) {
+          best = block;
+        }
+      }
+      current = best.getSecond();
+    }
 
     if (current != -1 && current != previous) {
       this.previous = current;
@@ -165,7 +177,7 @@ public class PathExecutor {
       log("Standing on node " + current + ", Target: " + this.target + ", PathSize: " + this.blockPath.size());
       RotationHandler.getInstance().reset();
       if (this.target == this.blockPath.size()) {
-        send("Path traversed");
+        log("Path traversed");
         this.succeeded = true;
         this.failed = false;
         this.prev = this.curr;
@@ -181,11 +193,17 @@ public class PathExecutor {
     );
 
     double yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);
-    if (yawDiff > 10 && !RotationHandler.getInstance().
-
-        isEnabled()) {
-      log("Started Rotation");
-      RotationHandler.getInstance().easeTo(new RotationConfiguration(new Angle(yaw, 20f), 275, null).easeFunction(Ease.EASE_OUT_QUAD));
+    if (yawDiff > 10 && !RotationHandler.getInstance().isEnabled()) {
+      float rotationYaw = yaw;
+      for (int i = this.target; i < this.blockPath.size(); i++) {
+        BlockPos rotationTarget = this.blockPath.get(i);
+        if (Math.hypot(mc.thePlayer.posX - rotationTarget.getX(), mc.thePlayer.posZ - rotationTarget.getZ()) > 5) {
+          rotationYaw = AngleUtil.getRotation(rotationTarget).yaw;
+          break;
+        }
+      }
+      double horizDistToTarget = playerPos.distanceSq(target);
+      RotationHandler.getInstance().easeTo(new RotationConfiguration(new Angle(rotationYaw, 15f), Math.max(275, (long) (400 - horizDistToTarget * 2)), null).easeFunction(Ease.EASE_OUT_QUAD));
     }
 
     StrafeUtil.enabled = true;

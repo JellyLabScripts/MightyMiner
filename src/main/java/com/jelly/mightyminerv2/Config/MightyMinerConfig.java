@@ -193,6 +193,16 @@ public class MightyMinerConfig extends Config {
   //</editor-fold>
   //</editor-fold>
 
+  //<editor-fold>
+  @Slider(
+      name = "PathExec Rotation Mult",
+      category = "Dev",
+      subcategory = "Pathing",
+      min = 0f, max = 10f
+  )
+  public static float devPathRotMult = 1f;
+  //</editor-fold>
+
 //
 //    DEBUG SETTINGS
 //

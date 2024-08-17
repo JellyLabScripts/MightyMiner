@@ -161,6 +161,7 @@ public class AutoMobKiller implements IFeature {
         Vec3 mobPos = this.targetMob.get().getPositionVector();
 
         Pathfinder.getInstance().queue(new BlockPos(mobPos.xCoord, Math.ceil(mobPos.yCoord) - 1, mobPos.zCoord));
+        log("Queued new to " + mobPos);
         if (!Pathfinder.getInstance().isEnabled()) {
           log("Pathfinder wasnt enabled. starting");
           Pathfinder.getInstance().setSprintState(MightyMinerConfig.commMobKillerSprint);
@@ -172,20 +173,16 @@ public class AutoMobKiller implements IFeature {
         // next tick pos makes hits more accurate
         if (PlayerUtil.getNextTickPosition().squareDistanceTo(this.targetMob.get().getPositionVector()) < 8) { // 8 cuz why not
           this.changeState(State.LOOKING_AT_MOB, 0);
-//          PathfindUtil.stop(); // Should I stop?
           return;
         }
 
         if (!this.targetMob.get().isEntityAlive()) {
+          Pathfinder.getInstance().stop();
           this.changeState(State.STARTING, 0);
           return;
         }
 
-        // 3.xx blocks away from recorded pos so probably cant hit it
-        if (this.targetMob.get().getPositionVector().squareDistanceTo(this.entityLastPosition.get()) > 4) {
-//          log("Going back to start");
-//          this.killAttempts++;
-//          this.entityLastPosition = Optional.ofNullable(this.targetMob.get().getPositionVector());
+        if (this.targetMob.get().getPositionVector().squareDistanceTo(this.entityLastPosition.get()) > 9) {
           this.changeState(State.STARTING, 0);
           log("target mob is far away. repathing");
           Pathfinder.getInstance().stop();
@@ -193,32 +190,30 @@ public class AutoMobKiller implements IFeature {
         }
 
         if (!Pathfinder.getInstance().isEnabled()) {
-//          if (Pathfinder.getInstance().failed()) {
           log("Pathfinder not enabled");
           this.changeState(State.STARTING, 0);
           return;
-//          }
-//          stop();
-//          log("Pathfinder stopped");
-//          return;
         }
         break;
       case LOOKING_AT_MOB:
-        RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.targetMob.get()), 300, null));
-        this.changeState(State.KILLING_MOB, 0);
+        if (!Pathfinder.getInstance().isEnabled()) {
+          RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.targetMob.get()), 400, null));
+          this.changeState(State.KILLING_MOB, 0);
 
-        log("Rotating");
+          log("Rotating");
+        }
       case KILLING_MOB:
         if (!Objects.equals(mc.objectMouseOver.entityHit, this.targetMob.get())) {
-//          Pathfinder.getInstance().stop();
-          if (!RotationHandler.getInstance().isEnabled()) {
+          if (mc.thePlayer.getDistanceSqToEntity(this.targetMob.get()) < 9 && Pathfinder.getInstance().isEnabled()) {
+            Pathfinder.getInstance().stop();
+            return;
+          }
+          if (!Pathfinder.getInstance().isEnabled() && !RotationHandler.getInstance().isEnabled()) {
             this.changeState(State.STARTING, 0);
-            log("Failed to rotate. restarting");
           }
           return;
         }
 
-//        this.killAttempts = 0;
         KeyBindUtil.leftClick();
         RotationHandler.getInstance().reset();
         this.changeState(State.STARTING, 0);

@@ -8,14 +8,17 @@ import com.jelly.mightyminerv2.Handler.RotationHandler;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.PlayerUtil;
+import com.jelly.mightyminerv2.Util.RenderUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import com.jelly.mightyminerv2.pathfinder.calculate.path.AStarPathFinder;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
 import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext;
+import java.awt.Color;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import kotlin.Pair;
 import net.minecraft.util.BlockPos;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
@@ -89,7 +92,9 @@ public class Pathfinder implements IFeature {
 
   @Override
   public void resetStatesAfterStop() {
-    if(finder != null) finder.requestStop();
+    if (finder != null) {
+      finder.requestStop();
+    }
     pathExecutor.stop();
     RotationHandler.getInstance().reset();
   }
@@ -124,7 +129,7 @@ public class Pathfinder implements IFeature {
     this.pathQueue.offer(new Pair(start, end));
   }
 
-  public void setSprintState(boolean sprint){
+  public void setSprintState(boolean sprint) {
     pathExecutor.setAllowSprint(sprint);
   }
 
@@ -152,9 +157,9 @@ public class Pathfinder implements IFeature {
     if (!okToPath) {
       return;
     }
-    log("okToPath");
+//    log("okToPath");
     if (this.pathQueue.isEmpty()) {
-      log("Pathqueue is empty");
+//      log("Pathqueue is empty");
       if (pathExecutor.getState() == State.WAITING && !this.pathfinding) {
         this.stop();
         this.succeeded = true;
@@ -195,6 +200,18 @@ public class Pathfinder implements IFeature {
       this.pathfinding = false;
       this.skipTick = true;
     });
+  }
+
+  @SubscribeEvent
+  public void onRenderWorld(RenderWorldLastEvent event) {
+    if (!this.enabled) {
+      return;
+    }
+
+    Path path = this.pathExecutor.getCurrentPath();
+    if (path != null) {
+      path.getSmoothedPath().forEach(tit -> RenderUtil.drawBlockBox(tit, new Color(255, 0, 0, 200)));
+    }
   }
 
   public boolean completedPathTo(BlockPos pos) {

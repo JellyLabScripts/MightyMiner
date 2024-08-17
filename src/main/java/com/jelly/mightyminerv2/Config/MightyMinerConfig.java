@@ -106,6 +106,13 @@ public class MightyMinerConfig extends Config {
   )
   public static boolean commMobKillerSprint = true;
 
+  @Switch(
+      name = "Interpolate During MobKiller", description = "Helps reduce sliding",
+      category = COMMISSION,
+      subcategory = "MobKiller"
+  )
+  public static boolean commMobKillerInterpolate = true;
+
   @Slider(
       name = "Distance cost",
       category = COMMISSION,

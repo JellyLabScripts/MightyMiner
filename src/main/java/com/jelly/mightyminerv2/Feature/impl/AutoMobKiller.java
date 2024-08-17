@@ -165,6 +165,7 @@ public class AutoMobKiller implements IFeature {
         if (!Pathfinder.getInstance().isEnabled()) {
           log("Pathfinder wasnt enabled. starting");
           Pathfinder.getInstance().setSprintState(MightyMinerConfig.commMobKillerSprint);
+          Pathfinder.getInstance().setInterpolationState(MightyMinerConfig.commMobKillerInterpolate);
           Pathfinder.getInstance().start();
         }
         this.changeState(State.WAITING_FOR_MOB, 0);

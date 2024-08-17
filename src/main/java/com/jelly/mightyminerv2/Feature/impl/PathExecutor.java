@@ -51,11 +51,18 @@ public class PathExecutor {
 
   private int target = 0;
   private int previous = -1;
+  private long nodeChangeTime = 0;
+  private boolean interpolated = true;
 
   private State state = State.STARTING_PATH;
 
   private boolean allowSprint = true;
+  private boolean allowInterpolation = false;
+
   private Clock stuckTimer = new Clock();
+
+  private Clock strafeTimer = new Clock();
+  private float strafeAmount = 0f;
 
   public void queuePath(Path path) {
     if (path.getPath().isEmpty()) {
@@ -91,6 +98,9 @@ public class PathExecutor {
     this.previous = -1;
     this.state = State.END;
     this.allowSprint = true;
+    this.strafeAmount = 0;
+    this.nodeChangeTime = 0;
+    this.interpolated = true;
     StrafeUtil.enabled = false;
     RotationHandler.getInstance().reset();
     KeyBindUtil.releaseAllExcept();
@@ -98,6 +108,10 @@ public class PathExecutor {
 
   public void setAllowSprint(boolean sprint) {
     this.allowSprint = sprint;
+  }
+
+  public void setAllowInterpolation(boolean interpolate) {
+    this.allowInterpolation = interpolate;
   }
 
   public boolean onTick() {
@@ -117,30 +131,26 @@ public class PathExecutor {
       if (this.stuckTimer.isScheduled()) {
         this.stuckTimer.reset();
       }
-//      log("curr is null");
       if (this.pathQueue.isEmpty()) {
-//        log("pathqueue is empty");
         this.state = State.WAITING;
         return true;
-      } else {
-        log("loading new path");
-        this.blockPath.clear();
-        this.map.clear();
-        this.previous = -1;
-        this.target = 0;
-
-        this.curr = this.pathQueue.poll();
-        this.blockPath.addAll(this.curr.getSmoothedPath());
-        for (int i = 0; i < this.blockPath.size(); i++) {
-          BlockPos pos = this.blockPath.get(i);
-          this.map.computeIfAbsent(new Pair<>(pos.getX(), pos.getZ()), k -> new ArrayList<>()).add(new Pair<>(pos.getY(), i));
-        }
-
-        this.enabled = true;
-        this.state = State.STARTING_PATH;
       }
+      log("loading new path");
+      this.blockPath.clear();
+      this.map.clear();
+      this.previous = -1;
+      this.target = 0;
+
+      this.curr = this.pathQueue.poll();
+      this.blockPath.addAll(this.curr.getSmoothedPath());
+      for (int i = 0; i < this.blockPath.size(); i++) {
+        BlockPos pos = this.blockPath.get(i);
+        this.map.computeIfAbsent(new Pair<>(pos.getX(), pos.getZ()), k -> new ArrayList<>()).add(new Pair<>(pos.getY(), i));
+      }
+
+      this.enabled = true;
+      this.state = State.STARTING_PATH;
     } else {
-      // stuck if player speed is less than 60% of normal player speed (sounded like a good number
       if (Math.hypot(mc.thePlayer.motionX, mc.thePlayer.motionZ) < 0.15) {
         if (!this.stuckTimer.isScheduled()) {
           this.stuckTimer.schedule(1000);
@@ -174,7 +184,8 @@ public class PathExecutor {
       this.previous = current;
       this.target = current + 1;
       this.state = State.TRAVERSING;
-      log("Standing on node " + current + ", Target: " + this.target + ", PathSize: " + this.blockPath.size());
+      this.nodeChangeTime = System.currentTimeMillis();
+      this.interpolated = false;
       RotationHandler.getInstance().reset();
       if (this.target == this.blockPath.size()) {
         log("Path traversed");
@@ -187,12 +198,11 @@ public class PathExecutor {
     }
 
     BlockPos target = this.blockPath.get(this.target);
+    double horizontalDistanceToTarget = Math.hypot(mc.thePlayer.posX - target.getX(), mc.thePlayer.posZ - target.getZ());
     float yaw = AngleUtil.get360RotationYaw(
         AngleUtil.getRotation(mc.thePlayer.getPositionVector().addVector(mc.thePlayer.motionX, 0.0, mc.thePlayer.motionZ),
-            new Vec3(target).addVector(0.5, 0.0, 0.5), false).yaw
-    );
-
-    double yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);
+            new Vec3(target).addVector(0.5, 0.0, 0.5), false).yaw);
+    float yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);
     if (yawDiff > 10 && !RotationHandler.getInstance().isEnabled()) {
       float rotationYaw = yaw;
       for (int i = this.target; i < this.blockPath.size(); i++) {
@@ -202,12 +212,31 @@ public class PathExecutor {
           break;
         }
       }
-      double horizDistToTarget = playerPos.distanceSq(target);
-      RotationHandler.getInstance().easeTo(new RotationConfiguration(new Angle(rotationYaw, 15f), Math.max(275, (long) (400 - horizDistToTarget * 2)), null).easeFunction(Ease.EASE_OUT_QUAD));
+
+      RotationHandler.getInstance().easeTo(new RotationConfiguration(new Angle(rotationYaw, 15f),
+          Math.max(300, (long) (400 - horizontalDistanceToTarget * MightyMinerConfig.devPathRotMult)), null).easeFunction(Ease.EASE_OUT_QUAD));
+    }
+
+    if (strafeTimer.passed()) {
+      strafeAmount = (float) (10f * (Math.random() * 2f - 1));
+      strafeTimer.schedule(500);
+    }
+
+    if (horizontalDistanceToTarget >= 10) {
+      if (this.allowInterpolation && !this.interpolated) {
+        long timePassed = System.currentTimeMillis() - this.nodeChangeTime;
+        if (timePassed < 250) {
+          yaw = mc.thePlayer.rotationYaw + yawDiff * (timePassed / 250f);
+        } else {
+          this.interpolated = true;
+        }
+      }
+    } else {
+      strafeAmount = 0;
     }
 
     StrafeUtil.enabled = true;
-    StrafeUtil.yaw = yaw;
+    StrafeUtil.yaw = yaw + strafeAmount;
 
     // needs work
     boolean shouldJump = mc.thePlayer.onGround

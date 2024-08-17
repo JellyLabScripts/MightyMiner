@@ -133,6 +133,10 @@ public class Pathfinder implements IFeature {
     pathExecutor.setAllowSprint(sprint);
   }
 
+  public void setInterpolationState(boolean interpolate) {
+    pathExecutor.setAllowInterpolation(interpolate);
+  }
+
   @SubscribeEvent
   public void onTick(ClientTickEvent event) {
     if (!this.enabled) {

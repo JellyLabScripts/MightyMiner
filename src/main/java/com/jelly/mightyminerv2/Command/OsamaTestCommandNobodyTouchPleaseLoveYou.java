@@ -6,8 +6,11 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
+import com.google.common.collect.ImmutableList;
 import com.jelly.mightyminerv2.Feature.impl.AutoCommissionClaim;
+import com.jelly.mightyminerv2.Feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.Feature.impl.AutoMobKiller;
+import com.jelly.mightyminerv2.Feature.impl.AutoWarp;
 import com.jelly.mightyminerv2.Feature.impl.MithrilMiner;
 import com.jelly.mightyminerv2.Feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.Feature.impl.RouteNavigator;
@@ -18,6 +21,7 @@ import com.jelly.mightyminerv2.Util.CommissionUtil;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.PlayerUtil;
 import com.jelly.mightyminerv2.Util.RenderUtil;
+import com.jelly.mightyminerv2.Util.helper.location.SubLocation;
 import com.jelly.mightyminerv2.Util.helper.route.Route;
 import com.jelly.mightyminerv2.Util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.Util.helper.route.TransportMethod;
@@ -34,6 +38,7 @@ import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementDiagonal;
 import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementTraverse;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +61,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 @Command(value = "set")
 public class OsamaTestCommandNobodyTouchPleaseLoveYou {
+
   @Getter
   private static OsamaTestCommandNobodyTouchPleaseLoveYou instance = new OsamaTestCommandNobodyTouchPleaseLoveYou();
   private final Minecraft mc = Minecraft.getMinecraft();
@@ -78,7 +84,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //    mobs = CommissionUtil.getMobList("Ice Walker", new HashSet<>());
 //    mc.theWorld.playerEntities.forEach(it -> System.out.println("Name: " + it.getName() + ", Itself: " + it));
     allowed = !allowed;
-    if(allowed == false){
+    if (allowed == false) {
       mobs.clear();
     }
   }
@@ -168,7 +174,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @SubCommand
   public void mine(final String t) {
     if (!MithrilMiner.getInstance().isRunning()) {
-      int[] p = new int[]{1, 1, 1, 1};
+      int[] p = new int[]{9, 7, 5, 1};
       if (t.equals("t")) {
         LogUtil.send("Tita");
         p[3] = 10;
@@ -189,6 +195,11 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   @SubCommand
+  public void move(){
+    AutoInventory.getInstance().moveItems(Arrays.asList("Pickonimbus 2000", "Aspect of the Void"));
+  }
+
+  @SubCommand
   public void clear() {
     blockToDraw.clear();
     entTodraw = null;
@@ -198,8 +209,6 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     second = null;
     pathfinder = null;
     curr = null;
-//    c = false;
-//    cc.clear();
   }
 
   @SubCommand
@@ -225,39 +234,39 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //      LogUtil.error("First or sec is null");
 //      return;
 //    }
-    Multithreading.schedule(() -> {
-      double walkSpeed = mc.thePlayer.getAIMoveSpeed();
-      CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-      BlockPos first = PlayerUtil.getBlockStandingOn();
-      BlockPos second = this.block;
-      AStarPathFinder finder = new AStarPathFinder(
-          first.getX(), first.getY(), first.getZ(),
-          new Goal(second.getX(), second.getY(), second.getZ(), ctx),
-          ctx
-      );
-      Path path = finder.calculatePath();
-      if (path == null) {
-        LogUtil.send("No path found");
-      } else {
-        LogUtil.send("path found");
-        if (go == 0) {
-          LogUtil.send("Go is zero. SmoothPathSize: " + path.getSmoothedPath().size());
-          this.blockToDraw.addAll(path.getSmoothedPath());
-        } else {
-          LogUtil.send("Go is not zero. PathSize: " + path.getPath().size());
-          this.blockToDraw.addAll(path.getPath());
-        }
-      }
-    }, 0, TimeUnit.MILLISECONDS);
-//    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), new BlockPos(first.toVec3()));
+//    Multithreading.schedule(() -> {
+//      double walkSpeed = mc.thePlayer.getAIMoveSpeed();
+//      CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
+//      BlockPos first = PlayerUtil.getBlockStandingOn();
+//      BlockPos second = this.block;
+//      AStarPathFinder finder = new AStarPathFinder(
+//          first.getX(), first.getY(), first.getZ(),
+//          new Goal(second.getX(), second.getY(), second.getZ(), ctx),
+//          ctx
+//      );
+//      Path path = finder.calculatePath();
+//      if (path == null) {
+//        LogUtil.send("No path found");
+//      } else {
+//        LogUtil.send("path found");
+//        blockToDraw.clear();
+//        blockToDraw.addAll(path.getSmoothedPath());
+//        if (go == 0) {
+//          Pathfinder.getInstance().queue();
+//        }
+//      }
+//    }, 0, TimeUnit.MILLISECONDS);
+    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), this.block);
 //    Pathfinder.getInstance().queue(new BlockPos(first.toVec3()), new BlockPos(second.toVec3()));
 //
-//    Pathfinder.getInstance().start();
+    Pathfinder.getInstance().start();
   }
 
   @SubscribeEvent
-  public void onTick(ClientTickEvent event){
-    if(!allowed) return;
+  public void onTick(ClientTickEvent event) {
+    if (!allowed) {
+      return;
+    }
     mobs = CommissionUtil.getMobListDebug("Goblin", new HashSet<>());
   }
 
@@ -268,7 +277,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       RenderUtil.drawBlockBox(new BlockPos(entTodraw.posX, Math.ceil(entTodraw.posY) - 1, entTodraw.posZ), new Color(123, 214, 44, 150));
     }
 
-    if(!blockToDraw.isEmpty()){
+    if (!blockToDraw.isEmpty()) {
       blockToDraw.forEach(b -> RenderUtil.drawBlockBox(b, new Color(255, 0, 0, 200)));
     }
 
@@ -299,17 +308,21 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       }
     }
 //
-    if(!mobs.isEmpty()) {
+    if (!mobs.isEmpty()) {
       Pair<EntityPlayer, Pair<Double, Double>> best = mobs.get(0);
       Vec3 pos = best.getFirst().getPositionVector();
-      RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5), new Color(255, 0, 241, 150));
-      RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord, pos.yCoord + 2.2, pos.zCoord, 1);
+      RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5),
+          new Color(255, 0, 241, 150));
+      RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord,
+          pos.yCoord + 2.2, pos.zCoord, 1);
 
-      for(int i = 1; i < mobs.size(); i++){
+      for (int i = 1; i < mobs.size(); i++) {
         best = mobs.get(i);
         pos = best.getFirst().getPositionVector();
-        RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5), new Color(123, 0, 234, 150));
-        RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord, pos.yCoord + 2.2, pos.zCoord, 1);
+        RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5),
+            new Color(123, 0, 234, 150));
+        RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord,
+            pos.yCoord + 2.2, pos.zCoord, 1);
       }
     }
   }

@@ -136,15 +136,14 @@ public class AutoMobKiller implements IFeature {
         log("Starting");
       case FINDING_MOB:
         List<EntityPlayer> mobs = CommissionUtil.getMobList(this.mobToKill, this.mobQueue);
-//        List<EntityPlayer> mobs = new ArrayList<>();
         if (mobs.isEmpty()) {
-//          if (!this.shutdownTimer.isScheduled()) {
-//            log("Cannot find mobs. Starting a 10 second timer");
-//            this.shutdownTimer.schedule(10_000);
-//          }
-          log("cannot find any mob");
-          this.stop();
+          if (!this.shutdownTimer.isScheduled()) {
+            log("Cannot find mobs. Starting a 10 second timer");
+            this.shutdownTimer.schedule(10_000);
+          }
           return;
+        } else if(this.shutdownTimer.isScheduled()){
+          this.shutdownTimer.reset();
         }
 
         EntityPlayer best = mobs.get(0);

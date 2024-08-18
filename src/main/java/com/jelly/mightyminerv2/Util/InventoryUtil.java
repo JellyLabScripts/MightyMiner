@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.Util;
 
+import kotlin.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.settings.KeyBinding;
@@ -14,14 +15,13 @@ import net.minecraft.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class InventoryUtil {
 
   private static final Minecraft mc = Minecraft.getMinecraft();
 
   public static boolean holdItem(String item) {
-    int slot = getSlotIdOfItemInHotbar(item);
+    int slot = getHotbarSlotOfItem(item);
     if (slot == -1) {
       return false;
     }
@@ -60,48 +60,63 @@ public class InventoryUtil {
     return null;
   }
 
-  public static int getSlotIdOfItemInHotbar(String... items) {
+  public static int getHotbarSlotOfItem(String items) {
     for (int i = 0; i < 9; i++) {
       ItemStack slot = mc.thePlayer.inventory.getStackInSlot(i);
-      if (slot == null || slot.getItem() == null) {
+      if (slot == null || !slot.hasDisplayName()) {
         continue;
       }
-      String itemName = StringUtils.stripControlCodes(slot.getDisplayName());
-      if (Arrays.stream(items).anyMatch(itemName::contains)) {
+
+      if (slot.getDisplayName().contains(items)) {
         return i;
       }
     }
     return -1;
   }
 
-  public static Slot getSlotOfItemInHotbar(String item) {
-    for (int i = 0; i < 9; i++) {
-      ItemStack slot = mc.thePlayer.inventory.getStackInSlot(i);
-      if (slot != null && slot.getItem() != null) {
-        String itemName = StringUtils.stripControlCodes(slot.getDisplayName());
-        if (itemName.contains(item)) {
-          return mc.thePlayer.inventoryContainer.getSlot(i);
-        }
+  public static boolean areItemsInInventory(List<String> items) {
+    List<String> itemsToFind = new ArrayList<>(items);
+    for (ItemStack stack : mc.thePlayer.inventory.mainInventory) {
+      if (stack != null && stack.hasDisplayName()) {
+        itemsToFind.removeIf(it -> stack.getDisplayName().contains(it));
       }
     }
-    return null;
+    return itemsToFind.isEmpty();
   }
 
-  public static int getSlotIdOfItemInInventory(String item) {
-    Slot slot = getSlotOfItemInInventory(item);
-    return slot != null ? slot.slotNumber : -1;
-  }
-
-  public static Slot getSlotOfItemInInventory(String item) {
-    for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
-      if (slot.getHasStack()) {
-        String itemName = StringUtils.stripControlCodes(slot.getStack().getDisplayName());
-        if (itemName.contains(item)) {
-          return slot;
-        }
+  public static boolean areItemsInHotbar(List<String> items) {
+    List<String> itemsToFind = new ArrayList<>(items);
+    for (int i = 0; i < 8; i++) {
+      ItemStack stack = mc.thePlayer.inventory.getStackInSlot(i);
+      if (stack != null && stack.hasDisplayName()) {
+        itemsToFind.removeIf(it -> stack.getDisplayName().contains(it));
       }
     }
-    return null;
+    return itemsToFind.isEmpty();
+  }
+
+  // returns the items that arent in hotbar and slots that items can be moved into
+  public static Pair<List<Integer>, List<String>> getAvailableHotbarSlots(List<String> items) {
+    List<String> itemsToMove = new ArrayList<>(items);
+    List<Integer> slotsToMoveTo = new ArrayList<>();
+
+    for (int i = 0; i < 8; i++) {
+      ItemStack stack = mc.thePlayer.inventory.getStackInSlot(i);
+
+      if (stack == null || !stack.hasDisplayName()) {
+        continue;
+      }
+
+      if (!itemsToMove.removeIf(item -> stack.getDisplayName().contains(item))) {
+        slotsToMoveTo.add(i);
+      }
+
+      if (itemsToMove.isEmpty()) {
+        break;
+      }
+    }
+
+    return new Pair<>(slotsToMoveTo, itemsToMove);
   }
 
   public static String getInventoryName(Container container) {
@@ -116,58 +131,20 @@ public class InventoryUtil {
     return getInventoryName(mc.thePlayer.openContainer);
   }
 
-  public static boolean hasItemInInventory(String item) {
-    return getSlotOfItemInInventory(item) != null;
-  }
-
-  public static boolean hasItemInHotbar(String... item) {
-    return getSlotIdOfItemInHotbar(item) != -1;
-  }
-
-  public static ArrayList<Slot> getIndexesOfItemsFromInventory(Predicate<Slot> predicate) {
-    ArrayList<Slot> indexes = new ArrayList<>();
-    for (int i = 0; i < 36; i++) {
-      Slot slot = mc.thePlayer.inventoryContainer.getSlot(i);
-      if (slot != null && slot.getHasStack()) {
-        if (predicate.test(slot)) {
-          indexes.add(slot);
-        }
-      }
-    }
-    return indexes;
-  }
-
-  public static ArrayList<Slot> getIndexesOfItemsFromContainer(Predicate<Slot> predicate) {
-    ArrayList<Slot> indexes = new ArrayList<>();
-    for (int i = 0; i < mc.thePlayer.openContainer.inventorySlots.size(); i++) {
-      Slot slot = mc.thePlayer.openContainer.getSlot(i);
-      if (slot != null && slot.getHasStack()) {
-        if (predicate.test(slot)) {
-          indexes.add(slot);
-        }
-      }
-    }
-    return indexes;
-  }
-
-  public static void clickSlotWithId(int id, ClickType mouseButton, ClickMode mode, int windowId) {
-    mc.playerController.windowClick(windowId, id, mouseButton.ordinal(), mode.ordinal(),
-        mc.thePlayer);
-  }
-
   public static void clickContainerSlot(int slot, ClickType mouseButton, ClickMode mode) {
-    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, slot,
-        mouseButton.ordinal(), mode.ordinal(), mc.thePlayer);
+    clickContainerSlot(slot, mouseButton.ordinal(), mode.ordinal());
   }
 
-  public static void clickInventorySlot(int slot, ClickType mouseButton, ClickMode mode) {
-    mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot,
-        mouseButton.ordinal(), mode.ordinal(), mc.thePlayer);
+  public static void clickContainerSlot(int slot, int mouseButton, ClickMode mode) {
+    clickContainerSlot(slot, mouseButton, mode.ordinal());
+  }
+
+  public static void clickContainerSlot(int slot, int mouseButton, int clickMode) {
+    mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, slot, mouseButton, clickMode, mc.thePlayer);
   }
 
   public static void swapSlots(int slot, int hotbarSlot) {
-    mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, hotbarSlot, 2,
-        mc.thePlayer);
+    mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, hotbarSlot, 2, mc.thePlayer);
   }
 
   public static void openInventory() {
@@ -178,24 +155,6 @@ public class InventoryUtil {
     if (mc.currentScreen != null && mc.thePlayer != null) {
       mc.thePlayer.closeScreen();
     }
-  }
-
-  public static Slot getSlotOfId(int id) {
-    for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
-      if (slot.slotNumber == id) {
-        return slot;
-      }
-    }
-    return null;
-  }
-
-  public static Slot getSlotOfIdInContainer(int id) {
-    for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
-      if (slot.slotNumber == id) {
-        return slot;
-      }
-    }
-    return null;
   }
 
   public static ArrayList<String> getItemLore(ItemStack itemStack) {
@@ -254,11 +213,11 @@ public class InventoryUtil {
     return true;
   }
 
-  public static enum ClickType {
+  public enum ClickType {
     LEFT, RIGHT
   }
 
-  public static enum ClickMode {
+  public enum ClickMode {
     PICKUP, QUICK_MOVE, SWAP
   }
 }

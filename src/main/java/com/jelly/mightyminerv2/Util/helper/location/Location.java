@@ -5,6 +5,7 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
+// DO NOT REARRANGE THE LAST THREE LOCATIONS - ORDINAL USED IN GAMSTATEHANDLER#ISPLAYERINSKYBLOCK TO REDUCE CHECKS
 @Getter
 public enum Location {
     PRIVATE_ISLAND("Private Island"),
@@ -20,10 +21,10 @@ public enum Location {
     CRYSTAL_HOLLOWS("Crystal Hollows"),
     JERRY_WORKSHOP("Jerry's Workshop"),
     DUNGEON_HUB("Dungeon Hub"),
-    LIMBO("UNKNOWN"),
-    LOBBY("PROTOTYPE"),
     GARDEN("Garden"),
     DUNGEON("Dungeon"),
+    LIMBO("UNKNOWN"),
+    LOBBY("PROTOTYPE"),
     // Knowhere - Avengers: Infinity War
     KNOWHERE("Knowhere");
 

@@ -48,6 +48,10 @@ public class GameStateHandler {
   @Getter
   private boolean cookieActive = false;
 
+  public boolean isPlayerInSkyBlock() {
+    return this.currentLocation.ordinal() < Location.values().length - 3;
+  }
+
 //  @SubscribeEvent
 //  public void onTick(ClientTickEvent event) {
 //    if (mc.theWorld != null) {

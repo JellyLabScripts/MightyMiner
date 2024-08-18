@@ -60,7 +60,7 @@ public class BlockUtil {
     final MinHeap<BlockPos> blocks = new MinHeap<>(500);
     final Set<Long> visitedPositions = new HashSet<>();
     final List<BlockPos> walkableBlocks =
-        getWalkableBlocksAround(PlayerUtil.getBlockStandingOnFloor());
+        getWalkableBlocksAround(PlayerUtil.getBlockStandingOn());
 
     for (final BlockPos blockPos : walkableBlocks) {
       final Vec3 blockCenter = new Vec3(blockPos).addVector(0.5, mc.thePlayer.eyeHeight, 0.5);

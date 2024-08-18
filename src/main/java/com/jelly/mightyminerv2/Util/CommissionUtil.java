@@ -1,13 +1,10 @@
 package com.jelly.mightyminerv2.Util;
 
 import com.google.common.collect.ImmutableMap;
-import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Macro.commissionmacro.helper.Commission;
-import com.jelly.mightyminerv2.Util.helper.Angle;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import kotlin.Pair;
@@ -70,27 +67,23 @@ public class CommissionUtil {
     return -1;
   }
 
-  public static List<EntityPlayer> getCommissionMobs(Commission commission) {
-    String mobName;
-    if ((mobName = slayerMob.get(commission)) == null) {
-      return new ArrayList<>();
-    }
-    List<EntityPlayer> mobs = new ArrayList<>();
-    for (EntityPlayer mob : mc.theWorld.playerEntities) {
-      if (mob.getName().equals(mobName)) {
-        mobs.add(mob);
-      }
-    }
-
-    Angle playerAngle = new Angle(AngleUtil.get360RotationYaw(), 0);
-    Vec3 playerPos = mc.thePlayer.getPositionVector();
-    mobs.sort(Comparator.comparingDouble(
-        mob -> mob.getPositionVector().distanceTo(playerPos) + AngleUtil.getNeededChange(playerAngle, AngleUtil.getRotation(mob)).yaw));
-    return mobs;
-  }
-
-//  public static List<EntityPlayer> getMobList(String mobName) {
-//    return getMobList(mobName, new HashSet<>());
+//  public static List<EntityPlayer> getCommissionMobs(Commission commission) {
+//    String mobName;
+//    if ((mobName = slayerMob.get(commission)) == null) {
+//      return new ArrayList<>();
+//    }
+//    List<EntityPlayer> mobs = new ArrayList<>();
+//    for (EntityPlayer mob : mc.theWorld.playerEntities) {
+//      if (mob.getName().equals(mobName)) {
+//        mobs.add(mob);
+//      }
+//    }
+//
+//    Angle playerAngle = new Angle(AngleUtil.get360RotationYaw(), 0);
+//    Vec3 playerPos = mc.thePlayer.getPositionVector();
+//    mobs.sort(Comparator.comparingDouble(
+//        mob -> mob.getPositionVector().distanceTo(playerPos) + AngleUtil.getNeededChange(playerAngle, AngleUtil.getRotation(mob)).yaw));
+//    return mobs;
 //  }
 
   public static List<EntityPlayer> getMobList(String mobName, Set<EntityPlayer> mobsToIgnore) {
@@ -105,9 +98,9 @@ public class CommissionUtil {
     float normalizedYaw = AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw);
     mobs.sort(Comparator.comparingDouble(mob -> {
           Vec3 mobPos = mob.getPositionVector();
-          return (Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord)
-              + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2) * (MightyMinerConfig.commDistCost / 100f)
-              + (double) Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(mob).yaw))) * (MightyMinerConfig.commRotCost / 100f);
+          double distanceCost = Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord) + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2;
+          double angleCost = Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(mob).yaw)));
+          return distanceCost * 0.6 + angleCost * 0.1;
         }
     ));
     return mobs;
@@ -121,20 +114,13 @@ public class CommissionUtil {
     for (EntityPlayer mob : mc.theWorld.playerEntities) {
       if (mob.getName().trim().equals(mobName) && mob.isEntityAlive() && !mobsToIgnore.contains(mob)) {
         Vec3 mobPos = mob.getPositionVector();
-        mobs.add(new Pair(mob, new Pair(
-            (Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord)
-                + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2) * (MightyMinerConfig.commDistCost / 100f),
-            (double) Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(mob).yaw))) * (MightyMinerConfig.commRotCost / 100f))));
+        double distanceCost =
+            Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord) + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2;
+        double angleCost = Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(mob).yaw)));
+        mobs.add(new Pair(mob, new Pair(distanceCost * 0.6, angleCost * 0.1)));
       }
     }
 
-//    mobs.sort(Comparator.comparingDouble(mob -> {
-//          Vec3 mobPos = mob.getPositionVector();
-//          return (Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord)
-//              + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2) * (MightyMinerConfig.commDistCost / 100f)
-//              + Math.abs(normalizedYaw - AngleUtil.getRotation(mob).yaw) * (MightyMinerConfig.commRotCost / 100f);
-//        }
-//    ));
     mobs.sort(Comparator.comparing(a -> {
       Pair<Double, Double> b = a.getSecond();
       return b.getFirst() + b.getSecond();

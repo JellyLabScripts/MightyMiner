@@ -40,8 +40,6 @@ public class MithrilMiner implements IFeature {
   private final Random random = new Random();
   @Getter
   private boolean enabled = false;
-  @Getter
-  private float walkDirection = 0f;
   private State state = State.STARTING;
   private BoostState boostState = BoostState.AVAILABLE;
   private final Clock timer = new Clock();
@@ -80,7 +78,7 @@ public class MithrilMiner implements IFeature {
 
   @Override
   public void start() {
-
+    this.enable(this.priority);
   }
 
   @Override
@@ -89,10 +87,10 @@ public class MithrilMiner implements IFeature {
     this.miningSpeed = 200;
     this.miningTime = 0;
     this.speedBoost = 0;
-    this.walkDirection = 0f;
     this.destBlock = null;
     this.targetPoint = null;
     KeyBindUtil.releaseAllExcept();
+    StrafeUtil.enabled = false;
     this.resetStatesAfterStop();
 
     send("Disabled");
@@ -204,7 +202,7 @@ public class MithrilMiner implements IFeature {
 
         if (this.targetPoint != null && mc.thePlayer.getPositionEyes(1).distanceTo(this.targetPoint) > 4) {
           this.swapState(State.WALKING, 0);
-          this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOnFloor()).stream()
+          this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOn()).stream()
               .min(Comparator.comparingDouble(this.targetBlock::distanceSq)).orElse(null);
         } else {
           this.swapState(State.BREAKING, 0);
@@ -216,11 +214,15 @@ public class MithrilMiner implements IFeature {
         boolean walk = false;
         boolean sneak = MightyMinerConfig.mithrilMinerSneakWhileMining;
 
-        if (this.destBlock != null && this.destBlock.distanceSqToCenter(mc.thePlayer.posX, this.destBlock.getY() + 0.5, mc.thePlayer.posZ) > 0.04) {
-          this.walkDirection = AngleUtil.getRotation(this.destBlock).getYaw();
+        if (this.destBlock != null
+            && this.destBlock.distanceSqToCenter(mc.thePlayer.posX, this.destBlock.getY() + 0.5, mc.thePlayer.posZ) > 0.04
+            && this.targetPoint.distanceTo(PlayerUtil.getPlayerEyePos()) > 3.5) {
+          StrafeUtil.enabled = true;
+          StrafeUtil.yaw = AngleUtil.get360RotationYaw(AngleUtil.getRotation(this.destBlock).getYaw());
           walk = sneak = true;
         } else {
           this.destBlock = null;
+          StrafeUtil.enabled = false;
           this.swapState(State.BREAKING, 0);
         }
 
@@ -289,16 +291,16 @@ public class MithrilMiner implements IFeature {
     }
   }
 
-  //  @SubscribeEvent
+    @SubscribeEvent
   public void onRender(final RenderWorldLastEvent event) {
     if (!this.isRunning()) {
       return;
     }
     if (this.targetBlock != null) {
-      RenderUtil.drawBlockBox(this.targetBlock, new Color(0, 255, 255, 50));
+      RenderUtil.drawBlockBox(this.targetBlock, new Color(0, 255, 255, 100));
     }
     if (this.destBlock != null) {
-      RenderUtil.drawBlockBox(this.destBlock, new Color(0, 255, 0, 50));
+      RenderUtil.drawBlockBox(this.destBlock, new Color(0, 255, 0, 100));
     }
   }
 

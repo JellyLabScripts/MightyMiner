@@ -1,78 +1,89 @@
 package com.jelly.mightyminerv2.Macro;
 
 import cc.polyfrost.oneconfig.events.event.ReceivePacketEvent;
-import com.jelly.mightyminerv2.Feature.FeatureManager;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.helper.Clock;
-import jdk.nashorn.internal.objects.annotations.Setter;
+import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public abstract class AbstractMacro {
-    public static final Minecraft mc = Minecraft.getMinecraft();
-    private boolean enabled = false;
-    private static Clock rewarDelay = new Clock();
-    private static Clock analyzeDelay = new Clock();
-    private static Clock DelayBeforeBreak = new Clock();
-    private static Clock BreakTime = new Clock();
 
+  private static final Minecraft mc = Minecraft.getMinecraft();
+  private boolean enabled = false;
+  public Clock timer = new Clock();
 
-    @Setter
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+  public abstract String getName();
+
+  public boolean isEnabled() {
+    return this.enabled;
+  }
+
+  public void enable() {
+    onEnable();
+    this.enabled = true;
+  }
+
+  public void disable() {
+    this.enabled = false;
+    onDisable();
+  }
+
+  public void toggle() {
+    if (this.enabled) {
+      this.disable();
+    } else {
+      this.enable();
     }
+  }
 
-    @Setter
-    public void setAnalyzeDelay(long delay) {
-        analyzeDelay.schedule(delay);
-    }
+  public boolean hasTimerEnded(){
+    return this.timer.isScheduled() && this.timer.passed();
+  }
 
-    @Setter
-    public void setBreakTime(double delay, double timeBefore) {
-        BreakTime.schedule((long) delay);
-        DelayBeforeBreak.schedule((long) timeBefore);
-    }
+  public abstract List<String> getNecessaryItems();
 
-    public boolean isEnableAndNoFeature() {
-        return enabled && !FeatureManager.getInstance().shouldPauseMacroExecution();
-    }
+  public void onEnable() {
+  }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
+  public void onDisable() {
+  }
 
-    public void onEnable() {
-        enabled = true;
-    }
+  public void onTick(ClientTickEvent event) {
+  }
 
-    public void onDisable() {
-        enabled = false;
-    }
+  public void onWorldRender(RenderWorldLastEvent event) {
+  }
 
-    public void onLastRender() {
-    }
+  public void onChat(ClientChatReceivedEvent event) {
+  }
 
-    public void onChatMessageReceived(String message) {
-    }
+  public void onOverlayRender(RenderGameOverlayEvent event) {
+  }
 
-    public void onOverlayRender(RenderGameOverlayEvent.Post event) {
-    }
+  public void onReceivePacket(ReceivePacketEvent event) {
+  }
 
-    public void onPacketReceived(ReceivePacketEvent event) {
-    }
+  public void log(String message) {
+    LogUtil.log(getMessage(message));
+  }
 
-    public abstract void updateState();
-    public abstract void invokeState();
+  public void send(String message) {
+    LogUtil.send(getMessage(message));
+  }
 
-    public void enable() {
-        setAnalyzeDelay(60_000);
-        setEnabled(true);
-        onEnable();
-    }
+  public void error(String message) {
+    LogUtil.error(getMessage(message));
+  }
 
-    public void disable() {
-        setEnabled(false);
-        onDisable();
-    }
+  public void warn(String message) {
+    LogUtil.warn(getMessage(message));
+  }
+
+  public String getMessage(String message) {
+    return "[" + this.getName() + "] " + message;
+  }
 }

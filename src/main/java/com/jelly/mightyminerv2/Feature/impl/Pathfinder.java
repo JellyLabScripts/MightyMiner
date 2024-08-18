@@ -1,12 +1,9 @@
 package com.jelly.mightyminerv2.Feature.impl;
 
-import static com.jelly.mightyminerv2.Macro.AbstractMacro.mc;
-
 import com.jelly.mightyminerv2.Feature.IFeature;
 import com.jelly.mightyminerv2.Feature.impl.PathExecutor.State;
 import com.jelly.mightyminerv2.Handler.RotationHandler;
 import com.jelly.mightyminerv2.MightyMiner;
-import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.PlayerUtil;
 import com.jelly.mightyminerv2.Util.RenderUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
@@ -17,6 +14,7 @@ import java.awt.Color;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import kotlin.Pair;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -30,6 +28,7 @@ public class Pathfinder implements IFeature {
     return instance;
   }
 
+  private final Minecraft mc = Minecraft.getMinecraft();
   private boolean enabled = false;
   private Deque<Pair<BlockPos, BlockPos>> pathQueue = new ConcurrentLinkedDeque<>();
   private AStarPathFinder finder;

@@ -60,7 +60,6 @@ public class PathExecutor {
   private boolean allowInterpolation = false;
 
   private Clock stuckTimer = new Clock();
-
   private Clock strafeTimer = new Clock();
   private float strafeAmount = 0f;
 
@@ -94,10 +93,12 @@ public class PathExecutor {
     this.blockPath.clear();
     this.map.clear();
     this.curr = null;
+    this.prev = null;
     this.target = 0;
     this.previous = -1;
     this.state = State.END;
     this.allowSprint = true;
+    this.allowInterpolation = false;
     this.strafeAmount = 0;
     this.nodeChangeTime = 0;
     this.interpolated = true;
@@ -115,13 +116,12 @@ public class PathExecutor {
   }
 
   public boolean onTick() {
-//    log("pathexec ontick");
     if (!enabled) {
       return false;
     }
 
     if (this.stuckTimer.isScheduled() && this.stuckTimer.passed()) {
-      log("Stuck for a second.");
+      log("Was Stuck For a Second.");
       this.failed = true;
       this.succeeded = false;
       this.stop();
@@ -151,7 +151,7 @@ public class PathExecutor {
       this.enabled = true;
       this.state = State.STARTING_PATH;
     } else {
-      if (Math.hypot(mc.thePlayer.motionX, mc.thePlayer.motionZ) < 0.15) {
+      if (Math.hypot(mc.thePlayer.motionX, mc.thePlayer.motionZ) < 0.05) {
         if (!this.stuckTimer.isScheduled()) {
           this.stuckTimer.schedule(1000);
         }
@@ -160,15 +160,11 @@ public class PathExecutor {
       }
     }
 
-    BlockPos playerPos = PlayerUtil.getBlockStandingOn();
     // this is utterly useless but im useless as well
-    int current = -1;
+    BlockPos playerPos = PlayerUtil.getBlockStandingOn();
     List<Pair<Integer, Integer>> blocks = this.map.get(new Pair<>(playerPos.getX(), playerPos.getZ()));
-    if (blocks == null) {
-      current = -1;
-    } else if (blocks.size() == 1) {
-      current = blocks.get(0).getSecond();
-    } else {
+    int current = -1;
+    if (blocks != null && !blocks.isEmpty()) {
       Pair<Integer, Integer> best = blocks.get(0);
       double y = mc.thePlayer.posY;
       for (Pair<Integer, Integer> block : blocks) {
@@ -184,8 +180,8 @@ public class PathExecutor {
       this.previous = current;
       this.target = current + 1;
       this.state = State.TRAVERSING;
-      this.nodeChangeTime = System.currentTimeMillis();
       this.interpolated = false;
+      this.nodeChangeTime = System.currentTimeMillis();
       RotationHandler.getInstance().reset();
       if (this.target == this.blockPath.size()) {
         log("Path traversed");
@@ -198,13 +194,14 @@ public class PathExecutor {
     }
 
     BlockPos target = this.blockPath.get(this.target);
-    double horizontalDistanceToTarget = Math.hypot(mc.thePlayer.posX - target.getX(), mc.thePlayer.posZ - target.getZ());
+    double horizontalDistToTarget = Math.hypot(mc.thePlayer.posX - target.getX() - 0.5, mc.thePlayer.posZ - target.getZ() - 0.5);
     float yaw = AngleUtil.get360RotationYaw(
-        AngleUtil.getRotation(mc.thePlayer.getPositionVector().addVector(mc.thePlayer.motionX, 0.0, mc.thePlayer.motionZ),
-            new Vec3(target).addVector(0.5, 0.0, 0.5), false).yaw);
+        AngleUtil.getRotation(PlayerUtil.getNextTickPosition(), new Vec3(target).addVector(0.5, 0.0, 0.5), false).yaw);
     float yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);
     if (yawDiff > 10 && !RotationHandler.getInstance().isEnabled()) {
       float rotationYaw = yaw;
+
+      // look at a block thats at least 5 blocks away instead of looking at the target which helps reduce buggy rotation
       for (int i = this.target; i < this.blockPath.size(); i++) {
         BlockPos rotationTarget = this.blockPath.get(i);
         if (Math.hypot(mc.thePlayer.posX - rotationTarget.getX(), mc.thePlayer.posZ - rotationTarget.getZ()) > 5) {
@@ -213,8 +210,13 @@ public class PathExecutor {
         }
       }
 
-      RotationHandler.getInstance().easeTo(new RotationConfiguration(new Angle(rotationYaw, 15f),
-          Math.max(300, (long) (400 - horizontalDistanceToTarget * MightyMinerConfig.devPathRotMult)), null).easeFunction(Ease.EASE_OUT_QUAD));
+      RotationHandler.getInstance().easeTo(
+          new RotationConfiguration(
+              new Angle(rotationYaw, 15f),
+              Math.max(300, (long) (400 - horizontalDistToTarget * MightyMinerConfig.devPathRotMult)),
+              null)
+              .easeFunction(Ease.EASE_OUT_QUAD)
+      );
     }
 
     if (strafeTimer.passed()) {
@@ -222,12 +224,12 @@ public class PathExecutor {
       strafeTimer.schedule(500);
     }
 
-    if (horizontalDistanceToTarget >= 5) {
+    if (horizontalDistToTarget >= 5) {
       // makes it more human but decreases accuracy - removes that weird sliding effect
       if (this.allowInterpolation && !this.interpolated) {
         long timePassed = System.currentTimeMillis() - this.nodeChangeTime;
-        if (timePassed < 250) {
-          yaw = mc.thePlayer.rotationYaw + yawDiff * (timePassed / 250f);
+        if (timePassed < 200) {
+          yaw = mc.thePlayer.rotationYaw + yawDiff * (timePassed / 200f);
         } else {
           this.interpolated = true;
         }
@@ -240,10 +242,8 @@ public class PathExecutor {
     StrafeUtil.yaw = yaw + strafeAmount;
 
     // needs work
-    boolean shouldJump = mc.thePlayer.onGround
-        && Math.hypot(mc.thePlayer.posX - (target.getX() + 0.5), mc.thePlayer.posZ - (target.getZ() + 0.5)) <= 1.0
-        && target.getY() >= mc.thePlayer.posY
-        && target.getY() - mc.thePlayer.posY < 0.1;
+    boolean shouldJump =
+        mc.thePlayer.onGround && horizontalDistToTarget <= 1.0 && target.getY() >= mc.thePlayer.posY && target.getY() - mc.thePlayer.posY < 0.05;
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSprint, this.allowSprint && yawDiff < 40 && !shouldJump && mc.thePlayer.onGround);
     if (shouldJump) {
@@ -294,6 +294,7 @@ public class PathExecutor {
     return "[PathExecutor] " + message;
   }
 
+  // we got no use for this - yet
   enum State {
     STARTING_PATH, TRAVERSING, JUMPING, WAITING, END
   }

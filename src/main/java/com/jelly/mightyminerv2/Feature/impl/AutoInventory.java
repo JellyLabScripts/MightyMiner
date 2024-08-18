@@ -2,11 +2,16 @@ package com.jelly.mightyminerv2.Feature.impl;
 
 import com.jelly.mightyminerv2.Feature.IFeature;
 import com.jelly.mightyminerv2.Util.InventoryUtil;
+import com.jelly.mightyminerv2.Util.InventoryUtil.ClickMode;
 import com.jelly.mightyminerv2.Util.ScoreboardUtil;
 import com.jelly.mightyminerv2.Util.TablistUtil;
 import com.jelly.mightyminerv2.Util.helper.Clock;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import kotlin.Pair;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -66,6 +71,7 @@ public class AutoInventory implements IFeature {
   public void resetStatesAfterStop() {
     this.mainTask = Task.NONE;
     this.sbState = SB.STARTING;
+    this.moveState = MoveState.STARTING;
   }
 
   @Override
@@ -86,28 +92,36 @@ public class AutoInventory implements IFeature {
       case GET_SPEED_BOOST:
         this.handleGetSpeedBoost();
         break;
+      case MOVE_ITEMS_TO_HOTBAR:
+        this.handleMoveItems();
+        break;
     }
   }
 
   enum Task {
-    NONE, GET_SPEED_BOOST
+    NONE, GET_SPEED_BOOST, MOVE_ITEMS_TO_HOTBAR
   }
 
   //<editor-fold desc="Get Mining Speed And Mining Speed Boost (Gemstone Later)">
+  private int[] speedBoostValues = new int[2]; // [Mining Speed, Mining Speed Boost]
+  private SB sbState = SB.STARTING;
+  private SBError sbError = SBError.NONE;
 
   public void retrieveSpeedBoost() {
     this.mainTask = Task.GET_SPEED_BOOST;
-    this.sbState = SB.STARTING;
-    this.sbFail = SBFail.NONE;
+    this.sbError = SBError.NONE;
     this.speedBoostValues = new int[2];
 
     this.enabled = true;
   }
 
-  @Getter
-  private int[] speedBoostValues = new int[2]; // [Mining Speed, Mining Speed Boost]
-  private SB sbState = SB.STARTING;
-  private SBFail sbFail = SBFail.NONE;
+  public int[] getSpeedBoostValues() {
+    return this.speedBoostValues;
+  }
+
+  public boolean sbFailed() {
+    return !this.enabled && this.sbError != SBError.NONE;
+  }
 
   private void handleGetSpeedBoost() {
     switch (this.sbState) {
@@ -117,7 +131,7 @@ public class AutoInventory implements IFeature {
       case GET_SPEED:
         if (this.hasTimerEnded()) {
           this.stop();
-          this.sbFail = SBFail.CANNOT_GET_VALUE;
+          this.sbError = SBError.CANNOT_GET_VALUE;
           error("Could Not Get Speed In Time.");
           break;
         }
@@ -140,13 +154,13 @@ public class AutoInventory implements IFeature {
         }
 
         this.stop();
-        this.sbFail = SBFail.CANNOT_GET_VALUE;
+        this.sbError = SBError.CANNOT_GET_VALUE;
         error("Could not get mining speed from tab. Make sure its enabled.");
         break;
       case OPEN_HOTM_MENU:
         if (this.hasTimerEnded()) {
           this.stop();
-          this.sbFail = SBFail.CANNOT_OPEN_INV;
+          this.sbError = SBError.CANNOT_OPEN_INV;
           error("Could Not Open Inventory in Time.");
           break;
         }
@@ -165,7 +179,7 @@ public class AutoInventory implements IFeature {
         }
 
         this.stop();
-        this.sbFail = SBFail.CANNOT_GET_VALUE;
+        this.sbError = SBError.CANNOT_GET_VALUE;
         error("Could Not Get Speed Boost Value.");
         break;
       case END:
@@ -187,12 +201,100 @@ public class AutoInventory implements IFeature {
     STARTING, GET_SPEED, OPEN_HOTM_MENU, END
   }
 
-  enum SBFail {
+  enum SBError {
     NONE, CANNOT_OPEN_INV, CANNOT_GET_VALUE
   }
+  //</editor-fold>
 
-  public boolean SBFailed() {
-    return !this.enabled && this.sbFail != SBFail.NONE;
+  //<editor-fold desc="Move Specific Items To Hotbar">
+  private MoveState moveState = MoveState.STARTING;
+  private MoveError moveError = MoveError.NONE;
+  private Queue<String> elementsToSwap = new LinkedList<>();
+  private Queue<Integer> availableSlots = new LinkedList<>();
+
+  public void moveItems(List<String> items) {
+    if (items.isEmpty()) {
+      return;
+    }
+
+    this.availableSlots.clear();
+    this.elementsToSwap.clear();
+
+    Pair<List<Integer>, List<String>> itemsToMove = InventoryUtil.getAvailableHotbarSlots(items);
+    this.availableSlots.addAll(itemsToMove.getFirst());
+    this.elementsToSwap.addAll(itemsToMove.getSecond());
+
+    if (this.elementsToSwap.isEmpty()) {
+      log("No Elements to move");
+      return;
+    }
+
+    if (this.availableSlots.size() < this.elementsToSwap.size()) {
+      error("Not enough slots to move items to. Disabling"); // should never happen
+      this.moveError = MoveError.NOT_ENOUGH_HOTBAR_SPACE;
+      return;
+    }
+
+    this.mainTask = Task.MOVE_ITEMS_TO_HOTBAR;
+    this.moveError = MoveError.NONE;
+    this.enabled = true;
+
+    log("Started moving items into hotbar");
+  }
+
+  private void changeMoveState(MoveState to, int time) {
+    this.moveState = to;
+    this.timer.schedule(time);
+  }
+
+  public boolean moveFailed() {
+    return !this.enabled && this.moveError != MoveError.NONE;
+  }
+
+  public MoveError getMoveError() {
+    return this.moveError;
+  }
+
+  private void handleMoveItems() {
+    if (this.timer.isScheduled() && !this.timer.passed()) {
+      return;
+    }
+
+    switch (this.moveState) {
+      case STARTING:
+        InventoryUtil.openInventory();
+        this.changeMoveState(MoveState.SWAP_SLOTS, 300);
+
+        log("Opened Inventory");
+        break;
+      case SWAP_SLOTS:
+        if (!(this.elementsToSwap.isEmpty() || this.availableSlots.isEmpty())) {
+          InventoryUtil.swapSlots(InventoryUtil.getSlotIdOfItemInContainer(this.elementsToSwap.poll()), this.availableSlots.poll());
+          this.changeMoveState(MoveState.SWAP_SLOTS, 300);
+        } else {
+          this.changeMoveState(MoveState.FINISH, 0);
+        }
+
+        log("Swapped Item");
+        break;
+      case FINISH:
+        InventoryUtil.closeScreen();
+
+        if (!this.elementsToSwap.isEmpty()) {
+          this.moveError = MoveError.NOT_ENOUGH_HOTBAR_SPACE;
+        }
+        this.stop();
+        log("Closed");
+        break;
+    }
+  }
+
+  enum MoveState {
+    STARTING, SWAP_SLOTS, FINISH
+  }
+
+  public enum MoveError {
+    NONE, NOT_ENOUGH_HOTBAR_SPACE
   }
   //</editor-fold>
 

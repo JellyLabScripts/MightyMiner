@@ -109,8 +109,8 @@ public class RotationConfiguration {
         EASE_IN_OUT_SINE(x -> (float) (-(Math.cos(x * Math.PI) - 1) / 2)),
         EASE_OUT_QUAD(x -> 1 - (1 - x) * (1 - x)),
         EASE_OUT_CUBIC(x -> 1 - (1 - x) * (1 - x) * (1 - x)),
-        EASE_OUT_CIRC(x -> (float) Math.sqrt(1 - (x - 1) * (x - 1))),
-        EASE_OUT_MIN_JERK(x -> (float) (6 * Math.pow(x, 5) - 15 * Math.pow(x, 4) + 10 * Math.pow(x, 3)));
+        EASE_OUT_CIRC(x -> (float) Math.sqrt(1 - (x - 1) * (x - 1)));
+//        EASE_OUT_MIN_JERK(x -> (float) (6 * Math.pow(x, 5) - 15 * Math.pow(x, 4) + 10 * Math.pow(x, 3)));
 
         private final Function<Float, Float> easingFunction;
 

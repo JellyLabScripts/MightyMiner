@@ -39,6 +39,7 @@ public class AutoMobKiller implements IFeature {
   private Minecraft mc = Minecraft.getMinecraft();
   private boolean enabled = false;
   private State state = State.STARTING;
+  private MKError mkError = MKError.NONE;
   private Clock timer = new Clock();
   private Clock shutdownTimer = new Clock();
   private Clock queueTimer = new Clock();
@@ -55,7 +56,7 @@ public class AutoMobKiller implements IFeature {
 
   @Override
   public boolean isEnabled() {
-    return true;
+    return this.enabled;
   }
 
   @Override
@@ -75,13 +76,13 @@ public class AutoMobKiller implements IFeature {
 
   @Override
   public void start() {
-//    this.enabled = true;
-
-//    log("Started");
   }
 
   @Override
   public void stop() {
+    if (!this.enabled) {
+      return;
+    }
     this.enabled = false;
     this.mobToKill = "";
     this.killAttempts = 0;
@@ -96,9 +97,23 @@ public class AutoMobKiller implements IFeature {
 
   public void enable(String mobToKill) {
     this.mobToKill = mobToKill;
+    this.mkError = MKError.NONE;
     this.enabled = true;
 
     log("Started");
+  }
+
+  public void stop(MKError error) {
+    this.mkError = error;
+    this.stop();
+  }
+
+  public boolean succeeded() {
+    return !this.enabled && this.mkError == MKError.NONE;
+  }
+
+  public MKError getMkError() {
+    return this.mkError;
   }
 
   @Override
@@ -118,7 +133,7 @@ public class AutoMobKiller implements IFeature {
     }
 
     if (this.shutdownTimer.isScheduled() && this.shutdownTimer.passed()) {
-      this.stop();
+      this.stop(MKError.NO_ENTITIES);
       log("Entities did not spawn");
       return;
     }
@@ -142,7 +157,7 @@ public class AutoMobKiller implements IFeature {
             this.shutdownTimer.schedule(10_000);
           }
           return;
-        } else if(this.shutdownTimer.isScheduled()){
+        } else if (this.shutdownTimer.isScheduled()) {
           this.shutdownTimer.reset();
         }
 
@@ -153,7 +168,7 @@ public class AutoMobKiller implements IFeature {
         break;
       case WALKING_TO_MOB:
         if (!this.targetMob.isPresent() || !this.entityLastPosition.isPresent()) {
-          stop();
+          this.stop(MKError.NO_ENTITIES);
           log("no target mob || no last position saved"); // idk why this would happen but better safe than sorry (im schizophrenic)
           return;
         }
@@ -244,5 +259,9 @@ public class AutoMobKiller implements IFeature {
   enum State {
     STARTING, FINDING_MOB, WALKING_TO_MOB, WAITING_FOR_MOB, LOOKING_AT_MOB, KILLING_MOB,
 //    STALLING, LOOKING - Todo: make this
+  }
+
+  public enum MKError {
+    NONE, NO_ENTITIES
   }
 }

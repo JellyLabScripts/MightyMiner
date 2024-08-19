@@ -1,10 +1,11 @@
 package com.jelly.mightyminerv2.Feature.impl;
 
+import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Feature.IFeature;
+import com.jelly.mightyminerv2.Feature.impl.MithrilMiner.BoostState;
 import com.jelly.mightyminerv2.Util.InventoryUtil;
 import com.jelly.mightyminerv2.Util.InventoryUtil.ClickMode;
-import com.jelly.mightyminerv2.Util.ScoreboardUtil;
-import com.jelly.mightyminerv2.Util.TablistUtil;
+import com.jelly.mightyminerv2.Util.InventoryUtil.ClickType;
 import com.jelly.mightyminerv2.Util.helper.Clock;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
 import kotlin.Pair;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.inventory.ContainerChest;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
@@ -119,14 +121,27 @@ public class AutoInventory implements IFeature {
     return this.speedBoostValues;
   }
 
-  public boolean sbFailed() {
-    return !this.enabled && this.sbError != SBError.NONE;
+  public boolean sbSucceeded() {
+    return !this.enabled && this.sbError == SBError.NONE;
+  }
+
+  public SBError getSbError() {
+    return this.sbError;
+  }
+
+  private void swapSbState(final SB state, final int time) {
+    this.sbState = state;
+    this.timer.schedule(time);
   }
 
   private void handleGetSpeedBoost() {
     switch (this.sbState) {
       case STARTING:
-        this.swapSbState(SB.GET_SPEED, 1000);
+        this.swapSbState(SB.OPEN_MENU, MightyMinerConfig.getRandomGuiWaitDelay());
+        break;
+      case OPEN_MENU:
+        mc.thePlayer.sendChatMessage("/sbmenu");
+        this.swapSbState(SB.GET_SPEED, 2000);
         break;
       case GET_SPEED:
         if (this.hasTimerEnded()) {
@@ -136,20 +151,26 @@ public class AutoInventory implements IFeature {
           break;
         }
 
-        for (final String text : TablistUtil.getCachedTablist()) {
-          if (!text.contains("Mining Speed")) {
+        if (!(mc.thePlayer.openContainer instanceof ContainerChest)
+            || !InventoryUtil.getInventoryName().equals("SkyBlock Menu")
+            || !InventoryUtil.isInventoryLoaded()) {
+          break;
+        }
+
+        List<String> loreList = InventoryUtil.getLoreOfItemInContainer(InventoryUtil.getSlotIdOfItemInContainer("Your SkyBlock Profile"));
+        for (String lore : loreList) {
+          if (!lore.contains("Mining Speed")) {
             continue;
           }
 
           try {
-            this.speedBoostValues[0] = Integer.parseInt(
-                ScoreboardUtil.sanitizeString(text).split(": ")[1].replace(",", "")
-            );
-            this.swapSbState(SB.OPEN_HOTM_MENU, 1000);
-            mc.thePlayer.sendChatMessage("/hotm");
-            log("Speed: " + this.speedBoostValues[0]);
+            String[] splitValues = lore.replace(",", "").split(" ");
+            this.speedBoostValues[0] = Integer.parseInt(splitValues[splitValues.length - 1]);
+            this.swapSbState(SB.OPEN_HOTM_MENU, MightyMinerConfig.getRandomGuiWaitDelay());
             return;
-          } catch (Exception ignored) {
+          } catch (Exception e) {
+            e.printStackTrace();
+            log("Couldn't parse value properly.");
           }
         }
 
@@ -158,13 +179,33 @@ public class AutoInventory implements IFeature {
         error("Could not get mining speed from tab. Make sure its enabled.");
         break;
       case OPEN_HOTM_MENU:
+        if (!this.hasTimerEnded()) {
+          break;
+        }
+
+        if (InventoryUtil.getInventoryName().equals("SkyBlock Menu")) {
+          InventoryUtil.clickContainerSlot(
+              InventoryUtil.getSlotIdOfItemInContainer("Heart of the Mountain"),
+              ClickType.LEFT,
+              ClickMode.PICKUP
+          );
+        } else {
+          log("Menu Name Is NOT SkyBlock Menu");
+          mc.thePlayer.sendChatMessage("/hotm"); // should never be a thing
+        }
+
+        this.swapSbState(SB.GET_SPEED_BOOST, 2000);
+        break;
+      case GET_SPEED_BOOST:
         if (this.hasTimerEnded()) {
           this.stop();
           this.sbError = SBError.CANNOT_OPEN_INV;
-          error("Could Not Open Inventory in Time.");
+          error("Could Not Open HOTM Inventory in Time.");
           break;
         }
-        if (!InventoryUtil.getInventoryName().contains("Heart of the Mountain") || !InventoryUtil.isInventoryLoaded()) {
+        if (!(mc.thePlayer.openContainer instanceof ContainerChest)
+            || !InventoryUtil.getInventoryName().equals("Heart of the Mountain")
+            || !InventoryUtil.isInventoryLoaded()) {
           break;
         }
 
@@ -174,7 +215,10 @@ public class AutoInventory implements IFeature {
         final Matcher matcher = Pattern.compile("\\+(\\d+)%").matcher(speedBoostLore);
         if (matcher.find()) {
           this.speedBoostValues[1] = Integer.parseInt(matcher.group(1));
-          this.swapSbState(SB.END, 200);
+          if (MithrilMiner.getBoostState() == BoostState.ACTIVE) {
+            this.speedBoostValues[0] /= this.speedBoostValues[1] / 100.0;
+          }
+          this.swapSbState(SB.END, 500);
           break;
         }
 
@@ -192,16 +236,11 @@ public class AutoInventory implements IFeature {
     }
   }
 
-  private void swapSbState(final SB state, final int time) {
-    this.sbState = state;
-    this.timer.schedule(time);
-  }
-
   enum SB {
-    STARTING, GET_SPEED, OPEN_HOTM_MENU, END
+    STARTING, OPEN_MENU, GET_SPEED, OPEN_HOTM_MENU, GET_SPEED_BOOST, END
   }
 
-  enum SBError {
+  public enum SBError {
     NONE, CANNOT_OPEN_INV, CANNOT_GET_VALUE
   }
   //</editor-fold>
@@ -263,14 +302,14 @@ public class AutoInventory implements IFeature {
     switch (this.moveState) {
       case STARTING:
         InventoryUtil.openInventory();
-        this.changeMoveState(MoveState.SWAP_SLOTS, 300);
+        this.changeMoveState(MoveState.SWAP_SLOTS, MightyMinerConfig.getRandomGuiWaitDelay());
 
         log("Opened Inventory");
         break;
       case SWAP_SLOTS:
         if (!(this.elementsToSwap.isEmpty() || this.availableSlots.isEmpty())) {
           InventoryUtil.swapSlots(InventoryUtil.getSlotIdOfItemInContainer(this.elementsToSwap.poll()), this.availableSlots.poll());
-          this.changeMoveState(MoveState.SWAP_SLOTS, 300);
+          this.changeMoveState(MoveState.SWAP_SLOTS, MightyMinerConfig.getRandomGuiWaitDelay());
         } else {
           this.changeMoveState(MoveState.FINISH, 0);
         }

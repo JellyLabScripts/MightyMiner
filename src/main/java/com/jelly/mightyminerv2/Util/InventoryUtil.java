@@ -104,10 +104,8 @@ public class InventoryUtil {
       ItemStack stack = mc.thePlayer.inventory.getStackInSlot(i);
 
       if (stack == null || !stack.hasDisplayName()) {
-        continue;
-      }
-
-      if (!itemsToMove.removeIf(item -> stack.getDisplayName().contains(item))) {
+        slotsToMoveTo.add(i);
+      } else if (!itemsToMove.removeIf(item -> stack.getDisplayName().contains(item))) {
         slotsToMoveTo.add(i);
       }
 

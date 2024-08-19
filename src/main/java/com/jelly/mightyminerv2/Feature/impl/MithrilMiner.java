@@ -25,6 +25,7 @@ import java.util.Random;
 
 // Code here is terrible
 // Help me fix it or fix it pls
+// Todo: Add a timer in case there arent enough mithril to mine
 public class MithrilMiner implements IFeature {
 
   private static MithrilMiner instance;
@@ -36,12 +37,14 @@ public class MithrilMiner implements IFeature {
     return instance;
   }
 
+  private static BoostState boostState = BoostState.AVAILABLE;
+
   private final Minecraft mc = Minecraft.getMinecraft();
   private final Random random = new Random();
   @Getter
   private boolean enabled = false;
   private State state = State.STARTING;
-  private BoostState boostState = BoostState.AVAILABLE;
+  private MithrilError mithrilError = MithrilError.NONE;
   private final Clock timer = new Clock();
   private int miningSpeed = 200;          // Mainly for TickGliding
   private int miningTime = 0;             // For TickGliding
@@ -83,6 +86,10 @@ public class MithrilMiner implements IFeature {
 
   @Override
   public void stop() {
+    if (!this.enabled) {
+      return;
+    }
+
     this.enabled = false;
     this.miningSpeed = 200;
     this.miningTime = 0;
@@ -119,8 +126,26 @@ public class MithrilMiner implements IFeature {
     this.speedBoost = speedBoost;
     this.priority = priority;
     this.enabled = true;
+    this.mithrilError = MithrilError.NONE;
 
     send("Enabled");
+  }
+
+  public void stop(MithrilError error) {
+    this.mithrilError = error;
+    this.stop();
+  }
+
+  public boolean hasSucceeded() {
+    return !this.enabled && this.mithrilError == MithrilError.NONE;
+  }
+
+  public MithrilError getMithrilError() {
+    return this.mithrilError;
+  }
+
+  public static BoostState getBoostState() {
+    return boostState;
   }
 
   @SubscribeEvent
@@ -151,13 +176,17 @@ public class MithrilMiner implements IFeature {
 
         KeyBindUtil.rightClick();
         this.swapState(State.STARTING, 0);
-        this.boostState = BoostState.ACTIVE;
+        boostState = BoostState.INACTIVE;
         break;
       case CHOOSING_BLOCK:
-        final List<BlockPos> blocks = BlockUtil.getBestMithrilBlocks(priority);
+        List<BlockPos> blocks;
+        if (!MightyMinerConfig.mithrilStrafe || (blocks = BlockUtil.getBestMithrilBlocksAround(priority)).isEmpty()) {
+          blocks = BlockUtil.getBestMithrilBlocks(priority);
+        }
+
         if (blocks.size() < 2) {
           error("Cannot find enough mithril blocks to mine.");
-          this.stop();
+          this.stop(MithrilError.NOT_ENOUGH_BLOCKS);
           return;
         }
 
@@ -183,7 +212,6 @@ public class MithrilMiner implements IFeature {
             new RotationConfiguration(
                 new Target(targetPoint),
                 this.getRandomRotationTime(),
-                RotationConfiguration.RotationType.CLIENT,
                 null)
         );
 
@@ -194,16 +222,17 @@ public class MithrilMiner implements IFeature {
               new RotationConfiguration(
                   new Target(targetPoint),
                   this.getRandomRotationTime() * 2L,
-                  RotationConfiguration.RotationType.CLIENT,
                   null)
           );
         }
         RotationHandler.getInstance().start();
 
-        if (this.targetPoint != null && mc.thePlayer.getPositionEyes(1).distanceTo(this.targetPoint) > 4) {
+        if (this.targetPoint != null && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 4) {
           this.swapState(State.WALKING, 0);
-          this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOn()).stream()
-              .min(Comparator.comparingDouble(this.targetBlock::distanceSq)).orElse(null);
+          this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOn())
+              .stream()
+              .min(Comparator.comparingDouble(this.targetBlock::distanceSq))
+              .orElse(null);
         } else {
           this.swapState(State.BREAKING, 0);
           break;
@@ -239,6 +268,7 @@ public class MithrilMiner implements IFeature {
           break;
         }
 
+        // i forgot what this is for :sob:
         if (++this.breakAttemptTime > 60) {
           this.swapState(State.STARTING, 0);
           this.breakAttemptTime = 0;
@@ -279,19 +309,18 @@ public class MithrilMiner implements IFeature {
       return;
     }
     final String msg = event.message.getUnformattedText();
-    if (msg.contains("Mining Speed Boost is now available!")) {
-      this.boostState = BoostState.AVAILABLE;
+    if (msg.equals("Mining Speed Boost is now available!")) {
+      boostState = BoostState.AVAILABLE;
     }
     if (msg.contains("You used your Mining Speed Boost Pickaxe Ability!")) {
-      this.boostState = BoostState.ACTIVE;
+      boostState = BoostState.ACTIVE;
     }
-    if (msg.contains("Your Mining Speed Boost has expired!") || (this.boostState != BoostState.ACTIVE && msg.contains(
-        "This ability is on cooldown for"))) {
-      this.boostState = BoostState.INACTIVE;
+    if (msg.equals("Your Mining Speed Boost has expired!") || (boostState != BoostState.ACTIVE && msg.startsWith("This ability is on cooldown for"))) {
+      boostState = BoostState.INACTIVE;
     }
   }
 
-    @SubscribeEvent
+  @SubscribeEvent
   public void onRender(final RenderWorldLastEvent event) {
     if (!this.isRunning()) {
       return;
@@ -324,5 +353,9 @@ public class MithrilMiner implements IFeature {
 
   enum BoostState {
     AVAILABLE, ACTIVE, INACTIVE,
+  }
+
+  public enum MithrilError {
+    NONE, NOT_ENOUGH_BLOCKS
   }
 }

@@ -13,6 +13,8 @@ import java.awt.Color;
 import java.io.BufferedWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +61,22 @@ public class GraphHandler {
     LogUtil.send("Disabled. Editing: " + this.editing);
   }
 
-  public List<RouteWaypoint> findPath(RouteWaypoint first, RouteWaypoint second){
+  public List<RouteWaypoint> findPath(BlockPos start, RouteWaypoint end) {
+    RouteWaypoint startWp = this.graph.map.keySet().stream().min(Comparator.comparing(it -> start.distanceSq(it.toBlockPos()))).orElse(null);
+    if (startWp == null) {
+      LogUtil.log("StartWP is null");
+      return new ArrayList<>();
+    }
+
+    if (!this.graph.map.containsKey(end)) {
+      LogUtil.log("GraphMap Does Not Contain End");
+      return new ArrayList<>();
+    }
+
+    return findPath(startWp, end);
+  }
+
+  public List<RouteWaypoint> findPath(RouteWaypoint first, RouteWaypoint second) {
     return this.graph.findPath(first, second);
   }
 

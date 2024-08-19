@@ -66,7 +66,12 @@ public class RouteNavigator implements IFeature {
 
   @Override
   public void stop() {
+    if (!this.enabled) {
+      return;
+    }
+
     this.enabled = false;
+    send("RouteNavigator Stopped");
   }
 
   @Override
@@ -88,6 +93,7 @@ public class RouteNavigator implements IFeature {
   private int targetRouteIndex = -1;
   private State state = State.STARTING;
   private boolean isQueued = false;
+  private NavError navError = NavError.NONE;
 
   public void queueRoute(final Route routeToFollow) {
     if (this.enabled) {
@@ -107,6 +113,7 @@ public class RouteNavigator implements IFeature {
     this.targetRouteIndex = index;
     this.currentRouteIndex = this.getCurrentIndex(PlayerUtil.getBlockStandingOn()) - 1;
     this.normalizeIndices();
+    this.navError = NavError.NONE;
     this.enabled = true;
   }
 
@@ -120,6 +127,7 @@ public class RouteNavigator implements IFeature {
     this.targetRouteIndex = -1;
     this.normalizeIndices();
     this.currentRouteIndex = -1;
+    this.navError = NavError.NONE;
 
     send("Enabling AutoAotv.");
   }
@@ -142,6 +150,11 @@ public class RouteNavigator implements IFeature {
     this.resetStatesAfterStop();
 
     send("Disabling Aotv");
+  }
+
+  public void disable(NavError error) {
+    this.navError = error;
+    this.disable();
   }
 
   private void normalizeIndices() {
@@ -171,6 +184,14 @@ public class RouteNavigator implements IFeature {
       return index;
     }
     return this.routeToFollow.getClosest(playerBlock).map(routeWaypoint -> this.routeToFollow.indexOf(routeWaypoint)).orElse(-1);
+  }
+
+  public boolean succeeded() {
+    return !this.enabled && this.navError == NavError.NONE;
+  }
+
+  public NavError getNavError() {
+    return this.navError;
   }
 
   @SubscribeEvent
@@ -205,8 +226,7 @@ public class RouteNavigator implements IFeature {
         RotationHandler.getInstance().easeTo(
             new RotationConfiguration(new Target(nextPoint.toVec3()),
                 this.getLookTime(nextPoint),
-                () -> {
-                })
+                null)
                 .followTarget(true));
         this.swapState(State.ROTATION_VERIFY, 2000);
         log("Rotating");
@@ -215,7 +235,7 @@ public class RouteNavigator implements IFeature {
       case ROTATION_VERIFY: {
         if (this.timer.isScheduled() && this.timer.passed()) {
           error("Could not look in time. Disabling.");
-          this.disable();
+          this.disable(NavError.TIME_FAIL);
           return;
         }
         RouteWaypoint target = this.routeToFollow.get(this.currentRouteIndex);
@@ -246,7 +266,7 @@ public class RouteNavigator implements IFeature {
       case AOTV_VERIFY: {
         if (this.timer.isScheduled() && this.timer.passed()) {
           error("Did not receive teleport packet in time. Disabling");
-          this.disable();
+          this.disable(NavError.TIME_FAIL);
           return;
         }
         break;
@@ -282,17 +302,13 @@ public class RouteNavigator implements IFeature {
 
         if (Pathfinder.getInstance().failed()) {
           error("Pathfinding failed");
-          this.disable();
+          this.disable(NavError.PATHFIND_FAILED);
           return;
         }
 
         break;
       case END_VERIFY: {
         // Todo: add something to verify if player is at the end or not preferably something that checks for distance from end
-
-//        RouteWaypoint target = this.routeToFollow.get(this.targetRouteIndex);
-//        BlockPos playerBlock = PlayerUtil.getBlockStandingOn();
-        // Distance Check Here
 
         if (this.isQueued) {
           this.pause();
@@ -338,5 +354,9 @@ public class RouteNavigator implements IFeature {
 
   enum State {
     STARTING, DETECT_ROUTE, ROTATION, ROTATION_VERIFY, AOTV, AOTV_VERIFY, WALK, WALK_VERIFY, END_VERIFY
+  }
+
+  public enum NavError {
+    NONE, TIME_FAIL, PATHFIND_FAILED
   }
 }

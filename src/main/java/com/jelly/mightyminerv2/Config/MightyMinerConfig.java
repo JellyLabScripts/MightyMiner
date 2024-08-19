@@ -7,6 +7,8 @@ import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import com.jelly.mightyminerv2.Feature.impl.RouteBuilder;
+import com.jelly.mightyminerv2.Handler.MacroHandler;
+import java.util.Random;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.input.Keyboard;
 
@@ -32,37 +34,38 @@ public class MightyMinerConfig extends Config {
   private transient static final String DEBUG = "Debug";
   private transient static final String DISCORD_INTEGRATION = "Discord Integration";
   private transient static final String EXPERIMENTAL = "Experimental";
-
   private transient static final File WAYPOINTS_FILE = new File(mc.mcDataDir, "mm_waypoints.json");
 
-  public static enum MacroType {
-    MITHRIL,
-    COMMISSION,
-    GEMSTONE,
-    POWDER,
-    AOTV
-  }
-
-//
-//    GENERAL SETTINGS
-//
-
+  // <editor-fold desc="General">
   @Dropdown(
       name = "Macro Type",
       category = GENERAL,
       description = "Select the macro type you want to use",
       options = {
-          "Mithril",
           "Commission",
+          "Mithril",
           "Gemstone",
           "Powder",
           "AOTV"
-      },
-      size = 2
+      }
   )
   public static int macroType = 0;
 
+  @KeyBind(
+      name = "Toggle Macro",
+      category = GENERAL,
+      description = "The Button To Click To Toggle The Macro"
+  )
+  public static OneKeyBind toggleMacro = new OneKeyBind(Keyboard.KEY_GRAVE);
+  //</editor-fold>
+
   //<editor-fold desc="Mithril">
+  @Switch(
+      name = "Strafe While Mining", description = "Walk Around The Vein While Mining",
+      category = MITHRIL
+  )
+  public static boolean mithrilStrafe = false;
+
   @Slider(
       name = "Rotation Time",
       category = MITHRIL,
@@ -99,6 +102,12 @@ public class MightyMinerConfig extends Config {
   //</editor-fold>
 
   //<editor-fold desc="Commission Macro">
+  @Text(
+      name = "Mining Tool", description = "The tool to use during comm macro",
+      category = COMMISSION, placeholder = "Pickonimbus 2000", size = 2
+  )
+  public static String commMiningTool = "Pickonimbus 2000";
+
   @Switch(
       name = "Sprint During MobKiller", description = "Allow Sprinting while mobkiller is active (looks sussy with sprint)",
       category = COMMISSION,
@@ -114,13 +123,19 @@ public class MightyMinerConfig extends Config {
   public static boolean commMobKillerInterpolate = true;
 
   @Slider(
+      name = "Commission Milestone",
+      category = COMMISSION,
+      min = 1, max = 3
+  )
+  public static int commMilestone = 1;
+
+  @Slider(
       name = "Distance cost",
       category = COMMISSION,
       subcategory = "MobKiller",
       min = 1, max = 100
   )
   public static int commDistCost = 50;
-
 
   @Slider(
       name = "Rotation cost",
@@ -177,8 +192,23 @@ public class MightyMinerConfig extends Config {
   public static OneColor routeBuilderTracerColor = new OneColor(0, 255, 255, 100);
   //</editor-fold>
 
-
   //<editor-fold desc="Delays">
+  //<editor-fold desc="GUI Delay">
+  @Slider(
+      name = "GUI Delay", description = "Time to wait in a gui",
+      category = DELAY, subcategory = "GUI",
+      min = 50, max = 2000
+  )
+  public static int delaysGuiDelay = 450;
+
+  @Slider(
+      name = "GUI Delay Randomizer", description = "Maximum random time to add to GUI Delay Time",
+      category = DELAY, subcategory = "GUI",
+      min = 50, max = 1000
+  )
+  public static int delaysGuiDelayRandomizer = 250;
+
+  //</editor-fold>
   //<editor-fold desc="AutoAotv">
   @Slider(
       name = "Aotv Look Delay (Right Click)",
@@ -200,7 +230,7 @@ public class MightyMinerConfig extends Config {
   //</editor-fold>
   //</editor-fold>
 
-  //<editor-fold>
+  //<editor-fold desc="Dev">
   @Slider(
       name = "PathExec Rotation Mult",
       category = "Dev",
@@ -210,28 +240,34 @@ public class MightyMinerConfig extends Config {
   public static float devPathRotMult = 1f;
   //</editor-fold>
 
-//
-//    DEBUG SETTINGS
-//
-
+  //<editor-fold desc="Debug">
   @Switch(
       name = "Debug Mode",
       category = DEBUG,
       description = "Enable debug mode"
   )
   public static boolean debugMode = false;
+  //</editor-fold>
 
+  //<editor-fold desc="Misc">
   @Switch(
       name = "Full Blocks",
       category = MISCELLANEOUS,
       description = "Gives a full block hitbox to blocks without a full block hitbox"
   )
-  public static boolean fullblock = false;
+  public static boolean miscFullBlock = false;
+  //</editor-fold>
+
+  public static int getRandomGuiWaitDelay() {
+    return delaysGuiDelay + (int) (Math.random() * delaysGuiDelayRandomizer);
+  }
 
   public MightyMinerConfig() {
     super(new Mod("Mighty Miner", ModType.HYPIXEL), "/MightMinerV2/config.json");
     initialize();
+
     registerKeyBind(routeBuilder, RouteBuilder.getInstance()::toggle);
+    registerKeyBind(toggleMacro, MacroHandler.getInstance()::toggle);
 
     save();
   }

@@ -150,7 +150,7 @@ public class AutoWarp implements IFeature {
     }
 
     if (this.isDoneWarping()) {
-      this.disable();
+      this.disable(false, Error.NONE);
 
       log("Done Warping");
       return;

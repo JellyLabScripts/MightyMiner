@@ -52,7 +52,7 @@ public enum Commission {
       });
       put(SubLocation.UPPER_MINES, new RouteWaypoint[]{
           new RouteWaypoint(-111, 166, -74, TransportMethod.WALK),
-          new RouteWaypoint(-145, 206, -29, TransportMethod.WALK)
+          new RouteWaypoint(-145, 206, -30, TransportMethod.WALK)
       });
       put(SubLocation.TREASURE_HUNTER_CAMP, new RouteWaypoint[]{new RouteWaypoint(-115, 204, -53, TransportMethod.WALK)});
       put(SubLocation.LAVA_SPRINGS, new RouteWaypoint[]{new RouteWaypoint(43, 197, -19, TransportMethod.WALK)});
@@ -70,6 +70,10 @@ public enum Commission {
 
   public static Commission getCommission(final String name) {
     return COMMISSIONS.get(name);
+  }
+
+  public String getName(){
+    return name;
   }
 
   public RouteWaypoint veinWaypoint() {

@@ -3,6 +3,7 @@ package com.jelly.mightyminerv2.Util.helper.route;
 import com.google.gson.annotations.Expose;
 import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Util.RenderUtil;
+import java.util.ArrayList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
@@ -15,7 +16,14 @@ import java.util.Optional;
 public class Route {
 
   @Expose
-  private final List<RouteWaypoint> waypoints = new LinkedList<>();
+  private final List<RouteWaypoint> waypoints = new ArrayList<>();
+
+  public Route() {
+  }
+
+  public Route(List<RouteWaypoint> routes) {
+    this.waypoints.addAll(routes);
+  }
 
   public void insert(final RouteWaypoint waypoint) {
     this.insert(this.waypoints.size(), waypoint);

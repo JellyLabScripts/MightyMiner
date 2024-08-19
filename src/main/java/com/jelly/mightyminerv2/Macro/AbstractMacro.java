@@ -1,11 +1,10 @@
 package com.jelly.mightyminerv2.Macro;
 
-import cc.polyfrost.oneconfig.events.event.ReceivePacketEvent;
+import com.jelly.mightyminerv2.Event.PacketEvent;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.helper.Clock;
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -23,11 +22,13 @@ public abstract class AbstractMacro {
   }
 
   public void enable() {
+    log("AbstractMacro::enable");
     onEnable();
     this.enabled = true;
   }
 
   public void disable() {
+    log("AbstractMacro::disable");
     this.enabled = false;
     onDisable();
   }
@@ -44,6 +45,10 @@ public abstract class AbstractMacro {
     return this.timer.isScheduled() && this.timer.passed();
   }
 
+  public boolean isTimerRunning(){
+    return this.timer.isScheduled() && !this.timer.passed();
+  }
+
   public abstract List<String> getNecessaryItems();
 
   public void onEnable() {
@@ -58,13 +63,13 @@ public abstract class AbstractMacro {
   public void onWorldRender(RenderWorldLastEvent event) {
   }
 
-  public void onChat(ClientChatReceivedEvent event) {
+  public void onChat(String message) {
   }
 
   public void onOverlayRender(RenderGameOverlayEvent event) {
   }
 
-  public void onReceivePacket(ReceivePacketEvent event) {
+  public void onReceivePacket(PacketEvent.Received event) {
   }
 
   public void log(String message) {

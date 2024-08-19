@@ -1,8 +1,10 @@
 package com.jelly.mightyminerv2.Util;
 
 import com.jelly.mightyminerv2.Config.MightyMinerConfig;
-import com.jelly.mightyminerv2.Util.helper.Angle;
+import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.Util.helper.heap.MinHeap;
+import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
+import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper;
 import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -36,27 +38,30 @@ public class BlockUtil {
   }
 
   public static List<BlockPos> getWalkableBlocksAround(BlockPos playerPos) {
-    final List<BlockPos> walkableBlocks = new ArrayList<>();
-    for (int i = -1; i < 2; i++) {
-      for (int k = -1; k < 2; k++) {
-        final BlockPos newPos = playerPos.add(i, 0, k);
-        if (!canStandOn(newPos)) {
-          continue;
-        }
-        if (i != 0 && !canStandOn(playerPos.add(i, 0, 0))) {
-          continue;
-        }
-        if (k != 0 && !canStandOn(playerPos.add(0, 0, k))) {
-          continue;
-        }
+    List<BlockPos> walkableBlocks = new ArrayList<>();
+    BlockStateAccessor bsa = new BlockStateAccessor(MightyMiner.instance);
+    int yOffset = MovementHelper.INSTANCE.isBottomSlab(bsa.get(playerPos.getX(), playerPos.getY(), playerPos.getZ())) ? -1 : 0;
 
-        walkableBlocks.add(newPos);
+    for (int i = -1; i <= 1; i++) {
+      for (int j = yOffset; j <= 0; j++) {
+        for (int k = -1; k <= 1; k++) {
+          int x = playerPos.getX() + i;
+          int y = playerPos.getY() + j;
+          int z = playerPos.getZ() + k;
+
+          if (MovementHelper.INSTANCE.canStandOn(bsa, x, y, z, bsa.get(x, y, z)) &&
+              MovementHelper.INSTANCE.canWalkThrough(bsa, x, y + 1, z, bsa.get(x, y + 1, z)) &&
+              MovementHelper.INSTANCE.canWalkThrough(bsa, x, y + 2, z, bsa.get(x, y + 2, z))) {
+            walkableBlocks.add(new BlockPos(x, y, z));
+          }
+        }
       }
     }
     return walkableBlocks;
   }
 
-  public static List<BlockPos> getBestMithrilBlocks(final int[] priority) {
+  // unfortunately this function is extremely expensive
+  public static List<BlockPos> getBestMithrilBlocksAround(final int[] priority) {
     final MinHeap<BlockPos> blocks = new MinHeap<>(500);
     final Set<Long> visitedPositions = new HashSet<>();
     final List<BlockPos> walkableBlocks =
@@ -92,7 +97,7 @@ public class BlockUtil {
 
             visitedPositions.add(hash);
             // Todo: Cost requires more testing.
-            blocks.add(pos, (angleChange + hardness / 100 + distance) / priorityValue);
+            blocks.add(pos, hardness / 100 + ((angleChange + distance) / priorityValue));
           }
         }
       }
@@ -109,17 +114,9 @@ public class BlockUtil {
     return hash;
   }
 
-  private static boolean canStandOn(final BlockPos pos) {
-    final IBlockState posUpState = mc.theWorld.getBlockState(pos.up());
-    return !mc.theWorld.isAirBlock(pos)
-        && (posUpState.getBlock() instanceof BlockAir
-        || posUpState.getBlock() instanceof BlockCarpet)
-        && mc.theWorld.isAirBlock(pos.add(0, 2, 0));
-  }
-
   // Priority - [GrayWool, Prismarine, BlueWool, Titanium]
 // The higher the priority, the higher the chance of it getting picked
-  public static List<BlockPos> getValidMithrilPositions(int[] priority) {
+  public static List<BlockPos> getBestMithrilBlocks(int[] priority) {
     final MinHeap<BlockPos> blocks = new MinHeap<>(500);
     final BlockPos playerHeadPos = PlayerUtil.getBlockStandingOn().add(0, 2, 0);
     final Vec3 posEyes = mc.thePlayer.getPositionEyes(1);
@@ -142,15 +139,9 @@ public class BlockUtil {
             continue;
           }
 
-          final Angle change = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(),
-              AngleUtil.getRotation(pos));
-          final double angleChange = Math.sqrt(
-              change.getYaw() * change.getYaw() + change.getPitch() * change.getPitch());
-
-          // Todo: Cost requires more testing.
-          blocks.add(pos,
-              angleChange * 0.5 + hardness / (50.0 * priority[getPriorityIndex(
-                  (int) hardness)]) + distance);
+          final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
+          final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
+          blocks.add(pos, (hardness / 100 + angleChange * 0.15 + distance * 0.35) / priorityValue);
         }
       }
     }
@@ -316,9 +307,9 @@ public class BlockUtil {
   public static List<Vec3> bestPointsOnBestSide(final BlockPos block) {
     return pointsOnBlockSide(block, getClosestVisibleSide(block)).stream()
         .filter(RaytracingUtil::canSeePoint)
-        .sorted(Comparator.comparingDouble(
-            i -> AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(i))
-                .getValue()))
+        .sorted(Comparator.comparingDouble(i ->
+            AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(i)).getValue())
+        )
         .collect(Collectors.toList());
   }
 

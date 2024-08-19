@@ -58,6 +58,7 @@ public class PathExecutor {
 
   private boolean allowSprint = true;
   private boolean allowInterpolation = false;
+  private boolean allowStrafing = false;
 
   private Clock stuckTimer = new Clock();
   private Clock strafeTimer = new Clock();
@@ -113,6 +114,10 @@ public class PathExecutor {
 
   public void setAllowInterpolation(boolean interpolate) {
     this.allowInterpolation = interpolate;
+  }
+
+  public void setAllowStrafing(boolean strafing) {
+    this.allowInterpolation = strafing;
   }
 
   public boolean onTick() {

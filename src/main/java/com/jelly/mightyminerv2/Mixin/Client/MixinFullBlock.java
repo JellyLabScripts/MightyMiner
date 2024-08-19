@@ -16,7 +16,7 @@ public abstract class MixinFullBlock extends BlockPane {
     }
 
     public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
-        if (MightyMinerConfig.fullblock)
+        if (MightyMinerConfig.miscFullBlock)
             this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
         else
             super.setBlockBoundsBasedOnState(worldIn, pos);

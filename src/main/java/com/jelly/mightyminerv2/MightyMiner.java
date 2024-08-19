@@ -10,6 +10,7 @@ import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Feature.FeatureManager;
 import com.jelly.mightyminerv2.Handler.GameStateHandler;
 import com.jelly.mightyminerv2.Handler.GraphHandler;
+import com.jelly.mightyminerv2.Handler.MacroHandler;
 import com.jelly.mightyminerv2.Handler.RotationHandler;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.ReflectionUtils;
@@ -151,9 +152,10 @@ public class MightyMiner {
     MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(RouteHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(GraphHandler.getInstance());
+    MinecraftForge.EVENT_BUS.register(MacroHandler.getInstance());
+    MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
     MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
     MinecraftForge.EVENT_BUS.register(new TablistUtil());
-    MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
     MinecraftForge.EVENT_BUS.register(PathExecutor.INSTANCE);
   }
 

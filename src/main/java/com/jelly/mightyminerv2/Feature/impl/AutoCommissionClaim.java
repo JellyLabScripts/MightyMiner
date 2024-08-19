@@ -35,9 +35,9 @@ public class AutoCommissionClaim implements IFeature {
   @Getter
   private boolean enabled = false;
   private State state = State.STARTING;
+  private ClaimError claimError = ClaimError.NONE;
   private Clock timer = new Clock();
-  private Optional<EntityPlayer> ceanna = Optional.empty();
-
+  private Optional<EntityPlayer> emissary = Optional.empty();
 
   @Override
   public String getName() {
@@ -62,14 +62,31 @@ public class AutoCommissionClaim implements IFeature {
   @Override
   public void start() {
     this.enabled = true;
+    this.claimError = ClaimError.NONE;
   }
 
   @Override
   public void stop() {
+    if(!this.enabled) return;
+
     this.enabled = false;
-    this.ceanna = Optional.empty();
+    this.emissary = Optional.empty();
     this.timer.reset();
     this.resetStatesAfterStop();
+    send("AutoCommissionClaim Stopped");
+  }
+
+  public void stop(ClaimError error) {
+    this.claimError = error;
+    this.stop();
+  }
+
+  public boolean succeeded() {
+    return !this.enabled && this.claimError == ClaimError.NONE;
+  }
+
+  public ClaimError claimError() {
+    return this.claimError;
   }
 
   @Override
@@ -93,28 +110,26 @@ public class AutoCommissionClaim implements IFeature {
         this.swapState(State.ROTATING, 0);
         break;
       case ROTATING:
-        this.ceanna = EntityUtil.getCeanna();
-        if (!this.ceanna.isPresent()) {
-          this.stop();
-          error("Cannot Find Ceanna. Stopping");
+        this.emissary = CommissionUtil.getClosestEmissary();
+        if (!this.emissary.isPresent()) {
+          this.stop(ClaimError.INACCESSIBLE_NPC);
+          error("Cannot Find Emissary. Stopping");
           break;
         }
 
-        if(mc.thePlayer.getDistanceSqToEntity(this.ceanna.get()) > 16){
-          this.stop();
-          error("Ceanna is too far away.");
+        if (mc.thePlayer.getDistanceSqToEntity(this.emissary.get()) > 16) {
+          this.stop(ClaimError.INACCESSIBLE_NPC);
+          error("Emissary is too far away.");
           break;
         }
 
-        RotationHandler.getInstance().easeTo(
-            new RotationConfiguration(new Target(this.ceanna.get()), 500, RotationType.CLIENT,
-                null));
+        RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.emissary.get()), 500, RotationType.CLIENT, null));
 
         this.swapState(State.OPENING, 1000);
         break;
       case OPENING:
         if (this.hasTimerEnded()) {
-          this.stop();
+          this.stop(ClaimError.TIMEOUT);
           error("Could not finish rotation in time.");
           break;
         }
@@ -124,10 +139,10 @@ public class AutoCommissionClaim implements IFeature {
         }
 
         // because why not
-        if (entityLookingAt.equals(this.ceanna)) {
+        if (entityLookingAt.equals(this.emissary)) {
           KeyBindUtil.leftClick();
         } else {
-          mc.playerController.interactWithEntitySendPacket(mc.thePlayer, this.ceanna.get());
+          mc.playerController.interactWithEntitySendPacket(mc.thePlayer, this.emissary.get());
         }
 
         this.swapState(State.CLAIMING, 500);
@@ -139,7 +154,7 @@ public class AutoCommissionClaim implements IFeature {
         }
 
         if (!InventoryUtil.getInventoryName().contains("Commissions")) {
-          this.stop();
+          this.stop(ClaimError.INACCESSIBLE_NPC);
           error("Opened a Different Inventory.");
           break;
         }
@@ -173,5 +188,9 @@ public class AutoCommissionClaim implements IFeature {
 
   enum State {
     STARTING, ROTATING, OPENING, CLAIMING, ENDING
+  }
+
+  public enum ClaimError {
+    NONE, INACCESSIBLE_NPC, TIMEOUT
   }
 }

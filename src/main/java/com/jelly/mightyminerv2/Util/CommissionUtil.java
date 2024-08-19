@@ -1,11 +1,14 @@
 package com.jelly.mightyminerv2.Util;
 
 import com.google.common.collect.ImmutableMap;
+import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Macro.commissionmacro.helper.Commission;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
@@ -16,10 +19,53 @@ import net.minecraft.util.Vec3;
 
 public class CommissionUtil {
 
-  private static final Map<Commission, String> slayerMob = ImmutableMap.of(Commission.GOBLIN_SLAYER, "Goblin", Commission.GLACITE_WALKER_SLAYER,
-      "Ice Walker", Commission.TREASURE_HOARDER_SLAYER, "Treasure Hoarder");
-
   private static final Minecraft mc = Minecraft.getMinecraft();
+  private static final Map<Commission, String> slayerMob = ImmutableMap.of(
+      Commission.GOBLIN_SLAYER, "Goblin",
+      Commission.GLACITE_WALKER_SLAYER, "Ice Walker",
+      Commission.TREASURE_HOARDER_SLAYER, "Treasure Hoarder");
+
+  private static final List<Pair<String, Vec3>> emissaries = Arrays.asList(
+      new Pair<>("Carlton", new Vec3(-72.50, 153.00, -10.50)),
+      new Pair<>("Ceanna", new Vec3(42.50, 134.50, 22.50)),
+      new Pair<>("Wilson", new Vec3(171.50, 150.00, 31.50)),
+      new Pair<>("Lilith", new Vec3(58.50, 198.00, -8.50)),
+      new Pair<>("Fraiser", new Vec3(-132.50, 174.00, -50.50)),
+      new Pair<>("Eliza", new Vec3(-37.50, 200.00, -131.50))
+  );
+
+  public static String getMobForCommission(Commission commission) {
+    return slayerMob.get(commission);
+  }
+
+  public static List<Pair<String, Vec3>> availableEmissaries() {
+    return emissaries.subList(0, MightyMinerConfig.commMilestone * 2);
+  }
+
+  public static Optional<EntityPlayer> getEmissary(Vec3 pos) {
+    return mc.theWorld.playerEntities.stream()
+        .filter(entity -> entity.posX == pos.xCoord && entity.posY == pos.yCoord && entity.posZ == pos.zCoord
+            && !entity.getName().contains("Sentry") // Just Because; It should never happen
+            && EntityUtil.isNpc(entity))
+        .findFirst();
+  }
+
+  public static Optional<EntityPlayer> getClosestEmissary() {
+    Vec3 pos = availableEmissaries()
+        .stream()
+        .min(Comparator.comparing(it -> mc.thePlayer.getPositionVector().squareDistanceTo(it.getSecond())))
+        .map(Pair::getSecond)
+        .orElse(null);
+    if (pos == null) {
+      return Optional.empty();
+    }
+
+    return mc.theWorld.playerEntities.stream()
+        .filter(entity -> entity.posX == pos.xCoord && entity.posY == pos.yCoord && entity.posZ == pos.zCoord
+            && !entity.getName().contains("Sentry") // Just Because; It should never happen
+            && EntityUtil.isNpc(entity))
+        .findFirst();
+  }
 
   public static Commission getCurrentCommission() {
     Commission comm = null;
@@ -98,7 +144,8 @@ public class CommissionUtil {
     float normalizedYaw = AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw);
     mobs.sort(Comparator.comparingDouble(mob -> {
           Vec3 mobPos = mob.getPositionVector();
-          double distanceCost = Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord) + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2;
+          double distanceCost =
+              Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord) + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2;
           double angleCost = Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(mob).yaw)));
           return distanceCost * 0.6 + angleCost * 0.1;
         }

@@ -136,6 +136,10 @@ public class Pathfinder implements IFeature {
     pathExecutor.setAllowInterpolation(interpolate);
   }
 
+  public void setStrafeState(boolean strafeState) {
+    pathExecutor.setAllowStrafing(strafeState);
+  }
+
   @SubscribeEvent
   public void onTick(ClientTickEvent event) {
     if (!this.enabled) {
@@ -160,9 +164,7 @@ public class Pathfinder implements IFeature {
     if (!okToPath) {
       return;
     }
-//    log("okToPath");
     if (this.pathQueue.isEmpty()) {
-//      log("Pathqueue is empty");
       if (pathExecutor.getState() == State.WAITING && !this.pathfinding) {
         this.stop();
         this.succeeded = true;

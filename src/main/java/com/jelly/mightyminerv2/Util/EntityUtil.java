@@ -20,14 +20,6 @@ public class EntityUtil {
     return !TablistUtil.getTabListPlayersSkyblock().contains(entity.getName());
   }
 
-  public static Optional<EntityPlayer> getCeanna() {
-    return mc.theWorld.playerEntities.stream()
-        .filter(entity -> entity.posX == 42.50 && entity.posY == 134.50 && entity.posZ == 22.50
-            && !entity.getName().contains("Sentry") // Just Because; It should never happen
-            && isNpc(entity))
-        .findFirst();
-  }
-
   public static Optional<Entity> getEntityLookingAt() {
     return Optional.ofNullable(mc.objectMouseOver.entityHit);
   }

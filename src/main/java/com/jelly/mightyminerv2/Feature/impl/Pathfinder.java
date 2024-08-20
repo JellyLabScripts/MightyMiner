@@ -45,23 +45,8 @@ public class Pathfinder implements IFeature {
   }
 
   @Override
-  public boolean isEnabled() {
-    return this.enabled;
-  }
-
-  @Override
   public boolean isRunning() {
     return this.enabled;
-  }
-
-  @Override
-  public boolean shouldPauseMacroExecution() {
-    return false;
-  }
-
-  @Override
-  public boolean shouldStartAtLaunch() {
-    return false;
   }
 
   @Override
@@ -96,11 +81,6 @@ public class Pathfinder implements IFeature {
     }
     pathExecutor.stop();
     RotationHandler.getInstance().reset();
-  }
-
-  @Override
-  public boolean shouldCheckForFailsafe() {
-    return false;
   }
 
   public void queue(BlockPos start, BlockPos end) {

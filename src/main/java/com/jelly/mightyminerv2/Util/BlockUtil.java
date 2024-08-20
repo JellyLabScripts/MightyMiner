@@ -5,6 +5,7 @@ import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.Util.helper.heap.MinHeap;
 import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
 import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper;
+import kotlin.Pair;
 import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -61,11 +62,14 @@ public class BlockUtil {
   }
 
   // unfortunately this function is extremely expensive
-  public static List<BlockPos> getBestMithrilBlocksAround(final int[] priority) {
+  public static List<BlockPos> getBestMithrilBlocksAround(final int[] priority, BlockPos blockToIgnore) {
     final MinHeap<BlockPos> blocks = new MinHeap<>(500);
     final Set<Long> visitedPositions = new HashSet<>();
-    final List<BlockPos> walkableBlocks =
-        getWalkableBlocksAround(PlayerUtil.getBlockStandingOn());
+    final List<BlockPos> walkableBlocks = getWalkableBlocksAround(PlayerUtil.getBlockStandingOn());
+
+    if(blockToIgnore != null) {
+      visitedPositions.add(longHash(blockToIgnore.getX(), blockToIgnore.getY(), blockToIgnore.getZ()));
+    }
 
     for (final BlockPos blockPos : walkableBlocks) {
       final Vec3 blockCenter = new Vec3(blockPos).addVector(0.5, mc.thePlayer.eyeHeight, 0.5);
@@ -97,7 +101,7 @@ public class BlockUtil {
 
             visitedPositions.add(hash);
             // Todo: Cost requires more testing.
-            blocks.add(pos, hardness / 100 + ((angleChange + distance) / priorityValue));
+            blocks.add(pos, ((hardness / 100) * MightyMinerConfig.devMithHard + angleChange * MightyMinerConfig.devMithRot + distance * MightyMinerConfig.devMithDist) / priorityValue);
           }
         }
       }
@@ -115,11 +119,47 @@ public class BlockUtil {
   }
 
   // Priority - [GrayWool, Prismarine, BlueWool, Titanium]
-// The higher the priority, the higher the chance of it getting picked
-  public static List<BlockPos> getBestMithrilBlocks(int[] priority) {
+  // The higher the priority, the higher the chance of it getting picked
+  public static List<BlockPos> getBestMithrilBlocks(int[] priority, BlockPos blockToIgnore) {
     final MinHeap<BlockPos> blocks = new MinHeap<>(500);
     final BlockPos playerHeadPos = PlayerUtil.getBlockStandingOn().add(0, 2, 0);
     final Vec3 posEyes = mc.thePlayer.getPositionEyes(1);
+    for (int x = -4; x < 5; x++) {
+      for (int z = -4; z < 5; z++) {
+        for (int y = -3; y < 5; y++) {
+          final BlockPos pos = playerHeadPos.add(x, y, z);
+          if (pos.equals(blockToIgnore)) {
+            continue;
+          }
+
+          final double hardness = getBlockStrength(pos);
+          if (hardness < 500 || hardness > 2000 || hardness == 600) {
+            continue;
+          }
+
+          final double distance = posEyes.distanceTo(new Vec3(pos));
+          if (distance > 4) {
+            continue;
+          }
+
+          if (!hasVisibleSide(pos)) {
+            continue;
+          }
+
+          final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
+          final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
+          blocks.add(pos, ((hardness / 100) * MightyMinerConfig.devMithHard + angleChange * MightyMinerConfig.devMithRot + distance * MightyMinerConfig.devMithDist) / priorityValue);
+        }
+      }
+    }
+    return blocks.getBlocks();
+  }
+
+  public static List<Pair<BlockPos, List<Float>>> getBestMithrilBlocksDebug(int[] priority) {
+//    final MinHeap<BlockPos> blocks = new MinHeap<>(500);
+    final BlockPos playerHeadPos = PlayerUtil.getBlockStandingOn().add(0, 2, 0);
+    final Vec3 posEyes = mc.thePlayer.getPositionEyes(1);
+    List<Pair<BlockPos, List<Float>>> debugs = new ArrayList<>();
     for (int x = -4; x < 5; x++) {
       for (int z = -4; z < 5; z++) {
         for (int y = -3; y < 5; y++) {
@@ -141,11 +181,17 @@ public class BlockUtil {
 
           final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
           final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
-          blocks.add(pos, (hardness / 100 + angleChange * 0.15 + distance * 0.35) / priorityValue);
+//          blocks.add(pos, (hardness / 100 + angleChange * 0.15 + distance * 0.35) / priorityValue);
+          debugs.add(new Pair(pos, Arrays.asList(
+              (float) (hardness / (100 * MightyMinerConfig.devMithHard * priorityValue)),
+              angleChange / (MightyMinerConfig.devMithRot * priorityValue),
+              (float) distance / (MightyMinerConfig.devMithDist * priorityValue)))
+          );
         }
       }
     }
-    return blocks.getBlocks();
+    debugs.sort(Comparator.comparing(it -> it.getSecond().stream().reduce(0f, Float::sum)));
+    return debugs;
   }
 
   private static int getPriorityIndex(final int hardness) {

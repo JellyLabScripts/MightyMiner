@@ -6,13 +6,7 @@ public interface IFeature {
 
   String getName();
 
-  boolean isEnabled();
-
   boolean isRunning();
-
-  boolean shouldPauseMacroExecution();
-
-  boolean shouldStartAtLaunch();
 
   void start();
 
@@ -20,7 +14,21 @@ public interface IFeature {
 
   void resetStatesAfterStop();
 
-  boolean shouldCheckForFailsafe();
+  default boolean isEnabled() {
+    return true;
+  }
+
+  default boolean shouldPauseMacroExecution() {
+    return false;
+  }
+
+  default boolean shouldStartAtLaunch() {
+    return false;
+  }
+
+  default boolean shouldCheckForFailsafe() {
+    return false;
+  }
 
   default void log(String message) {
     LogUtil.log(getMessage(message));

@@ -74,11 +74,6 @@ public class RouteBuilder implements IFeature {
     public void resetStatesAfterStop() {
     }
 
-    @Override
-    public boolean shouldCheckForFailsafe() {
-        return false;
-    }
-
     @SubscribeEvent
     public void onKeyEvent(InputEvent.KeyInputEvent event) {
         if (!this.isRunning()) return;

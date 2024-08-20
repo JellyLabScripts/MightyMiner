@@ -1,6 +1,7 @@
 package com.jelly.mightyminerv2.Macro.commissionmacro;
 
 import com.jelly.mightyminerv2.Config.MightyMinerConfig;
+import com.jelly.mightyminerv2.Event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.Feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.Feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.Feature.impl.AutoMobKiller;
@@ -53,8 +54,9 @@ public class CommissionMacro extends AbstractMacro {
     this.macroRetries = 0;
 
     this.miningSpeed = this.miningSpeedBoost = 0;
-
     this.curr = this.last = null;
+
+    this.checkForCommissionComplete = false;
 
     AutoMobKiller.getInstance().stop();
     AutoCommissionClaim.getInstance().stop();
@@ -114,8 +116,41 @@ public class CommissionMacro extends AbstractMacro {
     }
   }
 
+  public void onChat(String message) {
+    if (!this.isEnabled() || this.mainState != MainState.MACRO) {
+      return;
+    }
+
+    if (message.contains("Complete")) {
+      log("Message: " + message);
+      log("MyMessage: " + (this.curr.getName() + " Commission Complete! Visit the King to claim your rewards!"));
+      log("equalsignorecase: " + message.equalsIgnoreCase(this.curr.getName() + " Commission Complete! Visit the King to claim your rewards!"));
+    }
+
+    if (message.equalsIgnoreCase(this.curr.getName() + " Commission Complete! Visit the King to claim your rewards!")) {
+      send("Commission Complete Detected");
+      this.checkForCommissionComplete = true;
+    }
+  }
+
+  public void onTablistUpdate(UpdateTablistEvent event) {
+    if (!this.isEnabled() || this.mainState != MainState.MACRO || !this.checkForCommissionComplete) {
+      return;
+    }
+
+    Commission commission = CommissionUtil.getCurrentCommission();
+
+    if (commission == Commission.COMMISSION_CLAIM) {
+      MithrilMiner.getInstance().stop();
+      AutoMobKiller.getInstance().stop();
+      this.checkForCommissionComplete = false;
+      this.changeMacroState(MacroState.STARTING); // do i go to pathing or start? going to start rechecks the comm which basically does nothing
+    }
+  }
+
   // <editor-fold desc="Handle Macro">
   private MacroState macroState = MacroState.STARTING;
+  private boolean checkForCommissionComplete = false;
   private int miningSpeed = 0;
   private int miningSpeedBoost = 0;
   private int macroRetries = 0;
@@ -203,7 +238,14 @@ public class CommissionMacro extends AbstractMacro {
         }
         break;
       case PATHING:
-        List<RouteWaypoint> nodes = GraphHandler.getInstance().findPath(PlayerUtil.getBlockStandingOn(), this.curr.veinWaypoint());
+        RouteWaypoint end;
+        if (this.curr.getName().equals("Claim Commission")) {
+          end = this.curr.closestWaypointTo(CommissionUtil.getClosestEmissaryPosition());
+        } else {
+          end = this.curr.getWaypoint();
+        }
+
+        List<RouteWaypoint> nodes = GraphHandler.getInstance().findPath(PlayerUtil.getBlockStandingOn(), end);
         if (nodes.isEmpty()) {
           error("Could not find a path to target. Stopping");
           this.changeMainState(MainState.NONE);
@@ -331,6 +373,7 @@ public class CommissionMacro extends AbstractMacro {
         }
 
         if (AutoCommissionClaim.getInstance().succeeded()) {
+          this.changeMacroState(MacroState.STARTING);
           return;
         }
 

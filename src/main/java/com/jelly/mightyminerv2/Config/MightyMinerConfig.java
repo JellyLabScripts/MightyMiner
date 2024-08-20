@@ -57,6 +57,13 @@ public class MightyMinerConfig extends Config {
       description = "The Button To Click To Toggle The Macro"
   )
   public static OneKeyBind toggleMacro = new OneKeyBind(Keyboard.KEY_GRAVE);
+
+  @Switch(
+      name = "Ungrab Mouse", description = "Ungrabs Mouse; Duh",
+      category = GENERAL
+  )
+  public static boolean ungrabMouse = true;
+
   //</editor-fold>
 
   //<editor-fold desc="Mithril">
@@ -190,6 +197,37 @@ public class MightyMinerConfig extends Config {
       category = ROUTE_BUILDER
   )
   public static OneColor routeBuilderTracerColor = new OneColor(0, 255, 255, 100);
+
+  @KeyBind(
+      name = "RouteBuilder Add UNIDI",
+      category = ROUTE_BUILDER, subcategory = "Graph"
+  )
+  public static OneKeyBind routeBuilderUnidi = new OneKeyBind(Keyboard.KEY_NUMPAD7);
+
+  @KeyBind(
+      name = "RouteBuilder Add BIDI",
+      category = ROUTE_BUILDER, subcategory = "Graph"
+  )
+  public static OneKeyBind routeBuilderBidi = new OneKeyBind(Keyboard.KEY_NUMPAD8);
+
+  @KeyBind(
+      name = "RouteBuilder Select",
+      category = ROUTE_BUILDER, subcategory = "Graph"
+  )
+  public static OneKeyBind routeBuilderSelect = new OneKeyBind(Keyboard.KEY_NUMPAD4);
+
+  @KeyBind(
+      name = "RouteBuilder Move",
+      category = ROUTE_BUILDER, subcategory = "Graph"
+  )
+  public static OneKeyBind routeBuilderMove = new OneKeyBind(Keyboard.KEY_NUMPAD5);
+
+  @KeyBind(
+      name = "RouteBuilder Move",
+      category = ROUTE_BUILDER, subcategory = "Graph"
+  )
+  public static OneKeyBind routeBuilderDelete = new OneKeyBind(Keyboard.KEY_NUMPAD6);
+
   //</editor-fold>
 
   //<editor-fold desc="Delays">
@@ -232,12 +270,28 @@ public class MightyMinerConfig extends Config {
 
   //<editor-fold desc="Dev">
   @Slider(
-      name = "PathExec Rotation Mult",
+      name = "Rotation",
       category = "Dev",
-      subcategory = "Pathing",
-      min = 0f, max = 10f
+      subcategory = "MithrilMiner",
+      min = 0f, max = 100f
   )
-  public static float devPathRotMult = 1f;
+  public static float devMithRot = 1f;
+
+  @Slider(
+      name = "Distance",
+      category = "Dev",
+      subcategory = "MithrilMiner",
+      min = 0f, max = 1f
+  )
+  public static float devMithDist = 1f;
+
+  @Slider(
+      name = "Hardness",
+      category = "Dev",
+      subcategory = "MithrilMiner",
+      min = 0f, max = 1f
+  )
+  public static float devMithHard = 1f;
   //</editor-fold>
 
   //<editor-fold desc="Debug">

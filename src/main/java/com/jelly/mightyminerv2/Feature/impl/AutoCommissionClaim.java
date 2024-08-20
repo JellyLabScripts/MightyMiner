@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.Feature.impl;
 
+import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Feature.IFeature;
 import com.jelly.mightyminerv2.Handler.RotationHandler;
 import com.jelly.mightyminerv2.Util.CommissionUtil;
@@ -13,7 +14,6 @@ import com.jelly.mightyminerv2.Util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.Util.helper.RotationConfiguration.RotationType;
 import com.jelly.mightyminerv2.Util.helper.Target;
 import java.util.Optional;
-import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,7 +32,6 @@ public class AutoCommissionClaim implements IFeature {
   }
 
   private final Minecraft mc = Minecraft.getMinecraft();
-  @Getter
   private boolean enabled = false;
   private State state = State.STARTING;
   private ClaimError claimError = ClaimError.NONE;
@@ -47,16 +46,6 @@ public class AutoCommissionClaim implements IFeature {
   @Override
   public boolean isRunning() {
     return this.enabled;
-  }
-
-  @Override
-  public boolean shouldPauseMacroExecution() {
-    return false;
-  }
-
-  @Override
-  public boolean shouldStartAtLaunch() {
-    return false;
   }
 
   @Override
@@ -76,6 +65,11 @@ public class AutoCommissionClaim implements IFeature {
     send("AutoCommissionClaim Stopped");
   }
 
+  @Override
+  public void resetStatesAfterStop() {
+    this.state = State.STARTING;
+  }
+
   public void stop(ClaimError error) {
     this.claimError = error;
     this.stop();
@@ -87,16 +81,6 @@ public class AutoCommissionClaim implements IFeature {
 
   public ClaimError claimError() {
     return this.claimError;
-  }
-
-  @Override
-  public void resetStatesAfterStop() {
-    this.state = State.STARTING;
-  }
-
-  @Override
-  public boolean shouldCheckForFailsafe() {
-    return false;
   }
 
   @SubscribeEvent
@@ -125,7 +109,7 @@ public class AutoCommissionClaim implements IFeature {
 
         RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.emissary.get()), 500, RotationType.CLIENT, null));
 
-        this.swapState(State.OPENING, 1000);
+        this.swapState(State.OPENING, 2000);
         break;
       case OPENING:
         if (this.hasTimerEnded()) {
@@ -145,7 +129,7 @@ public class AutoCommissionClaim implements IFeature {
           mc.playerController.interactWithEntitySendPacket(mc.thePlayer, this.emissary.get());
         }
 
-        this.swapState(State.CLAIMING, 500);
+        this.swapState(State.CLAIMING, MightyMinerConfig.getRandomGuiWaitDelay());
 
         break;
       case CLAIMING:
@@ -165,7 +149,7 @@ public class AutoCommissionClaim implements IFeature {
         } else {
           send("No Commission To Claim");
         }
-        this.swapState(State.ENDING, 500);
+        this.swapState(State.ENDING, MightyMinerConfig.getRandomGuiWaitDelay());
         break;
       case ENDING:
         if (!this.hasTimerEnded()) {

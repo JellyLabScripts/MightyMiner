@@ -5,6 +5,7 @@ import com.jelly.mightyminerv2.Feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.Feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.Feature.impl.AutoWarp;
 import com.jelly.mightyminerv2.Feature.impl.MithrilMiner;
+import com.jelly.mightyminerv2.Feature.impl.MouseUngrab;
 import com.jelly.mightyminerv2.Feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.Feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.Feature.impl.RouteBuilder;
@@ -32,27 +33,26 @@ public class FeatureManager {
     addFeature(RouteBuilder.getInstance());
     addFeature(RouteNavigator.getInstance());
     addFeature(AutoInventory.getInstance());
-
     addFeature(MithrilMiner.getInstance());
     addFeature(AutoCommissionClaim.getInstance());
     addFeature(AutoMobKiller.getInstance());
     addFeature(Pathfinder.getInstance());
     addFeature(AutoWarp.getInstance());
+    addFeature(MouseUngrab.getInstance());
   }
 
   public void enableAll() {
     for (IFeature feature : features) {
-      if (feature.shouldStartAtLaunch() && !feature.isEnabled()) {
+      if (feature.shouldStartAtLaunch() && !feature.isRunning()) {
         feature.start();
         LogUtil.send("Enabled Feature:" + feature.getName());
       }
-
     }
   }
 
   public void disableAll() {
     for (IFeature feature : features) {
-      if (feature.isEnabled()) {
+      if (feature.isRunning()) {
         feature.stop();
         LogUtil.send("Disabled Feature:" + feature.getName());
       }
@@ -82,9 +82,9 @@ public class FeatureManager {
 
   public void disableCurrentRunning(IFeature sender) {
     features.stream().filter(IFeature::isRunning).forEach(feature -> {
-        if (feature == sender) {
-            return;
-        }
+      if (feature == sender) {
+        return;
+      }
       feature.stop();
       LogUtil.send("Disabled Feature:" + feature.getName());
     });
@@ -92,9 +92,9 @@ public class FeatureManager {
 
   public void disableAllExcept(IFeature... sender) {
     features.stream().filter(IFeature::isRunning).forEach(feature -> {
-        if (Arrays.asList(sender).contains(feature)) {
-            return;
-        }
+      if (Arrays.asList(sender).contains(feature)) {
+        return;
+      }
       feature.stop();
       LogUtil.send("Disabled Feature:" + feature.getName());
     });

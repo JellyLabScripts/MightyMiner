@@ -2,6 +2,8 @@ package com.jelly.mightyminerv2.Handler;
 
 import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.Event.PacketEvent;
+import com.jelly.mightyminerv2.Event.UpdateTablistEvent;
+import com.jelly.mightyminerv2.Feature.FeatureManager;
 import com.jelly.mightyminerv2.Macro.AbstractMacro;
 import com.jelly.mightyminerv2.Macro.commissionmacro.CommissionMacro;
 import com.jelly.mightyminerv2.Util.LogUtil;
@@ -43,12 +45,14 @@ public class MacroHandler {
 
   public void enable() {
     log("::enable");
+    FeatureManager.getInstance().enableAll();
     this.currentMacro = this.getCurrentMacro();
     this.currentMacro.enable();
   }
 
   public void disable() {
     log("::disable");
+    FeatureManager.getInstance().disableAll();
     this.currentMacro.disable();
     this.currentMacro = null;
   }
@@ -74,6 +78,15 @@ public class MacroHandler {
     }
 
     this.currentMacro.onChat(event.message.getUnformattedText());
+  }
+
+  @SubscribeEvent
+  public void onTablistUpdate(UpdateTablistEvent event){
+    if(this.currentMacro == null){
+      return;
+    }
+
+    this.currentMacro.onTablistUpdate(event);
   }
 
   @SubscribeEvent

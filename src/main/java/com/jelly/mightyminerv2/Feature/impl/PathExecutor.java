@@ -218,13 +218,13 @@ public class PathExecutor {
       RotationHandler.getInstance().easeTo(
           new RotationConfiguration(
               new Angle(rotationYaw, 15f),
-              Math.max(300, (long) (400 - horizontalDistToTarget * MightyMinerConfig.devPathRotMult)),
+              Math.max(300, (long) (400 - horizontalDistToTarget * 1.5f)),
               null)
               .easeFunction(Ease.EASE_OUT_QUAD)
       );
     }
 
-    if (strafeTimer.passed()) {
+    if (allowStrafing && strafeTimer.passed()) {
       strafeAmount = (float) (10f * (Math.random() * 2f - 1));
       strafeTimer.schedule(500);
     }
@@ -233,8 +233,8 @@ public class PathExecutor {
       // makes it more human but decreases accuracy - removes that weird sliding effect
       if (this.allowInterpolation && !this.interpolated) {
         long timePassed = System.currentTimeMillis() - this.nodeChangeTime;
-        if (timePassed < 200) {
-          yaw = mc.thePlayer.rotationYaw + yawDiff * (timePassed / 200f);
+        if (timePassed < 100) {
+          yaw = mc.thePlayer.rotationYaw + yawDiff * (timePassed / 100f);
         } else {
           this.interpolated = true;
         }

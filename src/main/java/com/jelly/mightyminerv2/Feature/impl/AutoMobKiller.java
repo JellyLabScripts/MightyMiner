@@ -55,23 +55,8 @@ public class AutoMobKiller implements IFeature {
   }
 
   @Override
-  public boolean isEnabled() {
-    return this.enabled;
-  }
-
-  @Override
   public boolean isRunning() {
     return this.enabled;
-  }
-
-  @Override
-  public boolean shouldPauseMacroExecution() {
-    return true;
-  }
-
-  @Override
-  public boolean shouldStartAtLaunch() {
-    return false;
   }
 
   @Override
@@ -103,6 +88,11 @@ public class AutoMobKiller implements IFeature {
     log("Started");
   }
 
+  @Override
+  public void resetStatesAfterStop() {
+    this.state = State.STARTING;
+  }
+
   public void stop(MKError error) {
     this.mkError = error;
     this.stop();
@@ -114,16 +104,6 @@ public class AutoMobKiller implements IFeature {
 
   public MKError getMkError() {
     return this.mkError;
-  }
-
-  @Override
-  public void resetStatesAfterStop() {
-    this.state = State.STARTING;
-  }
-
-  @Override
-  public boolean shouldCheckForFailsafe() {
-    return true;
   }
 
   @SubscribeEvent
@@ -176,7 +156,7 @@ public class AutoMobKiller implements IFeature {
 
         Pathfinder.getInstance().queue(new BlockPos(mobPos.xCoord, Math.ceil(mobPos.yCoord) - 1, mobPos.zCoord));
         log("Queued new to " + mobPos);
-        if (!Pathfinder.getInstance().isEnabled()) {
+        if (!Pathfinder.getInstance().isRunning()) {
           log("Pathfinder wasnt enabled. starting");
           Pathfinder.getInstance().setSprintState(MightyMinerConfig.commMobKillerSprint);
           Pathfinder.getInstance().setInterpolationState(MightyMinerConfig.commMobKillerInterpolate);
@@ -204,14 +184,14 @@ public class AutoMobKiller implements IFeature {
           return;
         }
 
-        if (!Pathfinder.getInstance().isEnabled()) {
+        if (!Pathfinder.getInstance().isRunning()) {
           log("Pathfinder not enabled");
           this.changeState(State.STARTING, 0);
           return;
         }
         break;
       case LOOKING_AT_MOB:
-        if (!Pathfinder.getInstance().isEnabled()) {
+        if (!Pathfinder.getInstance().isRunning()) {
           RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.targetMob.get()), 400, null));
           this.changeState(State.KILLING_MOB, 0);
 
@@ -219,11 +199,11 @@ public class AutoMobKiller implements IFeature {
         }
       case KILLING_MOB:
         if (!Objects.equals(mc.objectMouseOver.entityHit, this.targetMob.get())) {
-          if (mc.thePlayer.getDistanceSqToEntity(this.targetMob.get()) < 9 && Pathfinder.getInstance().isEnabled()) {
+          if (mc.thePlayer.getDistanceSqToEntity(this.targetMob.get()) < 9 && Pathfinder.getInstance().isRunning()) {
             Pathfinder.getInstance().stop();
             return;
           }
-          if (!Pathfinder.getInstance().isEnabled() && !RotationHandler.getInstance().isEnabled()) {
+          if (!Pathfinder.getInstance().isRunning() && !RotationHandler.getInstance().isEnabled()) {
             this.changeState(State.STARTING, 0);
           }
           return;
@@ -238,7 +218,7 @@ public class AutoMobKiller implements IFeature {
 
   @SubscribeEvent
   public void onRender(RenderWorldLastEvent event) {
-    if (!this.isEnabled() || !this.targetMob.isPresent()) {
+    if (!this.isRunning() || !this.targetMob.isPresent()) {
       return;
     }
     Vec3 pos = this.targetMob.get().getPositionVector();

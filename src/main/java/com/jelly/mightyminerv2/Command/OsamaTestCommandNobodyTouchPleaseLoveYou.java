@@ -81,12 +81,10 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-//    mobs = CommissionUtil.getMobList("Ice Walker", new HashSet<>());
-    mc.theWorld.getLoadedEntityList().forEach(it -> System.out.println("Name: " + it.getName() + ", Itself: " + it));
-//    allowed = !allowed;
-//    if (allowed == false) {
-//      mobs.clear();
-//    }
+//    btd = com.jelly.mightyminerv2.Util.BlockUtil.getBestMithrilBlocksDebug(new int[]{5, 3, 1, 10});
+    for(Pair<String, Vec3> emissary: CommissionUtil.emissaries){
+      LogUtil.send(emissary.getFirst() + " Dist: " + mc.thePlayer.getPositionVector().squareDistanceTo(emissary.getSecond()));
+    }
   }
 
   @SubCommand
@@ -172,10 +170,10 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   @SubCommand
-  public void mine(final String t) {
+  public void mine(int t) {
     if (!MithrilMiner.getInstance().isRunning()) {
-      int[] p = new int[]{9, 7, 5, 1};
-      if (t.equals("t")) {
+      int[] p = new int[]{6, 4, 2, 1};
+      if (t == 1) {
         LogUtil.send("Tita");
         p[3] = 10;
       }
@@ -195,7 +193,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   @SubCommand
-  public void move(){
+  public void move() {
     AutoInventory.getInstance().moveItems(Arrays.asList("Pickonimbus 2000", "Aspect of the Void"));
   }
 
@@ -209,6 +207,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     second = null;
     pathfinder = null;
     curr = null;
+    btd.clear();
   }
 
   @SubCommand
@@ -270,6 +269,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     mobs = CommissionUtil.getMobListDebug("Goblin", new HashSet<>());
   }
 
+  List<Pair<BlockPos, List<Float>>> btd = new ArrayList<>();
+
   @SubscribeEvent
   public void onRender(RenderWorldLastEvent event) {
     if (entTodraw != null) {
@@ -323,6 +324,30 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
             new Color(123, 0, 234, 150));
         RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord,
             pos.yCoord + 2.2, pos.zCoord, 1);
+      }
+    }
+
+    if (!btd.isEmpty()) {
+      Pair<BlockPos, List<Float>> best = btd.get(0);
+      BlockPos pos = best.getFirst();
+      RenderUtil.drawBlockBox(best.getFirst(), new Color(123, 0, 234, 150));
+      if (com.jelly.mightyminerv2.Util.BlockUtil.getBlockLookingAt().equals(pos)) {
+        RenderUtil.drawText(
+            String.format("Hardness: %.2f, Angle: %.2f, Dist: %.2f", best.getSecond().get(0), best.getSecond().get(1), best.getSecond().get(2)),
+            pos.getX() + 0.5,
+            pos.getY() + 1.2, pos.getZ() + 0.5, 1);
+      }
+
+      for (int i = 1; i < btd.size(); i++) {
+        best = btd.get(i);
+        pos = best.getFirst();
+        RenderUtil.drawBlockBox(best.getFirst(), new Color(255, 0, 241, 50));
+        if (com.jelly.mightyminerv2.Util.BlockUtil.getBlockLookingAt().equals(pos)) {
+          RenderUtil.drawText(
+              String.format("Hardness: %.2f, Angle: %.2f, Dist: %.2f", best.getSecond().get(0), best.getSecond().get(1), best.getSecond().get(2)),
+              pos.getX() + 0.5,
+              pos.getY() + 1.2, pos.getZ() + 0.5, 1);
+        }
       }
     }
   }

@@ -1,13 +1,18 @@
 package com.jelly.mightyminerv2.Macro.commissionmacro.helper;
 
 import com.jelly.mightyminerv2.Util.helper.location.SubLocation;
+import com.jelly.mightyminerv2.Util.helper.route.Route;
 import com.jelly.mightyminerv2.Util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.Util.helper.route.TransportMethod;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.Vec3;
 
 public enum Commission {
   // maybe set it to null and choose a random one?
@@ -41,7 +46,13 @@ public enum Commission {
     COMMISSIONS = Collections.unmodifiableMap(commissionsMap);
 
     Map<SubLocation, RouteWaypoint[]> veinsMap = new EnumMap<SubLocation, RouteWaypoint[]>(SubLocation.class) {{
-      put(SubLocation.FORGE_BASIN, new RouteWaypoint[]{new RouteWaypoint(43, 134, 21, TransportMethod.WALK)});
+      put(SubLocation.FORGE_BASIN, new RouteWaypoint[]{
+          new RouteWaypoint(43, 134, 21, TransportMethod.WALK),
+          new RouteWaypoint(58, 197, -11, TransportMethod.WALK),
+          new RouteWaypoint(70, 147, 32, TransportMethod.WALK),
+          new RouteWaypoint(-75, 152, -11, TransportMethod.WALK),
+          new RouteWaypoint(-131, 173, -52, TransportMethod.WALK)
+      });
       put(SubLocation.CLIFFSIDE_VEINS, new RouteWaypoint[]{new RouteWaypoint(93, 144, 51, TransportMethod.WALK)});
       put(SubLocation.ROYAL_MINES, new RouteWaypoint[]{new RouteWaypoint(115, 153, 83, TransportMethod.WALK)});
       put(SubLocation.GREAT_ICE_WALL, new RouteWaypoint[]{new RouteWaypoint(0, 127, 143, TransportMethod.WALK)});
@@ -55,7 +66,7 @@ public enum Commission {
           new RouteWaypoint(-145, 206, -30, TransportMethod.WALK)
       });
       put(SubLocation.TREASURE_HUNTER_CAMP, new RouteWaypoint[]{new RouteWaypoint(-115, 204, -53, TransportMethod.WALK)});
-      put(SubLocation.LAVA_SPRINGS, new RouteWaypoint[]{new RouteWaypoint(43, 197, -19, TransportMethod.WALK)});
+      put(SubLocation.LAVA_SPRINGS, new RouteWaypoint[]{new RouteWaypoint(53, 197, -24, TransportMethod.WALK)});
     }};
     VEINS = Collections.unmodifiableMap(veinsMap);
   }
@@ -72,14 +83,22 @@ public enum Commission {
     return COMMISSIONS.get(name);
   }
 
-  public String getName(){
+  public String getName() {
     return name;
   }
 
-  public RouteWaypoint veinWaypoint() {
+  public RouteWaypoint getWaypoint() {
     RouteWaypoint[] locs = VEINS.get(this.location);
     if (locs != null && locs.length > 0) {
       return locs[new Random().nextInt(locs.length)];
+    }
+    throw new IllegalStateException("No route waypoints available for location: " + this.location);
+  }
+
+  public RouteWaypoint closestWaypointTo(Vec3 pos) {
+    RouteWaypoint[] locs = VEINS.get(this.location);
+    if (locs != null && locs.length > 0) {
+      return Arrays.stream(locs).min(Comparator.comparing(it -> it.toVec3().distanceTo(pos))).get();
     }
     throw new IllegalStateException("No route waypoints available for location: " + this.location);
   }

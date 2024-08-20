@@ -25,13 +25,13 @@ public class CommissionUtil {
       Commission.GLACITE_WALKER_SLAYER, "Ice Walker",
       Commission.TREASURE_HOARDER_SLAYER, "Treasure Hoarder");
 
-  private static final List<Pair<String, Vec3>> emissaries = Arrays.asList(
-      new Pair<>("Carlton", new Vec3(-72.50, 153.00, -10.50)),
+  public static final List<Pair<String, Vec3>> emissaries = Arrays.asList(
       new Pair<>("Ceanna", new Vec3(42.50, 134.50, 22.50)),
+      new Pair<>("Carlton", new Vec3(-72.50, 153.00, -10.50)),
       new Pair<>("Wilson", new Vec3(171.50, 150.00, 31.50)),
       new Pair<>("Lilith", new Vec3(58.50, 198.00, -8.50)),
-      new Pair<>("Fraiser", new Vec3(-132.50, 174.00, -50.50)),
-      new Pair<>("Eliza", new Vec3(-37.50, 200.00, -131.50))
+      new Pair<>("Fraiser", new Vec3(-132.50, 174.00, -50.50))
+//      new Pair<>("Eliza", new Vec3(-37.50, 200.00, -131.50)) // she's at dwarven village, dont need her
   );
 
   public static String getMobForCommission(Commission commission) {
@@ -39,7 +39,7 @@ public class CommissionUtil {
   }
 
   public static List<Pair<String, Vec3>> availableEmissaries() {
-    return emissaries.subList(0, MightyMinerConfig.commMilestone * 2);
+    return emissaries.subList(0, Math.min(MightyMinerConfig.commMilestone * 2, 5));
   }
 
   public static Optional<EntityPlayer> getEmissary(Vec3 pos) {
@@ -65,6 +65,13 @@ public class CommissionUtil {
             && !entity.getName().contains("Sentry") // Just Because; It should never happen
             && EntityUtil.isNpc(entity))
         .findFirst();
+  }
+
+  public static Vec3 getClosestEmissaryPosition() {
+    return availableEmissaries()
+        .stream()
+        .min(Comparator.comparing(it -> mc.thePlayer.getPositionVector().squareDistanceTo(it.getSecond())))
+        .get().getSecond();
   }
 
   public static Commission getCurrentCommission() {

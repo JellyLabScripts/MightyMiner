@@ -37,11 +37,10 @@ public class MithrilMiner implements IFeature {
     return instance;
   }
 
-  private static BoostState boostState = BoostState.AVAILABLE;
+  private static BoostState boostState = BoostState.UNKNOWN;
 
   private final Minecraft mc = Minecraft.getMinecraft();
   private final Random random = new Random();
-  @Getter
   private boolean enabled = false;
   private State state = State.STARTING;
   private MithrilError mithrilError = MithrilError.NONE;
@@ -63,20 +62,6 @@ public class MithrilMiner implements IFeature {
   @Override
   public boolean isRunning() {
     return this.enabled;
-  }
-
-  @Override
-  public boolean shouldPauseMacroExecution() {
-    return false;
-  }
-
-  @Override
-  public boolean shouldStartAtLaunch() {
-    return false;
-  }
-
-  public boolean shouldWalk() {
-    return this.isRunning() && this.state == State.WALKING;
   }
 
   @Override
@@ -108,12 +93,6 @@ public class MithrilMiner implements IFeature {
     this.timer.reset();
     RotationHandler.getInstance().reset();
     this.state = State.STARTING;
-    this.boostState = BoostState.AVAILABLE;
-  }
-
-  @Override
-  public boolean shouldCheckForFailsafe() {
-    return false;
   }
 
   // No TickGlide
@@ -162,7 +141,8 @@ public class MithrilMiner implements IFeature {
         KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
         KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, MightyMinerConfig.mithrilMinerSneakWhileMining);
 
-        if (this.boostState == BoostState.AVAILABLE) {
+        // Unknown or Available
+        if (boostState.ordinal() <= 1) {
           this.swapState(State.SPEED_BOOST, 250);
           KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindAttack, false);
         }
@@ -180,8 +160,8 @@ public class MithrilMiner implements IFeature {
         break;
       case CHOOSING_BLOCK:
         List<BlockPos> blocks;
-        if (!MightyMinerConfig.mithrilStrafe || (blocks = BlockUtil.getBestMithrilBlocksAround(priority)).isEmpty()) {
-          blocks = BlockUtil.getBestMithrilBlocks(priority);
+        if (!MightyMinerConfig.mithrilStrafe || (blocks = BlockUtil.getBestMithrilBlocksAround(priority, this.targetBlock)).isEmpty()) {
+          blocks = BlockUtil.getBestMithrilBlocks(priority, this.targetBlock);
         }
 
         if (blocks.size() < 2) {
@@ -191,7 +171,7 @@ public class MithrilMiner implements IFeature {
         }
 
         this.targetBlock = blocks.get(blocks.get(0).equals(this.targetBlock) ? 1 : 0);
-        final int boostMultiplier = this.boostState == BoostState.ACTIVE ? this.speedBoost / 100 : 1;
+        final int boostMultiplier = boostState == BoostState.ACTIVE ? this.speedBoost / 100 : 1;
         this.miningTime = BlockUtil.getMiningTime(this.targetBlock, this.miningSpeed * boostMultiplier) * 2;
         this.swapState(State.ROTATING, 0);
 
@@ -315,7 +295,8 @@ public class MithrilMiner implements IFeature {
     if (msg.contains("You used your Mining Speed Boost Pickaxe Ability!")) {
       boostState = BoostState.ACTIVE;
     }
-    if (msg.equals("Your Mining Speed Boost has expired!") || (boostState != BoostState.ACTIVE && msg.startsWith("This ability is on cooldown for"))) {
+    if (msg.equals("Your Mining Speed Boost has expired!") || (boostState != BoostState.ACTIVE && msg.startsWith(
+        "This ability is on cooldown for"))) {
       boostState = BoostState.INACTIVE;
     }
   }
@@ -352,7 +333,7 @@ public class MithrilMiner implements IFeature {
   }
 
   enum BoostState {
-    AVAILABLE, ACTIVE, INACTIVE,
+    UNKNOWN, AVAILABLE, ACTIVE, INACTIVE,
   }
 
   public enum MithrilError {

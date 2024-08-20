@@ -51,23 +51,8 @@ public class AutoWarp implements IFeature {
   }
 
   @Override
-  public boolean isEnabled() {
-    return true;
-  }
-
-  @Override
   public boolean isRunning() {
     return this.enabled;
-  }
-
-  @Override
-  public boolean shouldPauseMacroExecution() {
-    return false;
-  }
-
-  @Override
-  public boolean shouldStartAtLaunch() {
-    return false;
   }
 
   @Override
@@ -84,12 +69,6 @@ public class AutoWarp implements IFeature {
   public void resetStatesAfterStop() {
 
   }
-
-  @Override
-  public boolean shouldCheckForFailsafe() {
-    return false;
-  }
-
 
   public void enable(Location targetLocation, SubLocation targetSubLocation) {
     if ((targetLocation != null && !LOCATION_WARP_COMMANDS.containsKey(targetLocation)) || (targetSubLocation != null && !SUBLOCATION_WARP_COMMANDS.containsKey(targetSubLocation))) {

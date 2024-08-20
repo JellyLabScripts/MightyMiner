@@ -2,6 +2,7 @@ package com.jelly.mightyminerv2.Handler;
 
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import com.google.gson.annotations.Expose;
+import com.jelly.mightyminerv2.Config.MightyMinerConfig;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.PlayerUtil;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 import org.lwjgl.input.Keyboard;
 
 public class GraphHandler {
@@ -62,7 +63,10 @@ public class GraphHandler {
   }
 
   public List<RouteWaypoint> findPath(BlockPos start, RouteWaypoint end) {
-    RouteWaypoint startWp = this.graph.map.keySet().stream().min(Comparator.comparing(it -> start.distanceSq(it.toBlockPos()))).orElse(null);
+    RouteWaypoint startWp = new RouteWaypoint(start, TransportMethod.WALK);
+    if (!this.graph.map.containsKey(startWp)) {
+      startWp = this.graph.map.keySet().stream().min(Comparator.comparing(it -> start.distanceSq(it.toBlockPos()))).orElse(null);
+    }
     if (startWp == null) {
       LogUtil.log("StartWP is null");
       return new ArrayList<>();
@@ -88,31 +92,31 @@ public class GraphHandler {
       }
       try (BufferedWriter writer = Files.newBufferedWriter(MightyMiner.commRoutePath, StandardCharsets.UTF_8)) {
         writer.write(MightyMiner.gson.toJson(instance));
-        this.dirty = false;
         LogUtil.send("saved Data");
       } catch (Exception e) {
         LogUtil.send("No saved data");
         e.printStackTrace();
       }
+      this.dirty = false;
     }
   }
 
   @SubscribeEvent
-  public void onInput(KeyInputEvent event) {
+  public void onInput(InputEvent event) {
     if (!this.editing) {
       return;
     }
 
     RouteWaypoint currentWaypoint = new RouteWaypoint(PlayerUtil.getBlockStandingOn(), TransportMethod.WALK);
 
-    if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD4)) {
+    if (MightyMinerConfig.routeBuilderSelect.isActive()) {
       lastPos = currentWaypoint;
       LogUtil.send("Changed Parent");
     }
 
-    if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD7) || Keyboard.isKeyDown(Keyboard.KEY_NUMPAD8)) {
+    if (MightyMinerConfig.routeBuilderUnidi.isActive() || MightyMinerConfig.routeBuilderBidi.isActive()) {
       if (lastPos != null) {
-        boolean bidi = Keyboard.isKeyDown(Keyboard.KEY_NUMPAD8); // Check if KEY_8 is pressed for bidirectional edges
+        boolean bidi = MightyMinerConfig.routeBuilderBidi.isActive(); // Check if KEY_8 is pressed for bidirectional edges
         this.graph.add(lastPos, currentWaypoint, bidi);
         LogUtil.send("Added " + (bidi ? "Bidirectional" : "Unidirectional"));
       } else {
@@ -123,7 +127,7 @@ public class GraphHandler {
       this.dirty = true;
     }
 
-    if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD5)) {
+    if (MightyMinerConfig.routeBuilderMove.isActive()) {
       if (lastPos == null) {
         return;
       }
@@ -133,7 +137,7 @@ public class GraphHandler {
       LogUtil.send("Updated");
     }
 
-    if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD6)) {
+    if (MightyMinerConfig.routeBuilderDelete.isActive()) {
       if (lastPos == null) {
         return;
       }

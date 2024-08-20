@@ -32,7 +32,6 @@ public class AutoInventory implements IFeature {
   }
 
   private final Minecraft mc = Minecraft.getMinecraft();
-  @Getter
   private boolean enabled = false;
   private Task mainTask = Task.NONE;
   private Clock timer = new Clock();
@@ -45,16 +44,6 @@ public class AutoInventory implements IFeature {
   @Override
   public boolean isRunning() {
     return this.enabled;
-  }
-
-  @Override
-  public boolean shouldPauseMacroExecution() {
-    return false;
-  }
-
-  @Override
-  public boolean shouldStartAtLaunch() {
-    return false;
   }
 
   @Override
@@ -74,11 +63,6 @@ public class AutoInventory implements IFeature {
     this.mainTask = Task.NONE;
     this.sbState = SB.STARTING;
     this.moveState = MoveState.STARTING;
-  }
-
-  @Override
-  public boolean shouldCheckForFailsafe() {
-    return false;
   }
 
   @SubscribeEvent

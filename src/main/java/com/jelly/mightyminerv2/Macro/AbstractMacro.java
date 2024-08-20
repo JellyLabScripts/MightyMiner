@@ -1,6 +1,7 @@
 package com.jelly.mightyminerv2.Macro;
 
 import com.jelly.mightyminerv2.Event.PacketEvent;
+import com.jelly.mightyminerv2.Event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.Util.LogUtil;
 import com.jelly.mightyminerv2.Util.helper.Clock;
 import java.util.List;
@@ -64,6 +65,9 @@ public abstract class AbstractMacro {
   }
 
   public void onChat(String message) {
+  }
+
+  public void onTablistUpdate(UpdateTablistEvent event){
   }
 
   public void onOverlayRender(RenderGameOverlayEvent event) {

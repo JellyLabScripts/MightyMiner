@@ -51,16 +51,6 @@ public class RouteNavigator implements IFeature {
   }
 
   @Override
-  public boolean shouldPauseMacroExecution() {
-    return true;
-  }
-
-  @Override
-  public boolean shouldStartAtLaunch() {
-    return false;
-  }
-
-  @Override
   public void start() {
   }
 
@@ -129,7 +119,7 @@ public class RouteNavigator implements IFeature {
     this.currentRouteIndex = -1;
     this.navError = NavError.NONE;
 
-    send("Enabling AutoAotv.");
+    send("Enabling RouteNavigator.");
   }
 
   public void pause() {
@@ -137,7 +127,7 @@ public class RouteNavigator implements IFeature {
     this.timer.reset();
     this.resetStatesAfterStop();
 
-    send("Pausing AutoAotv");
+    send("Pausing RouteNavigator");
   }
 
   public void disable() {
@@ -283,8 +273,9 @@ public class RouteNavigator implements IFeature {
           RouteWaypoint target = this.routeToFollow.get(this.currentRouteIndex + 1);
           Pathfinder.getInstance().queue(source, target.toBlockPos());
         }
-        if (!Pathfinder.getInstance().isEnabled()) {
+        if (!Pathfinder.getInstance().isRunning()) {
           log("Started");
+          Pathfinder.getInstance().setInterpolationState(true);
           Pathfinder.getInstance().start();
         }
         this.swapState(State.WALK_VERIFY, 2000);

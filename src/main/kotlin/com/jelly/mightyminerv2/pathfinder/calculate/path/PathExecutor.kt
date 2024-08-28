@@ -1,10 +1,10 @@
 package com.jelly.mightyminerv2.pathfinder.calculate.path
 
-import com.jelly.mightyminerv2.Handler.RotationHandler
-import com.jelly.mightyminerv2.Util.*
-import com.jelly.mightyminerv2.Util.helper.Angle
-import com.jelly.mightyminerv2.Util.helper.Clock
-import com.jelly.mightyminerv2.Util.helper.RotationConfiguration
+import com.jelly.mightyminerv2.handler.RotationHandler
+import com.jelly.mightyminerv2.util.*
+import com.jelly.mightyminerv2.util.helper.Angle
+import com.jelly.mightyminerv2.util.helper.Clock
+import com.jelly.mightyminerv2.util.helper.RotationConfiguration
 import com.jelly.mightyminerv2.pathfinder.calculate.Path
 import com.jelly.mightyminerv2.pathfinder.util.gameSettings
 import com.jelly.mightyminerv2.pathfinder.util.mc
@@ -18,7 +18,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import java.awt.Color
 import java.util.LinkedList
-import kotlin.math.floor
 
 object PathExecutor {
     var enabled = false

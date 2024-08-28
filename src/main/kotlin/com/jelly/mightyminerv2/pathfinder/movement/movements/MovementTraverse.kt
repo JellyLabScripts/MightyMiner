@@ -1,7 +1,6 @@
 package com.jelly.mightyminerv2.pathfinder.movement.movements
 
 import com.jelly.mightyminerv2.MightyMiner
-import com.jelly.mightyminerv2.Util.LogUtil
 import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext
 import com.jelly.mightyminerv2.pathfinder.movement.Movement
 import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper

@@ -4,36 +4,31 @@ import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.jelly.mightyminerv2.Command.OsamaTestCommandNobodyTouchPleaseLoveYou;
-import com.jelly.mightyminerv2.Command.RouteBuilderCommand;
-import com.jelly.mightyminerv2.Config.MightyMinerConfig;
-import com.jelly.mightyminerv2.Feature.FeatureManager;
-import com.jelly.mightyminerv2.Handler.GameStateHandler;
-import com.jelly.mightyminerv2.Handler.GraphHandler;
-import com.jelly.mightyminerv2.Handler.MacroHandler;
-import com.jelly.mightyminerv2.Handler.RotationHandler;
-import com.jelly.mightyminerv2.Util.LogUtil;
-import com.jelly.mightyminerv2.Util.ReflectionUtils;
-import com.jelly.mightyminerv2.Util.ScoreboardUtil;
-import com.jelly.mightyminerv2.Util.TablistUtil;
-import com.jelly.mightyminerv2.Handler.RouteHandler;
-import com.jelly.mightyminerv2.Util.helper.graph.Graph;
-import com.jelly.mightyminerv2.Util.helper.graph.GraphSerializer;
-import com.jelly.mightyminerv2.Util.helper.route.RouteWaypoint;
+import com.jelly.mightyminerv2.command.OsamaTestCommandNobodyTouchPleaseLoveYou;
+import com.jelly.mightyminerv2.command.RouteBuilderCommand;
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.feature.FeatureManager;
+import com.jelly.mightyminerv2.handler.GameStateHandler;
+import com.jelly.mightyminerv2.handler.GraphHandler;
+import com.jelly.mightyminerv2.macro.MacroManager;
+import com.jelly.mightyminerv2.handler.RotationHandler;
+import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.ReflectionUtils;
+import com.jelly.mightyminerv2.util.ScoreboardUtil;
+import com.jelly.mightyminerv2.util.TablistUtil;
+import com.jelly.mightyminerv2.handler.RouteHandler;
+import com.jelly.mightyminerv2.util.helper.graph.Graph;
+import com.jelly.mightyminerv2.util.helper.graph.GraphSerializer;
+import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.pathfinder.calculate.path.PathExecutor;
-import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
 import com.jelly.mightyminerv2.pathfinder.helper.player.IPlayerContext;
 import com.jelly.mightyminerv2.pathfinder.helper.player.PlayerContext;
-import java.io.InputStream;
-import java.nio.file.CopyOption;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -56,19 +51,16 @@ public class MightyMiner {
   private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
   public final String VERSION = "%%VERSION%%";
   public static final Gson gson = new GsonBuilder()
-      .registerTypeAdapter(new TypeToken<Graph<RouteWaypoint>>(){}.getType(), new GraphSerializer<RouteWaypoint>())
+      .registerTypeAdapter(new TypeToken<Graph<RouteWaypoint>>() {
+      }.getType(), new GraphSerializer<RouteWaypoint>())
       .excludeFieldsWithoutExposeAnnotation()
       .setPrettyPrinting()
       .create();
   public static MightyMinerConfig config;
-  public static boolean isDebug = false;
   public static boolean sendNotSupportedMessage = false;
   private static final Minecraft mc = Minecraft.getMinecraft();
   public static final Path routePath = Paths.get("./config/MightyMinerV2/mighty_miner_routes.json");
   public static final Path commRoutePath = Paths.get("./config/MightyMinerV2/comm_routes.json");
-
-  public IPlayerContext playerContext = new PlayerContext(this, Minecraft.getMinecraft());
-//  public BlockStateAccessor bsa = null;
 
   @Mod.Instance
   public static MightyMiner instance;
@@ -123,21 +115,15 @@ public class MightyMiner {
     mc.gameSettings.gammaSetting = 1000;
     mc.gameSettings.pauseOnLostFocus = false;
 
-    isDebug = java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
-
-    Display.setTitle("Mighty Miner 〔v" + VERSION + "〕 " + (isDebug ? "wazzadev!" : "Chilling huh?") + " ☛ " + mc.getSession().getUsername());
+    Display.setTitle(
+        "Mighty Miner 〔v" + VERSION + "〕 " + (MightyMinerConfig.debugMode ? "wazzadev!" : "Chilling huh?") + " ☛ " + mc.getSession().getUsername());
   }
 
-  @SubscribeEvent
-  public void onTickSendNotSupportedMessage(TickEvent.PlayerTickEvent event) {
-    if (mc.thePlayer == null || mc.theWorld == null || sendNotSupportedMessage) {
-      return;
-    }
-
+  @Mod.EventHandler
+  public void postInit(FMLPostInitializationEvent event) {
     if (ReflectionUtils.hasPackageInstalled("feather")) {
       LogUtil.sendNotification("Mighty Miner", "Feather Client is not supported! Might cause issues or a lot of bugs!", 5000L);
       LogUtil.warn("Feather Client is not supported! Might cause issues or a lot of bugs!");
-      sendNotSupportedMessage = true;
     }
   }
 
@@ -146,17 +132,15 @@ public class MightyMiner {
   }
 
   private void initializeListeners() {
-    FeatureManager.getInstance().getFeatures().forEach(MinecraftForge.EVENT_BUS::register);
-
     MinecraftForge.EVENT_BUS.register(GameStateHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(RouteHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(GraphHandler.getInstance());
-    MinecraftForge.EVENT_BUS.register(MacroHandler.getInstance());
+    MinecraftForge.EVENT_BUS.register(MacroManager.getInstance());
+    MinecraftForge.EVENT_BUS.register(FeatureManager.getInstance());
     MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
     MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
     MinecraftForge.EVENT_BUS.register(new TablistUtil());
-    MinecraftForge.EVENT_BUS.register(PathExecutor.INSTANCE);
   }
 
   private void initializeCommands() {
@@ -164,7 +148,7 @@ public class MightyMiner {
     CommandManager.register(new RouteBuilderCommand());
   }
 
-  public static Executor executor(){
+  public static Executor executor() {
     return executor;
   }
 }

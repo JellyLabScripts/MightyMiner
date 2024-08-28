@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.util.BlockPos
 import kotlin.math.ceil
 
-class PlayerContext(val mm: MightyMiner, override val mc: Minecraft) : IPlayerContext {
+class PlayerContext(override val mc: Minecraft) : IPlayerContext {
   override val player get() = mc.thePlayer
   override val playerController get() = mc.playerController
   override val world get() = mc.theWorld

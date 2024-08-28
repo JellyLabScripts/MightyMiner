@@ -1,18 +1,20 @@
 package com.jelly.mightyminerv2.pathfinder.helper
 
 import com.jelly.mightyminerv2.MightyMiner
-import com.jelly.mightyminerv2.Util.IChunkProviderClient
+import com.jelly.mightyminerv2.pathfinder.helper.player.IPlayerContext
+import com.jelly.mightyminerv2.pathfinder.helper.player.PlayerContext
+import com.jelly.mightyminerv2.util.IChunkProviderClient
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 import net.minecraft.block.state.IBlockState
+import net.minecraft.client.Minecraft
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import net.minecraft.world.chunk.Chunk
 
-class BlockStateAccessor(private val mm: MightyMiner) {
-  private val world: World = this.mm.playerContext.world
+class BlockStateAccessor(private val world: World) {
   private val loadedChunks: Long2ObjectMap<Chunk> = Long2ObjectOpenHashMap()
   private var cached: Chunk? = null
   public var access: IBlockAccess

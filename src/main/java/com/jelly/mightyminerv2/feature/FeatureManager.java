@@ -1,18 +1,17 @@
 package com.jelly.mightyminerv2.feature;
 
-import com.jelly.mightyminerv2.event.BlockChangeEvent;
-import com.jelly.mightyminerv2.event.BlockDestroyEvent;
-import com.jelly.mightyminerv2.event.PacketEvent;
-import com.jelly.mightyminerv2.event.UpdateTablistEvent;
-import com.jelly.mightyminerv2.feature.impl.FeatureTracker;
+import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
+import com.jelly.mightyminerv2.feature.impl.AutoInventory;
+import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
+import com.jelly.mightyminerv2.feature.impl.AutoWarp;
+import com.jelly.mightyminerv2.feature.impl.MithrilMiner;
+import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
+import com.jelly.mightyminerv2.feature.impl.Pathfinder;
+import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
+import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import net.minecraftforge.client.event.ClientChatReceivedEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 
 public class FeatureManager {
 
@@ -25,103 +24,55 @@ public class FeatureManager {
     return instance;
   }
 
-  private Set<AbstractFeature> features = FeatureTracker.getInstance().activeFeatures;
-  private boolean paused = false;
+  public final Set<AbstractFeature> allFeatures = new LinkedHashSet<>();
 
-  @SubscribeEvent
-  protected void onTick(ClientTickEvent event) {
-    if (this.paused) {
-      return;
-    }
-    if (FeatureTracker.getInstance().updated && event.phase == Phase.START) {
-      this.features = FeatureTracker.getInstance().activeFeatures;
-      FeatureTracker.getInstance().updated = false;
-    }
-    this.features.forEach(it -> it.onTick(event));
-  }
-
-  @SubscribeEvent
-  protected void onRender(RenderWorldLastEvent event) {
-    if (this.paused) {
-      return;
-    }
-    features.forEach(it -> it.onRender(event));
-  }
-
-  @SubscribeEvent
-  protected void onChat(ClientChatReceivedEvent event) {
-    if (this.paused) {
-      return;
-    }
-    features.forEach(it -> it.onChat(event.message.getUnformattedText()));
-  }
-
-  @SubscribeEvent
-  protected void onTablistUpdate(UpdateTablistEvent event) {
-    if (this.paused) {
-      return;
-    }
-    features.forEach(it -> it.onTablistUpdate(event));
-  }
-
-  @SubscribeEvent
-  protected void onOverlayRender(RenderGameOverlayEvent event) {
-    if (this.paused) {
-      return;
-    }
-    features.forEach(it -> it.onOverlayRender(event));
-  }
-
-  @SubscribeEvent
-  protected void onPacketReceive(PacketEvent.Received event) {
-    if (this.paused) {
-      return;
-    }
-    features.forEach(it -> it.onPacketReceive(event));
-  }
-
-  @SubscribeEvent
-  protected void onBlockChange(BlockChangeEvent event) {
-    if (this.paused) {
-      return;
-    }
-    features.forEach(it -> it.onBlockChange(event));
-  }
-
-  @SubscribeEvent
-  protected void onBlockDestroy(BlockDestroyEvent event) {
-    if (this.paused) {
-      return;
-    }
-    features.forEach(it -> it.onBlockDestroy(event));
-  }
-
-  @SubscribeEvent
-  protected void onKeyEvent(InputEvent.KeyInputEvent event) {
-    if (this.paused) {
-      return;
-    }
-    features.forEach(it -> it.onKeyEvent(event));
+  public FeatureManager() {
+    this.allFeatures.addAll(Arrays.asList(
+        AutoCommissionClaim.getInstance(),
+        AutoInventory.getInstance(),
+        AutoMobKiller.getInstance(),
+        AutoWarp.getInstance(),
+        MithrilMiner.getInstance(),
+        MouseUngrab.getInstance(),
+        Pathfinder.getInstance(),
+        RouteBuilder.getInstance(),
+        RouteNavigator.getInstance()
+    ));
   }
 
   public void enableAll() {
-    FeatureTracker.getInstance().startFeatures();
-    this.paused = false;
+    this.allFeatures.forEach(it -> {
+      if (it.shouldStartAtLaunch()) {
+        it.start();
+      }
+    });
   }
 
   public void disableAll() {
-    FeatureTracker.getInstance().stopAllFeatures();
+    this.allFeatures.forEach(it -> {
+      if (it.isRunning()) {
+        it.stop();
+      }
+    });
   }
 
   public void pauseAll() {
-    this.paused = true;
+    this.allFeatures.forEach(it -> {
+      if (it.isRunning()) {
+        it.pause();
+      }
+    });
   }
 
   public void resumeAll() {
-    this.paused = false;
+    this.allFeatures.forEach(it -> {
+      if (it.isRunning()) {
+        it.resume();
+      }
+    });
   }
 
   public boolean shouldNotCheckForFailsafe() {
-    return FeatureTracker.getInstance().activeFeatures.stream().anyMatch(AbstractFeature::shouldNotCheckForFailsafe);
+    return this.allFeatures.stream().filter(AbstractFeature::isRunning).anyMatch(AbstractFeature::shouldNotCheckForFailsafe);
   }
 }

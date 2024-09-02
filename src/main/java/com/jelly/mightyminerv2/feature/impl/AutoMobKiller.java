@@ -21,6 +21,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 // Todo: Make it a universal mob killer perhaps?
@@ -60,7 +61,7 @@ public class AutoMobKiller extends AbstractFeature {
   }
 
   @Override
-  public void onDisable() {
+  public void stop() {
     if (!this.enabled) {
       return;
     }
@@ -93,11 +94,11 @@ public class AutoMobKiller extends AbstractFeature {
     return this.mkError;
   }
 
-  @Override
+  @SubscribeEvent
   protected void onTick(ClientTickEvent event) {
-//    if (mc.thePlayer == null || mc.theWorld == null || !this.enabled) {
-//      return;
-//    }
+    if (!this.enabled) {
+      return;
+    }
 
     if (this.shutdownTimer.isScheduled() && this.shutdownTimer.passed()) {
       this.stop(MKError.NO_ENTITIES);
@@ -203,7 +204,7 @@ public class AutoMobKiller extends AbstractFeature {
     }
   }
 
-  @Override
+  @SubscribeEvent
   protected void onRender(RenderWorldLastEvent event) {
     if (!this.isRunning() || !this.targetMob.isPresent()) {
       return;

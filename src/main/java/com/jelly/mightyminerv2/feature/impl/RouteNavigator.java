@@ -16,6 +16,7 @@ import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 // This works under the assumption that the blocks between every node are clear and traversable.
@@ -103,7 +104,7 @@ public class RouteNavigator extends AbstractFeature {
   }
 
   @Override
-  public void onDisable() {
+  public void stop() {
     if (!this.enabled) {
       return;
     }
@@ -161,11 +162,11 @@ public class RouteNavigator extends AbstractFeature {
     return this.navError;
   }
 
-  @Override
+  @SubscribeEvent
   protected void onTick(ClientTickEvent event) {
-//    if (!this.enabled || mc.thePlayer == null || mc.theWorld == null) {
-//      return;
-//    }
+    if (!this.enabled) {
+      return;
+    }
 
     switch (this.state) {
       case STARTING: {
@@ -288,8 +289,11 @@ public class RouteNavigator extends AbstractFeature {
     }
   }
 
-  @Override
+  @SubscribeEvent
   protected void onPacketReceive(PacketEvent.Received event) {
+    if (!this.enabled) {
+      return;
+    }
     if (this.state != State.AOTV_VERIFY) {
       return;
     }
@@ -306,7 +310,7 @@ public class RouteNavigator extends AbstractFeature {
     }
   }
 
-  @Override
+  @SubscribeEvent
   protected void onRender(RenderWorldLastEvent event) {
     if (!this.isQueued) {
       return;

@@ -54,8 +54,8 @@ public class MacroManager {
     log("Macro::disable");
     FeatureManager.getInstance().disableAll();
     this.currentMacro.disable();
-    this.currentMacro = null;
     send(this.currentMacro.getName() + " Disabled");
+    this.currentMacro = null;
   }
 
   public void pause() {
@@ -76,8 +76,12 @@ public class MacroManager {
     send(this.currentMacro.getName() + " Resumed");
   }
 
-  public boolean isRunning() {
+  public boolean isEnabled() {
     return this.currentMacro != null;
+  }
+
+  public boolean isRunning(){
+    return this.currentMacro != null && this.currentMacro.isEnabled();
   }
 
   @SubscribeEvent
@@ -86,10 +90,11 @@ public class MacroManager {
       return;
     }
 
-    if (!currentMacro.isEnabled()) {
-      this.disable();
-      return;
-    }
+//    needed to remove for pause to work
+//    if (!currentMacro.isEnabled()) {
+//      this.disable();
+//      return;
+//    }
 
     this.currentMacro.onTick(event);
   }

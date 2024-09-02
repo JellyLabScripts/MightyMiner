@@ -256,6 +256,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //      }
 //    }, 0, TimeUnit.MILLISECONDS);
     Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), this.block);
+    Pathfinder.getInstance().setInterpolationState(false);
+    Pathfinder.getInstance().setStrafeState(false);
 //    Pathfinder.getInstance().queue(new BlockPos(first.toVec3()), new BlockPos(second.toVec3()));
 //
     Pathfinder.getInstance().start();

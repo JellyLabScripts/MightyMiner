@@ -15,6 +15,7 @@ import com.jelly.mightyminerv2.util.helper.Target;
 import java.util.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class AutoCommissionClaim extends AbstractFeature {
@@ -38,13 +39,13 @@ public class AutoCommissionClaim extends AbstractFeature {
   }
 
   @Override
-  public void onEnable() {
+  public void start() {
     this.enabled = true;
     this.claimError = ClaimError.NONE;
   }
 
   @Override
-  public void onDisable() {
+  public void stop() {
     if (!this.enabled) {
       return;
     }
@@ -74,11 +75,11 @@ public class AutoCommissionClaim extends AbstractFeature {
     return this.claimError;
   }
 
-  @Override
+  @SubscribeEvent
   protected void onTick(final ClientTickEvent event) {
-//    if (mc.thePlayer == null || mc.theWorld == null || !this.isRunning()) {
-//      return;
-//    }
+    if (!this.enabled) {
+      return;
+    }
 
     switch (this.state) {
       case STARTING:

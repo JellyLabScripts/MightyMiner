@@ -8,6 +8,8 @@ import com.jelly.mightyminerv2.util.helper.location.SubLocation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class AutoWarp extends AbstractFeature {
@@ -60,7 +62,7 @@ public class AutoWarp extends AbstractFeature {
   }
 
   @Override
-  public void onDisable() {
+  public void stop() {
     this.enabled = false;
     this.attempts = 0;
     this.targetLocation = null;
@@ -71,7 +73,7 @@ public class AutoWarp extends AbstractFeature {
   }
 
   @Override
-  public boolean shouldNotCheckForFailsafe(){
+  public boolean shouldNotCheckForFailsafe() {
     return true;
   }
 
@@ -88,11 +90,11 @@ public class AutoWarp extends AbstractFeature {
     return this.failReason;
   }
 
-  @Override
+  @SubscribeEvent
   protected void onTick(ClientTickEvent event) {
-//    if (mc.thePlayer == null || mc.theWorld == null || !this.enabled) {
-//      return;
-//    }
+    if (!this.enabled) {
+      return;
+    }
 
     if (this.attempts > 10) {
       this.stop(Error.FAILED_TO_WARP);
@@ -156,13 +158,14 @@ public class AutoWarp extends AbstractFeature {
     this.stop(Error.FAILED_TO_WARP);
   }
 
-  @Override
-  protected void onChat(String message) {
-//    if (!this.enabled || event.type != 0) {
-//      return;
-//    }
-//
-//    String message = event.message.getUnformattedText();
+  @SubscribeEvent
+  protected void onChat(ClientChatReceivedEvent event) {
+    if (!this.enabled || event.type != 0) {
+      return;
+    }
+
+    String message = event.message.getUnformattedText();
+
     if (this.waitMessages.contains(message)) {
       this.timer.schedule(10000); // Wait time
     }

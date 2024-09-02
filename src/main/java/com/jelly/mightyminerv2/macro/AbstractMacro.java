@@ -34,10 +34,6 @@ public abstract class AbstractMacro {
     this.onDisable();
   }
 
-  // in some cases with tracker features we might not want to pause all
-  // and some tracker features might be macro specific
-  // so this feature pause and resume methods are called in macro class
-  //    instead of MacroManager to get more control over what to pause
   public void pause() {
     log("AbstractMacro::pause");
     this.enabled = false;
@@ -49,7 +45,6 @@ public abstract class AbstractMacro {
     this.onResume();
     this.enabled = true;
   }
-
 
   public void toggle() {
     if (this.enabled) {

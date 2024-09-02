@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import kotlin.Pair;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class Pathfinder extends AbstractFeature {
@@ -44,7 +45,7 @@ public class Pathfinder extends AbstractFeature {
   }
 
   @Override
-  public void onEnable() {
+  public void start() {
     if (this.pathQueue.isEmpty()) {
       error("Pathqueue is empty. Cannot start");
       return;
@@ -58,7 +59,7 @@ public class Pathfinder extends AbstractFeature {
   }
 
   @Override
-  public void onDisable() {
+  public void stop() {
     this.enabled = false;
     this.pathfinding = false;
     this.skipTick = false;
@@ -114,11 +115,11 @@ public class Pathfinder extends AbstractFeature {
     pathExecutor.setAllowStrafing(strafeState);
   }
 
-  @Override
+  @SubscribeEvent
   protected void onTick(ClientTickEvent event) {
-//    if (!this.enabled) {
-//      return;
-//    }
+    if (!this.enabled) {
+      return;
+    }
 
     boolean okToPath = pathExecutor.onTick();
 
@@ -181,7 +182,7 @@ public class Pathfinder extends AbstractFeature {
     });
   }
 
-  @Override
+  @SubscribeEvent
   protected void onRender(RenderWorldLastEvent event) {
     if (!this.enabled) {
       return;

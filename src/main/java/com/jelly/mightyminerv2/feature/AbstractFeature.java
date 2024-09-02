@@ -4,7 +4,6 @@ import com.jelly.mightyminerv2.event.BlockChangeEvent;
 import com.jelly.mightyminerv2.event.BlockDestroyEvent;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
-import com.jelly.mightyminerv2.feature.impl.FeatureTracker;
 import com.jelly.mightyminerv2.util.LogUtil;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import net.minecraft.client.Minecraft;
@@ -19,38 +18,26 @@ public abstract class AbstractFeature {
   protected final Clock timer = new Clock();
   protected boolean enabled = false;
 
-  public AbstractFeature() {
-    FeatureTracker.getInstance().addFeature(this);
-  }
-
   public abstract String getName();
 
   public boolean isRunning() {
     return this.enabled;
   }
 
-  // this (next 4 methods) is so bad please improve this if you want
-  // i think i made this part too complicated
-  // remember - if you dont need to accept params in start and stop (like autocommclaim.java) then use onEnable and onDisable
-  // if you need to accept parameters to enable / disable then override start and/or stop but make sure you call this.start() and/or this.stop() at the end
   public void start() {
-    this.onEnable();
-    if (this.enabled) {
-      FeatureTracker.getInstance().enableFeature(this);
-    }
   }
 
   public void stop() {
-    this.onDisable();
-    FeatureTracker.getInstance().disableFeature(this);
-  }
-
-  public void onEnable() {
-  }
-
-  public void onDisable() {
     this.enabled = false;
     this.resetStatesAfterStop();
+  }
+
+  public void pause(){
+    this.enabled = false;
+  }
+
+  public void resume(){
+    this.enabled = true;
   }
 
   public void resetStatesAfterStop() {

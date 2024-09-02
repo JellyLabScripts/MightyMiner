@@ -200,7 +200,7 @@ public class PathExecutor {
     float yaw = AngleUtil.get360RotationYaw(
         AngleUtil.getRotation(PlayerUtil.getNextTickPosition(), new Vec3(target).addVector(0.5, 0.0, 0.5), false).yaw);
     float yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);
-    if (yawDiff > 10 && !RotationHandler.getInstance().isEnabled()) {
+    if (yawDiff > 3 && !RotationHandler.getInstance().isEnabled()) {
       float rotationYaw = yaw;
 
       // look at a block thats at least 5 blocks away instead of looking at the target which helps reduce buggy rotation
@@ -240,7 +240,7 @@ public class PathExecutor {
       strafeAmount = 0;
     }
 
-    StrafeUtil.enabled = true;
+    StrafeUtil.enabled = yawDiff > 3;
     StrafeUtil.yaw = yaw + strafeAmount;
 
     // needs work

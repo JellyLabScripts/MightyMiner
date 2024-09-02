@@ -8,6 +8,7 @@ import com.jelly.mightyminerv2.util.LogUtil;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 import java.util.concurrent.TimeUnit;
@@ -37,19 +38,22 @@ public class RouteBuilder extends AbstractFeature {
   }
 
   @Override
-  public void onEnable() {
+  public void start() {
     this.enabled = true;
     Multithreading.schedule(RouteHandler.getInstance()::saveData, 0, TimeUnit.MILLISECONDS);
     send("Enabling RouteBuilder.");
   }
 
   @Override
-  public void onDisable() {
+  public void stop() {
     send("Disabling RouteBuilder.");
   }
 
-  @Override
+  @SubscribeEvent
   public void onKeyEvent(InputEvent.KeyInputEvent event) {
+    if (!this.enabled) {
+      return;
+    }
     if (MightyMinerConfig.routeBuilderAotvAddKeybind.isActive()) {
       this.addToRoute(TransportMethod.AOTV);
       LogUtil.send("Added Aotv");

@@ -73,7 +73,7 @@ public class MouseUngrab extends AbstractFeature {
   }
 
   @Override
-  public void onEnable() {
+  public void start() {
     log("MouseUngrab::onEnable");
     try {
       ungrabMouse();
@@ -83,7 +83,7 @@ public class MouseUngrab extends AbstractFeature {
   }
 
   @Override
-  public void onDisable() {
+  public void stop() {
     log("MouseUngrab::onDisable");
     try {
       regrabMouse();

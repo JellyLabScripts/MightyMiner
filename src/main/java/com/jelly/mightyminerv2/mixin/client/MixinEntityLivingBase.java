@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
@@ -13,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 // Todo: Consider Adding a rotation check To disable omnisprint from within
 @Mixin(EntityLivingBase.class)
 public abstract class MixinEntityLivingBase extends Entity {
+
+  @Shadow public float rotationYawHead;
 
   public MixinEntityLivingBase(World worldIn) {
     super(worldIn);
@@ -48,6 +51,7 @@ public abstract class MixinEntityLivingBase extends Entity {
 
     final float originalYaw = this.rotationYaw;
     this.rotationYaw = StrafeUtil.yaw;
+    System.out.println("OriginalYaw: " + originalYaw + ", RotationYaw: " + this.rotationYaw);
 
     this.moveFlying(s, f, fr);
 

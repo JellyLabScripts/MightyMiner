@@ -12,6 +12,7 @@ import java.awt.Color;
 import java.util.Comparator;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -52,7 +53,7 @@ public class MithrilMiner extends AbstractFeature {
   }
 
   @Override
-  public void onDisable() {
+  public void stop() {
     if (!this.enabled) {
       return;
     }
@@ -110,13 +111,9 @@ public class MithrilMiner extends AbstractFeature {
     return boostState;
   }
 
-  @Override
+  @SubscribeEvent
   protected void onTick(TickEvent.ClientTickEvent event) {
-//    if (mc.thePlayer == null || mc.theWorld == null || mc.currentScreen != null || !this.isRunning()) {
-//      return;
-//    }
-
-    if (mc.currentScreen != null) {
+    if (!this.enabled || mc.currentScreen != null) {
       return;
     }
 
@@ -250,9 +247,9 @@ public class MithrilMiner extends AbstractFeature {
     }
   }
 
-  @Override
+  @SubscribeEvent
   protected void onBlockChange(BlockChangeEvent event) {
-    if (this.state.ordinal() < State.ROTATING.ordinal()) {
+    if (!this.enabled || this.state.ordinal() < State.ROTATING.ordinal()) {
       return;
     }
     if (event.pos.equals(this.targetBlock)) {
@@ -263,15 +260,19 @@ public class MithrilMiner extends AbstractFeature {
 
   @SubscribeEvent
   public void onBlockDestroy(BlockDestroyEvent event) {
-    if (!event.getBlock().equals(this.targetBlock)) {
+    if (!this.enabled || !event.getBlock().equals(this.targetBlock)) {
       return;
     }
 
     this.breakAttemptTime = 0;
   }
 
-  @Override
-  protected void onChat(String message) {
+  @SubscribeEvent
+  protected void onChat(ClientChatReceivedEvent event) {
+    if (event.type != 0) {
+      return;
+    }
+    String message = event.message.getUnformattedText();
     if (message.equals("Mining Speed Boost is now available!")) {
       boostState = BoostState.AVAILABLE;
     }
@@ -284,7 +285,7 @@ public class MithrilMiner extends AbstractFeature {
     }
   }
 
-  @Override
+  @SubscribeEvent
   protected void onRender(RenderWorldLastEvent event) {
     if (this.targetBlock != null) {
       RenderUtil.drawBlockBox(this.targetBlock, new Color(0, 255, 255, 100));

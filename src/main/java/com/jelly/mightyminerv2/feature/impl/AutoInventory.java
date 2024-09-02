@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import kotlin.Pair;
 import net.minecraft.inventory.ContainerChest;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 // A separate class for inventory-related tasks that aren't significant enough to warrant their own feature class
@@ -41,11 +42,11 @@ public class AutoInventory extends AbstractFeature {
     this.moveState = MoveState.STARTING;
   }
 
-  @Override
+  @SubscribeEvent
   protected void onTick(ClientTickEvent event) {
-//    if (mc.thePlayer == null || mc.theWorld == null || !this.isRunning()) {
-//      return;
-//    }
+    if (!this.enabled) {
+      return;
+    }
 
     switch (this.mainTask) {
       case NONE:

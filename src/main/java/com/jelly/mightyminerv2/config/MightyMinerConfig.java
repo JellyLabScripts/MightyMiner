@@ -300,6 +300,30 @@ public class MightyMinerConfig extends Config {
       min = 0f, max = 1f
   )
   public static float devMithHard = 1f;
+
+  @Slider(
+      name = "MobKiller Dist Cost",
+      category = "Dev",
+      subcategory = "MobKiller",
+      min = 0, max = 100
+  )
+  public static int devMKillDist = 100;
+
+  @Slider(
+      name = "MobKiller Rot Cost",
+      category = "Dev",
+      subcategory = "MobKiller",
+      min = 0, max = 100
+  )
+  public static int devMKillRot = 5;
+
+  @Text(
+      name = "MobKiller Mob Name",
+      category = "Dev",
+      subcategory = "MobKiller",
+      placeholder = "Enter Mobname Here"
+  )
+  public static String devMKillerMob = "Goblin";
   //</editor-fold>
 
   //<editor-fold desc="Debug">
@@ -309,6 +333,7 @@ public class MightyMinerConfig extends Config {
       description = "Enable debug mode"
   )
   public static boolean debugMode = false;
+
   //</editor-fold>
 
   //<editor-fold desc="Misc">

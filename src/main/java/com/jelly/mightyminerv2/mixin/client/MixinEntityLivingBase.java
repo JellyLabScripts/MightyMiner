@@ -51,7 +51,6 @@ public abstract class MixinEntityLivingBase extends Entity {
 
     final float originalYaw = this.rotationYaw;
     this.rotationYaw = StrafeUtil.yaw;
-    System.out.println("OriginalYaw: " + originalYaw + ", RotationYaw: " + this.rotationYaw);
 
     this.moveFlying(s, f, fr);
 

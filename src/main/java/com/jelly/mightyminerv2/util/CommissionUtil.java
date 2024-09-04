@@ -12,6 +12,9 @@ import java.util.Optional;
 import java.util.Set;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;
@@ -139,11 +142,11 @@ public class CommissionUtil {
 //    return mobs;
 //  }
 
-  public static List<EntityPlayer> getMobList(String mobName, Set<EntityPlayer> mobsToIgnore) {
-    List<EntityPlayer> mobs = new ArrayList<>();
-    for (EntityPlayer mob : mc.theWorld.playerEntities) {
-      if (mob.getName().trim().equals(mobName) && mob.isEntityAlive() && !mobsToIgnore.contains(mob)) {
-        mobs.add(mob);
+  public static List<EntityLiving> getMobList(String mobName, Set<EntityLiving> mobsToIgnore) {
+    List<EntityLiving> mobs = new ArrayList<>();
+    for (Entity mob : mc.theWorld.loadedEntityList) {
+      if (mob instanceof EntityLiving && mob.getName().trim().equals(mobName) && mob.isEntityAlive() && !mobsToIgnore.contains(mob)) {
+        mobs.add((EntityLiving) mob);
       }
     }
 
@@ -154,7 +157,7 @@ public class CommissionUtil {
           double distanceCost =
               Math.hypot(playerPos.xCoord - mobPos.xCoord, playerPos.zCoord - mobPos.zCoord) + Math.abs(mobPos.yCoord - playerPos.yCoord) * 2;
           double angleCost = Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(mob).yaw)));
-          return distanceCost * 0.6 + angleCost * 0.1;
+          return distanceCost * MightyMinerConfig.devMKillDist + angleCost * MightyMinerConfig.devMKillRot;
         }
     ));
     return mobs;

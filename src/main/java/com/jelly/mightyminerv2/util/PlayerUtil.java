@@ -22,7 +22,7 @@ public class PlayerUtil {
     return new BlockPos(mc.thePlayer.posX, Math.ceil(mc.thePlayer.posY - 0.25) - 1, mc.thePlayer.posZ);
   }
 
-  public static Vec3 getPlayerEyePos(){
+  public static Vec3 getPlayerEyePos() {
     return mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks);
   }
 
@@ -32,6 +32,10 @@ public class PlayerUtil {
 
   public static Vec3 getNextTickPosition() {
     return mc.thePlayer.getPositionVector().addVector(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ);
+  }
+
+  public static Vec3 getNextTickPosition(float mult) {
+    return mc.thePlayer.getPositionVector().addVector(mc.thePlayer.motionX * mult, 0, mc.thePlayer.motionZ * mult);
   }
 
   public static Entity getEntityCuttingOtherEntity(Entity e) {

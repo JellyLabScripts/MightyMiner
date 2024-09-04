@@ -111,10 +111,6 @@ public class Pathfinder extends AbstractFeature {
     pathExecutor.setAllowInterpolation(interpolate);
   }
 
-  public void setStrafeState(boolean strafeState) {
-    pathExecutor.setAllowStrafing(strafeState);
-  }
-
   @SubscribeEvent
   protected void onTick(ClientTickEvent event) {
     if (!this.enabled) {

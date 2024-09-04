@@ -4,6 +4,7 @@ import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.CommissionUtil;
+import com.jelly.mightyminerv2.util.EntityUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
@@ -41,8 +42,8 @@ public class AutoMobKiller extends AbstractFeature {
   private MKError mkError = MKError.NONE;
   private Clock shutdownTimer = new Clock();
   private Clock queueTimer = new Clock();
-  private Set<EntityPlayer> mobQueue = new HashSet<>();
-  private Optional<EntityPlayer> targetMob = Optional.empty();
+  private Set<EntityLiving> mobQueue = new HashSet<>();
+  private Optional<EntityLiving> targetMob = Optional.empty();
   private Optional<Vec3> entityLastPosition = Optional.empty();
   private String mobToKill = "";
 
@@ -118,7 +119,7 @@ public class AutoMobKiller extends AbstractFeature {
         this.changeState(State.FINDING_MOB, 0);
         log("Starting");
       case FINDING_MOB:
-        List<EntityPlayer> mobs = CommissionUtil.getMobList(this.mobToKill, this.mobQueue);
+        List<EntityLiving> mobs = EntityUtil.getEntities(this.mobToKill, this.mobQueue);
         if (mobs.isEmpty()) {
           if (!this.shutdownTimer.isScheduled()) {
             log("Cannot find mobs. Starting a 10 second timer");
@@ -129,9 +130,9 @@ public class AutoMobKiller extends AbstractFeature {
           this.shutdownTimer.reset();
         }
 
-        EntityPlayer best = mobs.get(0);
+        EntityLiving best = mobs.get(0);
         this.targetMob = Optional.ofNullable(best);
-        this.entityLastPosition = Optional.of(best.getPositionVector());
+        this.entityLastPosition = Optional.ofNullable(best.getPositionVector());
         this.changeState(State.WALKING_TO_MOB, 0);
         break;
       case WALKING_TO_MOB:
@@ -206,13 +207,15 @@ public class AutoMobKiller extends AbstractFeature {
 
   @SubscribeEvent
   protected void onRender(RenderWorldLastEvent event) {
-    if (!this.isRunning() || !this.targetMob.isPresent()) {
+    if (!this.enabled || !this.targetMob.isPresent()) {
       return;
     }
     Vec3 pos = this.targetMob.get().getPositionVector();
 
-    RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5),
-        new Color(255, 0, 241, 150));
+    RenderUtil.drawBox(
+        new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord, pos.zCoord + 0.5),
+        new Color(255, 0, 241, 150)
+    );
   }
 
   private void changeState(State state, int time) {

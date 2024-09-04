@@ -133,7 +133,8 @@ object BlockUtil {
         var y0 = MathHelper.floor_double(start0.yCoord)
         var z0 = MathHelper.floor_double(start0.zCoord)
 
-        var last = Pair(bsa.get(x0, y0, z0), BlockPos(start))
+        var lastState = bsa.get(x0, y0, z0)
+        var lastPos = BlockPos(start)
 
         var iterations = 200
         while (iterations-- >= 0) {
@@ -190,13 +191,27 @@ object BlockUtil {
                 enumfacing = if (z1 > z0) EnumFacing.NORTH else EnumFacing.SOUTH
                 start0 = Vec3(start0.xCoord + dx * stepZ, start0.yCoord + dy * stepZ, newZ)
             }
-            x0 = MathHelper.floor_double(start0.xCoord) - if (enumfacing == EnumFacing.EAST) 1 else 0
+            x0 =
+                MathHelper.floor_double(start0.xCoord) - if (enumfacing == EnumFacing.EAST) 1 else 0
             y0 = MathHelper.floor_double(start0.yCoord) - if (enumfacing == EnumFacing.UP) 1 else 0
-            z0 = MathHelper.floor_double(start0.zCoord) - if (enumfacing == EnumFacing.SOUTH) 1 else 0
+            z0 =
+                MathHelper.floor_double(start0.zCoord) - if (enumfacing == EnumFacing.SOUTH) 1 else 0
 
             var currState = ctx.bsa.get(x0, y0, z0)
             var i = 0
-            if (!MovementHelper.canStandOn(bsa, x0, y0, z0, currState) || !MovementHelper.canWalkThrough(bsa, x0, y0 + 1, z0) || !MovementHelper.canWalkThrough(bsa, x0, y0 + 2, z0)) {
+            if (!MovementHelper.canStandOn(
+                    bsa,
+                    x0,
+                    y0,
+                    z0,
+                    currState
+                ) || !MovementHelper.canWalkThrough(
+                    bsa,
+                    x0,
+                    y0 + 1,
+                    z0
+                ) || !MovementHelper.canWalkThrough(bsa, x0, y0 + 2, z0)
+            ) {
                 i = -3
                 while (++i <= 3) {
                     if (i == 0) continue
@@ -215,21 +230,26 @@ object BlockUtil {
                 }
             }
 
-            if (last.second.y - (y0 + i) != 0) {
-                val srcSmall = MovementHelper.isBottomSlab(last.first);
+            val delta = (y0 + i) - lastPos.y
+            if (delta > 0) {
+                if (delta > 1) {
+                    return false
+                }
+                val srcSmall = MovementHelper.isBottomSlab(lastState);
                 val destSmall = MovementHelper.isBottomSlab(currState);
 
-                val dX = x0 - last.second.x
-                val dZ = z0 - last.second.z
-                var destSmallStair = MovementHelper.isValidStair(currState, dX, dZ);
+                var destSmallStair =
+                    MovementHelper.isValidStair(currState, x0 - lastPos.x, z0 - lastPos.z);
 
                 if (!srcSmall == !(destSmall || destSmallStair)) {
                     return false
                 }
             }
 
-            last = Pair(currState, BlockPos(x0, y0 + i, z0))
+            lastState = currState
+            lastPos = BlockPos(x0, y0 + i, z0)
         }
+        println("shit")
         return false
     }
 }

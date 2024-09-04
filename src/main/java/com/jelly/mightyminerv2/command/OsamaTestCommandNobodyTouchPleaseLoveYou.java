@@ -2,9 +2,11 @@ package com.jelly.mightyminerv2.command;
 
 import static java.lang.Math.ceil;
 
+import cc.polyfrost.oneconfig.utils.Multithreading;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
@@ -16,6 +18,8 @@ import com.jelly.mightyminerv2.handler.GraphHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.macro.MacroManager;
+import com.jelly.mightyminerv2.pathfinder.goal.Goal;
+import com.jelly.mightyminerv2.util.EntityUtil;
 import com.jelly.mightyminerv2.util.LogUtil;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
@@ -35,16 +39,21 @@ import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementTraverse;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import kotlin.Pair;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -71,20 +80,33 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   AStarPathFinder pathfinder;
   PathNode curr;
   List<Pair<EntityPlayer, Pair<Double, Double>>> mobs = new ArrayList<>();
+  List<EntityLiving> ents = new ArrayList<>();
   boolean allowed = false;
 
   @Main
   public void main() {
+    ents = EntityUtil.getEntities(MightyMinerConfig.devMKillerMob, new HashSet<>());
+//    mc.theWorld.loadedEntityList.forEach(it -> {
+//      System.out.println("name: " + StringUtils.stripControlCodes(it.getName()) + ", Customname: " + (it.hasCustomName() ? it.getCustomNameTag() : " ") + ", Pos" + it.getPositionVector());
+//      try {
+//        System.out.println(it.serializeNBT());
+//      } catch (Exception e){
+//        try{
+//          System.out.println(it.getNBTTagCompound());
+//        } catch (Exception f){}
+//      }
+//      System.out.println();
+//    });
 //    btd = com.jelly.mightyminerv2.Util.BlockUtil.getBestMithrilBlocksDebug(new int[]{5, 3, 1, 10});
 //    for(Pair<String, Vec3> emissary: CommissionUtil.emissaries){
 //      LogUtil.send(emissary.getFirst() + " Dist: " + mc.thePlayer.getPositionVector().squareDistanceTo(emissary.getSecond()));
 //    }
 //    allowed = !allowed;
-    if (MacroManager.getInstance().isRunning()) {
-      MacroManager.getInstance().pause();
-    } else {
-      MacroManager.getInstance().resume();
-    }
+//    if (MacroManager.getInstance().isRunning()) {
+//      MacroManager.getInstance().pause();
+//    } else {
+//      MacroManager.getInstance().resume();
+//    }
   }
 
   @SubCommand
@@ -139,11 +161,9 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     RouteNavigator.getInstance().start(route);
   }
 
-  String[] name = {"Ice Walker", "Goblin"};
-
   @SubCommand
-  public void k(int i) {
-    AutoMobKiller.getInstance().start(name[i]);
+  public void k() {
+    AutoMobKiller.getInstance().start(MightyMinerConfig.devMKillerMob);
 //    this.c = !this.c;
   }
 
@@ -208,6 +228,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     pathfinder = null;
     curr = null;
     btd.clear();
+    ents.clear();
   }
 
   @SubCommand
@@ -233,37 +254,38 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //      LogUtil.error("First or sec is null");
 //      return;
 //    }
-//    Multithreading.schedule(() -> {
-//      double walkSpeed = mc.thePlayer.getAIMoveSpeed();
-//      CalculationContext ctx = new CalculationContext(MightyMiner.instance, walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-//      BlockPos first = PlayerUtil.getBlockStandingOn();
-//      BlockPos second = this.block;
-//      AStarPathFinder finder = new AStarPathFinder(
-//          first.getX(), first.getY(), first.getZ(),
-//          new Goal(second.getX(), second.getY(), second.getZ(), ctx),
-//          ctx
-//      );
-//      Path path = finder.calculatePath();
-//      if (path == null) {
-//        LogUtil.send("No path found");
-//      } else {
-//        LogUtil.send("path found");
-//        blockToDraw.clear();
-//        blockToDraw.addAll(path.getSmoothedPath());
-//        if (go == 0) {
+    Multithreading.schedule(() -> {
+      double walkSpeed = mc.thePlayer.getAIMoveSpeed();
+      CalculationContext ctx = new CalculationContext(walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
+      BlockPos first = PlayerUtil.getBlockStandingOn();
+      BlockPos second = this.block;
+      AStarPathFinder finder = new AStarPathFinder(
+          first.getX(), first.getY(), first.getZ(),
+          new Goal(second.getX(), second.getY(), second.getZ(), ctx),
+          ctx
+      );
+      Path path = finder.calculatePath();
+      if (path == null) {
+        LogUtil.send("No path found");
+      } else {
+        LogUtil.send("path found");
+        blockToDraw.clear();
+        if (go == 0) {
+          blockToDraw.addAll(path.getSmoothedPath());
 //          Pathfinder.getInstance().queue();
-//        }
-//      }
-//    }, 0, TimeUnit.MILLISECONDS);
-    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), this.block);
-    Pathfinder.getInstance().setInterpolationState(false);
-    Pathfinder.getInstance().setStrafeState(false);
+        } else {
+          blockToDraw.addAll(path.getPath());
+        }
+      }
+    }, 0, TimeUnit.MILLISECONDS);
+//    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), this.block);
+//    Pathfinder.getInstance().setInterpolationState(go == 0);
 //    Pathfinder.getInstance().queue(new BlockPos(first.toVec3()), new BlockPos(second.toVec3()));
-//
-    Pathfinder.getInstance().start();
+
+//    Pathfinder.getInstance().start();
   }
 
-  //  @SubscribeEvent
+  //    @SubscribeEvent
 //  public void onTick(ClientTickEvent event) {
 //    if (!allowed) {
 //      return;
@@ -321,7 +343,16 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
         RenderUtil.drawBlockBox(curr.getParentNode().getBlock(), new Color(0, 0, 255, 255));
       }
     }
-//
+
+    if (!ents.isEmpty()) {
+      ents.forEach(ent -> {
+        Vec3 pos = ent.getPositionVector();
+        RenderUtil.drawBox(
+            new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + ent.height, pos.zCoord + 0.5),
+            new Color(255, 0, 241, 150));
+      });
+    }
+
     if (!mobs.isEmpty()) {
       Pair<EntityPlayer, Pair<Double, Double>> best = mobs.get(0);
       Vec3 pos = best.getFirst().getPositionVector();
@@ -377,7 +408,6 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     LogUtil.send("Movement cost: " + res.getCost());
     this.block = res.getDest();
   }
-
 
   @SubCommand
   public void asc() {

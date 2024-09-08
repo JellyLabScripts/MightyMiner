@@ -3,7 +3,7 @@ package com.jelly.mightyminerv2.failsafe;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.BlockChangeEvent;
 import com.jelly.mightyminerv2.event.PacketEvent;
-import com.jelly.mightyminerv2.failsafe.impl.TeleportFailsafe;
+import com.jelly.mightyminerv2.failsafe.impl.*;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import com.jelly.mightyminerv2.util.StrafeUtil;
@@ -43,8 +43,16 @@ public class FailsafeManager {
 
   public FailsafeManager() {
     this.failsafes.addAll(Arrays.asList(
-        TeleportFailsafe.getInstance()
-    ));
+            BadEffectFailsafe.getInstance(),
+            DisconnectFailsafe.getInstance(),
+            EvacuateFailsafe.getInstance(),
+            InventoryFullFailsafe.getInstance(),
+            ItemChangeFailsafe.getInstance(),
+            KnockbackFailsafe.getInstance(),
+            TeleportFailsafe.getInstance(),
+            RotationFailsafe.getInstance()
+            )
+    );
   }
 
   public void stopFailsafes() {

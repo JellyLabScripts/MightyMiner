@@ -3,9 +3,9 @@ package com.jelly.mightyminerv2.failsafe.impl;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
+import com.jelly.mightyminerv2.util.LogUtil;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.Vec3;
-import scala.tools.nsc.interpreter.MemberHandlers.MacroHandler;
 
 public class TeleportFailsafe extends AbstractFailsafe {
 
@@ -39,5 +39,6 @@ public class TeleportFailsafe extends AbstractFailsafe {
 
   public void react() {
     MacroManager.getInstance().disable();
+    LogUtil.warn("You`ve got teleportet! Disabeling macro.");
   }
 }

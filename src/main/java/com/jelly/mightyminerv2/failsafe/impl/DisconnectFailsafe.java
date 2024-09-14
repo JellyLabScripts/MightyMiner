@@ -9,31 +9,30 @@ import net.minecraft.client.gui.GuiDisconnected;
 
 public class DisconnectFailsafe extends AbstractFailsafe {
 
-    private static final DisconnectFailsafe instance = new DisconnectFailsafe();
+  private static final DisconnectFailsafe instance = new DisconnectFailsafe();
 
-    public static DisconnectFailsafe getInstance() {
-        return instance;
-    }
+  public static DisconnectFailsafe getInstance() {
+    return instance;
+  }
 
-    public int getPriority() {
-        return 10;
-    }
+  @Override
+  public String getName() {
+    return "DisconnectFailsafe";
+  }
 
-    @Override
-    public boolean onPacketReceive(PacketEvent.Received event) {
-        if (event.packet instanceof S40PacketDisconnect) {
-            return true;
-        }
+  @Override
+  public int getPriority() {
+    return 10;
+  }
 
-        if (Minecraft.getMinecraft().currentScreen instanceof GuiDisconnected) {
-            return true;
-        }
+  @Override
+  public boolean onPacketReceive(PacketEvent.Received event) {
+    return event.packet instanceof S40PacketDisconnect || mc.currentScreen instanceof GuiDisconnected;
+  }
 
-        return false;
-    }
-
-    @Override
-    public void react() {
-        MacroManager.getInstance().disable();
-    }
+  @Override
+  public void react() {
+    warn("Disconnected. Disabling Macro");
+    MacroManager.getInstance().disable();
+  }
 }

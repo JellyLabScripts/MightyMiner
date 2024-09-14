@@ -2,17 +2,20 @@ package com.jelly.mightyminerv2.failsafe;
 
 import com.jelly.mightyminerv2.event.BlockChangeEvent;
 import com.jelly.mightyminerv2.event.PacketEvent;
+import com.jelly.mightyminerv2.util.Logger;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
-public abstract class AbstractFailsafe {
+public abstract class AbstractFailsafe extends Logger {
 
   public final Minecraft mc = Minecraft.getMinecraft();
 
   public abstract int getPriority();
+
+  public abstract String getName();
 
   public boolean onBlockChange(BlockChangeEvent event) {
     return false;

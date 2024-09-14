@@ -17,10 +17,8 @@ import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.handler.GraphHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.MightyMiner;
-import com.jelly.mightyminerv2.macro.MacroManager;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
-import com.jelly.mightyminerv2.util.EntityUtil;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.helper.route.Route;
@@ -39,21 +37,20 @@ import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementTraverse;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import kotlin.Pair;
 import lombok.Getter;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -81,11 +78,12 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   PathNode curr;
   List<Pair<EntityPlayer, Pair<Double, Double>>> mobs = new ArrayList<>();
   List<EntityLiving> ents = new ArrayList<>();
-  boolean allowed = false;
+  public boolean allowed = false;
 
   @Main
   public void main() {
-    ents = EntityUtil.getEntities(MightyMinerConfig.devMKillerMob, new HashSet<>());
+    this.allowed = !this.allowed;
+//    ents = EntityUtil.getEntities(MightyMinerConfig.devMKillerMob, new HashSet<>());
 //    mc.theWorld.loadedEntityList.forEach(it -> {
 //      System.out.println("name: " + StringUtils.stripControlCodes(it.getName()) + ", Customname: " + (it.hasCustomName() ? it.getCustomNameTag() : " ") + ", Pos" + it.getPositionVector());
 //      try {
@@ -122,7 +120,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       if (cost >= 1e6) {
         continue;
       }
-      LogUtil.send("Name: " + move.name() + ", Movement to: " + res.getDest() + ", Cost: " + cost);
+      Logger.sendMessage("Name: " + move.name() + ", Movement to: " + res.getDest() + ", Cost: " + cost);
       this.blockToDraw.add(res.getDest());
     }
   }
@@ -185,7 +183,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       this.blockToDraw.clear();
       boolean bs = BlockUtil.INSTANCE.bresenham(new CalculationContext(),
           new Vec3(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ), new Vec3(this.block));
-      LogUtil.send("Walkable: " + bs);
+      Logger.sendMessage("Walkable: " + bs);
     }
   }
 
@@ -194,7 +192,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     if (!MithrilMiner.getInstance().isRunning()) {
       int[] p = new int[]{6, 4, 2, 1};
       if (t == 1) {
-        LogUtil.send("Tita");
+        Logger.sendMessage("Tita");
         p[3] = 10;
       }
       MithrilMiner.getInstance().start(p);
@@ -234,7 +232,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @SubCommand
   public void aotv() {
     if (RouteHandler.getInstance().getSelectedRoute().isEmpty()) {
-      LogUtil.send("Selected Route is empty.");
+      Logger.sendMessage("Selected Route is empty.");
       return;
     }
     RouteNavigator.getInstance().queueRoute(RouteHandler.getInstance().getSelectedRoute());
@@ -245,7 +243,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   public void c() {
     BlockPos pp = PlayerUtil.getBlockStandingOn();
 //    this.curr = this.pathfinder.getClosedSet().get(PathNode.Companion.longHash(pp.getX(), pp.getY(), pp.getZ()));
-    LogUtil.send("Curr: " + curr);
+    Logger.sendMessage("Curr: " + curr);
   }
 
   @SubCommand
@@ -266,9 +264,9 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       );
       Path path = finder.calculatePath();
       if (path == null) {
-        LogUtil.send("No path found");
+        Logger.sendMessage("No path found");
       } else {
-        LogUtil.send("path found");
+        Logger.sendMessage("path found");
         blockToDraw.clear();
         if (go == 0) {
           blockToDraw.addAll(path.getSmoothedPath());
@@ -297,13 +295,11 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @SubscribeEvent
   public void onPack(PacketEvent.Received event) {
-    if (!this.allowed || !(event.packet instanceof S08PacketPlayerPosLook)) {
+    if (!this.allowed || !(event.packet instanceof S2FPacketSetSlot)) {
       return;
     }
-    S08PacketPlayerPosLook pack = (S08PacketPlayerPosLook) event.packet;
-    LogUtil.log(
-        String.format("x: %f, y: %f, z: %f", pack.getX(), pack.getY(), pack.getZ()).toString() + ", Enum: " + Arrays.toString(pack.func_179834_f()
-            .toArray()));
+    S2FPacketSetSlot pack = (S2FPacketSetSlot) event.packet;
+    Logger.sendLog("Real: " + pack.func_149173_d() + ", +36: " + (pack.func_149173_d() + 36) + ", Item: " + (pack.func_149174_e() != null ? pack.func_149174_e().getItem().toString() : ""));
   }
 
   @SubscribeEvent
@@ -405,7 +401,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     MovementResult res = new MovementResult();
     Movement trav = new MovementTraverse(MightyMiner.instance, pp, pp.add(d.getFrontOffsetX(), d.getFrontOffsetY(), d.getFrontOffsetZ()));
     trav.calculateCost(ctx, res);
-    LogUtil.send("Movement cost: " + res.getCost());
+    Logger.sendMessage("Movement cost: " + res.getCost());
     this.block = res.getDest();
   }
 
@@ -417,7 +413,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     MovementResult res = new MovementResult();
     Movement trav = new MovementAscend(MightyMiner.instance, pp, pp.add(d.getFrontOffsetX(), d.getFrontOffsetY() + 1, d.getFrontOffsetZ()));
     trav.calculateCost(ctx, res);
-    LogUtil.send("Movement cost: " + res.getCost());
+    Logger.sendMessage("Movement cost: " + res.getCost());
     this.block = res.getDest();
   }
 
@@ -430,7 +426,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     MovementResult res = new MovementResult();
     Movement trav = new MovementDescend(MightyMiner.instance, pp, pp.add(d.getFrontOffsetX(), d.getFrontOffsetY() - 1, d.getFrontOffsetZ()));
     trav.calculateCost(ctx, res);
-    LogUtil.send("Movement cost: " + res.getCost());
+    Logger.sendMessage("Movement cost: " + res.getCost());
     this.block = res.getDest();
   }
 
@@ -442,7 +438,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     MovementResult res = new MovementResult();
     Movement diag = new MovementDiagonal(MightyMiner.instance, pp, pp.add(1, 0, 1));
     diag.calculateCost(ctx, res);
-    LogUtil.send("Movement cost: " + res.getCost());
+    Logger.sendMessage("Movement cost: " + res.getCost());
     this.block = res.getDest();
   }
 }

@@ -4,7 +4,7 @@ import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.util.AngleUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.StrafeUtil;
 import com.jelly.mightyminerv2.util.helper.Angle;
@@ -312,15 +312,15 @@ public class PathExecutor {
   }
 
   void log(String message) {
-    LogUtil.log(getMessage(message));
+    Logger.sendLog(getMessage(message));
   }
 
   void send(String message) {
-    LogUtil.send(getMessage(message));
+    Logger.sendMessage(getMessage(message));
   }
 
   void error(String message) {
-    LogUtil.error(getMessage(message));
+    Logger.sendError(getMessage(message));
   }
 
   String getMessage(String message) {

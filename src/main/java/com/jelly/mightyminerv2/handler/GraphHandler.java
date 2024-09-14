@@ -4,7 +4,7 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import com.google.gson.annotations.Expose;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.MightyMiner;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.helper.graph.Graph;
@@ -47,18 +47,18 @@ public class GraphHandler {
     } else {
       start();
     }
-    LogUtil.send("Editing: " + this.editing);
+    Logger.sendMessage("Editing: " + this.editing);
   }
 
   public void start() {
     this.editing = true;
     Multithreading.schedule(this::save, 0, TimeUnit.MILLISECONDS);
-    LogUtil.send("Enabled. Editing: " + this.editing);
+    Logger.sendMessage("Enabled. Editing: " + this.editing);
   }
 
   public void stop() {
     this.editing = false;
-    LogUtil.send("Disabled. Editing: " + this.editing);
+    Logger.sendMessage("Disabled. Editing: " + this.editing);
   }
 
   public List<RouteWaypoint> findPath(BlockPos start, RouteWaypoint end) {
@@ -67,12 +67,12 @@ public class GraphHandler {
       startWp = this.graph.map.keySet().stream().min(Comparator.comparing(it -> start.distanceSq(it.toBlockPos()))).orElse(null);
     }
     if (startWp == null) {
-      LogUtil.log("StartWP is null");
+      Logger.sendLog("StartWP is null");
       return new ArrayList<>();
     }
 
     if (!this.graph.map.containsKey(end)) {
-      LogUtil.log("GraphMap Does Not Contain End");
+      Logger.sendLog("GraphMap Does Not Contain End");
       return new ArrayList<>();
     }
 
@@ -84,16 +84,16 @@ public class GraphHandler {
   }
 
   public synchronized void save() {
-    LogUtil.send("Started Save");
+    Logger.sendMessage("Started Save");
     while (this.editing) {
       if (!this.dirty) {
         continue;
       }
       try (BufferedWriter writer = Files.newBufferedWriter(MightyMiner.commRoutePath, StandardCharsets.UTF_8)) {
         writer.write(MightyMiner.gson.toJson(instance));
-        LogUtil.send("saved Data");
+        Logger.sendMessage("saved Data");
       } catch (Exception e) {
-        LogUtil.send("No saved data");
+        Logger.sendMessage("No saved data");
         e.printStackTrace();
       }
       this.dirty = false;
@@ -110,17 +110,17 @@ public class GraphHandler {
 
     if (MightyMinerConfig.routeBuilderSelect.isActive()) {
       lastPos = currentWaypoint;
-      LogUtil.send("Changed Parent");
+      Logger.sendMessage("Changed Parent");
     }
 
     if (MightyMinerConfig.routeBuilderUnidi.isActive() || MightyMinerConfig.routeBuilderBidi.isActive()) {
       if (lastPos != null) {
         boolean bidi = MightyMinerConfig.routeBuilderBidi.isActive(); // Check if KEY_8 is pressed for bidirectional edges
         this.graph.add(lastPos, currentWaypoint, bidi);
-        LogUtil.send("Added " + (bidi ? "Bidirectional" : "Unidirectional"));
+        Logger.sendMessage("Added " + (bidi ? "Bidirectional" : "Unidirectional"));
       } else {
         this.graph.add(currentWaypoint);
-        LogUtil.send("Added Single Waypoint");
+        Logger.sendMessage("Added Single Waypoint");
       }
       lastPos = currentWaypoint;
       this.dirty = true;
@@ -133,7 +133,7 @@ public class GraphHandler {
       this.graph.update(lastPos, currentWaypoint);
       lastPos = currentWaypoint;
       this.dirty = true;
-      LogUtil.send("Updated");
+      Logger.sendMessage("Updated");
     }
 
     if (MightyMinerConfig.routeBuilderDelete.isActive()) {
@@ -143,7 +143,7 @@ public class GraphHandler {
       this.graph.remove(lastPos);
       lastPos = null;
       this.dirty = true;
-      LogUtil.send("Removed");
+      Logger.sendMessage("Removed");
     }
   }
 

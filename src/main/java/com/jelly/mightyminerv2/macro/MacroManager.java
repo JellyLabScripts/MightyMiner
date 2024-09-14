@@ -5,7 +5,7 @@ import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.macro.commissionmacro.CommissionMacro;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -145,19 +145,19 @@ public class MacroManager {
   }
 
   public void log(String message) {
-    LogUtil.log(getMessage(message));
+    Logger.sendLog(getMessage(message));
   }
 
   public void send(String message) {
-    LogUtil.send(getMessage(message));
+    Logger.sendMessage(getMessage(message));
   }
 
   public void error(String message) {
-    LogUtil.error(getMessage(message));
+    Logger.sendError(getMessage(message));
   }
 
   public void warn(String message) {
-    LogUtil.warn(getMessage(message));
+    Logger.sendWarning(getMessage(message));
   }
 
   public String getMessage(String message) {

@@ -8,6 +8,8 @@
     "client.MixinEntityLivingBase",
     "client.MixinFullBlock",
     "FML.MixinFMLHandshakeMessage",
+    "gui.MixinGuiContainer",
+    "gui.MixinInventoryPlayer",
     "network.MixinNetworkManager"
   ],
   "client": [

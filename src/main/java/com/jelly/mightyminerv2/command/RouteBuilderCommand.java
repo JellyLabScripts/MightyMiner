@@ -5,7 +5,7 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.handler.RouteHandler;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
@@ -15,10 +15,10 @@ public class RouteBuilderCommand {
     @Main
     public void main() {
         if (!RouteBuilder.getInstance().isRunning()) {
-            LogUtil.send("Enable RouteBuilder First.");
+            Logger.sendMessage("Enable RouteBuilder First.");
             return;
         }
-        LogUtil.send("Use these commands to manage your routes.");
+        Logger.sendMessage("Use these commands to manage your routes.");
         success("   1. /rb list -> List all available routes.");
         success("   2. /rb select <route-name> -> Select the specified route name. A new route will be created if none exist.");
         success("   3. /rb add -> Add the block player is standing on to selected route.");
@@ -38,7 +38,7 @@ public class RouteBuilderCommand {
             sb.append(str).append(", ");
         });
 
-        LogUtil.send(sb.toString());
+        Logger.sendMessage(sb.toString());
     }
 
     @SubCommand

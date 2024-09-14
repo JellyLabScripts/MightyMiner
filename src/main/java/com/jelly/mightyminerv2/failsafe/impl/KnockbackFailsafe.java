@@ -2,7 +2,7 @@ package com.jelly.mightyminerv2.failsafe.impl;
 
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Vec3;
 
@@ -18,6 +18,11 @@ public class KnockbackFailsafe extends AbstractFailsafe {
     public int getPriority() {
         return 8;
 
+    }
+
+    @Override
+    public String getName() {
+        return "";
     }
 
 
@@ -45,6 +50,6 @@ public class KnockbackFailsafe extends AbstractFailsafe {
     @Override
     public void react() {
         MacroManager.getInstance().disable();
-        LogUtil.warn("Knockback has been detected! Disabeling macro.");
+        Logger.sendWarning("Knockback has been detected! Disabeling macro.");
     }
 }

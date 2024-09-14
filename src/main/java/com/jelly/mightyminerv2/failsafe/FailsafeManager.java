@@ -45,8 +45,6 @@ public class FailsafeManager {
     this.failsafes.addAll(Arrays.asList(
             BadEffectFailsafe.getInstance(),
             DisconnectFailsafe.getInstance(),
-            EvacuateFailsafe.getInstance(),
-            InventoryFullFailsafe.getInstance(),
             ItemChangeFailsafe.getInstance(),
             KnockbackFailsafe.getInstance(),
             TeleportFailsafe.getInstance(),

@@ -62,10 +62,6 @@ val shadowImpl: Configuration by configurations.creating {
 }
 
 dependencies {
-    implementation("org.lwjgl:lwjgl:3.3.1")
-    implementation("org.lwjgl:lwjgl-glfw:3.3.1")
-    implementation("org.lwjgl:lwjgl-opengl:3.3.1")
-    implementation("com.google.code.gson:gson:2.8.9")
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
@@ -73,9 +69,6 @@ dependencies {
     compileOnly("org.spongepowered:mixin:0.8.5")
     compileOnly("org.projectlombok:lombok:1.18.32")
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.0")
-    runtimeOnly("org.lwjgl:lwjgl::natives-windows")
-    runtimeOnly("org.lwjgl:lwjgl-glfw::natives-windows")
-    runtimeOnly("org.lwjgl:lwjgl-opengl::natives-windows")
     annotationProcessor("org.spongepowered:mixin:0.8.5")
     annotationProcessor("org.projectlombok:lombok:1.18.32")
     shadowImpl("it.unimi.dsi:fastutil:8.2.1")
@@ -100,7 +93,6 @@ tasks.withType<Jar> {
         // If you don't want mixins, remove these lines
         this["TweakClass"] = "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker"
         this["MixinConfigs"] = "mixins.$modid.json"
-        this["FMLLoadingPlugin"] = "com.jelly.mightyminerv2.transformer.ModUpdatePlugin"
     }
 }
 

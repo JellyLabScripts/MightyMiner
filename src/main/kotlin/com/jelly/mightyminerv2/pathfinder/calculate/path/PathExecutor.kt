@@ -34,7 +34,7 @@ object PathExecutor {
 
     fun queuePath(path: Path) {
         if (path.path.isEmpty()) {
-            LogUtil.send("Path is empty")
+            Logger.sendMessage("Path is empty")
             return
         }
         this.pathQueue.offer(path)
@@ -42,7 +42,7 @@ object PathExecutor {
 
     fun start(): Boolean {
         if (this.pathQueue.isEmpty()) {
-            LogUtil.send("Path queue is empty. Not starting")
+            Logger.sendMessage("Path queue is empty. Not starting")
             this.failed = !this.enabled;
             this.succeeded = this.enabled
             return false
@@ -71,7 +71,7 @@ object PathExecutor {
 
     fun start(path: Path) {
         if (path.path.isEmpty()) {
-            LogUtil.send("Path is empty")
+            Logger.sendMessage("Path is empty")
             this.failed = true;
             return
         }
@@ -87,7 +87,7 @@ object PathExecutor {
                 .add(Pair(block.y, i))
         }
         this.enabled = true;
-        LogUtil.send("Started PathExecutor")
+        Logger.sendMessage("Started PathExecutor")
     }
 
     fun stop() {
@@ -102,7 +102,7 @@ object PathExecutor {
 
         KeyBindUtil.releaseAllExcept()
         RotationHandler.getInstance().reset()
-        LogUtil.send("Stopped PathExecutor")
+        Logger.sendMessage("Stopped PathExecutor")
     }
 
     @SubscribeEvent
@@ -113,7 +113,7 @@ object PathExecutor {
             if (this.timer.isScheduled) {
                 if (this.timer.passed()) {
                     this.failed = true
-                    LogUtil.send("Stopped Moving for too long. Disabling")
+                    Logger.sendMessage("Stopped Moving for too long. Disabling")
                     this.stop()
                     return
                 }
@@ -136,13 +136,13 @@ object PathExecutor {
                 ?.maxByOrNull { it.first }
                 ?.second
         if (currentIndex != null && currentIndex != this.lastIndex) {
-            LogUtil.log("Standing On Node $currentIndex")
+            Logger.sendLog("Standing On Node $currentIndex")
             this.lastIndex = currentIndex
             this.targetIndex = currentIndex + 1
             RotationHandler.getInstance().reset()
-            LogUtil.log("Position Updated. LastPos: ${this.lastIndex}, CurrentPos: ${this.targetIndex}, PathSize: ${path.size}")
+            Logger.sendLog("Position Updated. LastPos: ${this.lastIndex}, CurrentPos: ${this.targetIndex}, PathSize: ${path.size}")
             if (this.targetIndex == path.size) {
-                LogUtil.send("Path Traversed. Disabling")
+                Logger.sendMessage("Path Traversed. Disabling")
                 this.succeeded = true
                 this.failed = false
                 if (!this.start()) this.stop()
@@ -163,7 +163,7 @@ object PathExecutor {
         val yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);
 
         if (yawDiff > 10 && !RotationHandler.getInstance().isEnabled()) {
-            LogUtil.log("Started Rotation. YawDiff: ${yawDiff}")
+            Logger.sendLog("Started Rotation. YawDiff: ${yawDiff}")
             // kotlin is gay as shit
             val config = RotationConfiguration(Angle(yaw, 20f), 300, null)
             config.easeFunction(RotationConfiguration.Ease.EASE_OUT_QUAD)
@@ -183,7 +183,7 @@ object PathExecutor {
             yawDiff < 40 && !shouldJump && player.onGround
         )
         if (shouldJump) {
-            LogUtil.send("Jumping")
+            Logger.sendMessage("Jumping")
             player.jump()
         }
     }

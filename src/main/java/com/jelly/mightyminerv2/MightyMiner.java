@@ -12,7 +12,7 @@ import com.jelly.mightyminerv2.handler.GameStateHandler;
 import com.jelly.mightyminerv2.handler.GraphHandler;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import com.jelly.mightyminerv2.handler.RotationHandler;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.ReflectionUtils;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.TablistUtil;
@@ -20,9 +20,6 @@ import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.util.helper.graph.Graph;
 import com.jelly.mightyminerv2.util.helper.graph.GraphSerializer;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
-import com.jelly.mightyminerv2.pathfinder.calculate.path.PathExecutor;
-import com.jelly.mightyminerv2.pathfinder.helper.player.IPlayerContext;
-import com.jelly.mightyminerv2.pathfinder.helper.player.PlayerContext;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
@@ -33,8 +30,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import org.lwjgl.opengl.Display;
 
@@ -122,8 +117,8 @@ public class MightyMiner {
   @Mod.EventHandler
   public void postInit(FMLPostInitializationEvent event) {
     if (ReflectionUtils.hasPackageInstalled("feather")) {
-      LogUtil.sendNotification("Mighty Miner", "Feather Client is not supported! Might cause issues or a lot of bugs!", 5000L);
-      LogUtil.warn("Feather Client is not supported! Might cause issues or a lot of bugs!");
+      Logger.sendNotification("Mighty Miner", "Feather Client is not supported! Might cause issues or a lot of bugs!", 5000L);
+      Logger.sendWarning("Feather Client is not supported! Might cause issues or a lot of bugs!");
     }
   }
 

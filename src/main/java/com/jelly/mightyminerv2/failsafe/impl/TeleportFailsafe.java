@@ -3,7 +3,7 @@ package com.jelly.mightyminerv2.failsafe.impl;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.Vec3;
 
@@ -15,10 +15,17 @@ public class TeleportFailsafe extends AbstractFailsafe {
     return instance;
   }
 
+  @Override
+  public String getName() {
+    return "TeleportFailsafe";
+  }
+
+  @Override
   public int getPriority() {
     return 5;
   }
 
+  @Override
   public boolean onPacketReceive(PacketEvent.Received event) {
     if (!(event.packet instanceof S08PacketPlayerPosLook)) {
       return false;
@@ -33,12 +40,12 @@ public class TeleportFailsafe extends AbstractFailsafe {
     );
 
     double distance = playerPos.distanceTo(packetPos);
-
+    warn("Got Teleported " + distance + " blocks.");
     return true;
   }
 
   public void react() {
     MacroManager.getInstance().disable();
-    LogUtil.warn("You`ve got teleportet! Disabeling macro.");
+    warn("Disabling macro.");
   }
 }

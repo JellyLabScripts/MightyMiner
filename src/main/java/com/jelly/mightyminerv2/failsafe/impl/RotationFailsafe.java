@@ -3,7 +3,7 @@ package com.jelly.mightyminerv2.failsafe.impl;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 
 public class RotationFailsafe extends AbstractFailsafe {
@@ -16,6 +16,11 @@ public class RotationFailsafe extends AbstractFailsafe {
 
     public int getPriority() {
         return 5;
+    }
+
+    @Override
+    public String getName() {
+        return "";
     }
 
     public boolean onPacketReceive(PacketEvent.Received event) {
@@ -46,6 +51,6 @@ public class RotationFailsafe extends AbstractFailsafe {
 
     public void react() {
         MacroManager.getInstance().disable();
-        LogUtil.warn("You`ve got rotated! Disabeling macro.");
+        Logger.sendWarning("You`ve got rotated! Disabeling macro.");
     }
 }

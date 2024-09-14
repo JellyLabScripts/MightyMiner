@@ -4,7 +4,7 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RouteHandler;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
@@ -56,12 +56,12 @@ public class RouteBuilder extends AbstractFeature {
     }
     if (MightyMinerConfig.routeBuilderAotvAddKeybind.isActive()) {
       this.addToRoute(TransportMethod.AOTV);
-      LogUtil.send("Added Aotv");
+      Logger.sendMessage("Added Aotv");
     }
 
     if (MightyMinerConfig.routeBuilderEtherwarpAddKeybind.isActive()) {
       this.addToRoute(TransportMethod.ETHERWARP);
-      LogUtil.send("Added Etherwarp");
+      Logger.sendMessage("Added Etherwarp");
     }
 
     if (MightyMinerConfig.routeBuilderRemoveKeybind.isActive()) {

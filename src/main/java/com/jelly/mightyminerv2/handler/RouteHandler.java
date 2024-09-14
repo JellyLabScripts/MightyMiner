@@ -3,7 +3,7 @@ package com.jelly.mightyminerv2.handler;
 import com.google.gson.annotations.Expose;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.MightyMiner;
-import com.jelly.mightyminerv2.util.LogUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
@@ -49,7 +49,7 @@ public class RouteHandler {
 
     public void addToCurrentRoute(final BlockPos block, final TransportMethod method) {
         if (this.selectedRoute == this.routes.get("Default")) {
-            LogUtil.error("Cannot Edit Default Route.");
+            Logger.sendError("Cannot Edit Default Route.");
             return;
         }
         final RouteWaypoint waypoint = new RouteWaypoint(block, method);

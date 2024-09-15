@@ -62,6 +62,11 @@ public class AutoCommissionClaim extends AbstractFeature {
     this.state = State.STARTING;
   }
 
+  @Override
+  public boolean shouldNotCheckForFailsafe() {
+    return true;
+  }
+
   public void stop(ClaimError error) {
     this.claimError = error;
     this.stop();

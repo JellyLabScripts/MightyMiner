@@ -10,9 +10,9 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
-public abstract class AbstractMacro extends Logger {
+public abstract class AbstractMacro {
 
-  private static final Minecraft mc = Minecraft.getMinecraft();
+  protected final Minecraft mc = Minecraft.getMinecraft();
   private boolean enabled = false;
   public Clock timer = new Clock();
 
@@ -92,5 +92,29 @@ public abstract class AbstractMacro extends Logger {
   }
 
   public void onReceivePacket(PacketEvent.Received event) {
+  }
+
+  protected void log(String message) {
+    Logger.sendLog(formatMessage(message));
+  }
+
+  protected void send(String message) {
+    Logger.sendMessage(formatMessage(message));
+  }
+
+  protected void error(String message) {
+    Logger.sendError(formatMessage(message));
+  }
+
+  protected void warn(String message) {
+    Logger.sendWarning(formatMessage(message));
+  }
+
+  protected void note(String message) {
+    Logger.sendNote(formatMessage(message));
+  }
+
+  protected String formatMessage(String message) {
+    return "[" + getName() + "] " + message;
   }
 }

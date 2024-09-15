@@ -3,7 +3,6 @@ package com.jelly.mightyminerv2.failsafe.impl;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
-import com.jelly.mightyminerv2.util.Logger;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.Vec3;
 
@@ -18,6 +17,11 @@ public class TeleportFailsafe extends AbstractFailsafe {
   @Override
   public String getName() {
     return "TeleportFailsafe";
+  }
+
+  @Override
+  public Failsafe getFailsafeType() {
+    return Failsafe.KNOCKBACK;
   }
 
   @Override
@@ -44,8 +48,10 @@ public class TeleportFailsafe extends AbstractFailsafe {
     return true;
   }
 
-  public void react() {
+  @Override
+  public boolean react() {
     MacroManager.getInstance().disable();
     warn("Disabling macro.");
+    return true;
   }
 }

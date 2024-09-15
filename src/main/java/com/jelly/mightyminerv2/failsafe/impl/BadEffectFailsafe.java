@@ -4,15 +4,10 @@ import com.google.common.collect.ImmutableSet;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
-import com.jelly.mightyminerv2.util.Logger;
 import java.util.Set;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.network.play.server.S1DPacketEntityEffect;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-
-import java.util.Collection;
 
 public class BadEffectFailsafe extends AbstractFailsafe {
 
@@ -23,18 +18,23 @@ public class BadEffectFailsafe extends AbstractFailsafe {
   }
 
   private final Set<Integer> BAD_EFFECTS = ImmutableSet.of(
-      Potion.poison.id,       // Poison
-      Potion.wither.id,       // Wither
-      Potion.weakness.id,     // Weakness
-      Potion.blindness.id,    // Blindness
-      Potion.hunger.id,       // Hunger
-      Potion.moveSlowdown.id, // Slowness
-      Potion.digSlowdown.id   // Mining Fatigue
+      Potion.poison.id,
+      Potion.wither.id,
+      Potion.weakness.id,
+      Potion.blindness.id,
+      Potion.hunger.id,
+      Potion.moveSlowdown.id,
+      Potion.digSlowdown.id
   );
 
   @Override
   public String getName() {
     return "BadEffectFailsafe";
+  }
+
+  @Override
+  public Failsafe getFailsafeType() {
+    return Failsafe.BAD_EFFECTS;
   }
 
   @Override
@@ -54,8 +54,9 @@ public class BadEffectFailsafe extends AbstractFailsafe {
   }
 
   @Override
-  public void react() {
+  public boolean react() {
     MacroManager.getInstance().disable();
     warn("Bad effect detected! Disabling macro.");
+    return true;
   }
 }

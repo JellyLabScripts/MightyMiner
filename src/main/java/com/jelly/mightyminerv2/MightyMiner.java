@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.jelly.mightyminerv2.command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.mightyminerv2.command.RouteBuilderCommand;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.failsafe.FailsafeManager;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.handler.GameStateHandler;
 import com.jelly.mightyminerv2.handler.GraphHandler;
@@ -132,6 +133,7 @@ public class MightyMiner {
     MinecraftForge.EVENT_BUS.register(RouteHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(GraphHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(MacroManager.getInstance());
+    MinecraftForge.EVENT_BUS.register(FailsafeManager.getInstance());
     FeatureManager.getInstance().allFeatures.forEach(MinecraftForge.EVENT_BUS::register);
     MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
     MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());

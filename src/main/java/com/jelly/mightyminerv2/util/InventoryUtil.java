@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.util;
 
+import java.util.Collection;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
@@ -73,7 +74,7 @@ public class InventoryUtil {
     return -1;
   }
 
-  public static boolean areItemsInInventory(List<String> items) {
+  public static boolean areItemsInInventory(Collection<String> items) {
     List<String> itemsToFind = new ArrayList<>(items);
     for (ItemStack stack : mc.thePlayer.inventory.mainInventory) {
       if (stack != null && stack.hasDisplayName()) {
@@ -83,7 +84,7 @@ public class InventoryUtil {
     return itemsToFind.isEmpty();
   }
 
-  public static boolean areItemsInHotbar(List<String> items) {
+  public static boolean areItemsInHotbar(Collection<String> items) {
     List<String> itemsToFind = new ArrayList<>(items);
     for (int i = 0; i < 8; i++) {
       ItemStack stack = mc.thePlayer.inventory.getStackInSlot(i);
@@ -95,7 +96,7 @@ public class InventoryUtil {
   }
 
   // returns the items that arent in hotbar and slots that items can be moved into
-  public static Pair<List<Integer>, List<String>> getAvailableHotbarSlots(List<String> items) {
+  public static Pair<List<Integer>, List<String>> getAvailableHotbarSlots(Collection<String> items) {
     List<String> itemsToMove = new ArrayList<>(items);
     List<Integer> slotsToMoveTo = new ArrayList<>();
 
@@ -125,6 +126,10 @@ public class InventoryUtil {
   }
 
   public static String getInventoryName() {
+    if(mc.thePlayer == null){
+      Logger.sendNote("Player is null for soem fucking reason. mc: " + (mc == null ? "null" : "not null"));
+      return "";
+    }
     return getInventoryName(mc.thePlayer.openContainer);
   }
 
@@ -185,6 +190,17 @@ public class InventoryUtil {
       }
     }
     return amount;
+  }
+
+  public static String getItemId(ItemStack stack) {
+    if (stack == null || !stack.hasDisplayName()) {
+      return "";
+    }
+    try {
+      return stack.getTagCompound().getCompoundTag("ExtraAttributes").getString("id");
+    } catch (Exception ignored) {
+      return StringUtils.stripControlCodes(stack.getDisplayName());
+    }
   }
 
   public static boolean isInventoryLoaded() {

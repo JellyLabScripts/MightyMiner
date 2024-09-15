@@ -51,6 +51,9 @@ public class MacroManager {
   }
 
   public void disable() {
+    if (this.currentMacro == null) {
+      return;
+    }
     log("Macro::disable");
     FeatureManager.getInstance().disableAll();
     this.currentMacro.disable();
@@ -80,7 +83,7 @@ public class MacroManager {
     return this.currentMacro != null;
   }
 
-  public boolean isRunning(){
+  public boolean isRunning() {
     return this.currentMacro != null && this.currentMacro.isEnabled();
   }
 

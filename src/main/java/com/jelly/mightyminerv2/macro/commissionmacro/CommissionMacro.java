@@ -2,6 +2,8 @@ package com.jelly.mightyminerv2.macro.commissionmacro;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
+import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
+import com.jelly.mightyminerv2.failsafe.FailsafeManager;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
@@ -57,7 +59,7 @@ public class CommissionMacro extends AbstractMacro {
     this.miningSpeed = this.miningSpeedBoost = 0;
     this.curr = this.last = null;
 
-    this.checkForCommissionComplete = false;
+    this.checkForCommissionChange = false;
     log("CommMacro::onDisable");
   }
 
@@ -101,9 +103,10 @@ public class CommissionMacro extends AbstractMacro {
     if (this.mainState == MainState.MACRO) {
       if (GameStateHandler.getInstance().getCurrentLocation() != Location.DWARVEN_MINES) {
         this.changeMainState(MainState.WARP, 0);
-      } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems())) {
+      } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems()) && !FailsafeManager.getInstance()
+          .isFailsafeActive(Failsafe.ITEM_CHANGE)) {
         this.changeMainState(MainState.NONE, 0);
-      } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems())) {
+      } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems()) && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
         this.changeMainState(MainState.ITEMS, 0);
       }
     }
@@ -129,36 +132,28 @@ public class CommissionMacro extends AbstractMacro {
       return;
     }
 
-    if (message.contains("Complete")) {
-      log("Message: " + message);
-      log("MyMessage: " + (this.curr.getName() + " Commission Complete! Visit the King to claim your rewards!"));
-      log("equalsignorecase: " + message.equalsIgnoreCase(this.curr.getName() + " Commission Complete! Visit the King to claim your rewards!"));
-    }
-
     if (message.equalsIgnoreCase(this.curr.getName() + " Commission Complete! Visit the King to claim your rewards!")) {
       send("Commission Complete Detected");
-      this.checkForCommissionComplete = true;
+      this.checkForCommissionChange = true;
     }
   }
 
   public void onTablistUpdate(UpdateTablistEvent event) {
-    if (!this.isEnabled() || this.mainState != MainState.MACRO || !this.checkForCommissionComplete) {
+    if (!this.isEnabled() || this.mainState != MainState.MACRO || !this.checkForCommissionChange) {
       return;
     }
 
-    Commission commission = CommissionUtil.getCurrentCommission();
-
-    if (commission == Commission.COMMISSION_CLAIM) {
+    if (CommissionUtil.getCurrentCommission() != this.curr) {
       MithrilMiner.getInstance().stop();
       AutoMobKiller.getInstance().stop();
-      this.checkForCommissionComplete = false;
+      this.checkForCommissionChange = false;
       this.changeMacroState(MacroState.STARTING); // do i go to pathing or start? going to start rechecks the comm which basically does nothing
     }
   }
 
   // <editor-fold desc="Handle Macro">
   private MacroState macroState = MacroState.STARTING;
-  private boolean checkForCommissionComplete = false;
+  private boolean checkForCommissionChange = false;
   private int miningSpeed = 0;
   private int miningSpeedBoost = 0;
   private int macroRetries = 0;
@@ -380,8 +375,10 @@ public class CommissionMacro extends AbstractMacro {
           return;
         }
 
+        // todo: get the updated commission from NPC Gui with AutoCommissionClaim and set update curr with that maybe, thats better
         if (AutoCommissionClaim.getInstance().succeeded()) {
-          this.changeMacroState(MacroState.STARTING);
+          this.changeMacroState(MacroState.WAITING, 3000);
+          this.checkForCommissionChange = true;
           return;
         }
 
@@ -405,6 +402,12 @@ public class CommissionMacro extends AbstractMacro {
             log("Retrying claim");
             this.changeMacroState(MacroState.CLAIMING_COMMISSION);
             break;
+        }
+        break;
+      case WAITING:
+        if (this.hasTimerEnded()) {
+          error("Timer ended but couldnt exit WAITING state. Disabling");
+          this.changeMainState(MainState.NONE);
         }
         break;
     }
@@ -543,6 +546,6 @@ public class CommissionMacro extends AbstractMacro {
   }
 
   enum MacroState {
-    STARTING, CHECKING_STATS, GETTING_STATS, CHECKING_COMMISSION, PATHING, PATHING_VERIFY, TOGGLE_MACRO, START_MINING, MINING_VERIFY, ENABLE_MOBKILLER, MOBKILLER_VERIFY, CLAIMING_COMMISSION, CLAIM_VERIFY
+    STARTING, CHECKING_STATS, GETTING_STATS, CHECKING_COMMISSION, PATHING, PATHING_VERIFY, TOGGLE_MACRO, START_MINING, MINING_VERIFY, ENABLE_MOBKILLER, MOBKILLER_VERIFY, CLAIMING_COMMISSION, CLAIM_VERIFY, WAITING;
   }
 }

@@ -4,7 +4,6 @@ import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import net.minecraft.network.play.server.S40PacketDisconnect;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDisconnected;
 
 public class DisconnectFailsafe extends AbstractFailsafe {
@@ -21,6 +20,11 @@ public class DisconnectFailsafe extends AbstractFailsafe {
   }
 
   @Override
+  public Failsafe getFailsafeType() {
+    return Failsafe.DISCONNECT;
+  }
+
+  @Override
   public int getPriority() {
     return 10;
   }
@@ -31,8 +35,9 @@ public class DisconnectFailsafe extends AbstractFailsafe {
   }
 
   @Override
-  public void react() {
+  public boolean react() {
     warn("Disconnected. Disabling Macro");
     MacroManager.getInstance().disable();
+    return true;
   }
 }

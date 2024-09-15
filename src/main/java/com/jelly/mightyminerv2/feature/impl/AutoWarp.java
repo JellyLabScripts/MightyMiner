@@ -187,6 +187,9 @@ public class AutoWarp extends AbstractFeature {
   }
 
   private void sendCommand(String command) {
+    if(mc.thePlayer == null){
+      note("Player is null. mc : " + (mc == null ? "null" : "not null"));
+    }
     mc.thePlayer.sendChatMessage(command);
   }
 

@@ -8,7 +8,7 @@ import net.minecraft.util.StringUtils;
 
 public abstract class Logger {
 
-  private static Minecraft mc = Minecraft.getMinecraft();
+  protected static final Minecraft mc = Minecraft.getMinecraft();
   private static String lastDebugMessage = null;
   private static String lastWebhookMessage = null;
 
@@ -34,6 +34,10 @@ public abstract class Logger {
     addMessage("§l§4[Mighty Miner] §8» §c" + message);
   }
 
+  public static void sendNote(final String message) {
+    addMessage("§l§6[Mighty Miner] §8» §e" + message);
+  }
+
   public static void sendLog(final String message) {
     if (lastDebugMessage != null && lastDebugMessage.equals(message)) {
       return;
@@ -54,19 +58,23 @@ public abstract class Logger {
   }
 
   protected void log(String message) {
-    log(formatMessage(message));
+    sendLog(formatMessage(message));
   }
 
   protected void send(String message) {
-    send(formatMessage(message));
+    sendMessage(formatMessage(message));
   }
 
   protected void error(String message) {
-    error(formatMessage(message));
+    sendError(formatMessage(message));
   }
 
   protected void warn(String message) {
-    warn(formatMessage(message));
+    sendWarning(formatMessage(message));
+  }
+
+  protected void note(String message) {
+    sendNote(formatMessage(message));
   }
 
   protected String formatMessage(String message) {

@@ -15,12 +15,18 @@ import com.jelly.mightyminerv2.feature.impl.MithrilMiner;
 import com.jelly.mightyminerv2.feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.handler.GraphHandler;
+import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
+import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
+import com.jelly.mightyminerv2.util.helper.Angle;
+import com.jelly.mightyminerv2.util.helper.Clock;
+import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
+import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
@@ -41,12 +47,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import kotlin.Pair;
 import lombok.Getter;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -79,10 +83,19 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   List<Pair<EntityPlayer, Pair<Double, Double>>> mobs = new ArrayList<>();
   List<EntityLiving> ents = new ArrayList<>();
   public boolean allowed = false;
+  Clock timer = new Clock();
 
   @Main
   public void main() {
-    this.allowed = !this.allowed;
+    try {
+      Logger.sendNote(InventoryUtil.getInventoryName());
+      Logger.sendNote("OpenCont: " + mc.thePlayer.openContainer.toString());
+    } catch (Exception e) {
+      Logger.sendNote("errored while sending ajdkdjsad");
+      e.printStackTrace();
+    }
+//    this.allowed = !this.allowed;
+//    timer.schedule(500);
 //    ents = EntityUtil.getEntities(MightyMinerConfig.devMKillerMob, new HashSet<>());
 //    mc.theWorld.loadedEntityList.forEach(it -> {
 //      System.out.println("name: " + StringUtils.stripControlCodes(it.getName()) + ", Customname: " + (it.hasCustomName() ? it.getCustomNameTag() : " ") + ", Pos" + it.getPositionVector());
@@ -188,17 +201,10 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   }
 
   @SubCommand
-  public void mine(int t) {
-    if (!MithrilMiner.getInstance().isRunning()) {
-      int[] p = new int[]{6, 4, 2, 1};
-      if (t == 1) {
-        Logger.sendMessage("Tita");
-        p[3] = 10;
-      }
-      MithrilMiner.getInstance().start(p);
-    } else {
-      MithrilMiner.getInstance().stop();
-    }
+  public void rot() {
+    RotationConfiguration conf = new RotationConfiguration(new Angle(0f, 0f), 400, RotationType.SERVER, null);
+    conf.easeBackToClientSide(true);
+    RotationHandler.getInstance().easeTo(conf);
   }
 
   @SubCommand
@@ -293,13 +299,34 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //
   List<Pair<BlockPos, List<Float>>> btd = new ArrayList<>();
 
-  @SubscribeEvent
+  boolean test = false;
+
+  //  @SubscribeEvent
   public void onPack(PacketEvent.Received event) {
-    if (!this.allowed || !(event.packet instanceof S2FPacketSetSlot)) {
+    if (!this.allowed) {
       return;
     }
-    S2FPacketSetSlot pack = (S2FPacketSetSlot) event.packet;
-    Logger.sendLog("Real: " + pack.func_149173_d() + ", +36: " + (pack.func_149173_d() + 36) + ", Item: " + (pack.func_149174_e() != null ? pack.func_149174_e().getItem().toString() : ""));
+    if (this.timer.isScheduled() && this.timer.passed()) {
+      this.timer.reset();
+      this.test = false;
+      this.allowed = false;
+    }
+//    if (!this.allowed || !(event.packet instanceof S2FPacketSetSlot)) {
+//      return;
+//    }
+    if (event.packet instanceof S2FPacketSetSlot) {
+      if (!this.timer.isScheduled()) {
+        this.timer.schedule(5000);
+        this.test = true;
+      }
+      S2FPacketSetSlot pack = (S2FPacketSetSlot) event.packet;
+      Logger.sendLog("Real: " + pack.func_149173_d() + ", +36: " + (pack.func_149173_d() + 36) + ", Item: " + (pack.func_149174_e() != null
+          ? pack.func_149174_e().stackSize : "null"));
+    }
+    if (!this.test) {
+      return;
+    }
+    Logger.sendLog(event.packet.toString());
   }
 
   @SubscribeEvent

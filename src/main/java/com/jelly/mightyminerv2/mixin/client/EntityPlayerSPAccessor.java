@@ -10,11 +10,5 @@ public interface EntityPlayerSPAccessor {
     float getLastReportedYaw();
 
     @Accessor
-    void setLastReportedYaw(float lastReportedYaw);
-
-    @Accessor
     float getLastReportedPitch();
-
-    @Accessor
-    void setLastReportedPitch(float lastReportedPitch);
 }

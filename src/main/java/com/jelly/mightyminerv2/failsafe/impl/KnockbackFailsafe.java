@@ -8,48 +8,54 @@ import net.minecraft.util.Vec3;
 
 public class KnockbackFailsafe extends AbstractFailsafe {
 
-    private static final KnockbackFailsafe instance = new KnockbackFailsafe();
-    private Vec3 lastPlayerPos = null;
+  private static final KnockbackFailsafe instance = new KnockbackFailsafe();
+  private Vec3 lastPlayerPos = null;
 
-    public static KnockbackFailsafe getInstance() {
-        return instance;
+  public static KnockbackFailsafe getInstance() {
+    return instance;
+  }
+
+  public int getPriority() {
+    return 8;
+
+  }
+
+  @Override
+  public String getName() {
+    return "";
+  }
+
+  @Override
+  public Failsafe getFailsafeType() {
+    return Failsafe.KNOCKBACK;
+  }
+
+
+  public boolean check() {
+
+    Vec3 currentPlayerPos = Minecraft.getMinecraft().thePlayer.getPositionVector();
+
+    if (lastPlayerPos != null) {
+      double deltaX = currentPlayerPos.xCoord - lastPlayerPos.xCoord;
+      double deltaZ = currentPlayerPos.zCoord - lastPlayerPos.zCoord;
+      double knockbackDistance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+
+      double knockbackThreshold = 0.4;
+
+      if (knockbackDistance > knockbackThreshold) {
+        return true;
+      }
     }
 
-    public int getPriority() {
-        return 8;
+    lastPlayerPos = currentPlayerPos;
 
-    }
+    return false;
+  }
 
-    @Override
-    public String getName() {
-        return "";
-    }
-
-
-    public boolean check() {
-
-        Vec3 currentPlayerPos = Minecraft.getMinecraft().thePlayer.getPositionVector();
-
-        if (lastPlayerPos != null) {
-            double deltaX = currentPlayerPos.xCoord - lastPlayerPos.xCoord;
-            double deltaZ = currentPlayerPos.zCoord - lastPlayerPos.zCoord;
-            double knockbackDistance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-
-            double knockbackThreshold = 0.4;
-
-            if (knockbackDistance > knockbackThreshold) {
-                return true;
-            }
-        }
-
-        lastPlayerPos = currentPlayerPos;
-
-        return false;
-    }
-
-    @Override
-    public void react() {
-        MacroManager.getInstance().disable();
-        Logger.sendWarning("Knockback has been detected! Disabeling macro.");
-    }
+  @Override
+  public boolean react() {
+    MacroManager.getInstance().disable();
+    Logger.sendWarning("Knockback has been detected! Disabeling macro.");
+    return true;
+  }
 }

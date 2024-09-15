@@ -9,10 +9,11 @@ import com.jelly.mightyminerv2.util.helper.Clock;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
-public abstract class AbstractFeature extends Logger {
+public abstract class AbstractFeature {
 
   protected final Minecraft mc = Minecraft.getMinecraft();
   protected final Clock timer = new Clock();
@@ -32,11 +33,11 @@ public abstract class AbstractFeature extends Logger {
     this.resetStatesAfterStop();
   }
 
-  public void pause(){
+  public void pause() {
     this.enabled = false;
   }
 
-  public void resume(){
+  public void resume() {
     this.enabled = true;
   }
 
@@ -88,5 +89,29 @@ public abstract class AbstractFeature extends Logger {
   }
 
   protected void onKeyEvent(InputEvent.KeyInputEvent event) {
+  }
+
+  protected void log(String message) {
+    Logger.sendLog(formatMessage(message));
+  }
+
+  protected void send(String message) {
+    Logger.sendMessage(formatMessage(message));
+  }
+
+  protected void error(String message) {
+    Logger.sendError(formatMessage(message));
+  }
+
+  protected void warn(String message) {
+    Logger.sendWarning(formatMessage(message));
+  }
+
+  protected void note(String message) {
+    Logger.sendNote(formatMessage(message));
+  }
+
+  protected String formatMessage(String message) {
+    return "[" + getName() + "] " + message;
   }
 }

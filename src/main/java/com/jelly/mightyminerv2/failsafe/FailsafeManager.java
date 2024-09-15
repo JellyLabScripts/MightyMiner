@@ -1,8 +1,10 @@
 package com.jelly.mightyminerv2.failsafe;
 
+import com.jelly.mightyminerv2.command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.BlockChangeEvent;
 import com.jelly.mightyminerv2.event.PacketEvent;
+import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
 import com.jelly.mightyminerv2.failsafe.impl.*;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.macro.MacroManager;
@@ -12,6 +14,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import javax.crypto.Mac;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
@@ -49,7 +52,7 @@ public class FailsafeManager {
             KnockbackFailsafe.getInstance(),
             TeleportFailsafe.getInstance(),
             RotationFailsafe.getInstance()
-            )
+        )
     );
   }
 
@@ -59,7 +62,7 @@ public class FailsafeManager {
   }
 
   public boolean shouldNotCheckForFailsafe() {
-    return !MacroManager.getInstance().isRunning()
+    return (!OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance().allowed && !MacroManager.getInstance().isRunning())
         || FeatureManager.getInstance().shouldNotCheckForFailsafe()
         || this.triggeredFailsafe.isPresent();
   }
@@ -144,7 +147,7 @@ public class FailsafeManager {
 
   @SubscribeEvent
   public void onTickChooseEmergency(ClientTickEvent event) {
-    if (!MacroManager.getInstance().isRunning()) {
+    if (this.shouldNotCheckForFailsafe()) {
       return;
     }
     if (this.triggeredFailsafe.isPresent()) {
@@ -158,7 +161,7 @@ public class FailsafeManager {
     if (!this.timer.isScheduled()) {
       this.timer.schedule(MightyMinerConfig.failsafeToggleDelay);
     } else if (this.timer.passed()) {
-      this.triggeredFailsafe = Optional.ofNullable(this.emergencyQueue.poll());
+      this.triggeredFailsafe = Optional.ofNullable(this.emergencyQueue.peek());
       this.emergencyQueue.clear();
       this.timer.reset();
     }
@@ -170,6 +173,15 @@ public class FailsafeManager {
       return;
     }
 
-    this.triggeredFailsafe.get().react();
+    // make a reset method
+    if (this.triggeredFailsafe.get().react()) {
+      this.triggeredFailsafe = Optional.empty();
+      this.emergencyQueue.clear();
+      this.failsafes.forEach(AbstractFailsafe::resetStates);
+    }
+  }
+
+  public boolean isFailsafeActive(Failsafe failsafe) {
+    return this.emergencyQueue.stream().anyMatch(it -> it.getFailsafeType().equals(failsafe));
   }
 }

@@ -249,8 +249,8 @@ public class PathExecutor {
       // makes it more human but decreases accuracy - removes that weird sliding effect
       if (this.allowInterpolation && !this.interpolated) {
         long timePassed = System.currentTimeMillis() - this.nodeChangeTime;
-        if (timePassed < 100) {
-          yaw = mc.thePlayer.rotationYaw + yawDiff * (timePassed / 100f);
+        if (timePassed < 150) {
+          yaw = mc.thePlayer.rotationYaw + yawDiff * (timePassed / 150f);
         } else {
           this.interpolated = true;
         }

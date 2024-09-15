@@ -6,12 +6,14 @@ import com.jelly.mightyminerv2.feature.impl.MithrilMiner.BoostState;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil.ClickMode;
 import com.jelly.mightyminerv2.util.InventoryUtil.ClickType;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import kotlin.Pair;
+import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -40,6 +42,11 @@ public class AutoInventory extends AbstractFeature {
     this.mainTask = Task.NONE;
     this.sbState = SB.STARTING;
     this.moveState = MoveState.STARTING;
+  }
+
+  @Override
+  public boolean shouldNotCheckForFailsafe(){
+    return true;
   }
 
   @SubscribeEvent
@@ -113,7 +120,7 @@ public class AutoInventory extends AbstractFeature {
           break;
         }
 
-        if (!(mc.thePlayer.openContainer instanceof ContainerChest)
+        if (!(mc.currentScreen instanceof GuiChest)
             || !InventoryUtil.getInventoryName().equals("SkyBlock Menu")
             || !InventoryUtil.isInventoryLoaded()) {
           break;
@@ -213,7 +220,7 @@ public class AutoInventory extends AbstractFeature {
   private Queue<String> elementsToSwap = new LinkedList<>();
   private Queue<Integer> availableSlots = new LinkedList<>();
 
-  public void moveItems(List<String> items) {
+  public void moveItems(Collection<String> items) {
     if (items.isEmpty()) {
       return;
     }

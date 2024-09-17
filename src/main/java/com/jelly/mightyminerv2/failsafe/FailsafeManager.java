@@ -175,6 +175,7 @@ public class FailsafeManager {
 
     // make a reset method
     if (this.triggeredFailsafe.get().react()) {
+      StrafeUtil.forceStop = false;
       this.triggeredFailsafe = Optional.empty();
       this.emergencyQueue.clear();
       this.failsafes.forEach(AbstractFailsafe::resetStates);

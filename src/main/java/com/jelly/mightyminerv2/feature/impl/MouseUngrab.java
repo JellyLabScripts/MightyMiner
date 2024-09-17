@@ -43,15 +43,11 @@ public class MouseUngrab extends AbstractFeature {
   }
 
   public void regrabMouse() {
-    regrabMouse(false);
-  }
-
-  public void regrabMouse(boolean force) {
-    if (!enabled && !force) {
+    if (!enabled) {
       return;
     }
     mc.mouseHelper = oldMouseHelper;
-    if (mc.currentScreen == null || force) {
+    if (mc.currentScreen == null) {
       mc.mouseHelper.grabMouseCursor();
     }
     enabled = false;

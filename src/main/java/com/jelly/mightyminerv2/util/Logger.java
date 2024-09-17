@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.utils.Notifications;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StringUtils;
 
 public abstract class Logger {
@@ -35,7 +36,7 @@ public abstract class Logger {
   }
 
   public static void sendNote(final String message) {
-    addMessage("§l§6[Mighty Miner] §8» §e" + message);
+    addMessage("§l§6[Mighty Miner] §r§8» §e" + message);
   }
 
   public static void sendLog(final String message) {

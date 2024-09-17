@@ -1,10 +1,12 @@
 package com.jelly.mightyminerv2.feature.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.event.UpdateEntityEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
-import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.EntityUtil;
+import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
@@ -12,16 +14,22 @@ import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
 import java.awt.Color;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
@@ -45,15 +53,22 @@ public class AutoMobKiller extends AbstractFeature {
   private Set<EntityLiving> mobQueue = new HashSet<>();
   private Optional<EntityLiving> targetMob = Optional.empty();
   private Optional<Vec3> entityLastPosition = Optional.empty();
-  private String mobToKill = "";
+  private Set<String> mobToKill = new HashSet<>();
+//  private Set<String> mobToKill = ImmutableSet.of("Glacite Walker", "Goblin", "Knifethrower", "Zombie", "Crypt Ghoul", "");
 
   @Override
   public String getName() {
     return "MobKiller";
   }
 
-  public void start(String mobToKill) {
-    this.mobToKill = mobToKill;
+  public void start(Collection<String> mobsToKill, String weaponName) {
+    // this should NEVER happen
+    if (!InventoryUtil.holdItem(weaponName)) {
+      error("Could not hold MobKiller Weapon");
+      this.stop(MKError.NO_ENTITIES);
+      return;
+    }
+    this.mobToKill.addAll(mobsToKill);
     this.mkError = MKError.NONE;
     this.enabled = true;
 
@@ -67,7 +82,7 @@ public class AutoMobKiller extends AbstractFeature {
       return;
     }
     this.enabled = false;
-    this.mobToKill = "";
+    this.mobToKill.clear();
     this.timer.reset();
     this.shutdownTimer.reset();
     this.targetMob = Optional.empty();
@@ -230,5 +245,83 @@ public class AutoMobKiller extends AbstractFeature {
 
   public enum MKError {
     NONE, NO_ENTITIES
+  }
+
+  // EntityTracker - Have NOT tested the accuracy of the events, coded everything in one go so :D
+  Map<Long, String> stands = new HashMap<>();
+  Map<Long, EntityLiving> entities = new HashMap<>();
+  Map<String, Set<EntityLiving>> mobs = new HashMap<>();
+
+  @SubscribeEvent
+  public void onRenderEvent(RenderWorldLastEvent event) {
+    mobs.forEach((a, b) -> {
+      b.forEach(it -> {
+        RenderUtil.drawText(a, it.posX, it.posY + 2.5, it.posZ, 1f);
+      });
+    });
+  }
+
+  @SubscribeEvent
+  public void onWorldUnload(WorldEvent.Unload event) {
+    stands.clear();
+    entities.clear();
+    mobs.clear();
+  }
+
+  @SubscribeEvent
+  public void onEntitySpawn(UpdateEntityEvent event) {
+//    if (!this.enabled) {
+//      return;
+//    }
+
+    Entity entity = event.entity;
+    switch (event.updateType) {
+      case SPAWN:
+        Long hash = this.computeHash((int) entity.posX, (int) entity.posZ);
+        if (event.type == 78) {
+          try {
+            String name = entity.getName().split("§.")[4];
+//            if (this.mobToKill.contains(name)) {
+            this.stands.put(hash, name);
+            EntityLiving exists = this.entities.get(hash);
+            if (exists != null) {
+              mobs.computeIfAbsent(name, k -> new HashSet<>()).add(exists);
+            }
+//            }
+          } catch (Exception e) {
+          }
+        } else {
+          String name = this.stands.get(hash);
+          if (name != null) {
+            this.mobs.computeIfAbsent(name, k -> new HashSet<>()).add((EntityLiving) entity);
+          }
+        }
+        break;
+      case DESPAWN:
+        hash = this.computeHash((int) entity.posX, (int) entity.posZ);
+        String name = this.stands.remove(hash);
+        EntityLiving removedEntity = this.entities.remove(hash);
+        if (name != null) {
+          this.mobs.remove(name);
+        } else if (removedEntity != null) {
+          this.mobs.remove(this.stands.remove(hash));
+        }
+        break;
+      case MOVEMENT:
+        Long newHash = this.computeHash((int) event.newPos.xCoord, (int) event.newPos.zCoord);
+        hash = this.computeHash((int) event.oldPos.xCoord, (int) event.oldPos.zCoord);
+        name = this.stands.remove(hash);
+        removedEntity = this.entities.remove(hash);
+        if (name != null) {
+          this.stands.put(newHash, name);
+        } else if (removedEntity != null) {
+          this.entities.put(newHash, removedEntity);
+        }
+        break;
+    }
+  }
+
+  private long computeHash(int x, int z) {
+    return ((long) x << 32) | (z & 0xFFFFFFFFL);
   }
 }

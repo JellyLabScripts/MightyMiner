@@ -1,11 +1,13 @@
 package com.jelly.mightyminerv2.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.macro.commissionmacro.helper.Commission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,10 +25,10 @@ import net.minecraft.util.Vec3;
 public class CommissionUtil {
 
   private static final Minecraft mc = Minecraft.getMinecraft();
-  private static final Map<Commission, String> slayerMob = ImmutableMap.of(
-      Commission.GOBLIN_SLAYER, "Goblin",
-      Commission.GLACITE_WALKER_SLAYER, "Ice Walker",
-      Commission.TREASURE_HOARDER_SLAYER, "Treasure Hoarder");
+  private static final Map<Commission, Set<String>> slayerMob = ImmutableMap.of(
+      Commission.GOBLIN_SLAYER, ImmutableSet.of("Goblin", "Knifethrower"),
+      Commission.GLACITE_WALKER_SLAYER, ImmutableSet.of("Ice Walker"),
+      Commission.TREASURE_HOARDER_SLAYER, ImmutableSet.of("Treasure Hoarder"));
 
   public static final List<Pair<String, Vec3>> emissaries = Arrays.asList(
       new Pair<>("Ceanna", new Vec3(42.50, 134.50, 22.50)),
@@ -37,7 +39,7 @@ public class CommissionUtil {
 //      new Pair<>("Eliza", new Vec3(-37.50, 200.00, -131.50)) // she's at dwarven village, dont need her
   );
 
-  public static String getMobForCommission(Commission commission) {
+  public static Set<String> getMobForCommission(Commission commission) {
     return slayerMob.get(commission);
   }
 

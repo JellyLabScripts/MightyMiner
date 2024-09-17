@@ -7,6 +7,7 @@ import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
+import com.jelly.mightyminerv2.hud.DebugHUD;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.input.Keyboard;
@@ -110,9 +111,15 @@ public class MightyMinerConfig extends Config {
   //<editor-fold desc="Commission Macro">
   @Text(
       name = "Mining Tool", description = "The tool to use during comm macro",
-      category = COMMISSION, placeholder = "Pickonimbus 2000", size = 2
+      category = COMMISSION, placeholder = "Mining Tool Name"
   )
   public static String commMiningTool = "Pickonimbus 2000";
+
+  @Text(
+      name = "Slayer Weapon", description = "Weapon to use for slayers",
+      category = COMMISSION, placeholder = "Slayer Weapon Name"
+  )
+  public static String commSlayerWeapon = "Sword";
 
   @Switch(
       name = "Sprint During MobKiller", description = "Allow Sprinting while mobkiller is active (looks sussy with sprint)",
@@ -333,6 +340,12 @@ public class MightyMinerConfig extends Config {
       description = "Enable debug mode"
   )
   public static boolean debugMode = false;
+
+  @HUD(
+      name = "DebugHUD",
+      category = DEBUG
+  )
+  public static DebugHUD debugHUD = DebugHUD.getInstance();
 
   //</editor-fold>
 

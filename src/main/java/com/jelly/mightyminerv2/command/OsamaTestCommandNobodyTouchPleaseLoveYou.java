@@ -11,7 +11,6 @@ import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
-import com.jelly.mightyminerv2.feature.impl.MithrilMiner;
 import com.jelly.mightyminerv2.feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.handler.GraphHandler;
@@ -19,10 +18,10 @@ import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
-import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
+import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.helper.Angle;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
@@ -43,15 +42,19 @@ import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementTraverse;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import kotlin.Pair;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
+import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -81,24 +84,143 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   AStarPathFinder pathfinder;
   PathNode curr;
   List<Pair<EntityPlayer, Pair<Double, Double>>> mobs = new ArrayList<>();
-  List<EntityLiving> ents = new ArrayList<>();
+  List<Pair<String, Entity>> ents = new ArrayList<>();
   public boolean allowed = false;
   Clock timer = new Clock();
 
+  private String mightyMinerV2$cleanSB(String scoreboard) {
+    char[] arr = scoreboard.toCharArray();
+    StringBuilder cleaned = new StringBuilder();
+    for (int i = 0; i < arr.length; i++) {
+      char c = arr[i];
+      if (c >= 32 && c < 127) {
+        cleaned.append(c);
+      }
+      if (c == 167) {
+        i++;
+      }
+    }
+    return cleaned.toString();
+  }
+
   @Main
   public void main() {
-    try {
-      Logger.sendNote(InventoryUtil.getInventoryName());
-      Logger.sendNote("OpenCont: " + mc.thePlayer.openContainer.toString());
-    } catch (Exception e) {
-      Logger.sendNote("errored while sending ajdkdjsad");
-      e.printStackTrace();
-    }
+
+    ScoreboardUtil.scoreboard.forEach((a, b) -> {
+      Logger.sendNote("Key: " + a + ", B is null: " + (b == null));
+      b.forEach((c, d) -> {
+        if(c == null || d == null){
+          Logger.sendNote("C or d is null.");
+          try{
+            Logger.sendNote("c: " + c);
+          } catch (Exception e){}
+          try{
+            Logger.sendNote("d: " + d);
+          } catch (Exception e){}
+        } else {
+          Logger.sendNote("C: " + c + ", D: " + d);
+        }
+      });
+    });
+
+    //                objective name, objective
+//    private final Map<String, ScoreObjective> scoreObjectives = Maps.newHashMap();
+    // no clue
+//    private final Map<IScoreObjectiveCriteria, List<ScoreObjective>> scoreObjectiveCriterias = Maps.newHashMap();
+    // entity name, entity objective, entity score
+//    private final Map<String, Map<ScoreObjective, Score>> entitiesScoreObjectives = Maps.newHashMap();
+    // objective array
+//    private final ScoreObjective[] objectiveDisplaySlots = new ScoreObjective[19];
+    // team name, team
+//    private final Map<String, ScorePlayerTeam> teams = Maps.newHashMap();
+    // player name, team
+//    private final Map<String, ScorePlayerTeam> teamMemberships = Maps.newHashMap();
+//    Scoreboard scoreboard = mc.theWorld.getScoreboard();
+//    Map<String, Map<ScoreObjective, Score>> shit = ((IMixinScoreboard) scoreboard).getEntitiesScoreObjectives();
+//    Map<String, ScorePlayerTeam> shit2 = ((IMixinScoreboard) scoreboard).getTeamMemberships();
+//    for (int i = 0; i < 9; i++) {
+//      ScoreObjective our = scoreboard.getObjectiveInDisplaySlot(i);
+//      if (our != null) {
+//        Logger.sendNote("Name: "+ our.getName() + ", Displayname: " + our.getDisplayName());
+//      }
+//    }
+    // teamemmberships
+//    shit.forEach((a, b) -> {
+//      System.out.println("player: " + a + ", team name: " + b.getTeamName() + ", reginame: " + b.getRegisteredName() + ", pref: " + b.getColorPrefix() + ", suff: " + b.getColorSuffix() + "try: " + b.getColorPrefix() + a + b.getColorSuffix());
+//    });
+    // entityscoreboardobjective
+//    shit.forEach((a, b) -> {
+//      System.out.println("entityName: " + a);
+//      if (b.get(our) != null) {
+//        System.out.println("===================");
+//        List<Score> scores = new ArrayList<>(b.values());
+//        b.forEach((c, d) -> {
+//          scores.add(d);
+//          System.out.println("obj: " + c.getName() + ", dsp: " + c.getDisplayName());
+//          System.out.println("score player: " + d.getPlayerName());
+//        });
+//        System.out.println("found scores. should be one score i think this shit is confusing");
+//        scores.forEach(c -> {
+//          System.out.println("score. player: " + c.getPlayerName() + ", scorePoints: " + c.getScorePoints());
+//          System.out.println("name: " + shit2.get(c.getPlayerName()).getColorPrefix() + c.getPlayerName() + shit2.get(c.getPlayerName()).getColorSuffix());
+//          System.out.println("cleaned: " + mightyMinerV2$cleanSB(shit2.get(c.getPlayerName()).getColorPrefix() + c.getPlayerName() + shit2.get(c.getPlayerName()).getColorSuffix()));
+//        });
+//        System.out.println();
+//        System.out.println("===================");
+//
+//      }
+//    });
+//     for teams
+//    shit2.forEach((a, b) -> {
+//      System.out.println("objname ig: " + a);
+//      System.out.println("reginame: " + b.getRegisteredName() + ", suf: " + b.getColorSuffix() + ", pref: " + b.getColorPrefix());
+//      System.out.println("pplname: " + b.getMembershipCollection());
+//      System.out.println("try: " + b.getColorPrefix() + b.getMembershipCollection().toArray()[0] + b.getColorSuffix());
+//      System.out.println();
+//    });
+//    for(ScoreObjective shi: shit){
+//      try{
+//        System.out.println(shi.getName() + ", " + shi.getDisplayName());
+//        scoreboard.getSortedScores(shi).forEach(s -> {
+//          ScorePlayerTeam team = scoreboard.getPlayersTeam(s.getPlayerName());
+//          System.out.println("Playername: " + s.getPlayerName() + ", teamname: " + team.getTeamName() + ", regsi: " + team.getRegisteredName());
+//          System.out.println("Format: " + ScorePlayerTeam.formatPlayerName(team, s.getPlayerName()));
+//          System.out.println("teamprefix: " + team.getColorPrefix() + ", suffix: " + team.getColorSuffix());
+//          System.out.println();
+//        });
+//        System.out.println();
+//        System.out.println();
+//      }catch (Exception e){}
+//    }
+
+//    Logger.sendNote("NewYaw: " + AngleUtil.getRotationYaw360(new Vec3(this.block).addVector(0.5, 0.5, 0.5)));
+//    Logger.sendNote("OldYaw: " + AngleUtil.get360RotationYaw(AngleUtil.getRotation(this.block).yaw));
+//    mc.theWorld.loadedEntityList.forEach(it -> {
+//      System.out.println();
+//    });
+//    try {
+//      Logger.sendNote(InventoryUtil.getInventoryName());
+//      Logger.sendNote("OpenCont: " + mc.thePlayer.openContainer.toString());
+//    } catch (Exception e) {
+//      Logger.sendNote("errored while sending ajdkdjsad");
+//      e.printStackTrace();
+//    }
 //    this.allowed = !this.allowed;
 //    timer.schedule(500);
 //    ents = EntityUtil.getEntities(MightyMinerConfig.devMKillerMob, new HashSet<>());
+//    ents.clear();
 //    mc.theWorld.loadedEntityList.forEach(it -> {
-//      System.out.println("name: " + StringUtils.stripControlCodes(it.getName()) + ", Customname: " + (it.hasCustomName() ? it.getCustomNameTag() : " ") + ", Pos" + it.getPositionVector());
+//      if (it instanceof EntityArmorStand) {
+//        try {
+    // knowing is faster - regex does the same thing but its slower
+//          String name = it.getName().split("§.")[4];
+//          ents.add(new Pair<>(name, it));
+//        } catch (Exception e) {
+//        }
+//        System.out.println(
+//            "name: " + it.getName().split("§.")[3] + ", CustomName: " + (it.hasCustomName() ? it.getCustomNameTag() : " ") + ", Pos"
+//                + it.getPositionVector());
+//      }
 //      try {
 //        System.out.println(it.serializeNBT());
 //      } catch (Exception e){
@@ -174,7 +296,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @SubCommand
   public void k() {
-    AutoMobKiller.getInstance().start(MightyMinerConfig.devMKillerMob);
+    AutoMobKiller.getInstance().start(Arrays.asList(MightyMinerConfig.devMKillerMob), "");
 //    this.c = !this.c;
   }
 
@@ -369,10 +491,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
     if (!ents.isEmpty()) {
       ents.forEach(ent -> {
-        Vec3 pos = ent.getPositionVector();
-        RenderUtil.drawBox(
-            new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + ent.height, pos.zCoord + 0.5),
-            new Color(255, 0, 241, 150));
+        Vec3 pos = ent.getSecond().getPositionVector();
+        RenderUtil.drawText(ent.getFirst(), pos.xCoord, pos.yCoord + 0.5, pos.zCoord, 1f);
       });
     }
 

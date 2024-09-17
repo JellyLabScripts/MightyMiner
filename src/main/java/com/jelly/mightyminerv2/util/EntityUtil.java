@@ -51,14 +51,14 @@ public class EntityUtil {
     return health;
   }
 
-  public static List<EntityLiving> getEntities(String entityName, Set<EntityLiving> entitiesToIgnore) {
+  public static List<EntityLiving> getEntities(Set<String> entityNames, Set<EntityLiving> entitiesToIgnore) {
     // L if by chance two living entities are on the same x and z coord
     Set<Long> stands = new HashSet<>();
     Map<Long, EntityLiving> entities = new HashMap<>();
     for (Entity ent : mc.theWorld.loadedEntityList) {
       if (ent instanceof EntityArmorStand) {
         String name = StringUtils.stripControlCodes(ent.getName());
-        if (name.contains(entityName) && !isStandDead(name)) {
+        if (entityNames.stream().anyMatch(name::contains) && !isStandDead(name)) {
           stands.add(pack((int) ent.posX, (int) ent.posZ));
         }
       }

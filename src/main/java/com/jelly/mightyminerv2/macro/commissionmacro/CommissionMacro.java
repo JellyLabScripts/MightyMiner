@@ -24,6 +24,7 @@ import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class CommissionMacro extends AbstractMacro {
@@ -301,7 +302,8 @@ public class CommissionMacro extends AbstractMacro {
         MithrilMiner.getInstance().start(
             miningSpeed,
             miningSpeedBoost,
-            this.curr.getName().contains("Titanium") ? titaniumPriority : mithrilPriority
+            this.curr.getName().contains("Titanium") ? titaniumPriority : mithrilPriority,
+            MightyMinerConfig.commMiningTool
         );
         this.changeMacroState(MacroState.MINING_VERIFY);
         break;
@@ -331,13 +333,13 @@ public class CommissionMacro extends AbstractMacro {
         }
         break;
       case ENABLE_MOBKILLER:
-        String mobName = CommissionUtil.getMobForCommission(this.curr);
+        Set<String> mobName = CommissionUtil.getMobForCommission(this.curr);
         if (mobName == null) {
           error("Was Supposed to Start MobKiller but current comm is " + this.curr.getName());
           this.changeMainState(MainState.NONE);
           return;
         }
-        AutoMobKiller.getInstance().start(mobName);
+        AutoMobKiller.getInstance().start(mobName, this.curr.getName().startsWith("Glacite") ? MightyMinerConfig.commMiningTool : MightyMinerConfig.commSlayerWeapon);
         this.changeMacroState(MacroState.MOBKILLER_VERIFY);
         break;
       case MOBKILLER_VERIFY:

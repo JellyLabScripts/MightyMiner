@@ -1,7 +1,6 @@
 package com.jelly.mightyminerv2.handler;
 
-import com.jelly.mightyminerv2.event.UpdateScoreboardLineEvent;
-import com.jelly.mightyminerv2.event.UpdateScoreboardListEvent;
+import com.jelly.mightyminerv2.event.UpdateScoreboardEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistFooterEvent;
 import com.jelly.mightyminerv2.util.InventoryUtil;
@@ -80,7 +79,7 @@ public class GameStateHandler {
       return;
     }
     final List<String> tabList = event.tablist;
-    final List<String> scoreboard = ScoreboardUtil.getScoreboardLines(true);
+    final List<String> scoreboard = ScoreboardUtil.getScoreboard();
 
     if (tabList.size() == 1 && InventoryUtil.isInventoryEmpty()) {
       this.currentLocation = Location.LIMBO;
@@ -128,23 +127,14 @@ public class GameStateHandler {
   }
 
   @SubscribeEvent
-  public void onScoreboardLineUpdate(UpdateScoreboardLineEvent event) {
-    if (!(event.getDirtyLine().contains("⏣") || event.getDirtyLine().contains("ф"))) {
-      return;
-    }
-
-    this.currentSubLocation = SubLocation.fromName(event.getCleanLine().trim());
-  }
-
-  @SubscribeEvent
-  public void onScoreboardListUpdate(UpdateScoreboardListEvent event) {
-    for (int i = 0; i < event.scoreboardLines.size(); i++) {
-      final String line = event.scoreboardLines.get(i);
+  public void onScoreboardListUpdate(UpdateScoreboardEvent event) {
+    for (int i = 0; i < event.scoreboard.size(); i++) {
+      final String line = event.scoreboard.get(i);
       if (!(line.contains("⏣") || line.contains("ф"))) {
         continue;
       }
 
-      this.currentSubLocation = SubLocation.fromName(event.cleanScoreboardLines.get(i).trim());
+      this.currentSubLocation = SubLocation.fromName(event.scoreboard.get(i).trim());
       break;
     }
   }

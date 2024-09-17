@@ -94,10 +94,10 @@ public class MacroManager {
     }
 
 //    needed to remove for pause to work
-//    if (!currentMacro.isEnabled()) {
-//      this.disable();
-//      return;
-//    }
+    if (!currentMacro.isEnabled()) {
+      this.disable();
+      return;
+    }
 
     this.currentMacro.onTick(event);
   }

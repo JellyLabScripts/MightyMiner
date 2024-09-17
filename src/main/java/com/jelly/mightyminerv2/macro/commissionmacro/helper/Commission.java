@@ -54,7 +54,7 @@ public enum Commission {
       put(SubLocation.CLIFFSIDE_VEINS, new RouteWaypoint[]{new RouteWaypoint(93, 144, 51, TransportMethod.WALK)});
       put(SubLocation.ROYAL_MINES, new RouteWaypoint[]{new RouteWaypoint(115, 153, 83, TransportMethod.WALK)});
       put(SubLocation.GREAT_ICE_WALL, new RouteWaypoint[]{new RouteWaypoint(0, 127, 143, TransportMethod.WALK)});
-      put(SubLocation.GOBLIN_BURROWS, new RouteWaypoint[]{new RouteWaypoint(-66, 136, 151, TransportMethod.WALK)});
+      put(SubLocation.GOBLIN_BURROWS, new RouteWaypoint[]{new RouteWaypoint(-56, 134, 153, TransportMethod.WALK)});
       put(SubLocation.RAMPARTS_QUARRY, new RouteWaypoint[]{
           new RouteWaypoint(-41, 138, -13, TransportMethod.WALK),
           new RouteWaypoint(-58, 146, -18, TransportMethod.WALK)

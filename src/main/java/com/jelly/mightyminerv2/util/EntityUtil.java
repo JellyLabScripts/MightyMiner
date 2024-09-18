@@ -41,6 +41,34 @@ public class EntityUtil {
     return getHealthFromStandName(name) == 0;
   }
 
+  public static String getEntityNameFromArmorStand(String armorstandName){
+    char[] carr = armorstandName.toCharArray();
+    if(carr[carr.length - 1] != '❤'){
+      return "";
+    }
+    StringBuilder builder = new StringBuilder();
+    boolean foundSpace = false;
+    byte charCounter = 0;
+    for(int i = carr.length - 1; i >= 0; i--){
+      char curr = carr[i];
+      if(!foundSpace) {
+        if (curr == ' ') {
+          foundSpace = true;
+        }
+      } else {
+        if(curr == '§'){
+          charCounter++;
+        }
+        if(charCounter == 2){
+          builder.deleteCharAt(builder.length() - 1);
+          break;
+        }
+        builder.append(curr);
+      }
+    }
+    return builder.reverse().toString();
+  }
+
   public static int getHealthFromStandName(String name) {
     int health = 0;
     try {

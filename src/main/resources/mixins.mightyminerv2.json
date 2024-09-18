@@ -7,7 +7,7 @@
     "client.IMixinScoreboard",
     "client.MixinChunk",
     "client.MixinEntityLivingBase",
-    "client.MixinFullBlock",
+    "client.MixinBlockStainedGlassPane",
     "client.MixinScoreboard",
     "FML.MixinFMLHandshakeMessage",
     "gui.MixinGuiContainer",

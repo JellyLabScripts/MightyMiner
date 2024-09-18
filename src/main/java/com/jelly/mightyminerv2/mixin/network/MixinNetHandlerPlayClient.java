@@ -3,7 +3,6 @@ package com.jelly.mightyminerv2.mixin.network;
 import com.jelly.mightyminerv2.event.BlockDestroyEvent;
 import com.jelly.mightyminerv2.event.UpdateEntityEvent;
 import com.jelly.mightyminerv2.event.SpawnParticleEvent;
-import com.jelly.mightyminerv2.event.UpdateEntityEvent.UpdateType;
 import com.jelly.mightyminerv2.event.UpdateScoreboardEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistFooterEvent;
@@ -12,7 +11,9 @@ import com.jelly.mightyminerv2.util.TablistUtil;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import net.minecraft.client.Minecraft;
@@ -22,13 +23,12 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.network.play.server.S0CPacketSpawnPlayer;
 import net.minecraft.network.play.server.S0EPacketSpawnObject;
 import net.minecraft.network.play.server.S0FPacketSpawnMob;
-import net.minecraft.network.play.server.S14PacketEntity;
+import net.minecraft.network.play.server.S1CPacketEntityMetadata;
 import net.minecraft.network.play.server.S25PacketBlockBreakAnim;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
@@ -41,13 +41,11 @@ import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.StringUtils;
-import net.minecraft.util.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -126,41 +124,44 @@ public class MixinNetHandlerPlayClient {
     MinecraftForge.EVENT_BUS.post(new BlockDestroyEvent(packetIn.getPosition(), packetIn.getProgress()));
   }
 
+  // Entity spawn stuff
+  @Unique
+  Set<Integer> mightyMinerv2$entities = new HashSet<>();
+
+  @Inject(method = "handleEntityMetadata", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
+  public void handleEntityMetadata(S1CPacketEntityMetadata packetIn, CallbackInfo ci, Entity entity) {
+    if (mightyMinerv2$entities.remove(packetIn.getEntityId()) && entity instanceof EntityArmorStand) {
+      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity));
+    }
+  }
+
   @Inject(method = "handleSpawnObject", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleSpawnObject(S0EPacketSpawnObject packetIn, CallbackInfo ci, double d0, double d1, double d2, Entity entity) {
-    // right now only care about armorsatnds for mobkiller
     if (packetIn.getType() == 78) {
-      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, packetIn.getType()));
+      mightyMinerv2$entities.add(packetIn.getEntityID());
     }
   }
 
   @Inject(method = "handleSpawnMob", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleSpawnMob(S0FPacketSpawnMob packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1,
       EntityLivingBase entitylivingbase, Entity[] aentity, List list) {
-    MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entitylivingbase, packetIn.getEntityType()));
+    MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entitylivingbase));
   }
 
   @Inject(method = "handleSpawnPlayer", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleSpawnPlayer(S0CPacketSpawnPlayer packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1,
       EntityOtherPlayerMP entityotherplayermp, int i, List list) {
-    MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entityotherplayermp, -1));
+    MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entityotherplayermp));
   }
 
   @Redirect(method = "handleDestroyEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/WorldClient;removeEntityFromWorld(I)Lnet/minecraft/entity/Entity;"))
   public Entity handleDestroyEntities(WorldClient instance, int entityID) {
     Entity entity = instance.removeEntityFromWorld(entityID);
+    mightyMinerv2$entities.remove(entityID);
     if (entity instanceof EntityLivingBase || entity instanceof EntityArmorStand) {
-      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, -1, UpdateType.DESPAWN));
+      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, 1));
     }
     return entity;
-  }
-
-  @Inject(method = "handleEntityMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPositionAndRotation2(DDDFFIZ)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-  public void handleEntityMovement(S14PacketEntity packetIn, CallbackInfo ci, Entity entity, double d0, double d1, double d2, float f, float f1) {
-    if ((entity instanceof EntityLiving || entity instanceof EntityArmorStand) && (int) entity.posX != (int) d0 || (int) entity.posY != (int) d1
-        || (int) entity.posZ != (int) d2) {
-      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, -1, entity.getPositionVector(), new Vec3(d0, d1, d2)));
-    }
   }
 
   // Scoreboard
@@ -228,7 +229,8 @@ public class MixinNetHandlerPlayClient {
     } else {
       scoreplayerteam.getMembershipCollection().forEach(it -> {
         scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
-          mightyMinerv2$scoreboard.get(a.getName()).put(b.getScorePoints(), mightyMinerv2$sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix()));
+          mightyMinerv2$scoreboard.get(a.getName()).put(b.getScorePoints(),
+              mightyMinerv2$sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix()));
         });
       });
     }

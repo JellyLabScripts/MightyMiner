@@ -1,19 +1,27 @@
 package com.jelly.mightyminerv2.feature.impl;
 
-import com.google.common.collect.ImmutableSet;
+import com.jelly.mightyminerv2.command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.UpdateEntityEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
+import com.jelly.mightyminerv2.pathfinder.calculate.PathNode;
 import com.jelly.mightyminerv2.util.EntityUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
+import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,9 +32,12 @@ import java.util.Optional;
 import java.util.Set;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -247,16 +258,18 @@ public class AutoMobKiller extends AbstractFeature {
     NONE, NO_ENTITIES
   }
 
-  // EntityTracker - Have NOT tested the accuracy of the events, coded everything in one go so :D
-  Map<Long, String> stands = new HashMap<>();
-  Map<Long, EntityLiving> entities = new HashMap<>();
-  Map<String, Set<EntityLiving>> mobs = new HashMap<>();
+  // EntityTracker
+  Long2ObjectMap<String> stands = new Long2ObjectOpenHashMap<>();
+  Long2ObjectMap<EntityLiving> entities = new Long2ObjectOpenHashMap<>();
+  Object2ObjectMap<String, Set<EntityLiving>> mobs = new Object2ObjectOpenHashMap<>();
 
+  // testing
   @SubscribeEvent
   public void onRenderEvent(RenderWorldLastEvent event) {
     mobs.forEach((a, b) -> {
       b.forEach(it -> {
         RenderUtil.drawText(a, it.posX, it.posY + 2.5, it.posZ, 1f);
+        RenderUtil.drawBox(new AxisAlignedBB(it.posX - 0.5, it.posY, it.posZ - 0.5, it.posX + 0.5, it.posY, it.posZ + 0.5), new Color(123, 0, 234, 150));
       });
     });
   }
@@ -268,60 +281,55 @@ public class AutoMobKiller extends AbstractFeature {
     mobs.clear();
   }
 
+
+  // i love writing shitcode
+  // i wrote a much cleaner readable version before but enjoy this >_<
   @SubscribeEvent
   public void onEntitySpawn(UpdateEntityEvent event) {
+    if (!OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance().allowed) {
+      return;
+    }
 //    if (!this.enabled) {
 //      return;
 //    }
 
+    // hash is just baritones BetterBlockPos::longHash
+    // assuming mixin works properly and doesnt add anything other than armorstands and entitylivings
+    String name = "";
     Entity entity = event.entity;
-    switch (event.updateType) {
-      case SPAWN:
-        Long hash = this.computeHash((int) entity.posX, (int) entity.posZ);
-        if (event.type == 78) {
-          try {
-            String name = entity.getName().split("§.")[4];
-//            if (this.mobToKill.contains(name)) {
-            this.stands.put(hash, name);
-            EntityLiving exists = this.entities.get(hash);
-            if (exists != null) {
-              mobs.computeIfAbsent(name, k -> new HashSet<>()).add(exists);
-            }
-//            }
-          } catch (Exception e) {
-          }
+    int updateType = event.updateType;
+    EntityLiving mob = null;
+    Long hash;
+    if (entity instanceof EntityArmorStand) {
+      if (!entity.hasCustomName()) {
+        return;
+      }
+      if ((name = EntityUtil.getEntityNameFromArmorStand(entity.getCustomNameTag())).isEmpty()) {
+        return;
+      }
+      hash = PathNode.Companion.longHash(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ));
+      mob = entities.remove(hash);
+      if (mob == null) {
+        stands.put(hash, name);
+      } else {
+        if(updateType == 0){
+          mobs.computeIfAbsent(name, a -> new HashSet<>()).add(mob);
         } else {
-          String name = this.stands.get(hash);
-          if (name != null) {
-            this.mobs.computeIfAbsent(name, k -> new HashSet<>()).add((EntityLiving) entity);
-          }
+          mobs.get(name).removeIf(mob::equals);
         }
-        break;
-      case DESPAWN:
-        hash = this.computeHash((int) entity.posX, (int) entity.posZ);
-        String name = this.stands.remove(hash);
-        EntityLiving removedEntity = this.entities.remove(hash);
-        if (name != null) {
-          this.mobs.remove(name);
-        } else if (removedEntity != null) {
-          this.mobs.remove(this.stands.remove(hash));
+      }
+    } else {
+      hash = PathNode.Companion.longHash(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY + Math.ceil(entity.height)), MathHelper.floor_double(entity.posZ));
+      name = stands.remove(hash);
+      if (name == null) {
+        entities.put(hash, (EntityLiving) entity);
+      } else {
+        if(updateType == 0){
+          mobs.computeIfAbsent(name, a -> new HashSet<>()).add((EntityLiving) entity);
+        } else {
+          mobs.get(name).removeIf(entity::equals);
         }
-        break;
-      case MOVEMENT:
-        Long newHash = this.computeHash((int) event.newPos.xCoord, (int) event.newPos.zCoord);
-        hash = this.computeHash((int) event.oldPos.xCoord, (int) event.oldPos.zCoord);
-        name = this.stands.remove(hash);
-        removedEntity = this.entities.remove(hash);
-        if (name != null) {
-          this.stands.put(newHash, name);
-        } else if (removedEntity != null) {
-          this.entities.put(newHash, removedEntity);
-        }
-        break;
+      }
     }
-  }
-
-  private long computeHash(int x, int z) {
-    return ((long) x << 32) | (z & 0xFFFFFFFFL);
   }
 }

@@ -22,6 +22,7 @@ public class DebugHUD extends TextHud {
   }
 
 //  public Map<String, DebugList> lists = new HashMap<>();
+  public int count = 0;
 
   public DebugHUD() {
     super(true, 1f, 10f, 0.5f, true, true, 1, 5, 5, new OneColor(0, 0, 0, 150), false, 2, new OneColor(0, 0, 0, 127));
@@ -35,8 +36,11 @@ public class DebugHUD extends TextHud {
 //    });
     lines.add(ScoreboardUtil.getScoreboardTitle());
     lines.addAll(ScoreboardUtil.getScoreboard());
+    lines.add("");
     lines.add("Location: " + GameStateHandler.getInstance().getCurrentLocation().getName());
     lines.add("SubLocation: " + GameStateHandler.getInstance().getCurrentSubLocation().getName());
+    lines.add("");
+    lines.add("EntityCount: " + count);
   }
 
 //  public void addList(String featureName, DebugList list) {

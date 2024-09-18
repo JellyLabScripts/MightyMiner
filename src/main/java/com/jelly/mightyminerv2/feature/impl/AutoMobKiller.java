@@ -261,15 +261,22 @@ public class AutoMobKiller extends AbstractFeature {
   // EntityTracker
   Long2ObjectMap<String> stands = new Long2ObjectOpenHashMap<>();
   Long2ObjectMap<EntityLiving> entities = new Long2ObjectOpenHashMap<>();
-  Object2ObjectMap<String, Set<EntityLiving>> mobs = new Object2ObjectOpenHashMap<>();
+  Object2ObjectMap<String, Set<Entity>> mobs = new Object2ObjectOpenHashMap<>();
 
   // testing
   @SubscribeEvent
   public void onRenderEvent(RenderWorldLastEvent event) {
+//    if (!OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance().allowed) {
+//      return;
+//    }
+//    if (mobs.get("MOB") == null || mobs.get("MOB").isEmpty()) {
+//      Logger.sendNote("NULL?EMPTY WTFRICK");
+//    }
     mobs.forEach((a, b) -> {
       b.forEach(it -> {
-        RenderUtil.drawText(a, it.posX, it.posY + 2.5, it.posZ, 1f);
-        RenderUtil.drawBox(new AxisAlignedBB(it.posX - 0.5, it.posY, it.posZ - 0.5, it.posX + 0.5, it.posY, it.posZ + 0.5), new Color(123, 0, 234, 150));
+//        RenderUtil.drawText(a, it.posX, it.posY + 2.5, it.posZ, 1f);
+        RenderUtil.drawBox(new AxisAlignedBB(it.posX - 0.5, it.posY, it.posZ - 0.5, it.posX + 0.5, it.posY, it.posZ + 0.5),
+            new Color(123, 0, 234, 150));
       });
     });
   }
@@ -293,13 +300,21 @@ public class AutoMobKiller extends AbstractFeature {
 //      return;
 //    }
 
+//    if ((event.entity instanceof EntityArmorStand) && event.entity.hasCustomName()) {
+//      if (event.updateType == 0) {
+//        mobs.computeIfAbsent("MOB", k -> new HashSet<>()).add(event.entity);
+//      } else {
+//        mobs.computeIfAbsent("MOB", k -> new HashSet<>()).remove(event.entity);
+//      }
+//    }
+
     // hash is just baritones BetterBlockPos::longHash
     // assuming mixin works properly and doesnt add anything other than armorstands and entitylivings
-    String name = "";
-    Entity entity = event.entity;
     int updateType = event.updateType;
+    Entity entity = event.entity;
+    String name = "";
     EntityLiving mob = null;
-    Long hash;
+    long hash;
     if (entity instanceof EntityArmorStand) {
       if (!entity.hasCustomName()) {
         return;
@@ -308,26 +323,41 @@ public class AutoMobKiller extends AbstractFeature {
         return;
       }
       hash = PathNode.Companion.longHash(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ));
+      if (updateType == 2) {
+        name = stands.remove(hash);
+        if (name != null) {
+          stands.put(event.newHash, name);
+        }
+        return;
+      }
       mob = entities.remove(hash);
       if (mob == null) {
         stands.put(hash, name);
       } else {
-        if(updateType == 0){
+        if (updateType == 0) {
           mobs.computeIfAbsent(name, a -> new HashSet<>()).add(mob);
         } else {
-          mobs.get(name).removeIf(mob::equals);
+          mobs.get(name).remove(mob);
         }
       }
     } else {
-      hash = PathNode.Companion.longHash(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY + Math.ceil(entity.height)), MathHelper.floor_double(entity.posZ));
+      hash = PathNode.Companion.longHash(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY + Math.ceil(entity.height)),
+          MathHelper.floor_double(entity.posZ));
+      if (updateType == 2) {
+        mob = entities.remove(hash);
+        if (mob != null) {
+          entities.put(event.newHash, mob);
+        }
+        return;
+      }
       name = stands.remove(hash);
       if (name == null) {
         entities.put(hash, (EntityLiving) entity);
       } else {
-        if(updateType == 0){
-          mobs.computeIfAbsent(name, a -> new HashSet<>()).add((EntityLiving) entity);
+        if (updateType == 0) {
+          mobs.computeIfAbsent(name, a -> new HashSet<>()).add(entity);
         } else {
-          mobs.get(name).removeIf(entity::equals);
+          mobs.get(name).remove(entity);
         }
       }
     }

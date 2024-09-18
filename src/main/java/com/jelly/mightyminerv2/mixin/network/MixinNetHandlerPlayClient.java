@@ -6,6 +6,8 @@ import com.jelly.mightyminerv2.event.SpawnParticleEvent;
 import com.jelly.mightyminerv2.event.UpdateScoreboardEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistFooterEvent;
+import com.jelly.mightyminerv2.hud.DebugHUD;
+import com.jelly.mightyminerv2.pathfinder.calculate.PathNode;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.TablistUtil;
 import java.util.Arrays;
@@ -23,11 +25,15 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.network.play.server.S0CPacketSpawnPlayer;
 import net.minecraft.network.play.server.S0EPacketSpawnObject;
 import net.minecraft.network.play.server.S0FPacketSpawnMob;
+import net.minecraft.network.play.server.S14PacketEntity;
+import net.minecraft.network.play.server.S18PacketEntityTeleport;
 import net.minecraft.network.play.server.S1CPacketEntityMetadata;
 import net.minecraft.network.play.server.S25PacketBlockBreakAnim;
 import net.minecraft.network.play.server.S2APacketParticles;
@@ -40,12 +46,15 @@ import net.minecraft.network.play.server.S3EPacketTeams;
 import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StringUtils;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -158,10 +167,34 @@ public class MixinNetHandlerPlayClient {
   public Entity handleDestroyEntities(WorldClient instance, int entityID) {
     Entity entity = instance.removeEntityFromWorld(entityID);
     mightyMinerv2$entities.remove(entityID);
-    if (entity instanceof EntityLivingBase || entity instanceof EntityArmorStand) {
+    if (entity instanceof EntityLiving || entity instanceof EntityArmorStand) {
       MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, 1));
     }
     return entity;
+  }
+
+  @Inject(method = "handleEntityMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPositionAndRotation2(DDDFFIZ)V"), locals = LocalCapture.CAPTURE_FAILHARD)
+  public void handleEntityMovement(S14PacketEntity packetIn, CallbackInfo ci, Entity entity, double d0, double d1, double d2, float f, float f1) {
+    if (entity instanceof EntityLivingBase) {
+      int nX = MathHelper.floor_double(d0);
+      int nY = MathHelper.floor_double(d1);
+      int nZ = MathHelper.floor_double(d2);
+      if (MathHelper.floor_double(entity.posX) != nX || MathHelper.floor_double(entity.posY) != nY || MathHelper.floor_double(entity.posZ) != nZ) {
+        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, PathNode.Companion.longHash(nX, nY, nZ)));
+      }
+    }
+  }
+
+  @Inject(method = "handleEntityTeleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/S18PacketEntityTeleport;getYaw()B"), locals = LocalCapture.CAPTURE_FAILHARD)
+  public void handleEntityTeleport(S18PacketEntityTeleport packetIn, CallbackInfo ci, Entity entity, double d0, double d1, double d2) {
+    if (entity instanceof EntityLivingBase) {
+      int nX = MathHelper.floor_double(d0);
+      int nY = MathHelper.floor_double(d1);
+      int nZ = MathHelper.floor_double(d2);
+      if (MathHelper.floor_double(entity.posX) != nX || MathHelper.floor_double(entity.posY) != nY || MathHelper.floor_double(entity.posZ) != nZ) {
+        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, PathNode.Companion.longHash(nX, nY, nZ)));
+      }
+    }
   }
 
   // Scoreboard

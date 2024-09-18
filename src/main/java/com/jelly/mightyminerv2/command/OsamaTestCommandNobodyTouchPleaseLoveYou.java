@@ -126,6 +126,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //        System.out.println(
 //            "Name: " + it.getName() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + Math.floor(it.posX) + ", " + Math.floor(
 //                it.posY + Math.ceil(it.height)) + ", " + Math.floor(it.posZ) + ")");
+//        System.out.println(it.getNBTTagCompound());
 //      }
 //    });
 //    Logger.sendNote("Done");

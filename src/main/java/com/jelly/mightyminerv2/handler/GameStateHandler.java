@@ -4,6 +4,7 @@ import com.jelly.mightyminerv2.event.UpdateScoreboardEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistFooterEvent;
 import com.jelly.mightyminerv2.util.InventoryUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.helper.location.Location;
 import com.jelly.mightyminerv2.util.helper.location.SubLocation;
@@ -18,12 +19,9 @@ import java.util.regex.Pattern;
 
 public class GameStateHandler {
 
-  private static GameStateHandler instance;
+  private static GameStateHandler instance = new GameStateHandler();
 
   public static GameStateHandler getInstance() {
-    if (instance == null) {
-      instance = new GameStateHandler();
-    }
     return instance;
   }
 
@@ -47,18 +45,6 @@ public class GameStateHandler {
   public boolean isPlayerInSkyBlock() {
     return this.currentLocation.ordinal() < Location.values().length - 3;
   }
-
-//  @SubscribeEvent
-//  public void onTick(ClientTickEvent event) {
-//    if (mc.theWorld != null) {
-//      try {
-//        MightyMiner.instance.bsa = new BlockStateAccessor(MightyMiner.instance);
-//      } catch (Exception e) {
-//        MightyMiner.instance.bsa = null;
-//        e.printStackTrace();
-//      }
-//    }
-//  }
 
   @SubscribeEvent
   public void onWorldUnload(WorldEvent.Unload event) {
@@ -101,17 +87,14 @@ public class GameStateHandler {
       return;
     }
 
-    if (!ScoreboardUtil.getScoreboardTitle().contains("SKYBLOCK")
-        && !scoreboard.isEmpty()
-        && scoreboard.get(scoreboard.size() - 1).equalsIgnoreCase("www.hypixel.com")) {
+    if (!ScoreboardUtil.getScoreboardTitle().contains("SKYBLOCK") && !scoreboard.isEmpty() && scoreboard.get(scoreboard.size() - 1).equalsIgnoreCase("www.hypixel.net")) {
       this.currentLocation = Location.LOBBY;
       return;
     }
     this.currentLocation = Location.KNOWHERE;
   }
 
-  // Todo: Consider Changing Logic. Its very simple because i cant test rn.
-  //       I doubt it will cause any problems tho
+  // kinda bad but knowing is faster
   @SubscribeEvent
   public void onTablistFooterUpdate(UpdateTablistFooterEvent event) {
     final List<String> footer = event.footer;
@@ -134,7 +117,7 @@ public class GameStateHandler {
         continue;
       }
 
-      this.currentSubLocation = SubLocation.fromName(event.scoreboard.get(i).trim());
+      this.currentSubLocation = SubLocation.fromName(ScoreboardUtil.sanitizeString(line).trim());
       break;
     }
   }

@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import net.minecraft.client.Minecraft;
@@ -39,7 +38,6 @@ import net.minecraft.network.play.server.S3CPacketUpdateScore.Action;
 import net.minecraft.network.play.server.S3DPacketDisplayScoreboard;
 import net.minecraft.network.play.server.S3EPacketTeams;
 import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
-import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.StringUtils;
@@ -190,9 +188,10 @@ public class MixinNetHandlerPlayClient {
       mightyMinerv2$scoreboard.put(objName, packetIn.func_149338_e() == 0 ? new TreeMap<>(Comparator.reverseOrder()) : removedValue);
     }
 
-    SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(mightyMinerv2$objectiveNames[1]);
+    String sidebarObjName = mightyMinerv2$objectiveNames[1];
+    SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(sidebarObjName);
 
-    if (sidebar != null) {
+    if (objName.equals(sidebarObjName) && sidebar != null) {
       MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
     }
 
@@ -208,9 +207,10 @@ public class MixinNetHandlerPlayClient {
       objective.put(packetIn.getScoreValue(), text);
     }
 
-    SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(mightyMinerv2$objectiveNames[1]);
+    String sidebarObjName = mightyMinerv2$objectiveNames[1];
+    SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(sidebarObjName);
 
-    if (sidebar != null) {
+    if (packetIn.getObjectiveName().equals(sidebarObjName) && sidebar != null) {
       MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
     }
 
@@ -228,7 +228,7 @@ public class MixinNetHandlerPlayClient {
     } else {
       scoreplayerteam.getMembershipCollection().forEach(it -> {
         scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
-          mightyMinerv2$scoreboard.get(a.getName()).put(b.getScorePoints(), sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix()));
+          mightyMinerv2$scoreboard.get(a.getName()).put(b.getScorePoints(), mightyMinerv2$sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix()));
         });
       });
     }
@@ -243,7 +243,7 @@ public class MixinNetHandlerPlayClient {
   }
 
   @Unique
-  public String sanitizeString(String scoreboard) {
+  public String mightyMinerv2$sanitizeString(String scoreboard) {
     char[] arr = scoreboard.toCharArray();
     StringBuilder cleaned = new StringBuilder();
     for (int i = 0; i < arr.length; i++) {

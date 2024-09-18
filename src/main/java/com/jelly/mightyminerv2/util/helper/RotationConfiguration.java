@@ -24,8 +24,6 @@ public class RotationConfiguration {
     private boolean easeBackToClientSide = false;
     private boolean followTarget = false;
     private RotationType rotationType = RotationType.CLIENT;
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private Ease easeFunction = Ease.values()[new Random().nextInt(Ease.values().length - 1)];
     private boolean randomness = false;
 
@@ -104,7 +102,7 @@ public class RotationConfiguration {
     }
 
     public enum Ease {
-        EASE_OUT_BACK(x -> 1 + (1 + 2 * (x - 1)) * (x - 1) * (x - 1)),
+//        EASE_OUT_BACK(x -> 1 + (1 + 2 * (x - 1)) * (x - 1) * (x - 1)),
         EASE_OUT_SINE(x -> (float) Math.sin((x * Math.PI) / 2)),
         EASE_IN_OUT_SINE(x -> (float) (-(Math.cos(x * Math.PI) - 1) / 2)),
         EASE_OUT_QUAD(x -> 1 - (1 - x) * (1 - x)),

@@ -73,6 +73,24 @@ public class MightyMinerConfig extends Config {
   )
   public static boolean mithrilStrafe = false;
 
+  @Switch(
+      name = "Sneak While Mining",
+      category = MITHRIL
+  )
+  public static boolean mithrilMinerSneakWhileMining = false;
+
+  @Switch(
+      name = "Gives Titanium a higher priority",
+      category = MITHRIL
+  )
+  public static boolean mithrilMinerTitaniumHighPriority = false;
+
+  @Switch(
+      name = "Precision Miner", description = "Looks at particles spawned by precision miner perk (Might/Will Mess Up TickGLide)",
+      category = MITHRIL
+  )
+  public static boolean mithrilMinerPrecisionMiner = false;
+
   @Slider(
       name = "Rotation Time",
       category = MITHRIL,
@@ -95,17 +113,6 @@ public class MightyMinerConfig extends Config {
   )
   public static int mithrilMinerTickGlideOffset = 4;
 
-  @Switch(
-      name = "Sneak While Mining",
-      category = MITHRIL
-  )
-  public static boolean mithrilMinerSneakWhileMining = false;
-
-  @Switch(
-      name = "Gives Titanium a higher priority",
-      category = MITHRIL
-  )
-  public static boolean mithrilMinerTitaniumHighPriority = false;
   //</editor-fold>
 
   //<editor-fold desc="Commission Macro">
@@ -134,13 +141,6 @@ public class MightyMinerConfig extends Config {
       subcategory = "MobKiller"
   )
   public static boolean commMobKillerInterpolate = true;
-
-  @Slider(
-      name = "Commission Milestone",
-      category = COMMISSION,
-      min = 1, max = 3
-  )
-  public static int commMilestone = 1;
 
   @Slider(
       name = "Distance cost",

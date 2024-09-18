@@ -43,10 +43,6 @@ public class CommissionUtil {
     return slayerMob.get(commission);
   }
 
-  public static List<Pair<String, Vec3>> availableEmissaries() {
-    return emissaries.subList(0, Math.min(MightyMinerConfig.commMilestone * 2, 5));
-  }
-
   public static Optional<EntityPlayer> getEmissary(Vec3 pos) {
     return mc.theWorld.playerEntities.stream()
         .filter(entity -> entity.posX == pos.xCoord && entity.posY == pos.yCoord && entity.posZ == pos.zCoord
@@ -56,7 +52,7 @@ public class CommissionUtil {
   }
 
   public static Optional<EntityPlayer> getClosestEmissary() {
-    Vec3 pos = availableEmissaries()
+    Vec3 pos = emissaries
         .stream()
         .min(Comparator.comparing(it -> mc.thePlayer.getPositionVector().squareDistanceTo(it.getSecond())))
         .map(Pair::getSecond)
@@ -73,7 +69,7 @@ public class CommissionUtil {
   }
 
   public static Vec3 getClosestEmissaryPosition() {
-    return availableEmissaries()
+    return emissaries
         .stream()
         .min(Comparator.comparing(it -> mc.thePlayer.getPositionVector().squareDistanceTo(it.getSecond())))
         .get().getSecond();

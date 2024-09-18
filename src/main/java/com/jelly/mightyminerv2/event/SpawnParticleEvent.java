@@ -15,7 +15,6 @@ public class SpawnParticleEvent extends Event {
     double xCoord;
     double yCoord;
     double zCoord;
-
     double xOffset;
     double yOffset;
     double zOffset;

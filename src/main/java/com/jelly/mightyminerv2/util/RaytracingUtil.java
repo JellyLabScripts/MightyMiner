@@ -17,6 +17,11 @@ public class RaytracingUtil {
         return Math.abs(r.xCoord - point.xCoord) < 0.1f && Math.abs(r.yCoord - point.yCoord) < 0.1f && Math.abs(r.zCoord - point.zCoord) < 0.1f;
     }
 
+    public static MovingObjectPosition raytraceTowards(Vec3 v1, Vec3 v2, double distance){
+        Vec3 normalized = v2.subtract(v1).normalize();
+        return raytrace(v1, v1.add(new Vec3(normalized.xCoord * distance, normalized.yCoord * distance, normalized.zCoord * distance)));
+    }
+
     // Credits to GumTuneClient <3
     public static MovingObjectPosition raytrace(Vec3 v1, Vec3 v2) {
         final Vec3 v3 = v2.subtract(v1);

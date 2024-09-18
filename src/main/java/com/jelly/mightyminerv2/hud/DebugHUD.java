@@ -2,6 +2,7 @@ package com.jelly.mightyminerv2.hud;
 
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.hud.TextHud;
+import com.jelly.mightyminerv2.handler.GameStateHandler;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +35,8 @@ public class DebugHUD extends TextHud {
 //    });
     lines.add(ScoreboardUtil.getScoreboardTitle());
     lines.addAll(ScoreboardUtil.getScoreboard());
+    lines.add("Location: " + GameStateHandler.getInstance().getCurrentLocation().getName());
+    lines.add("SubLocation: " + GameStateHandler.getInstance().getCurrentSubLocation().getName());
   }
 
 //  public void addList(String featureName, DebugList list) {

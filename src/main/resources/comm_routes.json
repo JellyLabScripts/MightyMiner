@@ -321,21 +321,15 @@
           "transportMethod": "WALK"
         },
         {
-          "x": 0,
-          "y": 127,
-          "z": 52,
-          "transportMethod": "WALK"
-        },
-        {
-          "x": 0,
-          "y": 127,
-          "z": 52,
-          "transportMethod": "WALK"
-        },
-        {
           "x": 22,
           "y": 127,
           "z": 45,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -11,
+          "y": 127,
+          "z": 49,
           "transportMethod": "WALK"
         }
       ],
@@ -503,9 +497,9 @@
           "transportMethod": "WALK"
         },
         {
-          "x": 0,
+          "x": 9,
           "y": 127,
-          "z": 52,
+          "z": 50,
           "transportMethod": "WALK"
         }
       ],
@@ -626,32 +620,6 @@
           "x": -61,
           "y": 138,
           "z": 11,
-          "transportMethod": "WALK"
-        }
-      ],
-      "{\"x\":16,\"y\":176,\"z\":-55,\"transportMethod\":\"WALK\"}": [
-        {
-          "x": 16,
-          "y": 176,
-          "z": -55,
-          "transportMethod": "WALK"
-        },
-        {
-          "x": 16,
-          "y": 176,
-          "z": -55,
-          "transportMethod": "WALK"
-        },
-        {
-          "x": 59,
-          "y": 189,
-          "z": -59,
-          "transportMethod": "WALK"
-        },
-        {
-          "x": -25,
-          "y": 174,
-          "z": -55,
           "transportMethod": "WALK"
         }
       ],
@@ -1111,8 +1079,8 @@
           "transportMethod": "WALK"
         },
         {
-          "x": 16,
-          "y": 176,
+          "x": 20,
+          "y": 182,
           "z": -55,
           "transportMethod": "WALK"
         }
@@ -1296,32 +1264,6 @@
           "x": -17,
           "y": 144,
           "z": -18,
-          "transportMethod": "WALK"
-        }
-      ],
-      "{\"x\":0,\"y\":127,\"z\":52,\"transportMethod\":\"WALK\"}": [
-        {
-          "x": -11,
-          "y": 127,
-          "z": 49,
-          "transportMethod": "WALK"
-        },
-        {
-          "x": 9,
-          "y": 127,
-          "z": 50,
-          "transportMethod": "WALK"
-        },
-        {
-          "x": 9,
-          "y": 127,
-          "z": 50,
-          "transportMethod": "WALK"
-        },
-        {
-          "x": 0,
-          "y": 127,
-          "z": 72,
           "transportMethod": "WALK"
         }
       ],
@@ -1821,12 +1763,6 @@
         {
           "x": 0,
           "y": 127,
-          "z": 52,
-          "transportMethod": "WALK"
-        },
-        {
-          "x": 0,
-          "y": 127,
           "z": 72,
           "transportMethod": "WALK"
         },
@@ -2139,15 +2075,15 @@
       ],
       "{\"x\":59,\"y\":189,\"z\":-59,\"transportMethod\":\"WALK\"}": [
         {
-          "x": 16,
-          "y": 176,
-          "z": -55,
-          "transportMethod": "WALK"
-        },
-        {
           "x": 87,
           "y": 193,
           "z": -38,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 20,
+          "y": 182,
+          "z": -55,
           "transportMethod": "WALK"
         }
       ],
@@ -2532,6 +2468,20 @@
           "x": 49,
           "y": 135,
           "z": 20,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":20,\"y\":182,\"z\":-55,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -25,
+          "y": 174,
+          "z": -55,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": 59,
+          "y": 189,
+          "z": -59,
           "transportMethod": "WALK"
         }
       ],

@@ -3,16 +3,17 @@ package com.jelly.mightyminerv2.feature.impl;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.BlockChangeEvent;
 import com.jelly.mightyminerv2.event.BlockDestroyEvent;
+import com.jelly.mightyminerv2.event.SpawnParticleEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
-import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
-import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper;
 import com.jelly.mightyminerv2.util.*;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
 import java.awt.Color;
 import java.util.Comparator;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -46,7 +47,7 @@ public class MithrilMiner extends AbstractFeature {
   private int[] priority = {1, 1, 1, 1};  // Priority - [GrayWool, Prismarine, BlueWool, Titanium]
   private BlockPos targetBlock = null;
   private Vec3 targetPoint = null;
-  private Vec3 destBlock = null;
+  //  private Vec3 destBlock = null;
   private int breakAttemptTime = 0;
 
   @Override
@@ -64,7 +65,7 @@ public class MithrilMiner extends AbstractFeature {
     this.miningSpeed = 200;
     this.miningTime = 0;
     this.speedBoost = 0;
-    this.destBlock = null;
+//    this.destBlock = null;
     this.targetPoint = null;
     KeyBindUtil.releaseAllExcept();
     StrafeUtil.enabled = false;
@@ -87,7 +88,7 @@ public class MithrilMiner extends AbstractFeature {
 
   public void start(final int miningSpeed, final int speedBoost, final int[] priority, String miningTool) {
     // this should never happen
-    if(!miningTool.isEmpty() && !InventoryUtil.holdItem(miningTool)){
+    if (!miningTool.isEmpty() && !InventoryUtil.holdItem(miningTool)) {
       error("Cannot hold " + miningTool);
       this.stop(MithrilError.NOT_ENOUGH_BLOCKS);
       return;
@@ -201,6 +202,7 @@ public class MithrilMiner extends AbstractFeature {
 
         if (this.targetPoint != null && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 4) {
           this.swapState(State.WALKING, 0);
+          note("Should walk");
 
 //          this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOn())
 //              .stream()
@@ -217,18 +219,13 @@ public class MithrilMiner extends AbstractFeature {
         boolean walk = false;
         boolean sneak = MightyMinerConfig.mithrilMinerSneakWhileMining;
 
-        if (this.destBlock == null) {
-          this.swapState(State.BREAKING, 0);
-          break;
-        }
-
-        if (Math.hypot(this.destBlock.xCoord - mc.thePlayer.posX, this.destBlock.zCoord - mc.thePlayer.posZ) > 0.2
+        if (Math.hypot(this.targetPoint.xCoord - mc.thePlayer.posX, this.targetPoint.zCoord - mc.thePlayer.posZ) > 0.2
             && this.targetPoint.distanceTo(PlayerUtil.getPlayerEyePos()) > 3.5) {
           StrafeUtil.enabled = true;
           StrafeUtil.yaw = AngleUtil.getRotationYaw360(this.targetPoint);
           walk = sneak = true;
         } else {
-          this.destBlock = null;
+//          this.destBlock = null;
           StrafeUtil.enabled = false;
           this.swapState(State.BREAKING, 0);
         }
@@ -291,6 +288,27 @@ public class MithrilMiner extends AbstractFeature {
     }
 
     this.breakAttemptTime = 0;
+  }
+
+  @SubscribeEvent
+  public void onParticleSpawn(SpawnParticleEvent event) {
+    if (!this.enabled || !MightyMinerConfig.mithrilMinerPrecisionMiner) {
+      return;
+    }
+
+    int particleID = event.getParticleTypes().getParticleID();
+    if (particleID == 9 || particleID == 10) {
+      Vec3 particlePos = new Vec3(event.getXCoord(), event.getYCoord(), event.getZCoord());
+      MovingObjectPosition raytrace = RaytracingUtil.raytraceTowards(PlayerUtil.getPlayerEyePos(), particlePos, 4);
+      if (raytrace != null && this.targetBlock.equals(raytrace.getBlockPos())) {
+        RotationHandler.getInstance().reset();
+        RotationHandler.getInstance().easeTo(new RotationConfiguration(
+            new Target(particlePos),
+            this.getRandomRotationTime(),
+            null
+        ));
+      }
+    }
   }
 
   @SubscribeEvent

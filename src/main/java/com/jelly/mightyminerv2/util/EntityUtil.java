@@ -41,28 +41,34 @@ public class EntityUtil {
     return getHealthFromStandName(name) == 0;
   }
 
-  public static String getEntityNameFromArmorStand(String armorstandName){
+  public static String getEntityNameFromArmorStand(String armorstandName) {
     char[] carr = armorstandName.toCharArray();
-    if(carr[carr.length - 1] != '❤'){
+    if (carr.length == 0 || carr[carr.length - 1] != '❤') {
       return "";
     }
     StringBuilder builder = new StringBuilder();
     boolean foundSpace = false;
+    boolean foundDigit = false;
     byte charCounter = 0;
-    for(int i = carr.length - 1; i >= 0; i--){
+    for (int i = carr.length - 1; i >= 0; i--) {
       char curr = carr[i];
-      if(!foundSpace) {
-        if (curr == ' ') {
-          foundSpace = true;
-        }
-      } else {
-        if(curr == '§'){
-          charCounter++;
-        }
-        if(charCounter == 2){
+      if(!foundDigit){
+        foundDigit = Character.isDigit(curr);
+        continue;
+      }
+      if (!foundSpace) {
+        foundSpace = curr == ' ';
+        continue;
+      }
+      if (curr == '§') {
+        charCounter++;
+        if (charCounter == 2) {
           builder.deleteCharAt(builder.length() - 1);
           break;
         }
+        continue;
+      }
+      if(charCounter == 1){
         builder.append(curr);
       }
     }
@@ -101,7 +107,8 @@ public class EntityUtil {
         .filter(it -> stands.contains(pack((int) it.posX, (int) it.posZ)))
         .sorted(Comparator.comparingDouble(ent -> {
               Vec3 entPos = ent.getPositionVector();
-              double distanceCost = Math.hypot(playerPos.xCoord - entPos.xCoord, playerPos.zCoord - entPos.zCoord) + Math.abs(entPos.yCoord - playerPos.yCoord) * 2;
+              double distanceCost =
+                  Math.hypot(playerPos.xCoord - entPos.xCoord, playerPos.zCoord - entPos.zCoord) + Math.abs(entPos.yCoord - playerPos.yCoord) * 2;
               double angleCost = Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(ent).yaw)));
               return distanceCost * ((float) MightyMinerConfig.devMKillDist / 100f) + angleCost * ((float) MightyMinerConfig.devMKillRot / 100f);
             }

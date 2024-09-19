@@ -50,6 +50,7 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
@@ -61,6 +62,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -119,17 +121,31 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //    mc.theWorld.loadedEntityList.forEach(it -> {
 //      if (it instanceof EntityArmorStand && it.hasCustomName()) {
 //        System.out.println(
-//            "Name: " + it.getCustomNameTag() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + Math.floor(it.posX) + ", " + Math.floor(
-//                it.posY) + ", " + Math.floor(it.posZ) + ")");
+//            "Name: " + it.getCustomNameTag() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + ((int) it.posX) + ", " + ((int) it.posY) + ", " + ((int) it.posZ) + ")");
 //      }
 //      if (it instanceof EntityLiving) {
-//        System.out.println(
-//            "Name: " + it.getName() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + Math.floor(it.posX) + ", " + Math.floor(
-//                it.posY + Math.ceil(it.height)) + ", " + Math.floor(it.posZ) + ")");
-//        System.out.println(it.getNBTTagCompound());
+//        System.out.println("Name: " + it.getName() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + ((int) it.posX) + ", " + (((int) it.posY) + MathHelper.ceiling_double_int(it.height)) + ", " + ((int) it.posZ) + ")");
 //      }
 //    });
 //    Logger.sendNote("Done");
+  }
+
+  @SubCommand
+  public void p() {
+    mc.theWorld.loadedEntityList.forEach(it -> {
+      if (it instanceof EntityArmorStand) {
+        if(it.hasCustomName()) {
+          System.out.println(
+              "Name: " + it.getCustomNameTag() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + (int) Math.round(it.posX) + ", " + (int) Math.round(
+                  it.posY) + ", " + (int) Math.round(it.posZ) + ")");
+        }
+      }
+      else if (it instanceof EntityLivingBase) {
+        System.out.println(
+            "Name: " + it.getName() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + (int) Math.round(it.posX) + ", " + (int) (Math.round(it.posY + it.height)) + ", " + (int) Math.round(it.posZ) + ")");
+      }
+    });
+    Logger.sendNote("Done");
   }
 
   public String getEntityNameFromArmorStand(String armorstandName) {

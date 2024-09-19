@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.mixin.network;
 
+import com.jelly.mightyminerv2.command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.mightyminerv2.event.BlockDestroyEvent;
 import com.jelly.mightyminerv2.event.UpdateEntityEvent;
 import com.jelly.mightyminerv2.event.SpawnParticleEvent;
@@ -10,6 +11,8 @@ import com.jelly.mightyminerv2.hud.DebugHUD;
 import com.jelly.mightyminerv2.pathfinder.calculate.PathNode;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.TablistUtil;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -44,6 +47,7 @@ import net.minecraft.network.play.server.S3CPacketUpdateScore.Action;
 import net.minecraft.network.play.server.S3DPacketDisplayScoreboard;
 import net.minecraft.network.play.server.S3EPacketTeams;
 import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
+import net.minecraft.network.play.server.S49PacketUpdateEntityNBT;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.MathHelper;
@@ -135,12 +139,13 @@ public class MixinNetHandlerPlayClient {
 
   // Entity spawn stuff
   @Unique
-  Set<Integer> mightyMinerv2$entities = new HashSet<>();
+  IntSet mightyMinerv2$entities = new IntOpenHashSet();
 
-  @Inject(method = "handleEntityMetadata", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
+  @Inject(method = "handleEntityMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/DataWatcher;updateWatchedObjectsFromList(Ljava/util/List;)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleEntityMetadata(S1CPacketEntityMetadata packetIn, CallbackInfo ci, Entity entity) {
-    if (mightyMinerv2$entities.remove(packetIn.getEntityId()) && entity instanceof EntityArmorStand) {
-      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity));
+    if (mightyMinerv2$entities.contains(packetIn.getEntityId()) && entity.hasCustomName()) { // right now care about stands with custom name
+      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity));
+      mightyMinerv2$entities.remove(packetIn.getEntityId());
     }
   }
 
@@ -165,34 +170,37 @@ public class MixinNetHandlerPlayClient {
 
   @Redirect(method = "handleDestroyEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/WorldClient;removeEntityFromWorld(I)Lnet/minecraft/entity/Entity;"))
   public Entity handleDestroyEntities(WorldClient instance, int entityID) {
-    Entity entity = instance.removeEntityFromWorld(entityID);
+    Entity entity = instance.getEntityByID(entityID);
     mightyMinerv2$entities.remove(entityID);
-    if (entity instanceof EntityLiving || entity instanceof EntityArmorStand) {
-      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, 1));
+    if (entity instanceof EntityLivingBase) {
+      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, 1));
     }
-    return entity;
+    // dont know anything changes when removeEntityFromWorld is called so i just did that
+//    Entity entity = instance.removeEntityFromWorld(entityID);
+    return instance.removeEntityFromWorld(entityID);
   }
 
   @Inject(method = "handleEntityMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPositionAndRotation2(DDDFFIZ)V"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleEntityMovement(S14PacketEntity packetIn, CallbackInfo ci, Entity entity, double d0, double d1, double d2, float f, float f1) {
     if (entity instanceof EntityLivingBase) {
-      int nX = MathHelper.floor_double(d0);
-      int nY = MathHelper.floor_double(d1);
-      int nZ = MathHelper.floor_double(d2);
-      if (MathHelper.floor_double(entity.posX) != nX || MathHelper.floor_double(entity.posY) != nY || MathHelper.floor_double(entity.posZ) != nZ) {
-        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, PathNode.Companion.longHash(nX, nY, nZ)));
+      int nX = (int) Math.round(d0);
+      int nY = (int) Math.round(d1);
+      int nZ = (int) Math.round(d2);
+      if ((int) Math.round(entity.posX) != nX || (int) Math.round(entity.posY) != nY || (int) Math.round(entity.posZ) != nZ) {
+        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, PathNode.Companion.longHash(nX, (int) Math.round(d1 + entity.height), nZ)));
       }
     }
+
   }
 
   @Inject(method = "handleEntityTeleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/S18PacketEntityTeleport;getYaw()B"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleEntityTeleport(S18PacketEntityTeleport packetIn, CallbackInfo ci, Entity entity, double d0, double d1, double d2) {
     if (entity instanceof EntityLivingBase) {
-      int nX = MathHelper.floor_double(d0);
-      int nY = MathHelper.floor_double(d1);
-      int nZ = MathHelper.floor_double(d2);
-      if (MathHelper.floor_double(entity.posX) != nX || MathHelper.floor_double(entity.posY) != nY || MathHelper.floor_double(entity.posZ) != nZ) {
-        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entity, PathNode.Companion.longHash(nX, nY, nZ)));
+      int nX = (int) Math.round(d0);
+      int nY = (int) Math.round(d1);
+      int nZ = (int) Math.round(d2);
+      if ((int) Math.round(entity.posX) != nX || (int) Math.round(entity.posY) != nY || (int) Math.round(entity.posZ) != nZ) {
+        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, PathNode.Companion.longHash(nX, (int) Math.round(d1 + entity.height), nZ)));
       }
     }
   }

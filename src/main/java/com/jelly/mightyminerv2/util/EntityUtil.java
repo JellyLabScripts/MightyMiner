@@ -1,22 +1,18 @@
 package com.jelly.mightyminerv2.util;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.feature.impl.MobTracker;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import kotlinx.serialization.descriptors.StructureKind.MAP;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.util.StringUtils;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.Vec3;
 
 public class EntityUtil {
@@ -52,7 +48,7 @@ public class EntityUtil {
     byte charCounter = 0;
     for (int i = carr.length - 1; i >= 0; i--) {
       char curr = carr[i];
-      if(!foundDigit){
+      if (!foundDigit) {
         foundDigit = Character.isDigit(curr);
         continue;
       }
@@ -68,7 +64,7 @@ public class EntityUtil {
         }
         continue;
       }
-      if(charCounter == 1){
+      if (charCounter == 1) {
         builder.append(curr);
       }
     }
@@ -85,26 +81,18 @@ public class EntityUtil {
     return health;
   }
 
-  public static List<EntityLiving> getEntities(Set<String> entityNames, Set<EntityLiving> entitiesToIgnore) {
+  public static List<EntityLivingBase> getEntities(Set<String> entityNames, Set<EntityLivingBase> entitiesToIgnore) {
     // L if by chance two living entities are on the same x and z coord
-    Set<Long> stands = new HashSet<>();
-    Map<Long, EntityLiving> entities = new HashMap<>();
-    for (Entity ent : mc.theWorld.loadedEntityList) {
-      if (ent instanceof EntityArmorStand) {
-        String name = StringUtils.stripControlCodes(ent.getName());
-        if (entityNames.stream().anyMatch(name::contains) && !isStandDead(name)) {
-          stands.add(pack((int) ent.posX, (int) ent.posZ));
-        }
-      }
-      if (ent instanceof EntityLiving && !entitiesToIgnore.contains(ent)) {
-        entities.put(pack((int) ent.posX, (int) ent.posZ), (EntityLiving) ent);
-      }
-    }
+    List<EntityLivingBase> entities = new ArrayList<>();
+    entityNames.forEach(it -> {
+      Set<EntityLivingBase> set = MobTracker.getInstance().getEntity(it);
+      entitiesToIgnore.forEach(set::remove);
+      entities.addAll(set);
+    });
 
     Vec3 playerPos = mc.thePlayer.getPositionVector();
     float normalizedYaw = AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw);
-    return entities.values().stream()
-        .filter(it -> stands.contains(pack((int) it.posX, (int) it.posZ)))
+    return entities.stream()
         .sorted(Comparator.comparingDouble(ent -> {
               Vec3 entPos = ent.getPositionVector();
               double distanceCost =

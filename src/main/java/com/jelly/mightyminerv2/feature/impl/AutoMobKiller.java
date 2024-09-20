@@ -18,15 +18,23 @@ import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
+import it.unimi.dsi.fastutil.objects.ObjectSets;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,7 +45,6 @@ import java.util.Set;
 import jline.internal.Log;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.AxisAlignedBB;
@@ -47,6 +54,7 @@ import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
@@ -67,8 +75,8 @@ public class AutoMobKiller extends AbstractFeature {
   private MKError mkError = MKError.NONE;
   private Clock shutdownTimer = new Clock();
   private Clock queueTimer = new Clock();
-  private Set<EntityLiving> mobQueue = new HashSet<>();
-  private Optional<EntityLiving> targetMob = Optional.empty();
+  private Set<EntityLivingBase> mobQueue = new HashSet<>();
+  private Optional<EntityLivingBase> targetMob = Optional.empty();
   private Optional<Vec3> entityLastPosition = Optional.empty();
   private Set<String> mobToKill = new HashSet<>();
 //  private Set<String> mobToKill = ImmutableSet.of("Glacite Walker", "Goblin", "Knifethrower", "Zombie", "Crypt Ghoul", "");
@@ -151,7 +159,7 @@ public class AutoMobKiller extends AbstractFeature {
         this.changeState(State.FINDING_MOB, 0);
         log("Starting");
       case FINDING_MOB:
-        List<EntityLiving> mobs = EntityUtil.getEntities(this.mobToKill, this.mobQueue);
+        List<EntityLivingBase> mobs = EntityUtil.getEntities(this.mobToKill, this.mobQueue);
         if (mobs.isEmpty()) {
           if (!this.shutdownTimer.isScheduled()) {
             log("Cannot find mobs. Starting a 10 second timer");
@@ -162,7 +170,7 @@ public class AutoMobKiller extends AbstractFeature {
           this.shutdownTimer.reset();
         }
 
-        EntityLiving best = mobs.get(0);
+        EntityLivingBase best = mobs.get(0);
         this.targetMob = Optional.ofNullable(best);
         this.entityLastPosition = Optional.ofNullable(best.getPositionVector());
         this.changeState(State.WALKING_TO_MOB, 0);
@@ -244,10 +252,8 @@ public class AutoMobKiller extends AbstractFeature {
     }
     Vec3 pos = this.targetMob.get().getPositionVector();
 
-    RenderUtil.drawBox(
-        new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord, pos.zCoord + 0.5),
-        new Color(255, 0, 241, 150)
-    );
+    RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord, pos.zCoord + 0.5),
+        new Color(255, 0, 241, 150));
   }
 
   private void changeState(State state, int time) {
@@ -265,125 +271,121 @@ public class AutoMobKiller extends AbstractFeature {
   }
 
   // EntityTracker
-  Long2ObjectMap<String> stands = new Long2ObjectOpenHashMap<>();
-  Long2ObjectMap<EntityLivingBase> entities = new Long2ObjectOpenHashMap<>();
-  Object2ObjectMap<String, Set<EntityLivingBase>> mobs = new Object2ObjectOpenHashMap<>();
-  IntSet locatedMobs = new IntOpenHashSet();
-
-  // testing
-  @SubscribeEvent
-  public void onRenderEvent(RenderWorldLastEvent event) {
-//    if(entity != null){
-//      RenderUtil.drawBox(new AxisAlignedBB(entity.posX - 0.5, entity.posY, entity.posZ - 0.5, entity.posX + 0.5, entity.posY + 1, entity.posZ + 0.5), new Color(123, 0, 234, 150));
-//      });
-//    }
-
-    mobs.forEach((a, b) -> {
-      b.forEach(it -> {
-        RenderUtil.drawText(a, it.posX, it.posY + 2.5, it.posZ, 1f);
-        RenderUtil.drawBox(new AxisAlignedBB(it.posX - 0.5, it.posY + it.height, it.posZ - 0.5, it.posX + 0.5, it.posY + it.height, it.posZ + 0.5),
-            new Color(123, 0, 234, 150));
-      });
-    });
-//  });
-
-//    stand.forEach((a, b) -> {
+//  Long2ObjectMap<String> stands = new Long2ObjectOpenHashMap<>();
+//  Long2ObjectMap<IntSet> entities = new Long2ObjectOpenHashMap<>();
+//  Object2ObjectMap<String, ObjectSet<EntityLivingBaseBase>> mobs = new Object2ObjectOpenHashMap<>();
+//  Int2ObjectMap<String> locatedMobs = new Int2ObjectOpenHashMap<>();
+//  Set<EntityLivingBaseBase> set = new HashSet<>();
+//
+//  // testing
+//  @SubscribeEvent
+//  public void onRenderEvent(RenderWorldLastEvent event) {
+//    mobs.forEach((a, b) -> {
 //      b.forEach(it -> {
-//      RenderUtil.drawText(a, it.posX, it.posY + 2.5, it.posZ, 1f);
-//      RenderUtil.drawBox(new AxisAlignedBB(b.posX - 0.5, b.posY + b.height, b.posZ - 0.5, b.posX + 0.5, b.posY + b.height, b.posZ + 0.5),
-//          new Color(123, 0, 234, 150));
+//        RenderUtil.drawText(a, it.posX, it.posY + 2.5, it.posZ, 1f);
+//        RenderUtil.drawBox(new AxisAlignedBB(it.posX - 0.5, it.posY + it.height, it.posZ - 0.5, it.posX + 0.5, it.posY + it.height, it.posZ + 0.5),
+//            new Color(123, 0, 234, 150));
 //      });
 //    });
-//    entities.forEach((a, b) -> {
-//      b.forEach(it -> {
-//      RenderUtil.drawText(a, it.posX, it.posY + 2.5, it.posZ, 1f);
-//      RenderUtil.drawBox(new AxisAlignedBB(b.posX - 0.5, b.posY, b.posZ - 0.5, b.posX + 0.5, b.posY, b.posZ + 0.5),
-//          new Color(123, 0, 234, 150));
-//      });
+//    new HashSet<>(set).forEach(it -> {
+//      if (it != null) {
+//        RenderUtil.drawBox(new AxisAlignedBB(it.posX - 0.5, it.posY, it.posZ - 0.5, it.posX + 0.5, it.posY + it.height, it.posZ + 0.5),
+//            new Color(200, 0, 0, 200));
+//        if (!it.isEntityAlive() || (it.motionX == 0 && it.motionZ == 0)) {
+//          set.remove(it);
+//        }
+//      }
 //    });
-
-//    spawned.forEach((a, it) -> {
-//      RenderUtil.drawBox(new AxisAlignedBB(it.xCoord - 0.5, (int) it.yCoord, it.zCoord - 0.5, it.xCoord + 0.5, (int) it.yCoord + 1, it.zCoord + 0.5),
-//          new Color(123, 105, 234, 150));
-//    });
-  }
-
-  @SubscribeEvent
-  public void onWorldUnload(WorldEvent.Unload event) {
-    stands.clear();
-    entities.clear();
-    mobs.clear();
-    locatedMobs.clear();
-  }
-
-  // i love writing shitcode
-// i wrote a much cleaner readable version before but enjoy this >_<
-  @SubscribeEvent
-  public void onEntitySpawn(UpdateEntityEvent event) {
-    if (!OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance().allowed) {
-      return;
-    }
-//    if (!this.enabled) {
+//  }
+//
+//  @SubscribeEvent
+//  public void onWorldUnload(Unload event) {
+////    stands.clear();
+//    set.clear();
+//    entities.clear();
+//    mobs.clear();
+//    locatedMobs.clear();
+//  }
+//
+//  // i love writing shitcode
+//// i wrote a much cleaner readable version before but enjoy this >_<
+//  @SubscribeEvent
+//  public void onEntitySpawn(UpdateEntityEvent event) {
+//    if (!OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance().allowed) {
 //      return;
 //    }
-
-    // hash is just baritones BetterBlockPos::longHash
-    // assuming mixin works properly and doesnt add anything other than armorstands and entitylivings
-    int updateType = event.updateType;
-    EntityLivingBase entity = event.entity;
-    String name = "";
-    EntityLivingBase mob;
-    long hash;
-    if (entity instanceof EntityArmorStand) {
-      if ((name = EntityUtil.getEntityNameFromArmorStand(entity.getCustomNameTag())).isEmpty()) {
-        return;
-      }
-      hash = PathNode.Companion.longHash((int) Math.round(entity.posX), (int) Math.round(entity.posY), (int) Math.round(entity.posZ));
-      if (updateType == 2) {
-        return;
-      }
-//      Logger.sendNote(name + " Stand. Pos: " + (int) entity.posX + ", " + (int) Math.round(entity.posY) + ", " + (int) entity.posZ + ", Y: " + (int) entity.posY);
-      mob = entities.remove(hash);
-      if (mob == null) {
-        stands.put(hash, name);
-      } else {
-        stands.remove(hash);
-        if (updateType == 0) {
-          mobs.computeIfAbsent(name, a -> new HashSet<>()).add(mob);
-          locatedMobs.add(mob.getEntityId());
-        } else {
-          mobs.computeIfPresent(name, (key, set) -> {
-            set.remove(mob);
-            return set;
-          });
-          locatedMobs.remove(mob.getEntityId());
-        }
-      }
-    } else {
-      hash = PathNode.Companion.longHash((int) Math.round(entity.posX), (int) Math.round(entity.posY + entity.height), (int) Math.round(entity.posZ));
-      if (updateType == 2) {
-        if (!locatedMobs.contains(entity.getEntityId()) && (mob = entities.remove(hash)) != null) {
-          entities.put(event.newHash, mob);
-        }
-        return;
-      }
-      name = stands.remove(hash);
-//      Logger.sendNote(entity.getName() + " Pos: " + (int) Math.round(entity.posX) + ", " + entity.posY + ", " + (int) entity.posZ + ", height: " + entity.height + ", Y: " + (int) Math.round(entity.posY + entity.height));
-      if (name == null) {
-        entities.put(hash, entity);
-      } else {
-        entities.remove(hash);
-        if (updateType == 0) {
-          mobs.computeIfAbsent(name, a -> new HashSet<>()).add(entity);
-          locatedMobs.add(entity.getEntityId());
-        } else {
-          mobs.computeIfPresent(name, (key, set) -> {
-            set.remove(entity);
-            return set;
-          });
-          locatedMobs.remove(entity.getEntityId());
-        }
-      }
-    }
-  }
+////    if (!this.enabled) {
+////      return;
+////    }
+//
+//    // hash is just baritones BetterBlockPos::longHash
+//    // assuming mixin works properly and doesnt add anything other than armorstands and entitylivings
+//    int updateType = event.updateType;
+//    EntityLivingBaseBase entity = event.entity;
+//    String name = "";
+//    int entityId = -1;
+//    long hash = pack((int) Math.round(entity.posX), (int) Math.round(entity.posZ));
+//    if (entity instanceof EntityArmorStand) {
+//      if (updateType != 0) {
+//        return;
+//      }
+//      if ((name = EntityUtil.getEntityNameFromArmorStand(entity.getCustomNameTag())).isEmpty()) {
+//        return;
+//      }
+//      EntityLivingBaseBase mob = null;
+//      IntSet mobs = entities.get(hash);
+//      if (mobs != null) {
+//        double minDist = Double.MAX_VALUE;
+//        for (int it : mobs) {
+//          EntityLivingBaseBase curr = (EntityLivingBaseBase) mc.theWorld.getEntityByID(it);
+//          double dist = entity.getDistanceSq(curr.posX, curr.posY + curr.height, curr.posZ);
+//          if (dist < minDist) {
+//            mob = curr;
+//            minDist = dist;
+//            entityId = it;
+//          }
+//        }
+//        mobs.remove(entityId);
+//        if (mobs.isEmpty()) {
+//          entities.remove(hash);
+//        }
+//      }
+//      if (mob != null && entityId != -1) {
+//        this.mobs.computeIfAbsent(name, b -> new ObjectOpenHashSet<>()).add(mob);
+//        locatedMobs.put(entityId, name);
+//      }
+//    } else {
+//      boolean wasCached = locatedMobs.containsKey(entity.getEntityId());
+//      entityId = entity.getEntityId();
+//      if (updateType == 2) {
+//        if (!wasCached && entities.containsKey(hash) && entities.get(hash).remove(entityId)) {
+//          entities.computeIfAbsent(event.newHash, k -> new IntOpenHashSet()).add(entityId);
+//        }
+//        return;
+//      }
+//      if (updateType == 0) {
+//        if (!wasCached) {
+//          entities.computeIfAbsent(hash, k -> new IntOpenHashSet()).add(entityId);
+//        }
+//      } else {
+//        IntSet sett = entities.get(hash);
+//        if (sett != null) {
+//          sett.remove(entityId);
+//          if (sett.isEmpty()) {
+//            entities.remove(hash);
+//          }
+//        }
+//        if (wasCached) {
+//          this.mobs.computeIfPresent(locatedMobs.remove(entity.getEntityId()), (key, val) -> {
+//            val.remove(entity);
+//            return val.isEmpty() ? null : val;
+//          });
+//        }
+//      }
+//    }
+//  }
+//
+//  private long pack(int x, int z) {
+//    return ((long) x << 32) | (z & 0xFFFFFFFFL);
+//  }
 }

@@ -75,7 +75,7 @@ public class BlockUtil {
       final Vec3 blockCenter = new Vec3(blockPos).addVector(0.5, mc.thePlayer.eyeHeight, 0.5);
       for (int x = -3; x < 4; x++) {
         for (int z = -3; z < 4; z++) {
-          for (int y = -2; y < 4; y++) {
+          for (int y = -3; y < 4; y++) {
             final BlockPos pos = blockPos.add(x, y + 2, z);
             final long hash = longHash(pos.getX(), pos.getY(), pos.getZ());
             if (visitedPositions.contains(hash)) {

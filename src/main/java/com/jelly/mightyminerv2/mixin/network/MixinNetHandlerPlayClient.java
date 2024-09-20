@@ -143,66 +143,62 @@ public class MixinNetHandlerPlayClient {
 
   @Inject(method = "handleEntityMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/DataWatcher;updateWatchedObjectsFromList(Ljava/util/List;)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleEntityMetadata(S1CPacketEntityMetadata packetIn, CallbackInfo ci, Entity entity) {
-    if (mightyMinerv2$entities.contains(packetIn.getEntityId()) && entity.hasCustomName()) { // right now care about stands with custom name
+    if (entity instanceof EntityArmorStand && entity.hasCustomName()) { // right now care about stands with custom name
       MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity));
-      mightyMinerv2$entities.remove(packetIn.getEntityId());
     }
   }
 
-  @Inject(method = "handleSpawnObject", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
-  public void handleSpawnObject(S0EPacketSpawnObject packetIn, CallbackInfo ci, double d0, double d1, double d2, Entity entity) {
-    if (packetIn.getType() == 78) {
-      mightyMinerv2$entities.add(packetIn.getEntityID());
-    }
-  }
+//  @Inject(method = "handleSpawnObject", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
+//  public void handleSpawnObject(S0EPacketSpawnObject packetIn, CallbackInfo ci, double d0, double d1, double d2, Entity entity) {
+//    if (packetIn.getType() == 78) {
+//      mightyMinerv2$entities.add(packetIn.getEntityID());
+//    }
+//  }
 
   @Inject(method = "handleSpawnMob", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
-  public void handleSpawnMob(S0FPacketSpawnMob packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1,
-      EntityLivingBase entitylivingbase, Entity[] aentity, List list) {
+  public void handleSpawnMob(S0FPacketSpawnMob packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1, EntityLivingBase entitylivingbase, Entity[] aentity, List list) {
     MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entitylivingbase));
   }
 
   @Inject(method = "handleSpawnPlayer", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
-  public void handleSpawnPlayer(S0CPacketSpawnPlayer packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1,
-      EntityOtherPlayerMP entityotherplayermp, int i, List list) {
+  public void handleSpawnPlayer(S0CPacketSpawnPlayer packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1, EntityOtherPlayerMP entityotherplayermp, int i, List list) {
     MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entityotherplayermp));
   }
 
   @Redirect(method = "handleDestroyEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/WorldClient;removeEntityFromWorld(I)Lnet/minecraft/entity/Entity;"))
   public Entity handleDestroyEntities(WorldClient instance, int entityID) {
-    Entity entity = instance.getEntityByID(entityID);
-    mightyMinerv2$entities.remove(entityID);
+    Entity entity = instance.removeEntityFromWorld(entityID);
     if (entity instanceof EntityLivingBase) {
       MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, 1));
     }
-    // dont know anything changes when removeEntityFromWorld is called so i just did that
-//    Entity entity = instance.removeEntityFromWorld(entityID);
-    return instance.removeEntityFromWorld(entityID);
+    return entity;
   }
 
   @Inject(method = "handleEntityMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPositionAndRotation2(DDDFFIZ)V"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleEntityMovement(S14PacketEntity packetIn, CallbackInfo ci, Entity entity, double d0, double d1, double d2, float f, float f1) {
     if (entity instanceof EntityLivingBase) {
       int nX = (int) Math.round(d0);
-      int nY = (int) Math.round(d1);
       int nZ = (int) Math.round(d2);
-      if ((int) Math.round(entity.posX) != nX || (int) Math.round(entity.posY) != nY || (int) Math.round(entity.posZ) != nZ) {
-        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, PathNode.Companion.longHash(nX, (int) Math.round(d1 + entity.height), nZ)));
+      if ((int) Math.round(entity.posX) != nX || (int) Math.round(entity.posZ) != nZ) {
+        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, pack(nX, nZ)));
       }
     }
-
   }
 
   @Inject(method = "handleEntityTeleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/S18PacketEntityTeleport;getYaw()B"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleEntityTeleport(S18PacketEntityTeleport packetIn, CallbackInfo ci, Entity entity, double d0, double d1, double d2) {
     if (entity instanceof EntityLivingBase) {
       int nX = (int) Math.round(d0);
-      int nY = (int) Math.round(d1);
       int nZ = (int) Math.round(d2);
-      if ((int) Math.round(entity.posX) != nX || (int) Math.round(entity.posY) != nY || (int) Math.round(entity.posZ) != nZ) {
-        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, PathNode.Companion.longHash(nX, (int) Math.round(d1 + entity.height), nZ)));
+      if ((int) Math.round(entity.posX) != nX || (int) Math.round(entity.posZ) != nZ) {
+        MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, pack(nX, nZ)));
       }
     }
+  }
+
+  @Unique
+  private long pack(int x, int z) {
+    return ((long) x << 32) | (z & 0xFFFFFFFFL);
   }
 
   // Scoreboard

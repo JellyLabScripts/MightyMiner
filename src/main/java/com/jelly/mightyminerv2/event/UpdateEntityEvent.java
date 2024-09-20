@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 public class UpdateEntityEvent extends Event {
 
   public final EntityLivingBase entity;
-  public final int updateType; // 0 = entity spawned, 1 = entity despawned, 2 = entity moved
+  public final byte updateType; // 0 = entity spawned, 1 = entity despawned, 2 = entity moved
   public long newHash; // maybe instead of saving new hash i should just save the coord - but i dont have a use for the coord so L
 
   public UpdateEntityEvent(EntityLivingBase entity) {
@@ -16,7 +16,7 @@ public class UpdateEntityEvent extends Event {
     this.updateType = 0;
   }
 
-  public UpdateEntityEvent(EntityLivingBase entity, int updateType) {
+  public UpdateEntityEvent(EntityLivingBase entity, byte updateType) {
     this.entity = entity;
     this.updateType = updateType;
   }

@@ -7,12 +7,12 @@ import com.jelly.mightyminerv2.event.SpawnParticleEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.*;
+import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
 import java.awt.Color;
 import java.util.Comparator;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -47,8 +47,9 @@ public class MithrilMiner extends AbstractFeature {
   private int[] priority = {1, 1, 1, 1};  // Priority - [GrayWool, Prismarine, BlueWool, Titanium]
   private BlockPos targetBlock = null;
   private Vec3 targetPoint = null;
-  //  private Vec3 destBlock = null;
+  private Vec3 destBlock = null;
   private int breakAttemptTime = 0;
+  private Clock shiftTimer = new Clock();
 
   @Override
   public String getName() {
@@ -65,7 +66,7 @@ public class MithrilMiner extends AbstractFeature {
     this.miningSpeed = 200;
     this.miningTime = 0;
     this.speedBoost = 0;
-//    this.destBlock = null;
+    this.destBlock = null;
     this.targetPoint = null;
     KeyBindUtil.releaseAllExcept();
     StrafeUtil.enabled = false;
@@ -126,13 +127,18 @@ public class MithrilMiner extends AbstractFeature {
       return;
     }
 
+    if (this.shiftTimer.isScheduled() && this.shiftTimer.passed()) {
+      KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, MightyMinerConfig.mithrilMinerSneakWhileMining);
+      this.shiftTimer.reset();
+    }
+
     switch (this.state) {
       case STARTING:
         this.swapState(State.CHOOSING_BLOCK, 0);
 
         KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindAttack, true);
         KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
-        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, MightyMinerConfig.mithrilMinerSneakWhileMining);
+//        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, MightyMinerConfig.mithrilMinerSneakWhileMining);
 
         // Unknown or Available
         if (boostState.ordinal() <= 1) {
@@ -140,7 +146,7 @@ public class MithrilMiner extends AbstractFeature {
           KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindAttack, false);
         }
 
-        log("Starting");
+//        log("Starting");
         break;
       case SPEED_BOOST:
         if (!this.hasTimerEnded()) {
@@ -168,7 +174,7 @@ public class MithrilMiner extends AbstractFeature {
         this.miningTime = BlockUtil.getMiningTime(this.targetBlock, this.miningSpeed * boostMultiplier) * 2;
         this.swapState(State.ROTATING, 0);
 
-        log("State: Choosing Block. Chosen Block Was: " + this.targetBlock);
+//        log("State: Choosing Block. Chosen Block Was: " + this.targetBlock);
         // fall through
       case ROTATING:
         final List<Vec3> points = BlockUtil.bestPointsOnBestSide(this.targetBlock);
@@ -202,52 +208,45 @@ public class MithrilMiner extends AbstractFeature {
 
         if (this.targetPoint != null && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 4) {
           this.swapState(State.WALKING, 0);
-          note("Should walk");
-
-//          this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOn())
-//              .stream()
-//              .min(Comparator.comparingDouble(this.targetBlock::distanceSq))
-//              .map(b -> new Vec3(b.getX(), b.getY(), b.getZ()))
-//              .orElse(null);
+//          note("Should walk");
+          Vec3 vec = AngleUtil.getVectorForRotation(AngleUtil.getRotationYaw(this.targetPoint));
+          if (mc.theWorld.isAirBlock(new BlockPos(mc.thePlayer.getPositionVector().add(vec)))) {
+            this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOn())
+                .stream()
+                .min(Comparator.comparingDouble(this.targetBlock::distanceSq))
+                .map(b -> new Vec3(b.getX() + 0.5, b.getY(), b.getZ() + 0.5))
+                .orElse(null);
+          }
         } else {
           this.swapState(State.BREAKING, 0);
           break;
         }
-        log("Rotation Started");
+//        log("Rotation Started");
         // fall through
       case WALKING:
-        boolean walk = false;
-        boolean sneak = MightyMinerConfig.mithrilMinerSneakWhileMining;
-
-        if (Math.hypot(this.targetPoint.xCoord - mc.thePlayer.posX, this.targetPoint.zCoord - mc.thePlayer.posZ) > 0.2
-            && this.targetPoint.distanceTo(PlayerUtil.getPlayerEyePos()) > 3.5) {
+        if ((this.destBlock == null || Math.hypot(this.destBlock.xCoord - mc.thePlayer.posX, this.destBlock.zCoord - mc.thePlayer.posZ) > 0.2)
+            && this.targetPoint.distanceTo(PlayerUtil.getPlayerEyePos()) > 3.7) {
+          this.shiftTimer.reset();
           StrafeUtil.enabled = true;
-          StrafeUtil.yaw = AngleUtil.getRotationYaw360(this.targetPoint);
-          walk = sneak = true;
+          StrafeUtil.yaw = AngleUtil.getRotationYaw360(this.destBlock == null ? this.targetPoint : this.destBlock);
+          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
+          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, true);
         } else {
-//          this.destBlock = null;
+          this.destBlock = null;
           StrafeUtil.enabled = false;
           this.swapState(State.BREAKING, 0);
+          this.shiftTimer.schedule(500);
+          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
         }
-
-//        if (this.destBlock != null
-//            && this.destBlock.squareDistanceTo(new Vec3(mc.thePlayer.posX, this.destBlock.yCoord + 0.5, mc.thePlayer.posZ)) > 0.04
-//            && this.targetPoint.distanceTo(PlayerUtil.getPlayerEyePos()) > 3.5) {
-//          StrafeUtil.enabled = true;
-//          StrafeUtil.yaw = AngleUtil.get360RotationYaw(AngleUtil.getRotation(this.destBlock).getYaw());
-//          walk = sneak = true;
-//        } else {
-//          this.destBlock = null;
-//          StrafeUtil.enabled = false;
-//          this.swapState(State.BREAKING, 0);
-//        }
-
-        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, walk);
-        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, sneak);
-
-        log("Started Walk. Walk: " + walk + ", Sneak: " + sneak);
+//        log("Started Walk. Walk: " + walk + ", Sneak: " + sneak);
         // fall through
       case BREAKING:
+        // sometimes it gets stuck while moving and doesnt look at targetBlock so it keeps trying infinitely
+        if (++this.breakAttemptTime > 60) {
+          this.swapState(State.STARTING, 0);
+          this.breakAttemptTime = 0;
+        }
+
         if (!this.targetBlock.equals(BlockUtil.getBlockLookingAt())) {
           if (this.state == State.BREAKING && !RotationHandler.getInstance().isEnabled()) {
             this.swapState(State.STARTING, 0);
@@ -255,17 +254,11 @@ public class MithrilMiner extends AbstractFeature {
           break;
         }
 
-        // i forgot what this is for :sob:
-        if (++this.breakAttemptTime > 60) {
-          this.swapState(State.STARTING, 0);
-          this.breakAttemptTime = 0;
-        }
-
         if (--this.miningTime <= 0) {
           this.swapState(State.STARTING, 0);
         }
 
-        log("Breaking Block");
+//        log("Breaking Block");
         break;
     }
   }
@@ -302,6 +295,7 @@ public class MithrilMiner extends AbstractFeature {
       MovingObjectPosition raytrace = RaytracingUtil.raytraceTowards(PlayerUtil.getPlayerEyePos(), particlePos, 4);
       if (raytrace != null && this.targetBlock.equals(raytrace.getBlockPos())) {
         RotationHandler.getInstance().reset();
+        log("Particle rotation");
         RotationHandler.getInstance().easeTo(new RotationConfiguration(
             new Target(particlePos),
             this.getRandomRotationTime(),

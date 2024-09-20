@@ -21,7 +21,6 @@ import com.jelly.mightyminerv2.pathfinder.goal.Goal;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
-import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.helper.Angle;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
@@ -42,28 +41,19 @@ import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementTraverse;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import kotlin.Pair;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -134,15 +124,19 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   public void p() {
     mc.theWorld.loadedEntityList.forEach(it -> {
       if (it instanceof EntityArmorStand) {
-        if(it.hasCustomName()) {
-          System.out.println(
-              "Name: " + it.getCustomNameTag() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + (int) Math.round(it.posX) + ", " + (int) Math.round(
-                  it.posY) + ", " + (int) Math.round(it.posZ) + ")");
+        if (it.hasCustomName()) {
+          System.out.println("ARMORSTAND");
+          System.out.println("Name: " + it.getCustomNameTag() + ", PositionVec: " + it.getPositionVector() + ", Height: " + it.height);
+          System.out.println("Casted Pos(x: " + (int) it.posX + ", realY: " + it.posY + ", z: " + (int) it.posZ + ")");
+          System.out.println("Exp Pos(x: " + (int) it.posX + ", y: " + (((int) it.posY) - 1) + ", z: " + (int) it.posZ + ")");
+          System.out.println();
         }
-      }
-      else if (it instanceof EntityLivingBase) {
-        System.out.println(
-            "Name: " + it.getName() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + (int) Math.round(it.posX) + ", " + (int) (Math.round(it.posY + it.height)) + ", " + (int) Math.round(it.posZ) + ")");
+      } else if (it instanceof EntityLivingBase) {
+        System.out.println("ENTITY");
+        System.out.println("Name: " + it.getName() + ", Height: " + it.height +  ", PositionVector: " + it.getPositionVector());
+        System.out.println("Casted Pos(x: " + (int) it.posX + ", realY: " + it.posY + ", z: " + (int) it.posZ + ")");
+        System.out.println("ExpectedCastPos Pos(x: " + (int) it.posX + ", y: " + (int) (it.posY + it.height) + ", z: " + (int) it.posZ + ")");
+        System.out.println();
       }
     });
     Logger.sendNote("Done");
@@ -239,6 +233,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     RouteNavigator.getInstance().stop();
     AutoMobKiller.getInstance().stop();
     Pathfinder.getInstance().stop();
+    RotationHandler.getInstance().reset();
   }
 
   @SubCommand
@@ -259,7 +254,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @SubCommand
   public void rot() {
     RotationConfiguration conf = new RotationConfiguration(new Angle(0f, 0f), 400, RotationType.SERVER, null);
-    conf.easeBackToClientSide(true);
+    conf.followTarget(true);
     RotationHandler.getInstance().easeTo(conf);
   }
 

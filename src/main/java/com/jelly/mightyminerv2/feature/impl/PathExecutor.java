@@ -240,7 +240,7 @@ public class PathExecutor {
       RotationHandler.getInstance().easeTo(
           new RotationConfiguration(
               new Angle(rotationYaw, 15f),
-              Math.max(300, (long) (400 - horizontalDistToTarget * 1.5f)), null
+              Math.max(275, (long) (400 - horizontalDistToTarget * 2f)), null
           ).easeFunction(Ease.EASE_OUT_QUAD)
       );
     }
@@ -249,8 +249,8 @@ public class PathExecutor {
       // makes it more human but decreases accuracy - removes that weird sliding effect
       if (this.allowInterpolation && !this.interpolated) {
         long timePassed = System.currentTimeMillis() - this.nodeChangeTime;
-        if (timePassed < 150) {
-          yaw = mc.thePlayer.rotationYaw + yawDiff * (timePassed / 150f);
+        if (timePassed < 200) {
+          yaw = mc.thePlayer.rotationYaw + yawDiff * (timePassed / 200f);
         } else {
           this.interpolated = true;
         }
@@ -264,10 +264,6 @@ public class PathExecutor {
     // if next tick pos is not target and stuck can jump then jump
     boolean shouldJump = new BlockPos(PlayerUtil.getNextTickPosition(2f)).equals(target) && !BlockUtil.INSTANCE.bresenham(this.curr.getCtx(), new Vec3(playerPos), new Vec3(target))
         || (this.stuckTimer.isScheduled() && mc.thePlayer.onGround && horizontalDistToTarget <= 1.0 && target.getY() >= mc.thePlayer.posY && target.getY() - mc.thePlayer.posY < 0.05);
-//    log("Next: " + new BlockPos(PlayerUtil.getNextTickPosition(2f)) + ", target; " + target);
-//    log("next equals target: " + new BlockPos(PlayerUtil.getNextTickPosition()).equals(target));
-//    log("can walk from curPos to target: " + BlockUtil.INSTANCE.bresenham(this.curr.getCtx(), new Vec3(playerPos), new Vec3(target)));
-//    log("shouldJump: " + shouldJump);
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSprint, this.allowSprint && yawDiff < 40 && !shouldJump);
     if (shouldJump) {

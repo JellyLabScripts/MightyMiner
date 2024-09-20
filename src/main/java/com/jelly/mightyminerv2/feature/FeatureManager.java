@@ -5,6 +5,7 @@ import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.feature.impl.AutoWarp;
 import com.jelly.mightyminerv2.feature.impl.MithrilMiner;
+import com.jelly.mightyminerv2.feature.impl.MobTracker;
 import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
 import com.jelly.mightyminerv2.feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
@@ -36,7 +37,8 @@ public class FeatureManager {
         MouseUngrab.getInstance(),
         Pathfinder.getInstance(),
         RouteBuilder.getInstance(),
-        RouteNavigator.getInstance()
+        RouteNavigator.getInstance(),
+        MobTracker.getInstance()
     ));
   }
 

@@ -75,7 +75,7 @@ public class Pathfinder extends AbstractFeature {
       finder.requestStop();
     }
     pathExecutor.stop();
-    RotationHandler.getInstance().reset();
+    RotationHandler.getInstance().stop();
   }
 
   public void queue(BlockPos start, BlockPos end) {
@@ -188,6 +188,8 @@ public class Pathfinder extends AbstractFeature {
     if (path != null) {
       path.getSmoothedPath().forEach(tit -> RenderUtil.drawBlockBox(tit, new Color(255, 0, 0, 200)));
     }
+
+    this.pathExecutor.onRender();
   }
 
   public boolean completedPathTo(BlockPos pos) {

@@ -14,6 +14,12 @@ public interface MinecraftAccessor {
     @Accessor("leftClickCounter")
     void setLeftClickCounter(int leftClickCounter);
 
+    @Accessor("rightClickDelayTimer")
+    int getRightClickDelayTimer();
+
+    @Accessor("rightClickDelayTimer")
+    void setRightClickDelayTimer(int rightClickDelayTimer);
+
     @Invoker("clickMouse")
     void leftClick();
 

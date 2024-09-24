@@ -137,6 +137,14 @@ public class AngleUtil {
     return new Angle(yawChange, endAngle.getPitch() - startAngle.getPitch());
   }
 
+  public static boolean isLookingAtDebug(Vec3 vec, float distance) {
+    System.out.println("PlayerAngle: " + getPlayerAngle());
+    System.out.println("RotationForVec: " + getRotation(vec));
+    Angle change = getNeededChange(getPlayerAngle(), getRotation(vec));
+    System.out.println("Change: " + change + ", Dist: " + distance);
+    return Math.abs(change.getYaw()) <= distance && Math.abs(change.getPitch()) <= distance;
+  }
+
   public static boolean isLookingAt(Vec3 vec, float distance) {
     Angle change = getNeededChange(getPlayerAngle(), getRotation(vec));
     return Math.abs(change.getYaw()) <= distance && Math.abs(change.getPitch()) <= distance;

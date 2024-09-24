@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import jline.internal.Log;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -19,7 +20,9 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 
 public class CommissionUtil {
@@ -119,6 +122,49 @@ public class CommissionUtil {
       }
     }
     return -1;
+  }
+
+  public static Commission getCommissionFromContainer(ContainerChest container) {
+    IInventory lowerChest = container.getLowerChestInventory();
+    Commission comm = null;
+    for (int i = 0; i < lowerChest.getSizeInventory(); i++) {
+      final ItemStack stack = lowerChest.getStackInSlot(i);
+//      if(stack == null){
+//        Logger.sendLog("Stack is null");
+//        continue;
+//      }
+//
+//      if(stack.getItem() == null){
+//        Logger.sendLog("Stack item is null");
+//        continue;
+//      }
+//
+//      if(!stack.hasDisplayName()){
+//        Logger.sendLog("Stack has no name");
+//        continue;
+//      }
+//      if(!StringUtils.stripControlCodes(stack.getDisplayName()).startsWith("Commission")){
+//        Logger.sendLog("Stack name doenst start with commission. Name: " + stack.getDisplayName());
+//        continue;
+//      }
+      if (stack == null || stack.getItem() == null || !stack.hasDisplayName() || !StringUtils.stripControlCodes(stack.getDisplayName()).startsWith("Commission")) {
+        continue;
+      }
+      List<String> loreList = InventoryUtil.getItemLore(stack);
+      for (int j = 0; j < loreList.size(); j++) {
+        if (loreList.get(j).isEmpty()) {
+//          System.out.println("IsEmpty. j: " + j + ", This: " + loreList.get(j) + ", next: " + loreList.get( j + 1));
+          comm = Commission.getCommission(loreList.get(++j));
+          if (comm != null) {
+//            System.out.println("FoundComm: " + comm);
+            return comm;
+          }
+//          System.out.println("didnt find comm");
+          break;
+        }
+      }
+    }
+    return null;
   }
 
 //  public static List<EntityPlayer> getCommissionMobs(Commission commission) {

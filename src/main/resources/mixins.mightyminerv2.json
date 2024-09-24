@@ -4,11 +4,9 @@
   "minVersion": "0.7",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "client.IMixinScoreboard",
+    "client.MixinBlockStainedGlassPane",
     "client.MixinChunk",
     "client.MixinEntityLivingBase",
-    "client.MixinBlockStainedGlassPane",
-    "client.MixinScoreboard",
     "FML.MixinFMLHandshakeMessage",
     "gui.MixinGuiContainer",
     "gui.MixinInventoryPlayer",

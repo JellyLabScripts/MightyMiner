@@ -156,12 +156,14 @@ public class MixinNetHandlerPlayClient {
 //  }
 
   @Inject(method = "handleSpawnMob", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
-  public void handleSpawnMob(S0FPacketSpawnMob packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1, EntityLivingBase entitylivingbase, Entity[] aentity, List list) {
+  public void handleSpawnMob(S0FPacketSpawnMob packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1,
+      EntityLivingBase entitylivingbase, Entity[] aentity, List list) {
     MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entitylivingbase));
   }
 
   @Inject(method = "handleSpawnPlayer", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
-  public void handleSpawnPlayer(S0CPacketSpawnPlayer packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1, EntityOtherPlayerMP entityotherplayermp, int i, List list) {
+  public void handleSpawnPlayer(S0CPacketSpawnPlayer packetIn, CallbackInfo ci, double d0, double d1, double d2, float f, float f1,
+      EntityOtherPlayerMP entityotherplayermp, int i, List list) {
     MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent(entityotherplayermp));
   }
 
@@ -238,47 +240,55 @@ public class MixinNetHandlerPlayClient {
 
   @Inject(method = "handleUpdateScore", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjective(Ljava/lang/String;)Lnet/minecraft/scoreboard/ScoreObjective;"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleUpdateScorePRE(S3CPacketUpdateScore packetIn, CallbackInfo ci, Scoreboard scoreboard) {
-    int score = scoreboard.getValueFromObjective(packetIn.getPlayerName(), scoreboard.getObjective(packetIn.getObjectiveName())).getScorePoints();
-    SortedMap<Integer, String> objective = mightyMinerv2$scoreboard.get(packetIn.getObjectiveName());
-    String text = objective.remove(score);
-    if (text != null && packetIn.getScoreAction() == Action.CHANGE) {
-      objective.put(packetIn.getScoreValue(), text);
+    try {
+      int score = scoreboard.getValueFromObjective(packetIn.getPlayerName(), scoreboard.getObjective(packetIn.getObjectiveName())).getScorePoints();
+      SortedMap<Integer, String> objective = mightyMinerv2$scoreboard.get(packetIn.getObjectiveName());
+      String text = objective.remove(score);
+      if (text != null && packetIn.getScoreAction() == Action.CHANGE) {
+        objective.put(packetIn.getScoreValue(), text);
+      }
+
+      String sidebarObjName = mightyMinerv2$objectiveNames[1];
+      SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(sidebarObjName);
+
+      if (packetIn.getObjectiveName().equals(sidebarObjName) && sidebar != null) {
+        MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
+      }
+
+      ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-
-    String sidebarObjName = mightyMinerv2$objectiveNames[1];
-    SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(sidebarObjName);
-
-    if (packetIn.getObjectiveName().equals(sidebarObjName) && sidebar != null) {
-      MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
-    }
-
-    ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
   }
 
   @Inject(method = "handleTeams", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleTeams(S3EPacketTeams packetIn, CallbackInfo ci, Scoreboard scoreboard, ScorePlayerTeam scoreplayerteam) {
-    if (packetIn.getAction() == 1 || packetIn.getAction() == 4) {
-      scoreplayerteam.getMembershipCollection().forEach(it -> {
-        scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
-          mightyMinerv2$scoreboard.get(a.getName()).remove(b.getScorePoints());
+    try {
+      if (packetIn.getAction() == 1 || packetIn.getAction() == 4) {
+        scoreplayerteam.getMembershipCollection().forEach(it -> {
+          scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
+            mightyMinerv2$scoreboard.get(a.getName()).remove(b.getScorePoints());
+          });
         });
-      });
-    } else {
-      scoreplayerteam.getMembershipCollection().forEach(it -> {
-        scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
-          mightyMinerv2$scoreboard.get(a.getName()).put(b.getScorePoints(),
-              mightyMinerv2$sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix()));
+      } else {
+        scoreplayerteam.getMembershipCollection().forEach(it -> {
+          scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
+            mightyMinerv2$scoreboard.get(a.getName()).put(b.getScorePoints(),
+                mightyMinerv2$sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix()));
+          });
         });
-      });
+      }
+
+      SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(mightyMinerv2$objectiveNames[1]);
+
+      if (sidebar != null) {
+        MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
+      }
+
+      ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-
-    SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(mightyMinerv2$objectiveNames[1]);
-
-    if (sidebar != null) {
-      MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
-    }
-
-    ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
   }
 
   @Unique

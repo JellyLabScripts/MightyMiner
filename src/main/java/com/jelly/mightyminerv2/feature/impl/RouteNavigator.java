@@ -5,9 +5,11 @@ import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.AngleUtil;
+import com.jelly.mightyminerv2.util.BlockUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
+import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
 import com.jelly.mightyminerv2.util.helper.Target;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
@@ -39,6 +41,8 @@ public class RouteNavigator extends AbstractFeature {
   private State state = State.STARTING;
   private boolean isQueued = false;
   private NavError navError = NavError.NONE;
+  private RotationType rotationType = RotationType.CLIENT;
+  private Vec3 rotationTarget = null;
 
   @Override
   public String getName() {
@@ -48,7 +52,9 @@ public class RouteNavigator extends AbstractFeature {
   @Override
   public void resetStatesAfterStop() {
     this.state = State.STARTING;
-    RotationHandler.getInstance().reset();
+    this.rotationType = RotationType.CLIENT;
+    KeyBindUtil.releaseAllExcept();
+    RotationHandler.getInstance().stop();
   }
 
   @Override
@@ -103,6 +109,10 @@ public class RouteNavigator extends AbstractFeature {
     send("Pausing RouteNavigator");
   }
 
+  public void setRotationType(RotationType type) {
+    this.rotationType = type;
+  }
+
   @Override
   public void stop() {
     if (!this.enabled) {
@@ -115,6 +125,7 @@ public class RouteNavigator extends AbstractFeature {
     this.timer.reset();
     this.targetRouteIndex = -1;
     this.currentRouteIndex = -1;
+    this.rotationTarget = null;
     this.resetStatesAfterStop();
 
     send("RouteNavigator Stopped");
@@ -139,6 +150,9 @@ public class RouteNavigator extends AbstractFeature {
 
   // Needs more work (trust me)
   private int getLookTime(final RouteWaypoint waypoint) {
+    if (this.rotationType == RotationType.SERVER) {
+      return MightyMinerConfig.delayAutoAotvServerRotation;
+    }
     if (waypoint.getTransportMethod().ordinal() == 0) {
       return MightyMinerConfig.delayAutoAotvLookDelay;
     }
@@ -190,14 +204,18 @@ public class RouteNavigator extends AbstractFeature {
       case ROTATION: {
         // Todo: improve the time thing
         RouteWaypoint nextPoint = this.routeToFollow.get(this.currentRouteIndex);
-
-        RotationHandler.getInstance().easeTo(
-            new RotationConfiguration(new Target(nextPoint.toVec3()),
-                this.getLookTime(nextPoint),
-                null)
-                .followTarget(true));
+        this.rotationTarget = BlockUtil.getClosestVisibleSidePos(nextPoint.toBlockPos());
+        RotationConfiguration config = new RotationConfiguration(new Target(this.rotationTarget),
+            this.getLookTime(nextPoint),
+            this.rotationType,
+            null)
+            .followTarget(true);
+//        if (this.rotationType == RotationType.SERVER) {
+//          config.easeBackToClientSide(true);
+//        }
+        RotationHandler.getInstance().easeTo(config);
         this.swapState(State.ROTATION_VERIFY, 2000);
-        log("Rotating");
+        log("Rotating to " + this.rotationTarget);
         break;
       }
       case ROTATION_VERIFY: {
@@ -206,14 +224,16 @@ public class RouteNavigator extends AbstractFeature {
           this.stop(NavError.TIME_FAIL);
           return;
         }
-        RouteWaypoint target = this.routeToFollow.get(this.currentRouteIndex);
 
         // Todo: add a better method to verify if rotation was completed or not
-        if (!AngleUtil.isLookingAt(target.toVec3(), 2f)) {
+        if (!AngleUtil.isLookingAt(this.rotationTarget, 0.5f) && !RotationHandler.getInstance().isFollowingTarget()) {
           return;
         }
+        System.out.println("IsLookingAt: " + AngleUtil.isLookingAtDebug(this.rotationTarget, 0.5f));
+        System.out.println("Following: " + RotationHandler.getInstance().isFollowingTarget());
         int sneakTime = 0;
-        if (target.getTransportMethod() == TransportMethod.ETHERWARP) {
+        RouteWaypoint target = this.routeToFollow.get(this.currentRouteIndex);
+        if (target.getTransportMethod() == TransportMethod.ETHERWARP && !mc.gameSettings.keyBindSneak.isKeyDown()) {
           KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, true);
           sneakTime = 250;
         }
@@ -225,9 +245,11 @@ public class RouteNavigator extends AbstractFeature {
           return;
         }
         // Todo: test Etherwarp
+        if (this.routeToFollow.get(this.currentRouteIndex + 1).getTransportMethod() != TransportMethod.ETHERWARP) {
+          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, false);
+        }
         KeyBindUtil.rightClick();
-        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, false);
-        RotationHandler.getInstance().reset();
+        System.out.println("clicked");
         this.swapState(State.AOTV_VERIFY, 2000);
         break;
       }
@@ -303,8 +325,14 @@ public class RouteNavigator extends AbstractFeature {
 
     this.swapState(State.STARTING, 0);
     S08PacketPlayerPosLook packet = (S08PacketPlayerPosLook) event.packet;
+    RotationHandler.getInstance().stop();
 
-    Vec3 pos = new Vec3(packet.getX(), packet.getY(), packet.getZ());
+    Vec3 playerPos = mc.thePlayer.getPositionVector();
+    Vec3 pos = new Vec3(
+        packet.getX() + (packet.func_179834_f().contains(S08PacketPlayerPosLook.EnumFlags.X) ? playerPos.xCoord : 0),
+        packet.getY() + (packet.func_179834_f().contains(S08PacketPlayerPosLook.EnumFlags.Y) ? playerPos.yCoord : 0),
+        packet.getZ() + (packet.func_179834_f().contains(S08PacketPlayerPosLook.EnumFlags.Z) ? playerPos.zCoord : 0)
+    );
     if (pos.distanceTo(this.routeToFollow.get(this.currentRouteIndex).toVec3()) > 6) {
       this.swapState(State.ROTATION, 0);
     }

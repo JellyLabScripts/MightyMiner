@@ -146,9 +146,7 @@ object MovementHelper {
     }
 
     fun isBottomSlab(state: IBlockState): Boolean {
-        return state.block is BlockSlab && !(state.block as BlockSlab).isDouble && state.getValue(
-            BlockSlab.HALF
-        ) == BlockSlab.EnumBlockHalf.BOTTOM
+        return state.block is BlockSlab && !(state.block as BlockSlab).isDouble && state.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.BOTTOM
     }
 
     fun isValidStair(state: IBlockState, dx: Int, dz: Int): Boolean {

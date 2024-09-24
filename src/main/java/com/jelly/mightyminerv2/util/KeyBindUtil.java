@@ -51,6 +51,14 @@ public class KeyBindUtil {
         }
     }
 
+    public static int getRightClickDelayTimer(){
+        return ((MinecraftAccessor) mc).getRightClickDelayTimer();
+    }
+
+    public static void resetRightClickDelayTimer(){
+        ((MinecraftAccessor) mc).setRightClickDelayTimer(0);
+    }
+
     public static void setKeyBindState(KeyBinding key, boolean pressed) {
         if (pressed) {
             if (mc.currentScreen != null && key != null) {

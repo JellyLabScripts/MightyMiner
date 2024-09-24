@@ -3,6 +3,7 @@ package com.jelly.mightyminerv2.feature.impl;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
+import com.jelly.mightyminerv2.macro.commissionmacro.helper.Commission;
 import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.EntityUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil;
@@ -15,6 +16,7 @@ import com.jelly.mightyminerv2.util.helper.Target;
 import java.util.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ContainerChest;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
@@ -32,6 +34,7 @@ public class AutoCommissionClaim extends AbstractFeature {
   private State state = State.STARTING;
   private ClaimError claimError = ClaimError.NONE;
   private Optional<EntityPlayer> emissary = Optional.empty();
+  private Commission nextComm = null;
 
   @Override
   public String getName() {
@@ -41,6 +44,7 @@ public class AutoCommissionClaim extends AbstractFeature {
   @Override
   public void start() {
     this.enabled = true;
+    this.nextComm = null;
     this.claimError = ClaimError.NONE;
   }
 
@@ -78,6 +82,10 @@ public class AutoCommissionClaim extends AbstractFeature {
 
   public ClaimError claimError() {
     return this.claimError;
+  }
+
+  public Commission getNextComm() {
+    return this.nextComm;
   }
 
   @SubscribeEvent
@@ -146,7 +154,16 @@ public class AutoCommissionClaim extends AbstractFeature {
         } else {
           send("No Commission To Claim");
         }
-        this.swapState(State.ENDING, MightyMinerConfig.getRandomGuiWaitDelay());
+        this.swapState(State.NEXT_COMM, MightyMinerConfig.getRandomGuiWaitDelay());
+        break;
+      case NEXT_COMM:
+        if (!this.hasTimerEnded()) {
+          break;
+        }
+        if (mc.thePlayer.openContainer instanceof ContainerChest) {
+          this.nextComm = CommissionUtil.getCommissionFromContainer((ContainerChest) mc.thePlayer.openContainer);
+        }
+        this.swapState(State.ENDING, 0);
         break;
       case ENDING:
         if (!this.hasTimerEnded()) {
@@ -164,7 +181,7 @@ public class AutoCommissionClaim extends AbstractFeature {
   }
 
   enum State {
-    STARTING, ROTATING, OPENING, CLAIMING, ENDING
+    STARTING, ROTATING, OPENING, CLAIMING, NEXT_COMM, ENDING
   }
 
   public enum ClaimError {

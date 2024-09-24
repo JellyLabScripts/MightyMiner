@@ -81,6 +81,11 @@ public class CommissionMacro extends AbstractMacro {
     return Arrays.asList(MightyMinerConfig.commMiningTool);
   }
 
+  public void stopActiveFeatures(){
+    MithrilMiner.getInstance().stop();
+    AutoMobKiller.getInstance().stop();
+  }
+
   private void changeMainState(MainState to, int timeToWait) {
     this.mainState = to;
     this.timer.schedule(timeToWait);
@@ -135,7 +140,10 @@ public class CommissionMacro extends AbstractMacro {
 
     if (message.equalsIgnoreCase(this.curr.getName() + " Commission Complete! Visit the King to claim your rewards!")) {
       send("Commission Complete Detected");
-      this.checkForCommissionChange = true;
+      this.stopActiveFeatures();
+      this.last = this.curr;
+      this.curr = Commission.COMMISSION_CLAIM;
+      this.changeMacroState(MacroState.PATHING);
     }
   }
 
@@ -148,7 +156,7 @@ public class CommissionMacro extends AbstractMacro {
       MithrilMiner.getInstance().stop();
       AutoMobKiller.getInstance().stop();
       this.checkForCommissionChange = false;
-      this.changeMacroState(MacroState.STARTING); // do i go to pathing or start? going to start rechecks the comm which basically does nothing
+      this.changeMacroState(MacroState.STARTING);
     }
   }
 
@@ -377,10 +385,16 @@ public class CommissionMacro extends AbstractMacro {
           return;
         }
 
-        // todo: get the updated commission from NPC Gui with AutoCommissionClaim and set update curr with that maybe, thats better
         if (AutoCommissionClaim.getInstance().succeeded()) {
-          this.changeMacroState(MacroState.WAITING, 3000);
-          this.checkForCommissionChange = true;
+          Commission nextComm = AutoCommissionClaim.getInstance().getNextComm();
+          if (nextComm == null) {
+            error("Couldn't retrieve next comm from NPC gui. Waiting for Tablist to update.");
+            this.changeMacroState(MacroState.WAITING, 3000);
+            this.checkForCommissionChange = true;
+          } else {
+            this.curr = nextComm;
+            this.changeMacroState(MacroState.PATHING);
+          }
           return;
         }
 

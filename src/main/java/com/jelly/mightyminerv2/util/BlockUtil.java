@@ -2,6 +2,7 @@ package com.jelly.mightyminerv2.util;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.MightyMiner;
+import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext;
 import com.jelly.mightyminerv2.util.helper.heap.MinHeap;
 import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
 import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper;
@@ -67,7 +68,7 @@ public class BlockUtil {
     final Set<Long> visitedPositions = new HashSet<>();
     final List<BlockPos> walkableBlocks = getWalkableBlocksAround(PlayerUtil.getBlockStandingOn());
 
-    if(blockToIgnore != null) {
+    if (blockToIgnore != null) {
       visitedPositions.add(longHash(blockToIgnore.getX(), blockToIgnore.getY(), blockToIgnore.getZ()));
     }
 
@@ -101,7 +102,8 @@ public class BlockUtil {
 
             visitedPositions.add(hash);
             // Todo: Cost requires more testing.
-            blocks.add(pos, ((hardness / 100) * MightyMinerConfig.devMithHard + angleChange * MightyMinerConfig.devMithRot + distance * MightyMinerConfig.devMithDist) / priorityValue);
+            blocks.add(pos, ((hardness / 100) * MightyMinerConfig.devMithHard + angleChange * MightyMinerConfig.devMithRot
+                + distance * MightyMinerConfig.devMithDist) / priorityValue);
           }
         }
       }
@@ -148,7 +150,8 @@ public class BlockUtil {
 
           final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
           final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
-          blocks.add(pos, ((hardness / 100) * MightyMinerConfig.devMithHard + angleChange * MightyMinerConfig.devMithRot + distance * MightyMinerConfig.devMithDist) / priorityValue);
+          blocks.add(pos, ((hardness / 100) * MightyMinerConfig.devMithHard + angleChange * MightyMinerConfig.devMithRot
+              + distance * MightyMinerConfig.devMithDist) / priorityValue);
         }
       }
     }
@@ -310,6 +313,31 @@ public class BlockUtil {
     return sides;
   }
 
+  public static Vec3 getClosestVisibleSidePos(BlockPos block) {
+    if (!mc.theWorld.isBlockFullCube(block)) {
+      return null;
+    }
+    final Vec3 eyePos = mc.thePlayer.getPositionEyes(1);
+    double dist = Double.MAX_VALUE;
+    EnumFacing face = null;
+    for (EnumFacing side : BLOCK_SIDES.keySet()) {
+      if (side != null && !mc.theWorld.getBlockState(block).getBlock()
+          .shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
+        continue;
+      }
+      final double distanceToThisSide = eyePos.distanceTo(getSidePos(block, side));
+      if (canSeeSide(block, side) && distanceToThisSide < dist) {
+        if (side == null && face != null) {
+          continue;
+        }
+        dist = distanceToThisSide;
+        face = side;
+      }
+    }
+    final float[] offset = BLOCK_SIDES.get(face);
+    return new Vec3(block.getX() + offset[0], block.getY() + offset[1], block.getZ() + offset[2]);
+  }
+
   public static EnumFacing getClosestVisibleSide(BlockPos block) {
     if (!mc.theWorld.isBlockFullCube(block)) {
       return null;
@@ -426,5 +454,46 @@ public class BlockUtil {
 
   private static float randomVal() {
     return (new Random().nextInt(6) + 2) / 10.0f;
+  }
+
+  public static boolean canWalkBetween(CalculationContext ctx, BlockPos start, BlockPos end) {
+    int ey = end.getY();
+    int ex = end.getX();
+    int ez = end.getZ();
+    IBlockState endState = ctx.get(ex, ey, ez);
+    if (!MovementHelper.INSTANCE.canStandOn(ctx.getBsa(), ex, ey, ez, endState)) {
+//      Logger.sendLog("Cannot stand on x: " + ex + ", y: " + ey + ", z: " + ez);
+      return false;
+    }
+    if (!MovementHelper.INSTANCE.canWalkThrough(ctx.getBsa(), ex, ey + 1, ez, ctx.get(ex, ey + 1, ez))) {
+//      Logger.sendLog("Cannot walk throug x: " + ex + ", y: " + (ey + 1) + ", z: " + ez);
+      return false;
+    }
+    if (!MovementHelper.INSTANCE.canWalkThrough(ctx.getBsa(), ex, ey + 2, ez, ctx.get(ex, ey + 2, ez))) {
+//      Logger.sendLog("Cannot walk throug x: " + ex + ", y: " + (ey + 2) + ", z: " + ez);
+      return false;
+    }
+    int sy = start.getY();
+    if(ey - sy > 1){
+//      Logger.sendLog("ey - sy > 1");
+      return true;
+    }
+
+    int sx = start.getX();
+    int sz = start.getZ();
+    IBlockState fromState = ctx.get(sx, sy, sz);
+
+    boolean srcSmall = MovementHelper.INSTANCE.isBottomSlab(fromState);
+    boolean destSmall = MovementHelper.INSTANCE.isBottomSlab(endState);
+    boolean destSmallStair = MovementHelper.INSTANCE.isValidStair(endState, ex - sx, ez - sz);
+//    Logger.sendLog("SrcSmall: " + srcSmall + ", DestSmall: " + destSmall + ", DestSmallStair: " + destSmallStair);
+    if (!srcSmall == !(destSmall || destSmallStair) && !srcSmall && !destSmallStair) {
+      return true;
+    }
+    return false;
+
+
+//[16:14:38] [main/INFO] (Minecraft) [CHAT] §l§2[Mighty Miner] §8» §7SrcSmall: true, DestSmall: true, DestSmallStair: false
+//        [16:14:38] [main/INFO] (Minecraft) [CHAT] §l§2[Mighty Miner] §8» §7Can Walk between: true
   }
 }

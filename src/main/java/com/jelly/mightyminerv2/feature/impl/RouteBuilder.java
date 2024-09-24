@@ -46,6 +46,7 @@ public class RouteBuilder extends AbstractFeature {
 
   @Override
   public void stop() {
+    this.enabled = false;
     send("Disabling RouteBuilder.");
   }
 

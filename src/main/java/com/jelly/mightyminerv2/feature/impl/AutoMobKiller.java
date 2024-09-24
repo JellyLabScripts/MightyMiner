@@ -1,60 +1,28 @@
 package com.jelly.mightyminerv2.feature.impl;
 
-import com.jelly.mightyminerv2.command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
-import com.jelly.mightyminerv2.event.UpdateEntityEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
-import com.jelly.mightyminerv2.pathfinder.calculate.PathNode;
 import com.jelly.mightyminerv2.util.EntityUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
-import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
-import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.ints.IntSets;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
-import it.unimi.dsi.fastutil.objects.ObjectSets;
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import jline.internal.Log;
-import net.minecraft.client.entity.EntityOtherPlayerMP;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.event.world.WorldEvent.Unload;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
@@ -239,7 +207,7 @@ public class AutoMobKiller extends AbstractFeature {
         }
 
         KeyBindUtil.leftClick();
-        RotationHandler.getInstance().reset();
+        RotationHandler.getInstance().stop();
         this.changeState(State.STARTING, 0);
         break;
     }

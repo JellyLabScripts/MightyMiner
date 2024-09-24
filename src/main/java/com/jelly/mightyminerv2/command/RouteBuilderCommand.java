@@ -4,8 +4,11 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
+import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.util.Logger;
+import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
+import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
@@ -69,6 +72,17 @@ public class RouteBuilderCommand {
         if (!RouteBuilder.getInstance().isRunning()) return;
         if (indexToReplace <= 0) return;
         RouteBuilder.getInstance().replaceNode(indexToReplace - 1);
+    }
+
+    @SubCommand
+    public void follow(int rotation){
+        Route route = RouteHandler.getInstance().getSelectedRoute();
+        if(route.isEmpty()){
+            success("Route is empty.");
+            return;
+        }
+        RouteNavigator.getInstance().setRotationType(rotation == 0 ? RotationType.CLIENT : RotationType.SERVER);
+        RouteNavigator.getInstance().start(route);
     }
 
     private void success(final String message) {

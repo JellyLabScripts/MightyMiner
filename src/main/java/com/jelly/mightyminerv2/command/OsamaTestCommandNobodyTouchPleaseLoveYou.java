@@ -18,6 +18,8 @@ import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
+import com.jelly.mightyminerv2.util.AngleUtil;
+import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
@@ -50,6 +52,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ContainerChest;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -82,6 +85,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   List<Pair<EntityPlayer, Pair<Double, Double>>> mobs = new ArrayList<>();
   List<Pair<String, Entity>> ents = new ArrayList<>();
   public boolean allowed = false;
+  boolean allowedd = false;
   Clock timer = new Clock();
 
   private String mightyMinerV2$cleanSB(String scoreboard) {
@@ -101,23 +105,11 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-//    ents.clear();
-//    AutoMobKiller.getInstance().mobs.forEach((a, b) -> {
-//      b.forEach(c -> {
-//        ents.add(new Pair<>(a, c));
-//      });
-//    });
-    allowed = !allowed;
-//    mc.theWorld.loadedEntityList.forEach(it -> {
-//      if (it instanceof EntityArmorStand && it.hasCustomName()) {
-//        System.out.println(
-//            "Name: " + it.getCustomNameTag() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + ((int) it.posX) + ", " + ((int) it.posY) + ", " + ((int) it.posZ) + ")");
-//      }
-//      if (it instanceof EntityLiving) {
-//        System.out.println("Name: " + it.getName() + ", PositionVec: " + it.getPositionVector() + ", Pos: (" + ((int) it.posX) + ", " + (((int) it.posY) + MathHelper.ceiling_double_int(it.height)) + ", " + ((int) it.posZ) + ")");
-//      }
-//    });
-//    Logger.sendNote("Done");
+    BlockPos targ = new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(AngleUtil.get360RotationYaw())));
+    this.blockToDraw.clear();
+    this.blockToDraw.add(targ);
+    this.blockToDraw.add(PlayerUtil.getBlockStandingOn());
+    Logger.sendLog("ShouldJump: " + com.jelly.mightyminerv2.util.BlockUtil.canWalkBetween(new CalculationContext(), PlayerUtil.getBlockStandingOn(), targ));
   }
 
   @SubCommand
@@ -233,7 +225,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     RouteNavigator.getInstance().stop();
     AutoMobKiller.getInstance().stop();
     Pathfinder.getInstance().stop();
-    RotationHandler.getInstance().reset();
+    RotationHandler.getInstance().stop();
   }
 
   @SubCommand
@@ -245,26 +237,28 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   public void between() {
     if (this.block != null) {
       this.blockToDraw.clear();
-      boolean bs = BlockUtil.INSTANCE.bresenham(new CalculationContext(),
-          new Vec3(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ), new Vec3(this.block));
+      boolean bs = BlockUtil.INSTANCE.bresenham(new CalculationContext(), PlayerUtil.getBlockStandingOn(), this.block);
       Logger.sendMessage("Walkable: " + bs);
     }
   }
 
   @SubCommand
   public void rot() {
-    RotationConfiguration conf = new RotationConfiguration(new Angle(0f, 0f), 400, RotationType.SERVER, null);
-    conf.followTarget(true);
+    RotationConfiguration conf = new RotationConfiguration(new Angle(0f, 0f), 400, null);
+//    conf.followTarget(true);
     RotationHandler.getInstance().easeTo(conf);
   }
 
   @SubCommand
   public void claim() {
-    if (!AutoCommissionClaim.getInstance().isRunning()) {
-      AutoCommissionClaim.getInstance().start();
-    } else {
-      AutoCommissionClaim.getInstance().stop();
-    }
+//    if (!AutoCommissionClaim.getInstance().isRunning()) {
+//      AutoCommissionClaim.getInstance().start();
+//    } else {
+//      AutoCommissionClaim.getInstance().stop();
+//    }
+    Multithreading.schedule(() -> {
+      Logger.sendNote("Comm: " + CommissionUtil.getCommissionFromContainer((ContainerChest) mc.thePlayer.openContainer));
+    }, 800, TimeUnit.MILLISECONDS);
   }
 
   @SubCommand
@@ -309,35 +303,35 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //      LogUtil.error("First or sec is null");
 //      return;
 //    }
-    Multithreading.schedule(() -> {
-      double walkSpeed = mc.thePlayer.getAIMoveSpeed();
-      CalculationContext ctx = new CalculationContext(walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-      BlockPos first = PlayerUtil.getBlockStandingOn();
-      BlockPos second = this.block;
-      AStarPathFinder finder = new AStarPathFinder(
-          first.getX(), first.getY(), first.getZ(),
-          new Goal(second.getX(), second.getY(), second.getZ(), ctx),
-          ctx
-      );
-      Path path = finder.calculatePath();
-      if (path == null) {
-        Logger.sendMessage("No path found");
-      } else {
-        Logger.sendMessage("path found");
-        blockToDraw.clear();
-        if (go == 0) {
-          blockToDraw.addAll(path.getSmoothedPath());
+//    Multithreading.schedule(() -> {
+//      double walkSpeed = mc.thePlayer.getAIMoveSpeed();
+//      CalculationContext ctx = new CalculationContext(walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
+//      BlockPos first = PlayerUtil.getBlockStandingOn();
+//      BlockPos second = this.block;
+//      AStarPathFinder finder = new AStarPathFinder(
+//          first.getX(), first.getY(), first.getZ(),
+//          new Goal(second.getX(), second.getY(), second.getZ(), ctx),
+//          ctx
+//      );
+//      Path path = finder.calculatePath();
+//      if (path == null) {
+//        Logger.sendMessage("No path found");
+//      } else {
+//        Logger.sendMessage("path found");
+//        blockToDraw.clear();
+//        if (go == 0) {
+//          blockToDraw.addAll(path.getSmoothedPath());
 //          Pathfinder.getInstance().queue();
-        } else {
-          blockToDraw.addAll(path.getPath());
-        }
-      }
-    }, 0, TimeUnit.MILLISECONDS);
-//    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), this.block);
-//    Pathfinder.getInstance().setInterpolationState(go == 0);
+//        } else {
+//          blockToDraw.addAll(path.getPath());
+//        }
+//      }
+//    }, 0, TimeUnit.MILLISECONDS);
+    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), this.block);
+    Pathfinder.getInstance().setInterpolationState(go == 0);
+    Pathfinder.getInstance().start();
 //    Pathfinder.getInstance().queue(new BlockPos(first.toVec3()), new BlockPos(second.toVec3()));
 
-//    Pathfinder.getInstance().start();
   }
 
   //    @SubscribeEvent
@@ -463,6 +457,14 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
               String.format("Hardness: %.2f, Angle: %.2f, Dist: %.2f", best.getSecond().get(0), best.getSecond().get(1), best.getSecond().get(2)),
               pos.getX() + 0.5,
               pos.getY() + 1.2, pos.getZ() + 0.5, 1);
+        }
+      }
+
+
+      if(this.allowedd) {
+        BlockPos poss = new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw))));
+        if (!mc.theWorld.isAirBlock(poss)) {
+          RenderUtil.drawBlockBox(poss, Color.GREEN);
         }
       }
     }

@@ -280,6 +280,15 @@ public class MightyMinerConfig extends Config {
       min = 50, max = 2000
   )
   public static int delayAutoAotvEtherwarpLookDelay = 500;
+
+  @Slider(
+      name = "Server Side Rotation Time",
+      description = "Rotation time to look at next block with client side rotation",
+      category = DELAY,
+      subcategory = "AutoAotv",
+      min = 0, max = 2000
+  )
+  public static int delayAutoAotvServerRotation = 500;
   //</editor-fold>
   //</editor-fold>
 

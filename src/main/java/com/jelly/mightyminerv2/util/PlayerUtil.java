@@ -23,7 +23,7 @@ public class PlayerUtil {
   }
 
   public static Vec3 getPlayerEyePos() {
-    return mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks);
+    return mc.thePlayer.getPositionEyes(1f);
   }
 
   public static BlockPos getBlockStandingOnFloor() {

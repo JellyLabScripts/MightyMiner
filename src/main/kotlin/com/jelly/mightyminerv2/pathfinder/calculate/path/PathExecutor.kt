@@ -56,7 +56,7 @@ object PathExecutor {
         this.targetIndex = 0;
         this.lastIndex = -1;
         this.timer.reset()
-        RotationHandler.getInstance().reset()
+        RotationHandler.getInstance().stop()
 
         val smoothPath = this.pathQueue.poll().getSmoothedPath()
         this.path.addAll(smoothPath)
@@ -101,7 +101,7 @@ object PathExecutor {
         StrafeUtil.enabled = false;
 
         KeyBindUtil.releaseAllExcept()
-        RotationHandler.getInstance().reset()
+        RotationHandler.getInstance().stop()
         Logger.sendMessage("Stopped PathExecutor")
     }
 
@@ -139,7 +139,7 @@ object PathExecutor {
             Logger.sendLog("Standing On Node $currentIndex")
             this.lastIndex = currentIndex
             this.targetIndex = currentIndex + 1
-            RotationHandler.getInstance().reset()
+            RotationHandler.getInstance().stop()
             Logger.sendLog("Position Updated. LastPos: ${this.lastIndex}, CurrentPos: ${this.targetIndex}, PathSize: ${path.size}")
             if (this.targetIndex == path.size) {
                 Logger.sendMessage("Path Traversed. Disabling")

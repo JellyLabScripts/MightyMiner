@@ -196,6 +196,7 @@ public class PathExecutor {
       this.interpolated = false;
       this.interpolYawDiff = 0;
       this.nodeChangeTime = System.currentTimeMillis();
+      StrafeUtil.enabled = false;
       log("changed target");
       RotationHandler.getInstance().stop();
       if (this.target == this.blockPath.size()) {
@@ -347,6 +348,10 @@ public class PathExecutor {
 
   void error(String message) {
     Logger.sendError(getMessage(message));
+  }
+
+  void note(String message) {
+    Logger.sendNote(getMessage(message));
   }
 
   String getMessage(String message) {

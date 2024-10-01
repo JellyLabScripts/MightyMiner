@@ -13,6 +13,8 @@ import com.jelly.mightyminerv2.util.KeyBindUtil;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
 import com.jelly.mightyminerv2.util.helper.Target;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,7 +36,7 @@ public class AutoCommissionClaim extends AbstractFeature {
   private State state = State.STARTING;
   private ClaimError claimError = ClaimError.NONE;
   private Optional<EntityPlayer> emissary = Optional.empty();
-  private Commission nextComm = null;
+  private List<Commission> nextComm = new ArrayList<>();
 
   @Override
   public String getName() {
@@ -84,7 +86,7 @@ public class AutoCommissionClaim extends AbstractFeature {
     return this.claimError;
   }
 
-  public Commission getNextComm() {
+  public List<Commission> getNextComm() {
     return this.nextComm;
   }
 
@@ -149,12 +151,15 @@ public class AutoCommissionClaim extends AbstractFeature {
         }
 
         final int slotToClick = CommissionUtil.getClaimableCommissionSlot();
+        State nextState;
         if (slotToClick != -1) {
           InventoryUtil.clickContainerSlot(slotToClick, ClickType.LEFT, ClickMode.PICKUP);
+          nextState = State.CLAIMING;
         } else {
           send("No Commission To Claim");
+          nextState = State.NEXT_COMM;
         }
-        this.swapState(State.NEXT_COMM, MightyMinerConfig.getRandomGuiWaitDelay());
+        this.swapState(nextState, MightyMinerConfig.getRandomGuiWaitDelay());
         break;
       case NEXT_COMM:
         if (!this.hasTimerEnded()) {

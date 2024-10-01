@@ -1,16 +1,21 @@
 package com.jelly.mightyminerv2.macro.commissionmacro.helper;
 
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.location.SubLocation;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.sound.PlayStreamingSourceEvent;
 
 public enum Commission {
   // maybe set it to null and choose a random one?
@@ -28,9 +33,9 @@ public enum Commission {
   RAMPARTS_TITANIUM("Rampart's Quarry Titanium", SubLocation.RAMPARTS_QUARRY),
   GOBLIN_SLAYER("Goblin Slayer", SubLocation.GOBLIN_BURROWS),
   GLACITE_WALKER_SLAYER("Glacite Walker Slayer", SubLocation.GREAT_ICE_WALL),
-  TREASURE_HOARDER_SLAYER("Treasure Hoarder Puncher", SubLocation.TREASURE_HUNTER_CAMP),
   COMMISSION_CLAIM("Claim Commission", SubLocation.FORGE_BASIN); // theres no set location for this so yea
   // Do not want this
+//  TREASURE_HOARDER_SLAYER("Treasure Hoarder Puncher", SubLocation.TREASURE_HUNTER_CAMP),
 //  STAR_CENTRY_SLAYER("Star Sentry Puncher	"),
 
   private static final Map<String, Commission> COMMISSIONS;
@@ -47,7 +52,7 @@ public enum Commission {
       put(SubLocation.FORGE_BASIN, new RouteWaypoint[]{
           new RouteWaypoint(44, 134, 21, TransportMethod.WALK),
           new RouteWaypoint(58, 197, -11, TransportMethod.WALK),
-          new RouteWaypoint(-170, 149, 32, TransportMethod.WALK),
+          new RouteWaypoint(170, 149, 32, TransportMethod.WALK),
           new RouteWaypoint(-75, 152, -11, TransportMethod.WALK),
           new RouteWaypoint(-131, 173, -52, TransportMethod.WALK)
       });
@@ -71,10 +76,16 @@ public enum Commission {
 
   private final String name;
   private final SubLocation location;
+  private final int priority;
 
   Commission(String name, SubLocation location) {
     this.name = name;
     this.location = location;
+    if (name.endsWith("Miner")) {
+      this.priority = 1;
+    } else {
+      this.priority = 0;
+    }
   }
 
   public static Commission getCommission(final String name) {
@@ -83,6 +94,42 @@ public enum Commission {
 
   public String getName() {
     return name;
+  }
+
+  // this is incredibly bad
+  public static List<Commission> getBestCommissionFrom(List<Commission> commissions) {
+    // max size of list is <=2 at any given time
+    int size = commissions.size();
+    if (size == 0) {
+      return Collections.emptyList();
+    }
+    if (size == 1) {
+      return commissions;
+    }
+
+    commissions.sort(Comparator.comparing(it -> it.priority));
+    SubLocation lastLoc = commissions.get(0).location;
+    boolean hasMiner = false;
+    boolean sameLocation = true;
+    for (Commission comm : commissions) {
+      if (comm.getName().contains("Slayer")) {
+        // how else am i supposed to create a mutable list of size 1
+        return new ArrayList<>(Collections.singletonList(commissions.get(0)));
+      }
+      if (comm.getName().contains("Miner")) {
+        hasMiner = true;
+      }
+      if (!lastLoc.equals(comm.location)) {
+        sameLocation = false;
+      }
+    }
+
+    if (!(sameLocation || hasMiner)) {
+      return new ArrayList<>(Collections.singletonList(commissions.get(0)));
+    }
+
+    Logger.sendNote("overlap: " + commissions);
+    return commissions;
   }
 
   public RouteWaypoint getWaypoint() {

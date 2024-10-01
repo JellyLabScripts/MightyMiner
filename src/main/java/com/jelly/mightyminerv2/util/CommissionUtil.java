@@ -7,17 +7,14 @@ import com.jelly.mightyminerv2.macro.commissionmacro.helper.Commission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import jline.internal.Log;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
@@ -30,8 +27,8 @@ public class CommissionUtil {
   private static final Minecraft mc = Minecraft.getMinecraft();
   private static final Map<Commission, Set<String>> slayerMob = ImmutableMap.of(
       Commission.GOBLIN_SLAYER, ImmutableSet.of("Goblin"),
-      Commission.GLACITE_WALKER_SLAYER, ImmutableSet.of("Ice Walker"),
-      Commission.TREASURE_HOARDER_SLAYER, ImmutableSet.of("Treasure Hoarder"));
+      Commission.GLACITE_WALKER_SLAYER, ImmutableSet.of("Ice Walker"));
+//      Commission.TREASURE_HOARDER_SLAYER, ImmutableSet.of("Treasure Hoarder"));
 
   public static final List<Pair<String, Vec3>> emissaries = Arrays.asList(
       new Pair<>("Ceanna", new Vec3(42.50, 134.50, 22.50)),
@@ -78,8 +75,8 @@ public class CommissionUtil {
         .get().getSecond();
   }
 
-  public static Commission getCurrentCommission() {
-    Commission comm = null;
+  public static List<Commission> getCurrentCommissionsFromTablist() {
+    List<Commission> comms = new ArrayList<>();
     boolean foundCommission = false;
     for (final String text : TablistUtil.getCachedTablist()) {
       if (!foundCommission) {
@@ -89,20 +86,21 @@ public class CommissionUtil {
         continue;
       }
 
-      if (comm == null) {
-        comm = Commission.getCommission(text.split(": ")[0].trim());
+      if (text.contains("DONE")) {
+        return Arrays.asList(Commission.COMMISSION_CLAIM);
       }
 
-      if (text.contains("DONE")) {
-        comm = Commission.COMMISSION_CLAIM;
-        break;
+      Commission comm = Commission.getCommission(text.split(": ")[0].trim());
+      if (comm != null) {
+        comms.add(comm);
       }
 
       if (text.isEmpty()) {
         break;
       }
     }
-    return comm;
+
+    return Commission.getBestCommissionFrom(comms);
   }
 
   public static int getClaimableCommissionSlot() {
@@ -124,47 +122,30 @@ public class CommissionUtil {
     return -1;
   }
 
-  public static Commission getCommissionFromContainer(ContainerChest container) {
+  public static List<Commission> getCommissionFromContainer(ContainerChest container) {
     IInventory lowerChest = container.getLowerChestInventory();
-    Commission comm = null;
+    List<Commission> comms = new ArrayList<>();
     for (int i = 0; i < lowerChest.getSizeInventory(); i++) {
       final ItemStack stack = lowerChest.getStackInSlot(i);
-//      if(stack == null){
-//        Logger.sendLog("Stack is null");
-//        continue;
-//      }
-//
-//      if(stack.getItem() == null){
-//        Logger.sendLog("Stack item is null");
-//        continue;
-//      }
-//
-//      if(!stack.hasDisplayName()){
-//        Logger.sendLog("Stack has no name");
-//        continue;
-//      }
-//      if(!StringUtils.stripControlCodes(stack.getDisplayName()).startsWith("Commission")){
-//        Logger.sendLog("Stack name doenst start with commission. Name: " + stack.getDisplayName());
-//        continue;
-//      }
-      if (stack == null || stack.getItem() == null || !stack.hasDisplayName() || !StringUtils.stripControlCodes(stack.getDisplayName()).startsWith("Commission")) {
+      if (stack == null || stack.getItem() == null || !stack.hasDisplayName() || !StringUtils.stripControlCodes(stack.getDisplayName())
+          .startsWith("Commission")) {
         continue;
       }
       List<String> loreList = InventoryUtil.getItemLore(stack);
       for (int j = 0; j < loreList.size(); j++) {
         if (loreList.get(j).isEmpty()) {
-//          System.out.println("IsEmpty. j: " + j + ", This: " + loreList.get(j) + ", next: " + loreList.get( j + 1));
-          comm = Commission.getCommission(loreList.get(++j));
+          Commission comm = Commission.getCommission(loreList.get(++j));
           if (comm != null) {
-//            System.out.println("FoundComm: " + comm);
-            return comm;
+            if (comm == Commission.COMMISSION_CLAIM) {
+              return Arrays.asList(comm);
+            }
+            comms.add(comm);
           }
-//          System.out.println("didnt find comm");
           break;
         }
       }
     }
-    return null;
+    return Commission.getBestCommissionFrom(comms);
   }
 
 //  public static List<EntityPlayer> getCommissionMobs(Commission commission) {

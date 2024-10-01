@@ -76,7 +76,7 @@ public class BedrockBlockChangeFailsafe extends AbstractFailsafe {
                 if (distance <= radiusSquared) {
                     long currentTime = System.currentTimeMillis();
                     bedrockChangeTimestamps.add(currentTime);
-                    log("Bedrock block change detected at: " + currentTime + " within radius at position " + blockPos);
+//                    log("Bedrock block change detected at: " + currentTime + " within radius at position " + blockPos);
                 }
             }
         }

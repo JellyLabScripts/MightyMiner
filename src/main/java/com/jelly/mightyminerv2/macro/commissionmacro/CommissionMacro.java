@@ -17,11 +17,13 @@ import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.macro.commissionmacro.helper.Commission;
 import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.helper.location.Location;
 import com.jelly.mightyminerv2.util.helper.location.SubLocation;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -58,7 +60,8 @@ public class CommissionMacro extends AbstractMacro {
     this.macroRetries = 0;
 
     this.miningSpeed = this.miningSpeedBoost = 0;
-    this.curr = this.last = null;
+//    this.curr = this.last = null;
+    this.curr = new ArrayList<>();
 
     this.checkForCommissionChange = false;
     log("CommMacro::onDisable");
@@ -78,10 +81,10 @@ public class CommissionMacro extends AbstractMacro {
 
   @Override
   public List<String> getNecessaryItems() {
-    return Arrays.asList(MightyMinerConfig.commMiningTool);
+    return Arrays.asList(MightyMinerConfig.commMiningTool, MightyMinerConfig.commSlayerWeapon);
   }
 
-  public void stopActiveFeatures(){
+  public void stopActiveFeatures() {
     MithrilMiner.getInstance().stop();
     AutoMobKiller.getInstance().stop();
   }
@@ -133,30 +136,43 @@ public class CommissionMacro extends AbstractMacro {
     }
   }
 
+  @Override
   public void onChat(String message) {
     if (!this.isEnabled() || this.mainState != MainState.MACRO) {
       return;
     }
 
-    if (message.equalsIgnoreCase(this.curr.getName() + " Commission Complete! Visit the King to claim your rewards!")) {
-      send("Commission Complete Detected");
-      this.stopActiveFeatures();
-      this.last = this.curr;
-      this.curr = Commission.COMMISSION_CLAIM;
-      this.changeMacroState(MacroState.PATHING);
+    if (message.contains("Commission Complete")) {
+      this.curr.forEach(it -> {
+        if (message.equalsIgnoreCase(it.getName() + " Commission Complete! Visit the King to claim your rewards!")) {
+          this.curr.remove(it);
+          send("Commission Complete Detected. Comms Left: " + this.curr.toString());
+        }
+        if (this.curr.isEmpty()) {
+          send("No more commissions to complete.");
+          this.curr.add(Commission.COMMISSION_CLAIM);
+          this.stopActiveFeatures();
+          this.changeMacroState(MacroState.PATHING);
+        }
+      });
     }
   }
 
+  @Override
   public void onTablistUpdate(UpdateTablistEvent event) {
     if (!this.isEnabled() || this.mainState != MainState.MACRO || !this.checkForCommissionChange) {
       return;
     }
-
-    if (CommissionUtil.getCurrentCommission() != this.curr) {
-      MithrilMiner.getInstance().stop();
-      AutoMobKiller.getInstance().stop();
-      this.checkForCommissionChange = false;
-      this.changeMacroState(MacroState.STARTING);
+    List<Commission> comms = CommissionUtil.getCurrentCommissionsFromTablist();
+    if (comms.size() != this.curr.size()) {
+      this.curr = comms;
+      send("Commission change detected from tablist");
+      if (this.curr.contains(Commission.COMMISSION_CLAIM)) {
+        send("curr contains claim");
+        this.stopActiveFeatures();
+        this.checkForCommissionChange = false;
+        this.changeMacroState(MacroState.STARTING);
+      }
     }
   }
 
@@ -166,8 +182,8 @@ public class CommissionMacro extends AbstractMacro {
   private int miningSpeed = 0;
   private int miningSpeedBoost = 0;
   private int macroRetries = 0;
-  private Commission last;
-  private Commission curr;
+  //  private Commission last;
+  private List<Commission> curr = new ArrayList<>();
 
   private final int[] mithrilPriority = {9, 6, 4, 1};
   private final int[] titaniumPriority = {5, 3, 1, 10};
@@ -232,11 +248,10 @@ public class CommissionMacro extends AbstractMacro {
         }
         break;
       case CHECKING_COMMISSION:
-        this.last = this.curr;
-        this.curr = CommissionUtil.getCurrentCommission();
+        this.curr = CommissionUtil.getCurrentCommissionsFromTablist();
         this.changeMacroState(MacroState.PATHING);
 
-        if (this.curr != null) {
+        if (!this.curr.isEmpty()) {
           this.macroRetries = 0;
           return;
         }
@@ -251,10 +266,11 @@ public class CommissionMacro extends AbstractMacro {
         break;
       case PATHING:
         RouteWaypoint end;
-        if (this.curr.getName().equals("Claim Commission")) {
-          end = this.curr.closestWaypointTo(CommissionUtil.getClosestEmissaryPosition());
+        Commission first = this.curr.get(0);
+        if (first.getName().equals("Claim Commission")) {
+          end = first.closestWaypointTo(CommissionUtil.getClosestEmissaryPosition());
         } else {
-          end = this.curr.getWaypoint();
+          end = first.getWaypoint();
         }
 
         List<RouteWaypoint> nodes = GraphHandler.getInstance().findPath(PlayerUtil.getBlockStandingOn(), end);
@@ -297,7 +313,7 @@ public class CommissionMacro extends AbstractMacro {
         }
         break;
       case TOGGLE_MACRO:
-        String commName = this.curr.getName();
+        String commName = this.curr.get(0).getName();
         if (commName.contains("Claim")) {
           this.changeMacroState(MacroState.CLAIMING_COMMISSION);
         } else if (commName.contains("Titanium") || commName.contains("Mithril")) {
@@ -310,7 +326,7 @@ public class CommissionMacro extends AbstractMacro {
         MithrilMiner.getInstance().start(
             miningSpeed,
             miningSpeedBoost,
-            this.curr.getName().contains("Titanium") ? titaniumPriority : mithrilPriority,
+            this.curr.stream().anyMatch(it -> it.getName().contains("Titanium")) ? titaniumPriority : mithrilPriority,
             MightyMinerConfig.commMiningTool
         );
         this.changeMacroState(MacroState.MINING_VERIFY);
@@ -341,13 +357,14 @@ public class CommissionMacro extends AbstractMacro {
         }
         break;
       case ENABLE_MOBKILLER:
-        Set<String> mobName = CommissionUtil.getMobForCommission(this.curr);
+        Set<String> mobName = CommissionUtil.getMobForCommission(this.curr.get(0));
         if (mobName == null) {
-          error("Was Supposed to Start MobKiller but current comm is " + this.curr.getName());
+          error("Was Supposed to Start MobKiller but current comm is " + this.curr.get(0).getName());
           this.changeMainState(MainState.NONE);
           return;
         }
-        AutoMobKiller.getInstance().start(mobName, this.curr.getName().startsWith("Glacite") ? MightyMinerConfig.commMiningTool : MightyMinerConfig.commSlayerWeapon);
+        AutoMobKiller.getInstance()
+            .start(mobName, this.curr.get(0).getName().startsWith("Glacite") ? MightyMinerConfig.commMiningTool : MightyMinerConfig.commSlayerWeapon);
         this.changeMacroState(MacroState.MOBKILLER_VERIFY);
         break;
       case MOBKILLER_VERIFY:
@@ -386,8 +403,8 @@ public class CommissionMacro extends AbstractMacro {
         }
 
         if (AutoCommissionClaim.getInstance().succeeded()) {
-          Commission nextComm = AutoCommissionClaim.getInstance().getNextComm();
-          if (nextComm == null) {
+          List<Commission> nextComm = AutoCommissionClaim.getInstance().getNextComm();
+          if (nextComm.isEmpty()) {
             error("Couldn't retrieve next comm from NPC gui. Waiting for Tablist to update.");
             this.changeMacroState(MacroState.WAITING, 3000);
             this.checkForCommissionChange = true;

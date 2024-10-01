@@ -74,6 +74,7 @@ public abstract class AbstractFailsafe {
 
   public enum Failsafe{
     BAD_EFFECTS,
+    BLOCK_CHANGE,
     DISCONNECT,
     ITEM_CHANGE,
     KNOCKBACK,

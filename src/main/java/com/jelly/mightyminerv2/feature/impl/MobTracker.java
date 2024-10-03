@@ -3,6 +3,7 @@ package com.jelly.mightyminerv2.feature.impl;
 import com.jelly.mightyminerv2.event.UpdateEntityEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.util.EntityUtil;
+import com.jelly.mightyminerv2.util.RenderUtil;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -13,10 +14,15 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.awt.Color;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -42,8 +48,18 @@ public class MobTracker extends AbstractFeature {
     if (list == null) {
       return new HashSet<>();
     }
-    return list;
+    return new HashSet<>(list);
   }
+
+//  @SubscribeEvent
+//  public void render(RenderWorldLastEvent event) {
+//    mobs.computeIfPresent("Ice Walker", (k, v) -> {
+//      v.forEach(it -> {
+//        RenderUtil.drawText(k, it.posX, it.posY + it.height, it.posZ, 1);
+//      });
+//      return v;
+//    });
+//  }
 
   @SubscribeEvent
   public void onWorldUnload(WorldEvent.Unload event) {
@@ -60,9 +76,9 @@ public class MobTracker extends AbstractFeature {
   public void onEntitySpawn(UpdateEntityEvent event) {
     byte updateType = event.updateType;
     EntityLivingBase entity = event.entity;
+    long hash = pack((int) Math.round(entity.posX) / 3, (int) Math.round(entity.posZ) / 3);
     String name = "";
     int entityId = -1;
-    long hash = pack((int) Math.round(entity.posX), (int) Math.round(entity.posZ));
     if (entity instanceof EntityArmorStand) {
       if (updateType != 0) {
         return;
@@ -105,7 +121,7 @@ public class MobTracker extends AbstractFeature {
         if (!wasCached) {
           entities.computeIfAbsent(hash, k -> new IntOpenHashSet()).add(entityId);
         }
-        mobs.computeIfAbsent(entity.getName(), k -> new ObjectOpenHashSet<>()).add(entity);
+        mobs.computeIfAbsent(entity.getName().trim(), k -> new ObjectOpenHashSet<>()).add(entity);
       } else {
         IntSet sett = entities.get(hash);
         if (sett != null) {
@@ -119,7 +135,7 @@ public class MobTracker extends AbstractFeature {
             val.remove(entity);
             return val.isEmpty() ? null : val;
           });
-          this.mobs.computeIfPresent(entity.getName(), (key, val) -> {
+          this.mobs.computeIfPresent(entity.getName().trim(), (key, val) -> {
             val.remove(entity);
             return val.isEmpty() ? null : val;
           });

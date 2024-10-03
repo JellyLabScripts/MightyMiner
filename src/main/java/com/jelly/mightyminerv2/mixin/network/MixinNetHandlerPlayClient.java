@@ -1,24 +1,18 @@
 package com.jelly.mightyminerv2.mixin.network;
 
-import com.jelly.mightyminerv2.command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.mightyminerv2.event.BlockDestroyEvent;
 import com.jelly.mightyminerv2.event.UpdateEntityEvent;
 import com.jelly.mightyminerv2.event.SpawnParticleEvent;
 import com.jelly.mightyminerv2.event.UpdateScoreboardEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistFooterEvent;
-import com.jelly.mightyminerv2.hud.DebugHUD;
-import com.jelly.mightyminerv2.pathfinder.calculate.PathNode;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.TablistUtil;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import net.minecraft.client.Minecraft;
@@ -28,12 +22,9 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.network.play.server.S0CPacketSpawnPlayer;
-import net.minecraft.network.play.server.S0EPacketSpawnObject;
 import net.minecraft.network.play.server.S0FPacketSpawnMob;
 import net.minecraft.network.play.server.S14PacketEntity;
 import net.minecraft.network.play.server.S18PacketEntityTeleport;
@@ -47,15 +38,11 @@ import net.minecraft.network.play.server.S3CPacketUpdateScore.Action;
 import net.minecraft.network.play.server.S3DPacketDisplayScoreboard;
 import net.minecraft.network.play.server.S3EPacketTeams;
 import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
-import net.minecraft.network.play.server.S49PacketUpdateEntityNBT;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.StringUtils;
-import net.minecraft.util.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
@@ -69,9 +56,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(NetHandlerPlayClient.class)
 public class MixinNetHandlerPlayClient {
-
-  @Shadow
-  private WorldClient clientWorldController;
 
   @Inject(method = "handleParticles", at = @At(value = "HEAD"))
   public void handleParticles(S2APacketParticles packetIn, CallbackInfo ci) {
@@ -138,9 +122,6 @@ public class MixinNetHandlerPlayClient {
   }
 
   // Entity spawn stuff
-  @Unique
-  IntSet mightyMinerv2$entities = new IntOpenHashSet();
-
   @Inject(method = "handleEntityMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/DataWatcher;updateWatchedObjectsFromList(Ljava/util/List;)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleEntityMetadata(S1CPacketEntityMetadata packetIn, CallbackInfo ci, Entity entity) {
     if (entity instanceof EntityArmorStand && entity.hasCustomName()) { // right now care about stands with custom name
@@ -171,7 +152,7 @@ public class MixinNetHandlerPlayClient {
   public Entity handleDestroyEntities(WorldClient instance, int entityID) {
     Entity entity = instance.removeEntityFromWorld(entityID);
     if (entity instanceof EntityLivingBase) {
-      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, 1));
+      MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, (byte) 1));
     }
     return entity;
   }
@@ -179,8 +160,8 @@ public class MixinNetHandlerPlayClient {
   @Inject(method = "handleEntityMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPositionAndRotation2(DDDFFIZ)V"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleEntityMovement(S14PacketEntity packetIn, CallbackInfo ci, Entity entity, double d0, double d1, double d2, float f, float f1) {
     if (entity instanceof EntityLivingBase) {
-      int nX = (int) Math.round(d0);
-      int nZ = (int) Math.round(d2);
+      int nX = (int) Math.round(d0) / 3;
+      int nZ = (int) Math.round(d2) / 3;
       if ((int) Math.round(entity.posX) != nX || (int) Math.round(entity.posZ) != nZ) {
         MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, pack(nX, nZ)));
       }
@@ -190,8 +171,8 @@ public class MixinNetHandlerPlayClient {
   @Inject(method = "handleEntityTeleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/S18PacketEntityTeleport;getYaw()B"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleEntityTeleport(S18PacketEntityTeleport packetIn, CallbackInfo ci, Entity entity, double d0, double d1, double d2) {
     if (entity instanceof EntityLivingBase) {
-      int nX = (int) Math.round(d0);
-      int nZ = (int) Math.round(d2);
+      int nX = (int) Math.round(d0) / 3;
+      int nZ = (int) Math.round(d2) / 3;
       if ((int) Math.round(entity.posX) != nX || (int) Math.round(entity.posZ) != nZ) {
         MinecraftForge.EVENT_BUS.post(new UpdateEntityEvent((EntityLivingBase) entity, pack(nX, nZ)));
       }
@@ -220,8 +201,8 @@ public class MixinNetHandlerPlayClient {
   }
 
   // for some reason this doesn't capture scoreobjective1
-  @Inject(method = "handleScoreboardObjective", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
-  public void handleScoreboardObjective(S3BPacketScoreboardObjective packetIn, CallbackInfo ci, Scoreboard scoreboard) {
+  @Inject(method = "handleScoreboardObjective", at = @At("TAIL"))
+  public void handleScoreboardObjective(S3BPacketScoreboardObjective packetIn, CallbackInfo ci) {
     String objName = packetIn.func_149339_c();
     SortedMap<Integer, String> removedValue = mightyMinerv2$scoreboard.remove(objName);
     if (packetIn.func_149338_e() != 1) {
@@ -257,6 +238,7 @@ public class MixinNetHandlerPlayClient {
 
       ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
     } catch (Exception e) {
+      Logger.sendNote("Couldn't Handle Update Score");
       e.printStackTrace();
     }
   }
@@ -287,6 +269,7 @@ public class MixinNetHandlerPlayClient {
 
       ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
     } catch (Exception e) {
+      Logger.sendNote("Couldn't Handle Update Teams");
       e.printStackTrace();
     }
   }

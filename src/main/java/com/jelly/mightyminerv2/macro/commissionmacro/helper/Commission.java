@@ -33,7 +33,8 @@ public enum Commission {
   RAMPARTS_TITANIUM("Rampart's Quarry Titanium", SubLocation.RAMPARTS_QUARRY),
   GOBLIN_SLAYER("Goblin Slayer", SubLocation.GOBLIN_BURROWS),
   GLACITE_WALKER_SLAYER("Glacite Walker Slayer", SubLocation.GREAT_ICE_WALL),
-  COMMISSION_CLAIM("Claim Commission", SubLocation.FORGE_BASIN); // theres no set location for this so yea
+  COMMISSION_CLAIM("Claim Commission", SubLocation.THE_FORGE), // theres no set location for this so yea
+  REFUEL("Refuel Drill", SubLocation.FORGE_BASIN); // theres no set location for this so yea
   // Do not want this
 //  TREASURE_HOARDER_SLAYER("Treasure Hoarder Puncher", SubLocation.TREASURE_HUNTER_CAMP),
 //  STAR_CENTRY_SLAYER("Star Sentry Puncher	"),
@@ -50,9 +51,12 @@ public enum Commission {
 
     Map<SubLocation, RouteWaypoint[]> veinsMap = new EnumMap<SubLocation, RouteWaypoint[]>(SubLocation.class) {{
       put(SubLocation.FORGE_BASIN, new RouteWaypoint[]{
+          new RouteWaypoint(-7, -144, -32, TransportMethod.WALK)
+      });
+      put(SubLocation.THE_FORGE, new RouteWaypoint[]{
           new RouteWaypoint(44, 134, 21, TransportMethod.WALK),
           new RouteWaypoint(58, 197, -11, TransportMethod.WALK),
-          new RouteWaypoint(170, 149, 32, TransportMethod.WALK),
+          new RouteWaypoint(171, 149, 33, TransportMethod.WALK),
           new RouteWaypoint(-75, 152, -11, TransportMethod.WALK),
           new RouteWaypoint(-131, 173, -52, TransportMethod.WALK)
       });

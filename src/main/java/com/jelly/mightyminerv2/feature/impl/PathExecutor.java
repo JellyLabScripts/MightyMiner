@@ -271,15 +271,6 @@ public class PathExecutor {
     StrafeUtil.enabled = yawDiff > 3;
     StrafeUtil.yaw = ipYaw;
 
-    // needs work
-    // if next tick pos is not target and stuck can jump then jump
-//    int nextX = nextPos.getX();
-//    int nextY = nextPos.getY();
-//    int nextZ = nextPos.getZ();
-//    CalculationContext ctx = this.curr.getCtx();
-//    if (ctx.get(nextX, nextY, nextZ).getBlock() != Blocks.air && ctx.get(nextX, nextY + 1, nextZ).getBlock() == Blocks.air && ctx.get(nextX, nextY + 2, nextZ).getBlock() == Blocks.air) {
-//      shouldJump = !BlockUtil.INSTANCE.bresenham(ctx, PlayerUtil.getBlockStandingOn(), nextPos);
-//    }
     boolean shouldJump = com.jelly.mightyminerv2.util.BlockUtil.canWalkBetween(this.curr.getCtx(), PlayerUtil.getBlockStandingOn(), new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(yaw))));
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSprint, this.allowSprint && yawDiff < 40 && !shouldJump);
@@ -293,9 +284,6 @@ public class PathExecutor {
   }
 
   public void onRender() {
-//    if (!this.interpolated) {
-//      RenderUtil.drawPoint(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(tempIpYaw)), Color.CYAN);
-//    }
     if (this.target != 0 && this.target < this.blockPath.size()) {
       BlockPos target = this.blockPath.get(this.target);
       BlockPos pos = new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(

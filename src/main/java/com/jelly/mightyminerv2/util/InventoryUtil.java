@@ -126,10 +126,6 @@ public class InventoryUtil {
   }
 
   public static String getInventoryName() {
-    if(mc.thePlayer == null){
-      Logger.sendNote("Player is null for soem fucking reason. mc: " + (mc == null ? "null" : "not null"));
-      return "";
-    }
     return getInventoryName(mc.thePlayer.openContainer);
   }
 
@@ -159,7 +155,39 @@ public class InventoryUtil {
     }
   }
 
-  public static ArrayList<String> getItemLore(ItemStack itemStack) {
+  public static List<String> getItemLoreFromOpenContainer(String name) {
+    Container openContainer = mc.thePlayer.openContainer;
+    for (int i = 0; i < openContainer.inventorySlots.size(); i++) {
+      Slot slot = openContainer.getSlot(i);
+      if (slot == null || !slot.getHasStack()) {
+        continue;
+      }
+      ItemStack stack = slot.getStack();
+      if (!stack.hasDisplayName() || !StringUtils.stripControlCodes(stack.getDisplayName()).contains(name)) {
+        continue;
+      }
+      return getItemLore(stack);
+    }
+    return new ArrayList<>();
+  }
+
+  public static List<String> getItemLoreFromInventory(String name) {
+    Container container = mc.thePlayer.inventoryContainer;
+    for (int i = 0; i < container.inventorySlots.size(); i++) {
+      Slot slot = container.getSlot(i);
+      if (slot == null || !slot.getHasStack()) {
+        continue;
+      }
+      ItemStack stack = slot.getStack();
+      if (!stack.hasDisplayName() || !StringUtils.stripControlCodes(stack.getDisplayName()).contains(name)) {
+        continue;
+      }
+      return getItemLore(stack);
+    }
+    return new ArrayList<>();
+  }
+
+  public static List<String> getItemLore(ItemStack itemStack) {
     NBTTagList loreTag = itemStack.getTagCompound().getCompoundTag("display").getTagList("Lore", 8);
     ArrayList<String> loreList = new ArrayList<>();
     for (int i = 0; i < loreTag.tagCount(); i++) {

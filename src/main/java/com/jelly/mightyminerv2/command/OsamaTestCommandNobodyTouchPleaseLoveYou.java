@@ -9,6 +9,7 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
+import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.feature.impl.Pathfinder;
@@ -105,11 +106,12 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    BlockPos targ = new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(AngleUtil.get360RotationYaw())));
-    this.blockToDraw.clear();
-    this.blockToDraw.add(targ);
-    this.blockToDraw.add(PlayerUtil.getBlockStandingOn());
-    Logger.sendLog("ShouldJump: " + com.jelly.mightyminerv2.util.BlockUtil.canWalkBetween(new CalculationContext(), PlayerUtil.getBlockStandingOn(), targ));
+    AutoDrillRefuel.getInstance().start("Titanium Drill", 7, true, true);
+//    BlockPos targ = new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(AngleUtil.get360RotationYaw())));
+//    this.blockToDraw.clear();
+//    this.blockToDraw.add(targ);
+//    this.blockToDraw.add(PlayerUtil.getBlockStandingOn());
+//    Logger.sendLog("ShouldJump: " + com.jelly.mightyminerv2.util.BlockUtil.canWalkBetween(new CalculationContext(), PlayerUtil.getBlockStandingOn(), targ));
   }
 
   @SubCommand

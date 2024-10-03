@@ -26,4 +26,11 @@ public class UpdateEntityEvent extends Event {
     this.updateType = 2;
     this.newHash = newHash;
   }
+//  public Vec3 newPos;
+//  public UpdateEntityEvent(EntityLivingBase entity, long newHash, Vec3 newPos) {
+//    this.entity = entity;
+//    this.updateType = 2;
+//    this.newHash = newHash;
+//    this.newPos = newPos;
+//  }
 }

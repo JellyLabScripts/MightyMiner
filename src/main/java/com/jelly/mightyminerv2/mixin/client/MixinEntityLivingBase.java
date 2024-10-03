@@ -21,7 +21,6 @@ public abstract class MixinEntityLivingBase extends Entity {
     super(worldIn);
   }
 
-  //     Need this for jump to work properly
   @Redirect(
       method = "jump",
       at = @At(

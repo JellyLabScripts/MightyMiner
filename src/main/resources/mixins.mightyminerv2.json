@@ -7,6 +7,7 @@
     "client.MixinBlockStainedGlassPane",
     "client.MixinChunk",
     "client.MixinEntityLivingBase",
+    "client.MixinMinecraft",
     "FML.MixinFMLHandshakeMessage",
     "gui.MixinGuiContainer",
     "gui.MixinInventoryPlayer",

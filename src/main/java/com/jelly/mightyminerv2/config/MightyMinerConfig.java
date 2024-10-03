@@ -6,6 +6,7 @@ import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.libs.common.value.qual.DoubleVal;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.hud.DebugHUD;
 import com.jelly.mightyminerv2.macro.MacroManager;
@@ -158,6 +159,38 @@ public class MightyMinerConfig extends Config {
   )
   public static int commRotCost = 25;
 
+  @Switch(
+      name = "Refuel Drill",
+      category = COMMISSION,
+      subcategory = "Refuel"
+  )
+  public static boolean commDrillRefuel = false;
+
+  @Dropdown(
+      name = "Machine Fuel",
+      category = COMMISSION,
+      subcategory = "Refuel",
+      options = {"Enchanted Poppy", "Goblin Egg", "Green Goblin Egg", "Yellow Goblin Egg", "Red Goblin Egg", "Blue Goblin Egg", "Volta", "Oil Barrel"}
+  )
+  public static int commMachineFuel = 6;
+
+  @DualOption(
+      name = "Fuel Retrieval Method",
+      category = COMMISSION,
+      subcategory = "Refuel",
+      left = "Get From Sack",
+      right = "Buy From Bazaar"
+  )
+  public static boolean commFuelRetrievalMethod = true;
+
+  @DualOption(
+      name = "Mechanics GUI Access Method",
+      category = COMMISSION,
+      subcategory = "Refuel",
+      left = "From NPC",
+      right = "Abiphone"
+  )
+  public static boolean commMechaGuiAccessMethod = true;
   //</editor-fold>
 
   //<editor-fold desc="Failsafe">

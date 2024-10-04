@@ -1,7 +1,6 @@
 package com.jelly.mightyminerv2.feature;
 
 import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
-import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.feature.impl.AutoWarp;
@@ -39,8 +38,7 @@ public class FeatureManager {
         Pathfinder.getInstance(),
         RouteBuilder.getInstance(),
         RouteNavigator.getInstance(),
-        MobTracker.getInstance(),
-        AutoDrillRefuel.getInstance()
+        MobTracker.getInstance()
     ));
   }
 

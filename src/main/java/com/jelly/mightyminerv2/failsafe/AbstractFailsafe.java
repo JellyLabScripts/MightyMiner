@@ -79,6 +79,7 @@ public abstract class AbstractFailsafe {
     ITEM_CHANGE,
     KNOCKBACK,
     ROTATION,
-    TELEPORT
+    TELEPORT,
+    BEDROCK_CHECK
   }
 }

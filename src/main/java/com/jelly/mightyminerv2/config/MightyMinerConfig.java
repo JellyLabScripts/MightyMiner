@@ -9,6 +9,7 @@ import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.libs.common.value.qual.DoubleVal;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.hud.DebugHUD;
+import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.input.Keyboard;
@@ -51,6 +52,17 @@ public class MightyMinerConfig extends Config {
       }
   )
   public static int macroType = 0;
+
+  @Dropdown(
+          name = "Ore Type",
+          category = MITHRIL,
+          description = "Select the ore type you want to use",
+          options = {
+                  "Mithril",
+                  "Pure Ore"
+          }
+  )
+  public static int oreType = 0;
 
   @KeyBind(
       name = "Toggle Macro",
@@ -388,6 +400,13 @@ public class MightyMinerConfig extends Config {
       category = DEBUG
   )
   public static DebugHUD debugHUD = DebugHUD.getInstance();
+
+  @HUD(
+          name = "CommissionHUD",
+          category = COMMISSION
+  )
+  public static CommissionHUD commissionHUD = CommissionHUD.getInstance();
+
 
   //</editor-fold>
 

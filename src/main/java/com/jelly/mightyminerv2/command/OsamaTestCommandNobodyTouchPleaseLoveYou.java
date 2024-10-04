@@ -8,7 +8,6 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.PacketEvent;
-import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
@@ -18,7 +17,6 @@ import com.jelly.mightyminerv2.handler.GraphHandler;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.MightyMiner;
-import com.jelly.mightyminerv2.pathfinder.goal.Goal;
 import com.jelly.mightyminerv2.util.AngleUtil;
 import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.Logger;
@@ -27,7 +25,6 @@ import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.helper.Angle;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
-import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
@@ -380,23 +377,23 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   public void onRender(RenderWorldLastEvent event) {
     if (entTodraw != null) {
       RenderUtil.drawBox(entTodraw.getEntityBoundingBox(), new Color(123, 214, 44, 150));
-      RenderUtil.drawBlockBox(new BlockPos(entTodraw.posX, Math.ceil(entTodraw.posY) - 1, entTodraw.posZ), new Color(123, 214, 44, 150));
+      RenderUtil.drawBlock(new BlockPos(entTodraw.posX, Math.ceil(entTodraw.posY) - 1, entTodraw.posZ), new Color(123, 214, 44, 150));
     }
 
     if (!blockToDraw.isEmpty()) {
-      blockToDraw.forEach(b -> RenderUtil.drawBlockBox(b, new Color(255, 0, 0, 200)));
+      blockToDraw.forEach(b -> RenderUtil.drawBlock(b, new Color(255, 0, 0, 200)));
     }
 
     if (this.block != null) {
-      RenderUtil.drawBlockBox(this.block, new Color(255, 0, 0, 50));
+      RenderUtil.drawBlock(this.block, new Color(255, 0, 0, 50));
     }
 
     if (this.first != null) {
-      RenderUtil.drawBlockBox(new BlockPos(this.first.toVec3()), new Color(0, 0, 0, 200));
+      RenderUtil.drawBlock(new BlockPos(this.first.toVec3()), new Color(0, 0, 0, 200));
     }
 
     if (this.second != null) {
-      RenderUtil.drawBlockBox(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
+      RenderUtil.drawBlock(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
     }
 
 //    if (pathfinder != null) {
@@ -404,13 +401,13 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //    }
 
     if (path != null) {
-      path.getPath().forEach(tit -> RenderUtil.drawBlockBox(tit, new Color(255, 0, 0, 200)));
+      path.getPath().forEach(tit -> RenderUtil.drawBlock(tit, new Color(255, 0, 0, 200)));
     }
 
     if (curr != null) {
-      RenderUtil.drawBlockBox(curr.getBlock(), new Color(0, 255, 0, 255));
+      RenderUtil.drawBlock(curr.getBlock(), new Color(0, 255, 0, 255));
       if (curr.getParentNode() != null) {
-        RenderUtil.drawBlockBox(curr.getParentNode().getBlock(), new Color(0, 0, 255, 255));
+        RenderUtil.drawBlock(curr.getParentNode().getBlock(), new Color(0, 0, 255, 255));
       }
     }
 
@@ -442,7 +439,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     if (!btd.isEmpty()) {
       Pair<BlockPos, List<Float>> best = btd.get(0);
       BlockPos pos = best.getFirst();
-      RenderUtil.drawBlockBox(best.getFirst(), new Color(123, 0, 234, 150));
+      RenderUtil.drawBlock(best.getFirst(), new Color(123, 0, 234, 150));
       if (com.jelly.mightyminerv2.util.BlockUtil.getBlockLookingAt().equals(pos)) {
         RenderUtil.drawText(
             String.format("Hardness: %.2f, Angle: %.2f, Dist: %.2f", best.getSecond().get(0), best.getSecond().get(1), best.getSecond().get(2)),
@@ -453,7 +450,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       for (int i = 1; i < btd.size(); i++) {
         best = btd.get(i);
         pos = best.getFirst();
-        RenderUtil.drawBlockBox(best.getFirst(), new Color(255, 0, 241, 50));
+        RenderUtil.drawBlock(best.getFirst(), new Color(255, 0, 241, 50));
         if (com.jelly.mightyminerv2.util.BlockUtil.getBlockLookingAt().equals(pos)) {
           RenderUtil.drawText(
               String.format("Hardness: %.2f, Angle: %.2f, Dist: %.2f", best.getSecond().get(0), best.getSecond().get(1), best.getSecond().get(2)),
@@ -466,7 +463,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
       if(this.allowedd) {
         BlockPos poss = new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw))));
         if (!mc.theWorld.isAirBlock(poss)) {
-          RenderUtil.drawBlockBox(poss, Color.GREEN);
+          RenderUtil.drawBlock(poss, Color.GREEN);
         }
       }
     }

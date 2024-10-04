@@ -12,7 +12,6 @@ import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
 import java.awt.Color;
 import java.util.Comparator;
-import javax.swing.text.JTextComponent.KeyBinding;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -223,13 +222,11 @@ public class MithrilMiner extends AbstractFeature {
         // fall through
       case WALKING:
         if ((this.destBlock == null || Math.hypot(this.destBlock.xCoord - mc.thePlayer.posX, this.destBlock.zCoord - mc.thePlayer.posZ) > 0.2)
-            && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 3.9) {
+            && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 3.7) {
           this.shiftTimer.reset();
           StrafeUtil.enabled = true;
           StrafeUtil.yaw = AngleUtil.getRotationYaw360(this.destBlock == null ? this.targetPoint : this.destBlock);
           KeyBindUtil.holdThese(mc.gameSettings.keyBindForward, mc.gameSettings.keyBindSneak);
-//          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
-//          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, true);
           log("Dist: " + PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) + ", EyePos: " + PlayerUtil.getPlayerEyePos() + ", Target: "
               + this.targetPoint);
         } else {
@@ -331,7 +328,7 @@ public class MithrilMiner extends AbstractFeature {
   @SubscribeEvent
   protected void onRender(RenderWorldLastEvent event) {
     if (this.targetBlock != null) {
-      RenderUtil.drawBlockBox(this.targetBlock, new Color(0, 255, 255, 100));
+      RenderUtil.drawBlock(this.targetBlock, new Color(0, 255, 255, 100));
     }
 
     if (this.state.ordinal() >= State.WALKING.ordinal() && this.targetPoint != null) {

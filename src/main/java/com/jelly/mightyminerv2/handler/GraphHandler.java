@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -66,6 +67,7 @@ public class GraphHandler {
     if (!this.graph.map.containsKey(startWp)) {
       startWp = this.graph.map.keySet().stream().min(Comparator.comparing(it -> start.distanceSq(it.toBlockPos()))).orElse(null);
     }
+
     if (startWp == null) {
       Logger.sendLog("StartWP is null");
       return new ArrayList<>();
@@ -80,7 +82,14 @@ public class GraphHandler {
   }
 
   public List<RouteWaypoint> findPath(RouteWaypoint first, RouteWaypoint second) {
-    return this.graph.findPath(first, second);
+    List<RouteWaypoint> route = this.graph.findPath(first, second);
+    if (route.size() < 2) {
+      return route;
+    }
+    if (PlayerUtil.getBlockStandingOn().distanceSq(route.get(0).toBlockPos()) < route.get(0).toBlockPos().distanceSq(route.get(1).toBlockPos())) {
+      route.remove(0);
+    }
+    return route;
   }
 
   public synchronized void save() {
@@ -153,13 +162,13 @@ public class GraphHandler {
       return;
     }
     for (Entry<RouteWaypoint, List<RouteWaypoint>> entry : this.graph.map.entrySet()) {
-      RenderUtil.drawBlockBox(entry.getKey().toBlockPos(), new Color(101, 10, 142, 186));
+      RenderUtil.drawBlock(entry.getKey().toBlockPos(), new Color(101, 10, 142, 186));
       for (RouteWaypoint edge : entry.getValue()) {
-        RenderUtil.drawTracer(entry.getKey().toVec3().addVector(0.5, 0.5, 0.5), edge.toVec3().addVector(0.5, 0.5, 0.5), new Color(194, 12, 164, 179));
+        RenderUtil.drawLine(entry.getKey().toVec3().addVector(0.5, 0.5, 0.5), edge.toVec3().addVector(0.5, 0.5, 0.5), new Color(194, 12, 164, 179));
       }
     }
     if (lastPos != null) {
-      RenderUtil.drawBlockBox(new BlockPos(lastPos.toVec3()), new Color(255, 0, 0, 150));
+      RenderUtil.drawBlock(new BlockPos(lastPos.toVec3()), new Color(255, 0, 0, 150));
     }
   }
 }

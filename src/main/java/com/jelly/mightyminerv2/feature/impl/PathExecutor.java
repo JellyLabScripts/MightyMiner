@@ -1,8 +1,6 @@
 package com.jelly.mightyminerv2.feature.impl;
 
 import com.jelly.mightyminerv2.handler.RotationHandler;
-import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext;
-import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.util.AngleUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
 import com.jelly.mightyminerv2.util.Logger;
@@ -22,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 
@@ -283,17 +280,6 @@ public class PathExecutor {
     return playerPos.distanceSqToCenter(target.getX(), target.getY(), target.getZ()) < 100;
   }
 
-  public void onRender() {
-    if (this.target != 0 && this.target < this.blockPath.size()) {
-      BlockPos target = this.blockPath.get(this.target);
-      BlockPos pos = new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(
-          AngleUtil.getRotationYaw360(PlayerUtil.getNextTickPosition(0.6f), new Vec3(target.getX() + 0.5, 0, target.getZ() + 0.5)))));
-      if (!mc.theWorld.isAirBlock(pos)) {
-        RenderUtil.drawBlockBox(pos, Color.GREEN);
-      }
-    }
-  }
-
   public State getState() {
     return this.state;
   }
@@ -308,6 +294,10 @@ public class PathExecutor {
 
   public Path getCurrentPath() {
     return this.curr;
+  }
+
+  public Deque<Path> getPathQueue(){
+    return this.pathQueue;
   }
 
   public boolean failed() {

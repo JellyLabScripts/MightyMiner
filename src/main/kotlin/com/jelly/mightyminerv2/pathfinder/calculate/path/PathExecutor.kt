@@ -199,7 +199,7 @@ object PathExecutor {
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
         if (!this.enabled) return;
-        this.path.forEach { RenderUtil.drawBlockBox(it, Color(0, 255, 255, 50)) }
-        RenderUtil.drawBlockBox(this.path[this.targetIndex], Color(255, 0, 0, 100))
+        this.path.forEach { RenderUtil.drawBlock(it, Color(0, 255, 255, 50)) }
+        RenderUtil.drawBlock(this.path[this.targetIndex], Color(255, 0, 0, 100))
     }
 }

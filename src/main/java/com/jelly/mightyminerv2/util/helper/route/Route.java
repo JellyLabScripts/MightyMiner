@@ -70,13 +70,13 @@ public class Route {
   public void drawRoute() {
     for (int i = 0; i < this.waypoints.size(); i++) {
       RouteWaypoint currWaypoint = this.get(i);
-      RenderUtil.drawBlockBox(currWaypoint.toBlockPos(), MightyMinerConfig.routeBuilderNodeColor.toJavaColor());
+      RenderUtil.drawBlock(currWaypoint.toBlockPos(), MightyMinerConfig.routeBuilderNodeColor.toJavaColor());
       RenderUtil.drawText(String.valueOf(i + 1), currWaypoint.getX() + 0.5, currWaypoint.getY() + 1, currWaypoint.getZ() + 0.5, 1);
       if (this.waypoints.size() == 1) {
         continue;
       }
       RouteWaypoint prevWaypoint = this.get(i - 1);
-      RenderUtil.drawTracer(
+      RenderUtil.drawLine(
           prevWaypoint.toVec3().addVector(0.5, 0.5, 0.5),
           currWaypoint.toVec3().addVector(0.5, 0.5, 0.5),
           MightyMinerConfig.routeBuilderTracerColor.toJavaColor()

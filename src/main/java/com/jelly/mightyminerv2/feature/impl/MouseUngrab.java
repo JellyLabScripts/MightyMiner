@@ -22,10 +22,8 @@ public class MouseUngrab extends AbstractFeature {
     if (!Mouse.isGrabbed() || enabled) {
       return;
     }
-    mc.gameSettings.pauseOnLostFocus = false;
     oldMouseHelper = mc.mouseHelper;
     oldMouseHelper.ungrabMouseCursor();
-    mc.inGameHasFocus = true;
     mc.mouseHelper = new MouseHelper() {
       @Override
       public void mouseXYChange() {

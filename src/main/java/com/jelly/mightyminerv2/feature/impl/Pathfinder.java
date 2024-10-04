@@ -12,9 +12,12 @@ import com.jelly.mightyminerv2.pathfinder.goal.Goal;
 import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext;
 import java.awt.Color;
 import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import kotlin.Pair;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -135,6 +138,7 @@ public class Pathfinder extends AbstractFeature {
     if (!okToPath) {
       return;
     }
+
     if (this.pathQueue.isEmpty()) {
       if (pathExecutor.getState() == State.WAITING && !this.pathfinding) {
         this.stop();
@@ -184,12 +188,22 @@ public class Pathfinder extends AbstractFeature {
       return;
     }
 
-    Path path = this.pathExecutor.getCurrentPath();
-    if (path != null) {
-      path.getSmoothedPath().forEach(tit -> RenderUtil.drawBlockBox(tit, new Color(255, 0, 0, 200)));
+    Deque<Path> paths = new LinkedList<>(this.pathExecutor.getPathQueue());
+    if (pathExecutor.getCurrentPath() != null) {
+      paths.add(pathExecutor.getCurrentPath());
     }
-
-    this.pathExecutor.onRender();
+    if (!paths.isEmpty()) {
+      paths.forEach(path -> {
+        List<BlockPos> bpath = path.getSmoothedPath();
+        for (int i = 0; i < bpath.size(); i++) {
+          RenderUtil.drawBlock(bpath.get(i), new Color(0, 255, 0, 150));
+          if (i != 0) {
+            RenderUtil.drawLine(new Vec3(bpath.get(i)).addVector(0.5, 1, 0.5), new Vec3(bpath.get(i - 1)).addVector(0.5, 1, 0.5),
+                new Color(0, 255, 0, 150));
+          }
+        }
+      });
+    }
   }
 
   public boolean completedPathTo(BlockPos pos) {

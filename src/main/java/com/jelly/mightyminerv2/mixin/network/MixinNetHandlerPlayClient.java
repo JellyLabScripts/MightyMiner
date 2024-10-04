@@ -263,35 +263,31 @@ public class MixinNetHandlerPlayClient {
 
   @Inject(method = "handleTeams", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleTeams(S3EPacketTeams packetIn, CallbackInfo ci, Scoreboard scoreboard, ScorePlayerTeam scoreplayerteam) {
-    try {
-      if (packetIn.getAction() == 1 || packetIn.getAction() == 4) {
-        scoreplayerteam.getMembershipCollection().forEach(it -> {
-          scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
-            mightyMinerv2$scoreboard.get(a.getName()).remove(b.getScorePoints());
-          });
-        });
-      } else {
-        scoreplayerteam.getMembershipCollection().forEach(it -> {
-          scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
-            mightyMinerv2$scoreboard.get(
-                a.getName()).put(b.getScorePoints(),
-                mightyMinerv2$sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix())
-            );
-          });
-        });
-      }
-
-      SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(mightyMinerv2$objectiveNames[1]);
-
-      if (sidebar != null) {
-        MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
-      }
-
-      ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
-    } catch (Exception e) {
-      Logger.sendNote("Couldn't Handle Update Teams");
-      e.printStackTrace();
+    if (scoreplayerteam == null || scoreplayerteam.getRegisteredName() == null) {
+      return;
     }
+    if (packetIn.getAction() == 1 || packetIn.getAction() == 4) {
+      scoreplayerteam.getMembershipCollection().forEach(it -> {
+        scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
+          mightyMinerv2$scoreboard.get(a.getName()).remove(b.getScorePoints());
+        });
+      });
+    } else {
+      scoreplayerteam.getMembershipCollection().forEach(it -> {
+        scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
+          mightyMinerv2$scoreboard.get(a.getName()).put(b.getScorePoints(),
+              mightyMinerv2$sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix()));
+        });
+      });
+    }
+
+    SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(mightyMinerv2$objectiveNames[1]);
+
+    if (sidebar != null) {
+      MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
+    }
+
+    ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
   }
 
   @Unique

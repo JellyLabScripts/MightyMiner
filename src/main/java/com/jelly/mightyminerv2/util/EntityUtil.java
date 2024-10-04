@@ -82,7 +82,6 @@ public class EntityUtil {
   }
 
   public static List<EntityLivingBase> getEntities(Set<String> entityNames, Set<EntityLivingBase> entitiesToIgnore) {
-    // L if by chance two living entities are on the same x and z coord
     List<EntityLivingBase> entities = new ArrayList<>();
     entityNames.forEach(it -> {
       Set<EntityLivingBase> set = MobTracker.getInstance().getEntity(it);
@@ -93,6 +92,7 @@ public class EntityUtil {
     Vec3 playerPos = mc.thePlayer.getPositionVector();
     float normalizedYaw = AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw);
     return entities.stream()
+        .filter(EntityLivingBase::isEntityAlive)
         .sorted(Comparator.comparingDouble(ent -> {
               Vec3 entPos = ent.getPositionVector();
               double distanceCost =

@@ -53,9 +53,10 @@ public class MobTracker extends AbstractFeature {
 
 //  @SubscribeEvent
 //  public void render(RenderWorldLastEvent event) {
-//    mobs.computeIfPresent("Ice Walker", (k, v) -> {
+//    mobs.computeIfPresent("Goblin", (k, v) -> {
 //      v.forEach(it -> {
-//        RenderUtil.drawText(k, it.posX, it.posY + it.height, it.posZ, 1);
+//        RenderUtil.drawBox(new AxisAlignedBB(it.posX, it.posY, it.posZ, it.posX + 1, it.posY + 1, it.posZ + 1), new Color(100, 100, 100, 100));
+////        RenderUtil.drawText(k, it.posX, it.posY + it.height, it.posZ, 1);
 //      });
 //      return v;
 //    });
@@ -111,7 +112,7 @@ public class MobTracker extends AbstractFeature {
     } else {
       boolean wasCached = locatedMobs.containsKey(entity.getEntityId());
       entityId = entity.getEntityId();
-      if (updateType == 2) {
+      if (updateType == 2) { // moved
         if (!wasCached && entities.containsKey(hash) && entities.get(hash).remove(entityId)) {
           entities.computeIfAbsent(event.newHash, k -> new IntOpenHashSet()).add(entityId);
         }
@@ -123,13 +124,6 @@ public class MobTracker extends AbstractFeature {
         }
         mobs.computeIfAbsent(entity.getName().trim(), k -> new ObjectOpenHashSet<>()).add(entity);
       } else {
-        IntSet sett = entities.get(hash);
-        if (sett != null) {
-          sett.remove(entityId);
-          if (sett.isEmpty()) {
-            entities.remove(hash);
-          }
-        }
         if (wasCached) {
           this.mobs.computeIfPresent(locatedMobs.remove(entity.getEntityId()), (key, val) -> {
             val.remove(entity);
@@ -139,6 +133,14 @@ public class MobTracker extends AbstractFeature {
             val.remove(entity);
             return val.isEmpty() ? null : val;
           });
+        } else {
+          IntSet sett = entities.get(hash);
+          if (sett != null) {
+            sett.remove(entityId);
+            if (sett.isEmpty()) {
+              entities.remove(hash);
+            }
+          }
         }
       }
     }

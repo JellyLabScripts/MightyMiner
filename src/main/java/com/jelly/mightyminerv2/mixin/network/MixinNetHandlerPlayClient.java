@@ -34,7 +34,6 @@ import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.network.play.server.S3BPacketScoreboardObjective;
 import net.minecraft.network.play.server.S3CPacketUpdateScore;
-import net.minecraft.network.play.server.S3CPacketUpdateScore.Action;
 import net.minecraft.network.play.server.S3DPacketDisplayScoreboard;
 import net.minecraft.network.play.server.S3EPacketTeams;
 import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
@@ -223,25 +222,42 @@ public class MixinNetHandlerPlayClient {
   public void handleUpdateScorePRE(S3CPacketUpdateScore packetIn, CallbackInfo ci, Scoreboard scoreboard) {
     try {
       if (!StringUtils.isNullOrEmpty(packetIn.getObjectiveName())) {
-        int score = scoreboard.getValueFromObjective(packetIn.getPlayerName(), scoreboard.getObjective(packetIn.getObjectiveName())).getScorePoints();
-        SortedMap<Integer, String> objective = mightyMinerv2$scoreboard.get(packetIn.getObjectiveName());
-        String text = objective.remove(score);
-        if (text != null && packetIn.getScoreAction() == Action.CHANGE) {
-          objective.put(packetIn.getScoreValue(), text);
-        }
-
-        String sidebarObjName = mightyMinerv2$objectiveNames[1];
-        SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(sidebarObjName);
-
-        if (packetIn.getObjectiveName().equals(sidebarObjName) && sidebar != null) {
-          MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
-        }
-
-        ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
+        mightyMinerv2$updateScoreboard(
+            packetIn.getObjectiveName(),
+            scoreboard.getValueFromObjective(packetIn.getPlayerName(), scoreboard.getObjective(packetIn.getObjectiveName())).getScorePoints(),
+            packetIn.getScoreAction().ordinal(),
+            packetIn.getScoreValue()
+        );
+      } else {
+        scoreboard.getObjectivesForEntity(packetIn.getPlayerName()).forEach((k, v) -> {
+          mightyMinerv2$updateScoreboard(
+              k.getName(),
+              v.getScorePoints(),
+              packetIn.getScoreAction().ordinal(),
+              packetIn.getScoreValue()
+          );
+        });
       }
+      String sidebarObjName = mightyMinerv2$objectiveNames[1];
+      SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(sidebarObjName);
+
+      if (sidebarObjName.equals(packetIn.getObjectiveName()) && sidebar != null) {
+        MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
+      }
+
+      ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
     } catch (Exception e) {
       Logger.sendNote("Couldn't Handle Update Score. Action: " + packetIn.getScoreAction());
       e.printStackTrace();
+    }
+  }
+
+  @Unique
+  public void mightyMinerv2$updateScoreboard(String objName, int score, int action, int packetScore) {
+    SortedMap<Integer, String> objective = mightyMinerv2$scoreboard.get(objName);
+    String text = objective.remove(score);
+    if (text != null && action == 0) {
+      objective.put(packetScore, text);
     }
   }
 
@@ -257,8 +273,10 @@ public class MixinNetHandlerPlayClient {
       } else {
         scoreplayerteam.getMembershipCollection().forEach(it -> {
           scoreboard.getObjectivesForEntity(it).forEach((a, b) -> {
-            mightyMinerv2$scoreboard.get(a.getName()).put(b.getScorePoints(),
-                mightyMinerv2$sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix()));
+            mightyMinerv2$scoreboard.get(
+                a.getName()).put(b.getScorePoints(),
+                mightyMinerv2$sanitizeString(scoreplayerteam.getColorPrefix() + b.getPlayerName() + scoreplayerteam.getColorSuffix())
+            );
           });
         });
       }

@@ -12,6 +12,7 @@ import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -48,6 +49,7 @@ public class AutoMobKiller extends AbstractFeature {
   private Optional<Vec3> entityLastPosition = Optional.empty();
   private Set<String> mobToKill = new HashSet<>();
 //  private Set<String> mobToKill = ImmutableSet.of("Glacite Walker", "Goblin", "Knifethrower", "Zombie", "Crypt Ghoul", "");
+//  private List<EntityLivingBase> mobs = new ArrayList<>();
 
   @Override
   public String getName() {
@@ -81,6 +83,7 @@ public class AutoMobKiller extends AbstractFeature {
     this.targetMob = Optional.empty();
     this.resetStatesAfterStop();
     Pathfinder.getInstance().stop();
+//    mobs.clear();
 
     log("stopped");
   }
@@ -138,6 +141,7 @@ public class AutoMobKiller extends AbstractFeature {
           this.shutdownTimer.reset();
         }
 
+//        this.mobs = mobs;
         EntityLivingBase best = mobs.get(0);
         this.targetMob = Optional.ofNullable(best);
         this.entityLastPosition = Optional.ofNullable(best.getPositionVector());
@@ -222,6 +226,10 @@ public class AutoMobKiller extends AbstractFeature {
 
     RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord, pos.zCoord + 0.5),
         new Color(255, 0, 241, 150));
+//
+//    this.mobs.forEach(it -> {
+//      RenderUtil.drawText("Mob", it.posX, it.posY + it.height, it.posZ, 1);
+//    });
   }
 
   private void changeState(State state, int time) {
@@ -231,129 +239,9 @@ public class AutoMobKiller extends AbstractFeature {
 
   enum State {
     STARTING, FINDING_MOB, WALKING_TO_MOB, WAITING_FOR_MOB, LOOKING_AT_MOB, KILLING_MOB,
-//    STALLING, LOOKING - Todo: make this
   }
 
   public enum MKError {
     NONE, NO_ENTITIES
   }
-
-  // EntityTracker
-//  Long2ObjectMap<String> stands = new Long2ObjectOpenHashMap<>();
-//  Long2ObjectMap<IntSet> entities = new Long2ObjectOpenHashMap<>();
-//  Object2ObjectMap<String, ObjectSet<EntityLivingBaseBase>> mobs = new Object2ObjectOpenHashMap<>();
-//  Int2ObjectMap<String> locatedMobs = new Int2ObjectOpenHashMap<>();
-//  Set<EntityLivingBaseBase> set = new HashSet<>();
-//
-//  // testing
-//  @SubscribeEvent
-//  public void onRenderEvent(RenderWorldLastEvent event) {
-//    mobs.forEach((a, b) -> {
-//      b.forEach(it -> {
-//        RenderUtil.drawText(a, it.posX, it.posY + 2.5, it.posZ, 1f);
-//        RenderUtil.drawBox(new AxisAlignedBB(it.posX - 0.5, it.posY + it.height, it.posZ - 0.5, it.posX + 0.5, it.posY + it.height, it.posZ + 0.5),
-//            new Color(123, 0, 234, 150));
-//      });
-//    });
-//    new HashSet<>(set).forEach(it -> {
-//      if (it != null) {
-//        RenderUtil.drawBox(new AxisAlignedBB(it.posX - 0.5, it.posY, it.posZ - 0.5, it.posX + 0.5, it.posY + it.height, it.posZ + 0.5),
-//            new Color(200, 0, 0, 200));
-//        if (!it.isEntityAlive() || (it.motionX == 0 && it.motionZ == 0)) {
-//          set.remove(it);
-//        }
-//      }
-//    });
-//  }
-//
-//  @SubscribeEvent
-//  public void onWorldUnload(Unload event) {
-////    stands.clear();
-//    set.clear();
-//    entities.clear();
-//    mobs.clear();
-//    locatedMobs.clear();
-//  }
-//
-//  // i love writing shitcode
-//// i wrote a much cleaner readable version before but enjoy this >_<
-//  @SubscribeEvent
-//  public void onEntitySpawn(UpdateEntityEvent event) {
-//    if (!OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance().allowed) {
-//      return;
-//    }
-////    if (!this.enabled) {
-////      return;
-////    }
-//
-//    // hash is just baritones BetterBlockPos::longHash
-//    // assuming mixin works properly and doesnt add anything other than armorstands and entitylivings
-//    int updateType = event.updateType;
-//    EntityLivingBaseBase entity = event.entity;
-//    String name = "";
-//    int entityId = -1;
-//    long hash = pack((int) Math.round(entity.posX), (int) Math.round(entity.posZ));
-//    if (entity instanceof EntityArmorStand) {
-//      if (updateType != 0) {
-//        return;
-//      }
-//      if ((name = EntityUtil.getEntityNameFromArmorStand(entity.getCustomNameTag())).isEmpty()) {
-//        return;
-//      }
-//      EntityLivingBaseBase mob = null;
-//      IntSet mobs = entities.get(hash);
-//      if (mobs != null) {
-//        double minDist = Double.MAX_VALUE;
-//        for (int it : mobs) {
-//          EntityLivingBaseBase curr = (EntityLivingBaseBase) mc.theWorld.getEntityByID(it);
-//          double dist = entity.getDistanceSq(curr.posX, curr.posY + curr.height, curr.posZ);
-//          if (dist < minDist) {
-//            mob = curr;
-//            minDist = dist;
-//            entityId = it;
-//          }
-//        }
-//        mobs.remove(entityId);
-//        if (mobs.isEmpty()) {
-//          entities.remove(hash);
-//        }
-//      }
-//      if (mob != null && entityId != -1) {
-//        this.mobs.computeIfAbsent(name, b -> new ObjectOpenHashSet<>()).add(mob);
-//        locatedMobs.put(entityId, name);
-//      }
-//    } else {
-//      boolean wasCached = locatedMobs.containsKey(entity.getEntityId());
-//      entityId = entity.getEntityId();
-//      if (updateType == 2) {
-//        if (!wasCached && entities.containsKey(hash) && entities.get(hash).remove(entityId)) {
-//          entities.computeIfAbsent(event.newHash, k -> new IntOpenHashSet()).add(entityId);
-//        }
-//        return;
-//      }
-//      if (updateType == 0) {
-//        if (!wasCached) {
-//          entities.computeIfAbsent(hash, k -> new IntOpenHashSet()).add(entityId);
-//        }
-//      } else {
-//        IntSet sett = entities.get(hash);
-//        if (sett != null) {
-//          sett.remove(entityId);
-//          if (sett.isEmpty()) {
-//            entities.remove(hash);
-//          }
-//        }
-//        if (wasCached) {
-//          this.mobs.computeIfPresent(locatedMobs.remove(entity.getEntityId()), (key, val) -> {
-//            val.remove(entity);
-//            return val.isEmpty() ? null : val;
-//          });
-//        }
-//      }
-//    }
-//  }
-//
-//  private long pack(int x, int z) {
-//    return ((long) x << 32) | (z & 0xFFFFFFFFL);
-//  }
 }

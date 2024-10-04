@@ -62,6 +62,7 @@ public class KeyBindUtil {
     public static void setKeyBindState(KeyBinding key, boolean pressed) {
         if (pressed) {
             if (mc.currentScreen != null && key != null) {
+                Logger.sendNote("Releasing Key. currentScreen isnt null and key isnt null");
                 realSetKeyBindState(key, false);
                 return;
             }

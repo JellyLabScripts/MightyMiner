@@ -11,7 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.opengl.Display;
 
 public class DebugHUD extends TextHud {
 
@@ -20,6 +22,8 @@ public class DebugHUD extends TextHud {
   public static DebugHUD getInstance() {
     return instance;
   }
+
+  private transient Minecraft mc = Minecraft.getMinecraft();
 
 //  public Map<String, DebugList> lists = new HashMap<>();
   public int count = 0;
@@ -39,8 +43,12 @@ public class DebugHUD extends TextHud {
     lines.add("");
     lines.add("Location: " + GameStateHandler.getInstance().getCurrentLocation().getName());
     lines.add("SubLocation: " + GameStateHandler.getInstance().getCurrentSubLocation().getName());
-    lines.add("");
-    lines.add("EntityCount: " + count);
+    lines.add("inGameHasFocus: " + mc.inGameHasFocus);
+    lines.add("displayIsActive: " + Display.isActive());
+//    lines.add("");
+//    lines.add("EntityCount: " + count);
+//    lines.add("LeftClickDown: " + mc.gameSettings.keyBindAttack.isPressed());
+//    lines.add("IsUsingItems: " + mc.thePlayer.isUsingItem());
   }
 
 //  public void addList(String featureName, DebugList list) {

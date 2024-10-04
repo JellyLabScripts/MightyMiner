@@ -12,6 +12,7 @@ import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
 import java.awt.Color;
 import java.util.Comparator;
+import javax.swing.text.JTextComponent.KeyBinding;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -226,8 +227,9 @@ public class MithrilMiner extends AbstractFeature {
           this.shiftTimer.reset();
           StrafeUtil.enabled = true;
           StrafeUtil.yaw = AngleUtil.getRotationYaw360(this.destBlock == null ? this.targetPoint : this.destBlock);
-          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
-          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, true);
+          KeyBindUtil.holdThese(mc.gameSettings.keyBindForward, mc.gameSettings.keyBindSneak);
+//          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
+//          KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, true);
           log("Dist: " + PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) + ", EyePos: " + PlayerUtil.getPlayerEyePos() + ", Target: "
               + this.targetPoint);
         } else {

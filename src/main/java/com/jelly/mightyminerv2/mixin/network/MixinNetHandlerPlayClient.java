@@ -222,23 +222,25 @@ public class MixinNetHandlerPlayClient {
   @Inject(method = "handleUpdateScore", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjective(Ljava/lang/String;)Lnet/minecraft/scoreboard/ScoreObjective;"), locals = LocalCapture.CAPTURE_FAILHARD)
   public void handleUpdateScorePRE(S3CPacketUpdateScore packetIn, CallbackInfo ci, Scoreboard scoreboard) {
     try {
-      int score = scoreboard.getValueFromObjective(packetIn.getPlayerName(), scoreboard.getObjective(packetIn.getObjectiveName())).getScorePoints();
-      SortedMap<Integer, String> objective = mightyMinerv2$scoreboard.get(packetIn.getObjectiveName());
-      String text = objective.remove(score);
-      if (text != null && packetIn.getScoreAction() == Action.CHANGE) {
-        objective.put(packetIn.getScoreValue(), text);
+      if (!StringUtils.isNullOrEmpty(packetIn.getObjectiveName())) {
+        int score = scoreboard.getValueFromObjective(packetIn.getPlayerName(), scoreboard.getObjective(packetIn.getObjectiveName())).getScorePoints();
+        SortedMap<Integer, String> objective = mightyMinerv2$scoreboard.get(packetIn.getObjectiveName());
+        String text = objective.remove(score);
+        if (text != null && packetIn.getScoreAction() == Action.CHANGE) {
+          objective.put(packetIn.getScoreValue(), text);
+        }
+
+        String sidebarObjName = mightyMinerv2$objectiveNames[1];
+        SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(sidebarObjName);
+
+        if (packetIn.getObjectiveName().equals(sidebarObjName) && sidebar != null) {
+          MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
+        }
+
+        ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
       }
-
-      String sidebarObjName = mightyMinerv2$objectiveNames[1];
-      SortedMap<Integer, String> sidebar = mightyMinerv2$scoreboard.get(sidebarObjName);
-
-      if (packetIn.getObjectiveName().equals(sidebarObjName) && sidebar != null) {
-        MinecraftForge.EVENT_BUS.post(new UpdateScoreboardEvent(new ArrayList<>(sidebar.values()), System.currentTimeMillis()));
-      }
-
-      ScoreboardUtil.scoreboard = new HashMap<>(mightyMinerv2$scoreboard);
     } catch (Exception e) {
-      Logger.sendNote("Couldn't Handle Update Score");
+      Logger.sendNote("Couldn't Handle Update Score. Action: " + packetIn.getScoreAction());
       e.printStackTrace();
     }
   }

@@ -52,7 +52,8 @@ public class FailsafeManager {
             KnockbackFailsafe.getInstance(),
             TeleportFailsafe.getInstance(),
             RotationFailsafe.getInstance(),
-            BedrockBlockChangeFailsafe.getInstance()
+            BedrockBlockChangeFailsafe.getInstance(),
+            BedrockCheckFailsafe.getInstance()
         )
     );
   }

@@ -27,6 +27,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import lombok.Getter;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class CommissionMacro extends AbstractMacro {
@@ -45,8 +49,17 @@ public class CommissionMacro extends AbstractMacro {
   @Override
   public void onEnable() {
     this.mainState = MainState.MACRO;
+    this.commissionCounter = 0;
     log("CommMacro::onEnable");
+    resetTimer();
+    startTimer();
   }
+  private long startTime = 0;
+  private long pausedTime = 0;
+  public long totalElapsedTime = 0;
+  private boolean isTimerRunning = false;
+
+  public int commissionCounter = 0;
 
   @Override
   public void onDisable() {
@@ -64,18 +77,22 @@ public class CommissionMacro extends AbstractMacro {
     this.curr = new ArrayList<>();
 
     this.checkForCommissionChange = false;
+     this.commissionCounter = 0;
+    pauseTimer();
     log("CommMacro::onDisable");
   }
 
   @Override
   public void onPause() {
     FeatureManager.getInstance().pauseAll();
+    pauseTimer();
     log("CommMacro::onPause");
   }
 
   @Override
   public void onResume() {
     FeatureManager.getInstance().resumeAll();
+    resumeTimer();
     log("CommMacro::onResume");
   }
 
@@ -83,7 +100,42 @@ public class CommissionMacro extends AbstractMacro {
   public List<String> getNecessaryItems() {
     return Arrays.asList(MightyMinerConfig.commMiningTool, MightyMinerConfig.commSlayerWeapon);
   }
+  private void startTimer() {
+    if (!isTimerRunning) {
+      startTime = System.currentTimeMillis();
+      isTimerRunning = true;
+      totalElapsedTime = 0;
+    }
+  }
+  private void pauseTimer() {
+    if (isTimerRunning) {
+      pausedTime = System.currentTimeMillis();
+      totalElapsedTime += pausedTime - startTime;
+      isTimerRunning = false;
+    }
+  }
 
+  private void resumeTimer() {
+    if (!isTimerRunning) {
+      startTime = System.currentTimeMillis();
+      isTimerRunning = true;
+    }
+  }
+
+  private void resetTimer() {
+    startTime = 0;
+    pausedTime = 0;
+    totalElapsedTime = 0;
+    isTimerRunning = false;
+  }
+
+  public long getElapsedTimeInSeconds() {
+    if (isTimerRunning) {
+      return (totalElapsedTime + (System.currentTimeMillis() - startTime)) / 1000;
+    } else {
+      return totalElapsedTime / 1000;
+    }
+  }
   public void stopActiveFeatures() {
     MithrilMiner.getInstance().stop();
     AutoMobKiller.getInstance().stop();
@@ -146,6 +198,7 @@ public class CommissionMacro extends AbstractMacro {
       this.curr.forEach(it -> {
         if (message.equalsIgnoreCase(it.getName() + " Commission Complete! Visit the King to claim your rewards!")) {
           this.curr.remove(it);
+          this.commissionCounter++;
           send("Commission Complete Detected. Comms Left: " + this.curr.toString());
         }
         if (this.curr.isEmpty()) {
@@ -200,6 +253,7 @@ public class CommissionMacro extends AbstractMacro {
   public void handleMacro() {
     switch (this.macroState) {
       case STARTING:
+        MightyMinerConfig.oreType = 0;
         this.changeMacroState(MacroState.CHECKING_COMMISSION);
         if (this.miningSpeed == 0 && this.miningSpeedBoost == 0) {
           if (!InventoryUtil.holdItem(MightyMinerConfig.commMiningTool)) {

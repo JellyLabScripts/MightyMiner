@@ -29,7 +29,6 @@ public class RotationHandler {
   private final Queue<RotationConfiguration> rotations = new LinkedList<>();
   private final Minecraft mc = Minecraft.getMinecraft();
 
-  //    @Getter
   private boolean enabled;
   private long startTime;
   private long endTime;
@@ -47,6 +46,7 @@ public class RotationHandler {
   private int randomMultiplier2 = 1;
 
   private boolean followingTarget = false;
+  private boolean stopRequested = false;
 
   @Getter
   private RotationConfiguration configuration;
@@ -74,7 +74,6 @@ public class RotationHandler {
     this.endTime = this.startTime + getTime(pythagoras(change.getYaw(), change.getPitch()), configuration.time());
 
     this.randomMultiplier1 = randomMultiplier2 = random.nextBoolean() ? 1 : -1;
-//        this.randomMultiplier2 = random.nextBoolean() ? 1 : -1;
 
     this.lastBezierYaw = 0;
     this.lastBezierPitch = 0;
@@ -89,21 +88,23 @@ public class RotationHandler {
       }
     }
 
+    this.stopRequested = false;
     this.enabled = true;
   }
 
   private void reset() {
     this.enabled = false;
     this.followingTarget = false;
+    this.stopRequested = false;
     this.configuration = null;
     this.target = null;
-    this.rotations.clear();
     this.startTime = this.endTime = 0L;
     this.serverSideYaw = this.serverSidePitch = this.lastBezierYaw = this.lastBezierPitch = 0;
   }
 
   public void stop() {
-    this.reset();
+    this.rotations.clear();
+    this.stopRequested = true;
   }
 
   @SubscribeEvent
@@ -112,16 +113,14 @@ public class RotationHandler {
       return;
     }
 
-    long time = System.currentTimeMillis();
+    if (System.currentTimeMillis() <= this.endTime && !this.stopRequested) {
+      Angle bezierAngle = getBezierAngle();
 
-    Angle bezierAngle = getBezierAngle();
-
-    mc.thePlayer.rotationYaw += bezierAngle.getYaw() - lastBezierYaw;
-    mc.thePlayer.rotationPitch += bezierAngle.getPitch() - lastBezierPitch;
-    lastBezierYaw = bezierAngle.getYaw();
-    lastBezierPitch = bezierAngle.getPitch();
-
-    if (time >= this.endTime) {
+      mc.thePlayer.rotationYaw += bezierAngle.getYaw() - lastBezierYaw;
+      mc.thePlayer.rotationPitch += bezierAngle.getPitch() - lastBezierPitch;
+      lastBezierYaw = bezierAngle.getYaw();
+      lastBezierPitch = bezierAngle.getPitch();
+    } else {
       handleRotationEnd();
     }
   }
@@ -132,21 +131,17 @@ public class RotationHandler {
       return;
     }
 
-    // because yes - unable to put into words why
-    long time = System.currentTimeMillis();
+    if (System.currentTimeMillis() <= this.endTime && !this.stopRequested) {
+      Angle bezierAngle = getBezierAngle();
 
-    Angle bezierAngle = getBezierAngle();
+      serverSideYaw += bezierAngle.getYaw() - lastBezierYaw;
+      serverSidePitch += bezierAngle.getPitch() - lastBezierPitch;
+      event.yaw = serverSideYaw;
+      event.pitch = serverSidePitch;
 
-    serverSideYaw += bezierAngle.getYaw() - lastBezierYaw;
-    serverSidePitch += bezierAngle.getPitch() - lastBezierPitch;
-
-    event.yaw = serverSideYaw;
-    event.pitch = serverSidePitch;
-
-    lastBezierYaw = bezierAngle.getYaw();
-    lastBezierPitch = bezierAngle.getPitch();
-
-    if (time >= this.endTime) {
+      lastBezierYaw = bezierAngle.getYaw();
+      lastBezierPitch = bezierAngle.getPitch();
+    } else {
       handleRotationEnd();
     }
   }
@@ -171,30 +166,28 @@ public class RotationHandler {
   }
 
   private void handleRotationEnd() {
-    if (this.configuration.followTarget()) {
-      this.easeTo(configuration);
-      this.followingTarget = true;
-      return;
+    if (!this.stopRequested) {
+      if (this.configuration.followTarget()) {
+        this.easeTo(configuration);
+        this.followingTarget = true;
+        return;
+      }
+
+      configuration.callback().ifPresent(Runnable::run);
+
+      if (!this.rotations.isEmpty()) {
+        this.easeTo(this.rotations.poll());
+        return;
+      }
+
+      if (this.configuration.rotationType() == RotationConfiguration.RotationType.SERVER && this.configuration.easeBackToClientSide()) {
+        RotationConfiguration newConf = new RotationConfiguration(AngleUtil.getPlayerAngle(), this.configuration.time(),
+            RotationConfiguration.RotationType.SERVER, () -> {
+        });
+        this.easeTo(newConf);
+        return;
+      }
     }
-
-    configuration.callback().ifPresent(Runnable::run);
-
-    if (!this.rotations.isEmpty()) {
-      this.easeTo(this.rotations.poll());
-      return;
-    }
-
-    if (this.configuration.rotationType() == RotationConfiguration.RotationType.SERVER && this.configuration.easeBackToClientSide()) {
-      RotationConfiguration newConf = new RotationConfiguration(AngleUtil.getPlayerAngle(), this.configuration.time(),
-          RotationConfiguration.RotationType.SERVER, () -> {
-      });
-      this.easeTo(newConf);
-      return;
-    }
-
-    Angle change = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), target.getTargetAngle());
-    mc.thePlayer.rotationYaw += change.getYaw();
-    mc.thePlayer.rotationPitch += change.getPitch();
     this.reset();
   }
 

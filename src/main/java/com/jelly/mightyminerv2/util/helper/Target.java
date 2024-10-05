@@ -54,4 +54,9 @@ public class Target {
 
     return angle;
   }
+
+  @Override
+  public String toString(){
+    return "Vec3: " + this.vec + ", Ent: " + (this.entity !=null ? this.entity.getEntityId() : "null") + ", Pos: " + this.blockPos + ", Angle: " + this.angle;
+  }
 }

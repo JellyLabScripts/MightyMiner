@@ -203,6 +203,7 @@ object BlockUtil {
             var i = 0
             if (!MovementHelper.canStandOn(bsa, x0, y0, z0, currState) || !MovementHelper.canWalkThrough(bsa, x0, y0 + 1, z0) || !MovementHelper.canWalkThrough(bsa, x0, y0 + 2, z0)) {
                 i = -3
+                var foundValidBlock = false
                 while (++i <= 3) {
                     if (i == 0) continue
                     currState = bsa.get(x0, y0 + i, z0)
@@ -215,10 +216,14 @@ object BlockUtil {
                     if (!MovementHelper.canWalkThrough(bsa, x0, y0 + i + 2, z0)) {
                         continue
                     }
+                    foundValidBlock = true
                     break
-
+                }
+                if (!foundValidBlock) {
+                    return false
                 }
             }
+
 
             val delta = (y0 + i) - lastPos.y
             if (delta > 0) {
@@ -228,7 +233,7 @@ object BlockUtil {
                 val srcSmall = MovementHelper.isBottomSlab(lastState);
                 val destSmall = MovementHelper.isBottomSlab(currState);
 
-                var destSmallStair = MovementHelper.isValidStair(currState, x0 - lastPos.x, z0 - lastPos.z);
+                val destSmallStair = MovementHelper.isValidStair(currState, x0 - lastPos.x, z0 - lastPos.z);
 
                 if (!srcSmall == !(destSmall || destSmallStair)) {
                     return false

@@ -330,7 +330,7 @@ public class MightyMinerConfig extends Config {
       name = "Rotation",
       category = "Dev",
       subcategory = "MithrilMiner",
-      min = 0f, max = 1f
+      min = 0f, max = 10f
   )
   public static float devMithRot = 0.4f;
 
@@ -338,7 +338,7 @@ public class MightyMinerConfig extends Config {
       name = "Distance",
       category = "Dev",
       subcategory = "MithrilMiner",
-      min = 0f, max = 1f
+      min = 0f, max = 10f
   )
   public static float devMithDist = 1f;
 
@@ -346,7 +346,7 @@ public class MightyMinerConfig extends Config {
       name = "Hardness",
       category = "Dev",
       subcategory = "MithrilMiner",
-      min = 0f, max = 1f
+      min = 0f, max = 10f
   )
   public static float devMithHard = 1f;
 
@@ -354,7 +354,7 @@ public class MightyMinerConfig extends Config {
       name = "MobKiller Dist Cost",
       category = "Dev",
       subcategory = "MobKiller",
-      min = 0, max = 100
+      min = 0, max = 1000
   )
   public static int devMKillDist = 100;
 
@@ -362,7 +362,7 @@ public class MightyMinerConfig extends Config {
       name = "MobKiller Rot Cost",
       category = "Dev",
       subcategory = "MobKiller",
-      min = 0, max = 100
+      min = 0, max = 1000
   )
   public static int devMKillRot = 5;
 

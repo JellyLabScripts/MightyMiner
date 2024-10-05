@@ -297,7 +297,6 @@ public class MithrilMiner extends AbstractFeature {
       Vec3 particlePos = new Vec3(event.getXCoord(), event.getYCoord(), event.getZCoord());
       MovingObjectPosition raytrace = RaytracingUtil.raytraceTowards(PlayerUtil.getPlayerEyePos(), particlePos, 4);
       if (raytrace != null && this.targetBlock.equals(raytrace.getBlockPos())) {
-        System.out.println("Easing to 2 " + particlePos);
         RotationHandler.getInstance().stop();
         RotationHandler.getInstance().easeTo(new RotationConfiguration(
             new Target(particlePos),

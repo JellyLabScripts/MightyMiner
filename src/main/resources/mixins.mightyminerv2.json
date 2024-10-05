@@ -9,6 +9,7 @@
     "client.MixinEntityLivingBase",
     "client.MixinMinecraft",
     "client.MixinScoreboard",
+    "client.MixinSoundManager",
     "FML.MixinFMLHandshakeMessage",
     "gui.MixinGuiContainer",
     "gui.MixinInventoryPlayer",

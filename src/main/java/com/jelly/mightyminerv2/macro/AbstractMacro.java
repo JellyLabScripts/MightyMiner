@@ -1,7 +1,9 @@
 package com.jelly.mightyminerv2.macro;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
+import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import java.util.List;
@@ -15,6 +17,7 @@ public abstract class AbstractMacro {
   protected final Minecraft mc = Minecraft.getMinecraft();
   private boolean enabled = false;
   public Clock timer = new Clock();
+  public Clock uptime = new Clock();
 
   public abstract String getName();
 
@@ -25,17 +28,20 @@ public abstract class AbstractMacro {
   public void enable() {
     log("AbstractMacro::enable");
     this.onEnable();
+    this.uptime.start(CommissionHUD.getInstance().commHudResetStats);
     this.enabled = true;
   }
 
   public void disable() {
     log("AbstractMacro::disable");
+    this.uptime.stop(CommissionHUD.getInstance().commHudResetStats);
     this.enabled = false;
     this.onDisable();
   }
 
   public void pause() {
     log("AbstractMacro::pause");
+    this.uptime.stop(false);
     this.enabled = false;
     this.onPause();
   }
@@ -43,6 +49,7 @@ public abstract class AbstractMacro {
   public void resume() {
     log("AbstractMacro::resume");
     this.onResume();
+    this.uptime.start(false);
     this.enabled = true;
   }
 

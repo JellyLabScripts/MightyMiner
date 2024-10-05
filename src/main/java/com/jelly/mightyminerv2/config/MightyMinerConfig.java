@@ -53,17 +53,6 @@ public class MightyMinerConfig extends Config {
   )
   public static int macroType = 0;
 
-  @Dropdown(
-          name = "Ore Type",
-          category = MITHRIL,
-          description = "Select the ore type you want to use",
-          options = {
-                  "Mithril",
-                  "Pure Ore"
-          }
-  )
-  public static int oreType = 0;
-
   @KeyBind(
       name = "Toggle Macro",
       category = GENERAL,
@@ -76,6 +65,12 @@ public class MightyMinerConfig extends Config {
       category = GENERAL
   )
   public static boolean ungrabMouse = true;
+
+  @Switch(
+      name = "Mute Game", description = "Mute Game",
+      category = GENERAL
+  )
+  public static boolean muteGame = true;
 
   //</editor-fold>
 

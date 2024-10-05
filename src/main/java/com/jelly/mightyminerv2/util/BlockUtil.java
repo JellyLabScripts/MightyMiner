@@ -93,11 +93,11 @@ public class BlockUtil {
               continue;
             }
 
-            if (!hasVisibleSide(pos)) {
+            if (!hasVisibleSide(blockCenter, pos)) {
               continue;
             }
 
-            final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
+            final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(blockCenter, pos)).getValue();
             final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
 
             visitedPositions.add(hash);
@@ -291,12 +291,15 @@ public class BlockUtil {
 
   public static Vec3 getSidePos(BlockPos block, EnumFacing face) {
     final float[] offset = BLOCK_SIDES.get(face);
-    return new Vec3(block.getX() + offset[0], block.getY() + offset[1],
-        block.getZ() + offset[2]);
+    return new Vec3(block.getX() + offset[0], block.getY() + offset[1], block.getZ() + offset[2]);
   }
 
   public static boolean canSeeSide(BlockPos block, EnumFacing side) {
     return RaytracingUtil.canSeePoint(getSidePos(block, side));
+  }
+
+  public static boolean canSeeSide(Vec3 from, BlockPos block, EnumFacing side) {
+    return RaytracingUtil.canSeePoint(from, getSidePos(block, side));
   }
 
   public static List<EnumFacing> getAllVisibleSides(BlockPos block) {
@@ -307,6 +310,19 @@ public class BlockUtil {
         continue;
       }
       if (canSeeSide(block, face)) {
+        sides.add(face);
+      }
+    }
+    return sides;
+  }
+
+  public static List<EnumFacing> getAllVisibleSides(Vec3 from, BlockPos block) {
+    final List<EnumFacing> sides = new ArrayList<>();
+    for (EnumFacing face : BLOCK_SIDES.keySet()) {
+      if (face != null && !mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(face), face)) {
+        continue;
+      }
+      if (canSeeSide(from, block, face)) {
         sides.add(face);
       }
     }
@@ -327,6 +343,30 @@ public class BlockUtil {
       }
       final double distanceToThisSide = eyePos.distanceTo(getSidePos(block, side));
       if (canSeeSide(block, side) && distanceToThisSide < dist) {
+        if (side == null && face != null) {
+          continue;
+        }
+        dist = distanceToThisSide;
+        face = side;
+      }
+    }
+    final float[] offset = BLOCK_SIDES.get(face);
+    return new Vec3(block.getX() + offset[0], block.getY() + offset[1], block.getZ() + offset[2]);
+  }
+
+
+  public static Vec3 getClosestVisibleSidePos(Vec3 from, BlockPos block) {
+    if (!mc.theWorld.isBlockFullCube(block)) {
+      return null;
+    }
+    double dist = Double.MAX_VALUE;
+    EnumFacing face = null;
+    for (EnumFacing side : BLOCK_SIDES.keySet()) {
+      if (side != null && !mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
+        continue;
+      }
+      final double distanceToThisSide = from.distanceTo(getSidePos(block, side));
+      if (canSeeSide(from, block, side) && distanceToThisSide < dist) {
         if (side == null && face != null) {
           continue;
         }
@@ -362,13 +402,34 @@ public class BlockUtil {
     return face;
   }
 
+  public static EnumFacing getClosestVisibleSide(Vec3 from, BlockPos block) {
+    if (!mc.theWorld.isBlockFullCube(block)) {
+      return null;
+    }
+    double dist = Double.MAX_VALUE;
+    EnumFacing face = null;
+    for (EnumFacing side : BLOCK_SIDES.keySet()) {
+      if (side != null && !mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
+        continue;
+      }
+      final double distanceToThisSide = from.distanceTo(getSidePos(block, side));
+      if (canSeeSide(from, block, side) && distanceToThisSide < dist) {
+        if (side == null && face != null) {
+          continue;
+        }
+        dist = distanceToThisSide;
+        face = side;
+      }
+    }
+    return face;
+  }
+
   public static boolean hasVisibleSide(BlockPos block) {
     if (!mc.theWorld.isBlockFullCube(block)) {
       return false;
     }
     for (EnumFacing side : EnumFacing.values()) {
-      if (!mc.theWorld.getBlockState(block).getBlock()
-          .shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
+      if (!mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
         continue;
       }
       if (canSeeSide(block, side)) {
@@ -378,12 +439,32 @@ public class BlockUtil {
     return false;
   }
 
+  public static boolean hasVisibleSide(Vec3 from, BlockPos block) {
+    if (!mc.theWorld.isBlockFullCube(block)) {
+      return false;
+    }
+    for (EnumFacing side : EnumFacing.values()) {
+      if (!mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
+        continue;
+      }
+      if (canSeeSide(from, block, side)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public static List<Vec3> bestPointsOnBestSide(final BlockPos block) {
     return pointsOnBlockSide(block, getClosestVisibleSide(block)).stream()
         .filter(RaytracingUtil::canSeePoint)
-        .sorted(Comparator.comparingDouble(i ->
-            AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(i)).getValue())
-        )
+        .sorted(Comparator.comparingDouble(i -> AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(i)).getValue()))
+        .collect(Collectors.toList());
+  }
+
+  public static List<Vec3> bestPointsOnBestSide(Vec3 from, final BlockPos block) {
+    return pointsOnBlockSide(block, getClosestVisibleSide(from, block)).stream()
+        .filter(it -> RaytracingUtil.canSeePoint(from, it))
+        .sorted(Comparator.comparingDouble(i -> AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(from, i)).getValue()))
         .collect(Collectors.toList());
   }
 
@@ -391,6 +472,13 @@ public class BlockUtil {
     return pointsOnVisibleSides(block).stream()
         .filter(RaytracingUtil::canSeePoint)
         .sorted(Comparator.comparingDouble(mc.thePlayer.getPositionEyes(1)::distanceTo))
+        .collect(Collectors.toList());
+  }
+
+  public static List<Vec3> bestPointsOnVisibleSides(Vec3 from, final BlockPos block) {
+    return pointsOnVisibleSides(block).stream()
+        .filter(it -> RaytracingUtil.canSeePoint(from, it))
+        .sorted(Comparator.comparingDouble(from::distanceTo))
         .collect(Collectors.toList());
   }
 
@@ -403,9 +491,17 @@ public class BlockUtil {
     return points;
   }
 
+  private static List<Vec3> pointsOnVisibleSides(Vec3 from, final BlockPos block) {
+    final List<Vec3> points = new ArrayList<>();
+    for (EnumFacing side : getAllVisibleSides(from, block)) {
+      points.addAll(pointsOnBlockSide(block, side));
+    }
+    return points;
+  }
+
   // Credits to GTC <3
   private static List<Vec3> pointsOnBlockSide(final BlockPos block, final EnumFacing side) {
-    final List<Vec3> points = new ArrayList<>();
+    final Set<Vec3> points = new HashSet<>();
 
     if (side != null) {
       float[] it = BLOCK_SIDES.get(side);
@@ -449,7 +545,7 @@ public class BlockUtil {
         }
       }
     }
-    return points;
+    return new ArrayList<>(points);
   }
 
   private static float randomVal() {
@@ -491,9 +587,5 @@ public class BlockUtil {
       return true;
     }
     return false;
-
-
-//[16:14:38] [main/INFO] (Minecraft) [CHAT] §l§2[Mighty Miner] §8» §7SrcSmall: true, DestSmall: true, DestSmallStair: false
-//        [16:14:38] [main/INFO] (Minecraft) [CHAT] §l§2[Mighty Miner] §8» §7Can Walk between: true
   }
 }

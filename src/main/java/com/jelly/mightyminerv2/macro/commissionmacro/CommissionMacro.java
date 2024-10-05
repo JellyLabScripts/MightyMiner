@@ -13,6 +13,7 @@ import com.jelly.mightyminerv2.feature.impl.MithrilMiner;
 import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.handler.GameStateHandler;
 import com.jelly.mightyminerv2.handler.GraphHandler;
+import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.macro.commissionmacro.helper.Commission;
 import com.jelly.mightyminerv2.util.CommissionUtil;
@@ -41,6 +42,8 @@ public class CommissionMacro extends AbstractMacro {
     return instance;
   }
 
+  private int commissionCounter = 0;
+
   @Override
   public String getName() {
     return "Commission Macro";
@@ -49,17 +52,9 @@ public class CommissionMacro extends AbstractMacro {
   @Override
   public void onEnable() {
     this.mainState = MainState.MACRO;
-    this.commissionCounter = 0;
     log("CommMacro::onEnable");
-    resetTimer();
-    startTimer();
   }
-  private long startTime = 0;
-  private long pausedTime = 0;
-  public long totalElapsedTime = 0;
-  private boolean isTimerRunning = false;
 
-  public int commissionCounter = 0;
 
   @Override
   public void onDisable() {
@@ -73,26 +68,24 @@ public class CommissionMacro extends AbstractMacro {
     this.macroRetries = 0;
 
     this.miningSpeed = this.miningSpeedBoost = 0;
-//    this.curr = this.last = null;
     this.curr = new ArrayList<>();
 
     this.checkForCommissionChange = false;
-     this.commissionCounter = 0;
-    pauseTimer();
+    if (CommissionHUD.getInstance().commHudResetStats) {
+      this.commissionCounter = 0;
+    }
     log("CommMacro::onDisable");
   }
 
   @Override
   public void onPause() {
     FeatureManager.getInstance().pauseAll();
-    pauseTimer();
     log("CommMacro::onPause");
   }
 
   @Override
   public void onResume() {
     FeatureManager.getInstance().resumeAll();
-    resumeTimer();
     log("CommMacro::onResume");
   }
 
@@ -100,42 +93,11 @@ public class CommissionMacro extends AbstractMacro {
   public List<String> getNecessaryItems() {
     return Arrays.asList(MightyMinerConfig.commMiningTool, MightyMinerConfig.commSlayerWeapon);
   }
-  private void startTimer() {
-    if (!isTimerRunning) {
-      startTime = System.currentTimeMillis();
-      isTimerRunning = true;
-      totalElapsedTime = 0;
-    }
-  }
-  private void pauseTimer() {
-    if (isTimerRunning) {
-      pausedTime = System.currentTimeMillis();
-      totalElapsedTime += pausedTime - startTime;
-      isTimerRunning = false;
-    }
+
+  public int getCompletedCommissions(){
+    return this.commissionCounter;
   }
 
-  private void resumeTimer() {
-    if (!isTimerRunning) {
-      startTime = System.currentTimeMillis();
-      isTimerRunning = true;
-    }
-  }
-
-  private void resetTimer() {
-    startTime = 0;
-    pausedTime = 0;
-    totalElapsedTime = 0;
-    isTimerRunning = false;
-  }
-
-  public long getElapsedTimeInSeconds() {
-    if (isTimerRunning) {
-      return (totalElapsedTime + (System.currentTimeMillis() - startTime)) / 1000;
-    } else {
-      return totalElapsedTime / 1000;
-    }
-  }
   public void stopActiveFeatures() {
     MithrilMiner.getInstance().stop();
     AutoMobKiller.getInstance().stop();
@@ -253,7 +215,6 @@ public class CommissionMacro extends AbstractMacro {
   public void handleMacro() {
     switch (this.macroState) {
       case STARTING:
-        MightyMinerConfig.oreType = 0;
         this.changeMacroState(MacroState.CHECKING_COMMISSION);
         if (this.miningSpeed == 0 && this.miningSpeedBoost == 0) {
           if (!InventoryUtil.holdItem(MightyMinerConfig.commMiningTool)) {

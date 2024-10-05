@@ -66,29 +66,23 @@ public class AngleUtil {
   private static final double randomAddition = (Math.random() * 0.3 - 0.15);
 
   public static Angle getRotation(Vec3 to) {
-    return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to, false);
-  }
-
-  public static Angle getRotation(Vec3 to, boolean randomness) {
-    return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to, randomness);
+    return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to);
   }
 
   public static Angle getRotation(Entity to) {
     return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks),
-        to.getPositionVector().addVector(0, Math.min(((to.height * 0.85) + randomAddition), 1.7), 0), false);
+        to.getPositionVector().addVector(0, Math.min(((to.height * 0.85) + randomAddition), 1.7), 0));
   }
 
   public static Angle getRotation(BlockPos pos) {
-    return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), new Vec3(pos).addVector(0.5, 0.5, 0.5),
-        false);
+    return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), new Vec3(pos).addVector(0.5, 0.5, 0.5));
   }
 
-  public static Angle getRotation(BlockPos pos, boolean randomness) {
-    return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), new Vec3(pos).addVector(0.5, 0.5, 0.5),
-        randomness);
+  public static Angle getRotation(Vec3 from, BlockPos pos) {
+    return getRotation(from, new Vec3(pos).addVector(0.5, 0.5, 0.5));
   }
 
-  public static Angle getRotation(Vec3 from, Vec3 to, boolean randomness) {
+  public static Angle getRotation(Vec3 from, Vec3 to) {
     double xDiff = to.xCoord - from.xCoord;
     double yDiff = to.yCoord - from.yCoord;
     double zDiff = to.zCoord - from.zCoord;
@@ -98,10 +92,10 @@ public class AngleUtil {
     float yaw = (float) Math.toDegrees(Math.atan2(zDiff, xDiff)) - 90F;
     float pitch = (float) -Math.toDegrees(Math.atan2(yDiff, dist));
 
-    if (randomness) {
-      yaw += (float) ((Math.random() - 1) * 4);
-      pitch += (float) ((Math.random() - 1) * 4);
-    }
+//    if (randomness) {
+//      yaw += (float) ((Math.random() - 1) * 4);
+//      pitch += (float) ((Math.random() - 1) * 4);
+//    }
 
     return new Angle(yaw, pitch);
   }

@@ -9,42 +9,50 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class LagDetector extends AbstractFeature {
-    private static LagDetector instance;
 
-    public static LagDetector getInstance() {
-        if (instance == null) {
-            instance = new LagDetector();
-        }
-         return instance;
+  private static LagDetector instance;
+
+  public static LagDetector getInstance() {
+    if (instance == null) {
+      instance = new LagDetector();
     }
-    @Override
-    public String getName() {
-        return "LagDetector";
+    return instance;
+  }
+
+  @Override
+  public String getName() {
+    return "LagDetector";
+  }
+
+  private final Clock lagTimer = new Clock();
+  private long lastReceivedPacketTime = -1;
+
+  @SubscribeEvent
+  public void onReceivePacket(PacketEvent event) {
+    if (event.packet instanceof S03PacketTimeUpdate) {
+      lastReceivedPacketTime = System.currentTimeMillis();
     }
+  }
 
-    private final Minecraft mc = Minecraft.getMinecraft();
-    private final Clock recentlyLagged = new Clock();
-    private long lastReceivedPacketTime = -1;
-
-    @SubscribeEvent
-    public void onReceivePacket(PacketEvent event) {
-        if (event.packet instanceof S03PacketTimeUpdate) {
-            lastReceivedPacketTime = System.currentTimeMillis();
-        }
+  @SubscribeEvent
+  public void onTick(TickEvent.ClientTickEvent event) {
+    if (System.currentTimeMillis() - lastReceivedPacketTime > 1300) {
+      lagTimer.schedule(900);
     }
-
-    @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event) {
-        if (isLagging()) recentlyLagged.schedule(900);
-        if (recentlyLagged.passed()) recentlyLagged.reset();
+    if (lagTimer.isScheduled() && lagTimer.passed()) {
+      lagTimer.reset();
     }
+  }
 
-    public boolean isLagging() {
-        return getTimeSinceLastPacket() > 1.3;
-    }
+  public boolean isLagging() {
+    return lagTimer.isScheduled();
+  }
 
-    private float getTimeSinceLastPacket() {
-        return (System.currentTimeMillis() - lastReceivedPacketTime) / 1000F;
-    }
+//  private boolean isLagging() {
+//    return getTimeSinceLastPacket() > 1.3;
+//  }
 
+  private float getTimeSinceLastPacket() {
+    return (System.currentTimeMillis() - lastReceivedPacketTime) / 1000F;
+  }
 }

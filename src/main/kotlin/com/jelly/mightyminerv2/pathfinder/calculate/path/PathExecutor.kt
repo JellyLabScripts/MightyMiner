@@ -157,7 +157,7 @@ object PathExecutor {
                     player.motionX,
                     0.0,
                     player.motionZ
-                ), Vec3(target).addVector(0.5, 0.0, 0.5), false
+                ), Vec3(target).addVector(0.5, 0.0, 0.5)
             ).yaw
         )
         val yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);

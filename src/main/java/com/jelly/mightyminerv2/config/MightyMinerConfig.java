@@ -172,8 +172,14 @@ public class MightyMinerConfig extends Config {
   )
   public static int commMachineFuel = 6;
 
-  @DualOption(
-      name = "Fuel Retrieval Method",
+  @Dropdown(
+          name = "Oretype",
+          category = MITHRIL,
+          options = {"Mithril", "Pure Ore"}
+
+  )
+  public static int oreType = 0;
+  @DualOption(name= "Fuel Retrieval Method",
       category = COMMISSION,
       subcategory = "Refuel",
       left = "Buy From Bazaar", right = "Get From Sack"

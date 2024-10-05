@@ -84,8 +84,15 @@ public class BlockUtil {
             }
 
             final double hardness = getBlockStrength(pos);
-            if (hardness < 500 || hardness > 2000 || hardness == 600) {
-              continue;
+            // Modify block filtering condition based on MightyMinerConfig.oreType
+            if (MightyMinerConfig.oreType == 0) {
+              if (hardness < 500 || hardness > 2000 || hardness == 600) {
+                continue;
+              }
+            } else if (MightyMinerConfig.oreType == 1) {
+              if (hardness != 600) {
+                continue;
+              }
             }
 
             final double distance = blockCenter.distanceTo(new Vec3(pos));
@@ -135,8 +142,15 @@ public class BlockUtil {
           }
 
           final double hardness = getBlockStrength(pos);
-          if (hardness < 500 || hardness > 2000 || hardness == 600) {
-            continue;
+          // Modify block filtering condition based on MightyMinerConfig.oreType
+          if (MightyMinerConfig.oreType == 0) {
+            if (hardness < 500 || hardness > 2000 || hardness == 600) {
+              continue;
+            }
+          } else if (MightyMinerConfig.oreType == 1) {
+            if (hardness != 600) {
+              continue;
+            }
           }
 
           final double distance = posEyes.distanceTo(new Vec3(pos));
@@ -169,8 +183,15 @@ public class BlockUtil {
           final BlockPos pos = playerHeadPos.add(x, y, z);
 
           final double hardness = getBlockStrength(pos);
-          if (hardness < 500 || hardness > 2000 || hardness == 600) {
-            continue;
+          // Modify block filtering condition based on MightyMinerConfig.oreType
+          if (MightyMinerConfig.oreType == 0) {
+            if (hardness < 500 || hardness > 2000 || hardness == 600) {
+              continue;
+            }
+          } else if (MightyMinerConfig.oreType == 1) {
+            if (hardness != 600) {
+              continue;
+            }
           }
 
           final double distance = posEyes.distanceTo(new Vec3(pos));
@@ -186,9 +207,9 @@ public class BlockUtil {
           final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
 //          blocks.add(pos, (hardness / 100 + angleChange * 0.15 + distance * 0.35) / priorityValue);
           debugs.add(new Pair(pos, Arrays.asList(
-              (float) (hardness / (100 * MightyMinerConfig.devMithHard * priorityValue)),
-              angleChange / (MightyMinerConfig.devMithRot * priorityValue),
-              (float) distance / (MightyMinerConfig.devMithDist * priorityValue)))
+                  (float) (hardness / (100 * MightyMinerConfig.devMithHard * priorityValue)),
+                  angleChange / (MightyMinerConfig.devMithRot * priorityValue),
+                  (float) distance / (MightyMinerConfig.devMithDist * priorityValue)))
           );
         }
       }
@@ -196,6 +217,7 @@ public class BlockUtil {
     debugs.sort(Comparator.comparing(it -> it.getSecond().stream().reduce(0f, Float::sum)));
     return debugs;
   }
+
 
   private static int getPriorityIndex(final int hardness) {
     switch (hardness) {
@@ -220,8 +242,18 @@ public class BlockUtil {
     Block block = blockState.getBlock();
 
     if (block == Blocks.diamond_block) {
-      return 50;
+      return 600;
     } else if (block == Blocks.gold_block) {
+      return 600;
+    } else if (block == Blocks.redstone_block) {
+      return 600;
+    } else if (block == Blocks.lapis_block) {
+      return 600;
+    } else if (block == Blocks.emerald_block) {
+      return 600;
+    } else if (block == Blocks.iron_block) {
+      return 600;
+    } else if (block == Blocks.coal_block) {
       return 600;
     } else if (block == Blocks.sponge) {
       return 500;
@@ -284,6 +316,7 @@ public class BlockUtil {
 
     return 5000;
   }
+
 
   public static int getMiningTime(final BlockPos pos, final int miningSpeed) {
     return (int) Math.ceil((getBlockStrength(pos) * 30) / (float) miningSpeed) + MightyMinerConfig.mithrilMinerTickGlideOffset;
@@ -482,7 +515,7 @@ public class BlockUtil {
         .collect(Collectors.toList());
   }
 
-  // Should not use this because it wont ensure the points can be looked at
+  // Should not use this because it won't ensure the points can be looked at
   private static List<Vec3> pointsOnVisibleSides(final BlockPos block) {
     final List<Vec3> points = new ArrayList<>();
     for (EnumFacing side : getAllVisibleSides(block)) {

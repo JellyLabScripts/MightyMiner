@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.macro.commissionmacro.helper;
 
+import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.location.SubLocation;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
@@ -18,7 +19,7 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.sound.PlayStreamingSourceEvent;
 
 public enum Commission {
-  // maybe set it to null and choose a random one?
+  // maybe set it to null and choose a random one? - DO NOT REARRANGE THIS
   MITHRIL_MINER("Mithril Miner", SubLocation.RAMPARTS_QUARRY),
   TITANIUM_MINER("Titanium Miner", SubLocation.RAMPARTS_QUARRY),
   UPPER_MITHRIL("Upper Mines Mithril", SubLocation.UPPER_MINES),
@@ -51,7 +52,7 @@ public enum Commission {
 
     Map<SubLocation, RouteWaypoint[]> veinsMap = new EnumMap<SubLocation, RouteWaypoint[]>(SubLocation.class) {{
       put(SubLocation.FORGE_BASIN, new RouteWaypoint[]{
-          new RouteWaypoint(-7, -144, -32, TransportMethod.WALK)
+          new RouteWaypoint(-7, 144, -21, TransportMethod.WALK)
       });
       put(SubLocation.THE_FORGE, new RouteWaypoint[]{
           new RouteWaypoint(44, 134, 21, TransportMethod.WALK),
@@ -137,6 +138,9 @@ public enum Commission {
   }
 
   public RouteWaypoint getWaypoint() {
+    if (this.name.equals("Claim Commission")) {
+      return closestWaypointTo(CommissionUtil.getClosestEmissaryPosition());
+    }
     RouteWaypoint[] locs = VEINS.get(this.location);
     if (locs != null && locs.length > 0) {
       return locs[new Random().nextInt(locs.length)];

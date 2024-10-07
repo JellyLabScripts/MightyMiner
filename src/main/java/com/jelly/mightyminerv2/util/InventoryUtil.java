@@ -210,7 +210,7 @@ public class InventoryUtil {
   public static int getAmountOfItemInInventory(String item) {
     int amount = 0;
     for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
-      if (slot.getHasStack()) {
+      if (slot.getHasStack() && slot.getStack().hasDisplayName()) {
         String itemName = StringUtils.stripControlCodes(slot.getStack().getDisplayName());
         if (itemName.equals(item)) {
           amount += slot.getStack().stackSize;

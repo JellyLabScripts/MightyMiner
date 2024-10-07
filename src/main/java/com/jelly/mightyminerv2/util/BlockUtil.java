@@ -93,7 +93,7 @@ public class BlockUtil {
               continue;
             }
 
-            if (!hasVisibleSide(blockCenter, pos)) {
+            if (!hasVisibleSide(pos)) {
               continue;
             }
 
@@ -569,23 +569,24 @@ public class BlockUtil {
 //      Logger.sendLog("Cannot walk throug x: " + ex + ", y: " + (ey + 2) + ", z: " + ez);
       return false;
     }
-    int sy = start.getY();
-    if(ey - sy > 1){
-//      Logger.sendLog("ey - sy > 1");
-      return true;
-    }
-
-    int sx = start.getX();
-    int sz = start.getZ();
-    IBlockState fromState = ctx.get(sx, sy, sz);
-
-    boolean srcSmall = MovementHelper.INSTANCE.isBottomSlab(fromState);
-    boolean destSmall = MovementHelper.INSTANCE.isBottomSlab(endState);
-    boolean destSmallStair = MovementHelper.INSTANCE.isValidStair(endState, ex - sx, ez - sz);
-//    Logger.sendLog("SrcSmall: " + srcSmall + ", DestSmall: " + destSmall + ", DestSmallStair: " + destSmallStair);
-    if (!srcSmall == !(destSmall || destSmallStair) && !srcSmall && !destSmallStair) {
-      return true;
-    }
-    return false;
+    return !com.jelly.mightyminerv2.pathfinder.util.BlockUtil.INSTANCE.bresenham(ctx, start, end);
+//    int sy = start.getY();
+//    if(ey - sy > 1){
+////      Logger.sendLog("ey - sy > 1");
+//      return true;
+//    }
+//
+//    int sx = start.getX();
+//    int sz = start.getZ();
+//    IBlockState fromState = ctx.get(sx, sy, sz);
+//
+//    boolean srcSmall = MovementHelper.INSTANCE.isBottomSlab(fromState);
+//    boolean destSmall = MovementHelper.INSTANCE.isBottomSlab(endState);
+//    boolean destSmallStair = MovementHelper.INSTANCE.isValidStair(endState, ex - sx, ez - sz);
+////    Logger.sendLog("SrcSmall: " + srcSmall + ", DestSmall: " + destSmall + ", DestSmallStair: " + destSmallStair);
+//    if (!srcSmall == !(destSmall || destSmallStair) && !srcSmall && !destSmallStair) {
+//      return true;
+//    }
+//    return false;
   }
 }

@@ -19,6 +19,7 @@ import java.util.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
@@ -37,6 +38,7 @@ public class AutoCommissionClaim extends AbstractFeature {
   private ClaimError claimError = ClaimError.NONE;
   private Optional<EntityPlayer> emissary = Optional.empty();
   private List<Commission> nextComm = new ArrayList<>();
+  private int retry = 0;
 
   @Override
   public String getName() {
@@ -66,6 +68,7 @@ public class AutoCommissionClaim extends AbstractFeature {
   @Override
   public void resetStatesAfterStop() {
     this.state = State.STARTING;
+    this.retry = 0;
   }
 
   @Override
@@ -96,26 +99,54 @@ public class AutoCommissionClaim extends AbstractFeature {
       return;
     }
 
+    if (this.retry > 3) {
+      log("Tried too many times but failed. stopping");
+      this.stop(ClaimError.INACCESSIBLE_NPC);
+      return;
+    }
+
     switch (this.state) {
       case STARTING:
-        this.swapState(State.ROTATING, 0);
+        int time = 400;
+        switch (MightyMinerConfig.commClaimMethod) {
+          case 0:
+            time = 0;
+            break;
+          case 1:
+            if (!InventoryUtil.holdItem("Royal Pigeon")) {
+              this.stop(ClaimError.NO_ITEMS);
+              break;
+            }
+            break;
+          case 2:
+            if (!InventoryUtil.holdItem("Abiphone")) {
+              this.stop(ClaimError.NO_ITEMS);
+              break;
+            }
+            break;
+        }
+        this.swapState(State.ROTATING, time);
         break;
       case ROTATING:
-        this.emissary = CommissionUtil.getClosestEmissary();
-        if (!this.emissary.isPresent()) {
-          this.stop(ClaimError.INACCESSIBLE_NPC);
-          error("Cannot Find Emissary. Stopping");
-          break;
+        if (!this.hasTimerEnded()) {
+          return;
         }
+        if (MightyMinerConfig.commClaimMethod == 0) {
+          this.emissary = CommissionUtil.getClosestEmissary();
+          if (!this.emissary.isPresent()) {
+            this.stop(ClaimError.INACCESSIBLE_NPC);
+            error("Cannot Find Emissary. Stopping");
+            break;
+          }
 
-        if (mc.thePlayer.getDistanceSqToEntity(this.emissary.get()) > 16) {
-          this.stop(ClaimError.INACCESSIBLE_NPC);
-          error("Emissary is too far away.");
-          break;
+          if (mc.thePlayer.getDistanceSqToEntity(this.emissary.get()) > 16) {
+            this.stop(ClaimError.INACCESSIBLE_NPC);
+            error("Emissary is too far away.");
+            break;
+          }
+
+          RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.emissary.get()), 500, RotationType.CLIENT, null));
         }
-
-        RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.emissary.get()), 500, RotationType.CLIENT, null));
-
         this.swapState(State.OPENING, 2000);
         break;
       case OPENING:
@@ -125,28 +156,36 @@ public class AutoCommissionClaim extends AbstractFeature {
           break;
         }
         final Optional<Entity> entityLookingAt = EntityUtil.getEntityLookingAt();
-        if (RotationHandler.getInstance().isEnabled() || !entityLookingAt.isPresent()) {
-          return;
+        switch (MightyMinerConfig.commClaimMethod) {
+          case 0:
+            if (RotationHandler.getInstance().isEnabled() || !entityLookingAt.isPresent()) {
+              return;
+            }
+
+            // because why not
+            if (entityLookingAt.equals(this.emissary)) {
+              KeyBindUtil.leftClick();
+            } else {
+              mc.playerController.interactWithEntitySendPacket(mc.thePlayer, this.emissary.get());
+            }
+            break;
+          case 1:
+            KeyBindUtil.rightClick();
+          case 2:
+            // Toggle AutoAbiphone
+            break;
         }
 
-        // because why not
-        if (entityLookingAt.equals(this.emissary)) {
-          KeyBindUtil.leftClick();
-        } else {
-          mc.playerController.interactWithEntitySendPacket(mc.thePlayer, this.emissary.get());
-        }
-
-        this.swapState(State.CLAIMING, MightyMinerConfig.getRandomGuiWaitDelay());
-
+        this.swapState(State.CLAIMING, 5000);
         break;
       case CLAIMING:
-        if (!this.hasTimerEnded()) {
-          return;
-        }
-
-        if (!InventoryUtil.getInventoryName().contains("Commissions")) {
+        if (this.hasTimerEnded()) {
           this.stop(ClaimError.INACCESSIBLE_NPC);
           error("Opened a Different Inventory.");
+          break;
+        }
+
+        if (!(mc.thePlayer.openContainer instanceof ContainerChest) || !InventoryUtil.getInventoryName().contains("Commissions")) {
           break;
         }
 
@@ -180,6 +219,20 @@ public class AutoCommissionClaim extends AbstractFeature {
     }
   }
 
+  @SubscribeEvent
+  protected void onChat(ClientChatReceivedEvent event) {
+    if (!this.enabled || this.state != State.CLAIMING || event.type != 0) {
+      return;
+    }
+
+    String mess = event.message.getUnformattedText();
+    if (mess.startsWith("This ability is on cooldown for ")) {
+      this.retry++;
+      log("Pigeon Cooldown Detected, Waiting for 5 Seconds");
+      this.swapState(State.OPENING, 5000);
+    }
+  }
+
   private void swapState(final State state, final int time) {
     this.state = state;
     this.timer.schedule(time);
@@ -190,6 +243,6 @@ public class AutoCommissionClaim extends AbstractFeature {
   }
 
   public enum ClaimError {
-    NONE, INACCESSIBLE_NPC, TIMEOUT
+    NONE, INACCESSIBLE_NPC, NO_ITEMS, TIMEOUT
   }
 }

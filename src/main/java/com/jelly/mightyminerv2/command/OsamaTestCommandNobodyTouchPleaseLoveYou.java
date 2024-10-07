@@ -205,12 +205,13 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   @SubCommand
   public void findg() {
 //    GraphHandler.getInstance().stop();
-    List<RouteWaypoint> path = GraphHandler.getInstance().findPath(first, second);
+    Logger.sendNote("sec: " + second);
+    List<RouteWaypoint> path = GraphHandler.getInstance().findPath(PlayerUtil.getBlockStandingOn(), second);
     Route route = new Route();
     path.forEach(k -> route.insert(k));
     blockToDraw.clear();
-//    path.forEach(i -> blockToDraw.add(new BlockPos(i.toVec3())));
-    RouteNavigator.getInstance().start(route);
+    path.forEach(i -> blockToDraw.add(new BlockPos(i.toVec3())));
+//    RouteNavigator.getInstance().start(route);
   }
 
   @SubCommand

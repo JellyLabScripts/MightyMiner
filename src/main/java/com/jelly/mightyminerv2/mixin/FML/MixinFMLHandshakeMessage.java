@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.mixin.FML;
 
+import com.jelly.mightyminerv2.MightyMiner;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.network.handshake.FMLHandshakeMessage;
@@ -20,6 +21,6 @@ public abstract class MixinFMLHandshakeMessage {
     @Inject(method = "<init>(Ljava/util/List;)V", at = @At("RETURN"), remap = false)
     private void init(List<ModContainer> modList, CallbackInfo ci) {
         if (Minecraft.getMinecraft().isIntegratedServerRunning()) return;
-        modTags.keySet().removeIf(s -> s.contains("MightyMinerV2"));
+        modTags.keySet().removeIf(s -> s.contains(MightyMiner.modid));
     }
 }

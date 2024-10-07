@@ -79,11 +79,11 @@ public class RenderUtil {
   }
 
   public static void drawLine(Vec3 start, Vec3 end, Color color) {
-    startGL();
     RenderManager renderManager = mc.getRenderManager();
     double vx = renderManager.viewerPosX;
     double vy = renderManager.viewerPosY;
     double vz = renderManager.viewerPosZ;
+    startGL();
     drawLine(start.xCoord - vx, start.yCoord - vy, start.zCoord - vz, end.xCoord - vx, end.yCoord - vy, end.zCoord - vz, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0f, color.getAlpha() / 255.0f, 1.5f);
     endGL();
   }
@@ -93,9 +93,9 @@ public class RenderUtil {
   }
 
   public static void outlineBox(AxisAlignedBB bb, Color color) {
-    startGL();
     RenderManager renderManager = mc.getRenderManager();
     bb = bb.offset(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ);
+    startGL();
     outline(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0f, color.getAlpha() / 255.0f, 2f);
     endGL();
   }

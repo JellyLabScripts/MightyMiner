@@ -26,8 +26,8 @@ public class CommissionUtil {
 
   private static final Minecraft mc = Minecraft.getMinecraft();
   private static final Map<Commission, Set<String>> slayerMob = ImmutableMap.of(
-      Commission.GOBLIN_SLAYER, ImmutableSet.of("Goblin"),
-      Commission.GLACITE_WALKER_SLAYER, ImmutableSet.of("Ice Walker", "Weakling"));
+      Commission.GOBLIN_SLAYER, ImmutableSet.of("Goblin", "Weakling"),
+      Commission.GLACITE_WALKER_SLAYER, ImmutableSet.of("Ice Walker"));
 //      Commission.TREASURE_HOARDER_SLAYER, ImmutableSet.of("Treasure Hoarder"));
 
   public static final List<Pair<String, Vec3>> emissaries = Arrays.asList(

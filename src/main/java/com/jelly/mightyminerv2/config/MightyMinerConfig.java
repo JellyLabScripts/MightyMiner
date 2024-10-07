@@ -136,6 +136,12 @@ public class MightyMinerConfig extends Config {
   )
   public static String commSlayerWeapon = "Sword";
 
+  @Dropdown(
+      name = "Claim Method", category = COMMISSION,
+      options = {"NPC", "Royal Pigeon", "Abiphone"}
+  )
+  public static int commClaimMethod = 0;
+
   @Switch(
       name = "Sprint During MobKiller", description = "Allow Sprinting while mobkiller is active (looks sussy with sprint)",
       category = COMMISSION,
@@ -150,21 +156,6 @@ public class MightyMinerConfig extends Config {
   )
   public static boolean commMobKillerInterpolate = true;
 
-  @Slider(
-      name = "Distance cost",
-      category = COMMISSION,
-      subcategory = "MobKiller",
-      min = 1, max = 100
-  )
-  public static int commDistCost = 50;
-
-  @Slider(
-      name = "Rotation cost",
-      category = COMMISSION,
-      subcategory = "MobKiller",
-      min = 1, max = 100
-  )
-  public static int commRotCost = 25;
 
   @Switch(
       name = "Refuel Drill",
@@ -185,19 +176,17 @@ public class MightyMinerConfig extends Config {
       name = "Fuel Retrieval Method",
       category = COMMISSION,
       subcategory = "Refuel",
-      left = "Get From Sack",
-      right = "Buy From Bazaar"
+      left = "Buy From Bazaar", right = "Get From Sack"
   )
-  public static boolean commFuelRetrievalMethod = true;
+  public static boolean commFuelRetrievalMethod = false;
 
   @DualOption(
       name = "Mechanics GUI Access Method",
       category = COMMISSION,
       subcategory = "Refuel",
-      left = "From NPC",
-      right = "Abiphone"
+      left = "Abiphone", right = "From NPC"
   )
-  public static boolean commMechaGuiAccessMethod = true;
+  public static boolean commMechaGuiAccessMethod = false;
   //</editor-fold>
 
   //<editor-fold desc="Failsafe">

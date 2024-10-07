@@ -41,11 +41,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Mod(modid = "MightyMinerV2", useMetadata = true)
+@Mod(modid = MightyMiner.modid, useMetadata = true)
 public class MightyMiner {
 
-  private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
   public final String VERSION = "%%VERSION%%";
+  public static final String modid = "mightyminerv2";
+  private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
   public static final Gson gson = new GsonBuilder()
       .registerTypeAdapter(new TypeToken<Graph<RouteWaypoint>>() {
       }.getType(), new GraphSerializer<RouteWaypoint>())
@@ -55,8 +56,8 @@ public class MightyMiner {
   public static MightyMinerConfig config;
   public static boolean sendNotSupportedMessage = false;
   private static final Minecraft mc = Minecraft.getMinecraft();
-  public static final Path routePath = Paths.get("./config/MightyMinerV2/mighty_miner_routes.json");
-  public static final Path commRoutePath = Paths.get("./config/MightyMinerV2/comm_routes.json");
+  public static final Path routePath = Paths.get("./config/mightyminerv2/mighty_miner_routes.json");
+  public static final Path commRoutePath = Paths.get("./config/mightyminerv2/comm_routes.json");
 
   @Mod.Instance
   public static MightyMiner instance;
@@ -111,8 +112,7 @@ public class MightyMiner {
     mc.gameSettings.gammaSetting = 1000;
     mc.gameSettings.pauseOnLostFocus = false;
 
-    Display.setTitle(
-        "Mighty Miner 〔v" + VERSION + "〕 " + (MightyMinerConfig.debugMode ? "wazzadev!" : "Chilling huh?") + " ☛ " + mc.getSession().getUsername());
+    Display.setTitle("Mighty Miner 〔v" + VERSION + "〕 " + (MightyMinerConfig.debugMode ? "wazzadev!" : "Chilling huh?") + " ☛ " + mc.getSession().getUsername());
   }
 
   @Mod.EventHandler

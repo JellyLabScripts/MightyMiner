@@ -164,9 +164,18 @@ public class MithrilMiner extends AbstractFeature {
         }
 
         if (blocks.size() < 2) {
-          error("Cannot find enough mithril blocks to mine.");
-          this.stop(MithrilError.NOT_ENOUGH_BLOCKS);
+          if (!this.timer.isScheduled()) {
+            log("Scheduled a 2 second timer to see if mithril spawns back or not");
+            this.timer.schedule(2000);
+          }
+
+          if (this.hasTimerEnded()) {
+            error("Cannot find enough mithril blocks to mine.");
+            this.stop(MithrilError.NOT_ENOUGH_BLOCKS);
+          }
           return;
+        } else if (this.timer.isScheduled()) {
+          this.timer.reset();
         }
 
         this.targetBlock = blocks.get(blocks.get(0).equals(this.targetBlock) ? 1 : 0);
@@ -221,14 +230,11 @@ public class MithrilMiner extends AbstractFeature {
         }
         // fall through
       case WALKING:
-        if ((this.destBlock == null || Math.hypot(this.destBlock.xCoord - mc.thePlayer.posX, this.destBlock.zCoord - mc.thePlayer.posZ) > 0.2)
-            && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 3.7) {
+        if ((this.destBlock == null || Math.hypot(this.destBlock.xCoord - mc.thePlayer.posX, this.destBlock.zCoord - mc.thePlayer.posZ) > 0.2) && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 3.5) {
           this.shiftTimer.reset();
           StrafeUtil.enabled = true;
           StrafeUtil.yaw = AngleUtil.getRotationYaw360(this.destBlock == null ? this.targetPoint : this.destBlock);
           KeyBindUtil.holdThese(mc.gameSettings.keyBindForward, mc.gameSettings.keyBindSneak);
-          log("Dist: " + PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) + ", EyePos: " + PlayerUtil.getPlayerEyePos() + ", Target: "
-              + this.targetPoint);
         } else {
           this.destBlock = null;
           StrafeUtil.enabled = false;
@@ -327,26 +333,24 @@ public class MithrilMiner extends AbstractFeature {
 
   @SubscribeEvent
   protected void onRender(RenderWorldLastEvent event) {
+    if (!this.enabled) {
+      return;
+    }
     if (this.targetBlock != null) {
       RenderUtil.drawBlock(this.targetBlock, new Color(0, 255, 255, 100));
     }
-
-    if (this.state.ordinal() >= State.WALKING.ordinal() && this.targetPoint != null) {
-      Vec3 playerEye = PlayerUtil.getPlayerEyePos();
-      Vec3 subVal = this.targetPoint.subtract(playerEye);
-      Vec3 pos = playerEye.addVector(subVal.xCoord * 0.5, subVal.yCoord * 0.5, subVal.zCoord * 0.5);
-      RenderUtil.drawTracer(this.targetPoint, new Color(124, 015, 214, 255));
-      double trackerDist = PlayerUtil.getPlayerEyePos().distanceTo(targetPoint);
-      if (mc.gameSettings.keyBindForward.isKeyDown()) {
-        System.out.println("TrackerDist: " + trackerDist);
-      }
-      RenderUtil.drawText(String.format("%.2f", trackerDist), pos.xCoord, pos.yCoord, pos.zCoord, 1);
+    if (this.targetPoint != null) {
+      RenderUtil.drawPoint(this.targetPoint, new Color(255, 0, 0, 150));
     }
   }
 
   private void swapState(final State toState, final int delay) {
     this.state = toState;
-    this.timer.schedule(delay);
+    if(delay == 0){
+      this.timer.reset();
+    } else {
+      this.timer.schedule(delay);
+    }
   }
 
   private int getRandomRotationTime() {

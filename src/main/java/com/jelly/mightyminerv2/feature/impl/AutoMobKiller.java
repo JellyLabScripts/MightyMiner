@@ -3,6 +3,8 @@ package com.jelly.mightyminerv2.feature.impl;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
+import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
+import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper;
 import com.jelly.mightyminerv2.util.EntityUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
@@ -154,8 +156,16 @@ public class AutoMobKiller extends AbstractFeature {
           return;
         }
         Vec3 mobPos = this.targetMob.get().getPositionVector();
+        int mpx = (int) mobPos.xCoord;
+        int mpy = (int) Math.ceil(mobPos.yCoord) - 1;
+        int mpz = (int) mobPos.zCoord;
 
-        Pathfinder.getInstance().queue(new BlockPos(mobPos.xCoord, Math.ceil(mobPos.yCoord) - 1, mobPos.zCoord));
+        BlockPos pos = new BlockPos(mpx, mpy, mpz);
+        BlockStateAccessor bsa = new BlockStateAccessor(mc.theWorld);
+        if (!MovementHelper.INSTANCE.canStandOn(bsa, mpx, mpy, mpz, bsa.get(mpx, mpy, mpz))) {
+          pos = pos.down();
+        }
+        Pathfinder.getInstance().queue(pos);
         log("Queued new to " + mobPos);
         if (!Pathfinder.getInstance().isRunning()) {
           log("Pathfinder wasnt enabled. starting");
@@ -167,7 +177,7 @@ public class AutoMobKiller extends AbstractFeature {
         break;
       case WAITING_FOR_MOB:
         // next tick pos makes hits more accurate
-        if (PlayerUtil.getNextTickPosition().squareDistanceTo(this.targetMob.get().getPositionVector()) < 8) { // 8 cuz why not
+        if (PlayerUtil.getNextTickPosition().squareDistanceTo(this.targetMob.get().getPositionVector()) < 8 && mc.thePlayer.canEntityBeSeen(this.targetMob.get())) { // 8 cuz why not
           this.changeState(State.LOOKING_AT_MOB, 0);
           return;
         }
@@ -175,12 +185,13 @@ public class AutoMobKiller extends AbstractFeature {
         if (!this.targetMob.get().isEntityAlive()) {
           Pathfinder.getInstance().stop();
           this.changeState(State.STARTING, 0);
+          log("Targetmob isnt alive");
           return;
         }
 
         if (this.targetMob.get().getPositionVector().squareDistanceTo(this.entityLastPosition.get()) > 9) {
           this.changeState(State.STARTING, 0);
-          log("target mob is far away. repathing");
+          log("target mob moved away. repathing");
           Pathfinder.getInstance().stop();
           return;
         }

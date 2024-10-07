@@ -1,11 +1,13 @@
 package com.jelly.mightyminerv2.macro.commissionmacro;
 
+import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
 import com.jelly.mightyminerv2.failsafe.FailsafeManager;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
+import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.feature.impl.AutoWarp;
@@ -43,6 +45,7 @@ public class CommissionMacro extends AbstractMacro {
   }
 
   private int commissionCounter = 0;
+  private List<String> necessaryItems = new ArrayList<>();
 
   @Override
   public String getName() {
@@ -54,7 +57,6 @@ public class CommissionMacro extends AbstractMacro {
     this.mainState = MainState.MACRO;
     log("CommMacro::onEnable");
   }
-
 
   @Override
   public void onDisable() {
@@ -69,6 +71,7 @@ public class CommissionMacro extends AbstractMacro {
 
     this.miningSpeed = this.miningSpeedBoost = 0;
     this.curr = new ArrayList<>();
+    this.necessaryItems = new ArrayList<>();
 
     this.checkForCommissionChange = false;
     if (CommissionHUD.getInstance().commHudResetStats) {
@@ -91,10 +94,22 @@ public class CommissionMacro extends AbstractMacro {
 
   @Override
   public List<String> getNecessaryItems() {
-    return Arrays.asList(MightyMinerConfig.commMiningTool, MightyMinerConfig.commSlayerWeapon);
+    if (this.necessaryItems.isEmpty()) {
+      List<String> items = new ArrayList<>();
+      items.add(MightyMinerConfig.commMiningTool);
+      items.add(MightyMinerConfig.commSlayerWeapon);
+      if (MightyMinerConfig.commClaimMethod == 2 || !MightyMinerConfig.commMechaGuiAccessMethod) {
+        items.add("Abiphone");
+      }
+      if (MightyMinerConfig.commClaimMethod == 1) {
+        items.add("Royal Pigeon");
+      }
+      this.necessaryItems = items;
+    }
+    return this.necessaryItems;
   }
 
-  public int getCompletedCommissions(){
+  public int getCompletedCommissions() {
     return this.commissionCounter;
   }
 
@@ -126,10 +141,12 @@ public class CommissionMacro extends AbstractMacro {
     if (this.mainState == MainState.MACRO) {
       if (GameStateHandler.getInstance().getCurrentLocation() != Location.DWARVEN_MINES) {
         this.changeMainState(MainState.WARP, 0);
-      } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems()) && !FailsafeManager.getInstance()
-          .isFailsafeActive(Failsafe.ITEM_CHANGE)) {
-        this.changeMainState(MainState.NONE, 0);
-      } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems()) && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
+      } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY
+          && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
+        log("Items Arent In Inventory And Failsafe Isnt Active");
+        this.changeMainState(MainState.NONE);
+      } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY
+          && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
         this.changeMainState(MainState.ITEMS, 0);
       }
     }
@@ -170,6 +187,18 @@ public class CommissionMacro extends AbstractMacro {
           this.changeMacroState(MacroState.PATHING);
         }
       });
+    }
+
+    if (message.endsWith("is empty! Refuel it by talking to a Drill Mechanic!")) {
+      if (!MightyMinerConfig.commDrillRefuel) {
+        this.changeMainState(MainState.NONE);
+        error("Drill Empty But Not Allowed to Refuel. Stopping");
+        return;
+      }
+      this.curr.clear();
+      this.curr.add(Commission.REFUEL);
+      this.stopActiveFeatures();
+      this.changeMacroState(MacroState.PATHING);
     }
   }
 
@@ -280,23 +309,27 @@ public class CommissionMacro extends AbstractMacro {
         }
         break;
       case PATHING:
-        RouteWaypoint end;
+        this.changeMacroState(MacroState.PATHING_VERIFY);
         Commission first = this.curr.get(0);
-        if (first.getName().equals("Claim Commission")) {
-          end = first.closestWaypointTo(CommissionUtil.getClosestEmissaryPosition());
-        } else {
-          end = first.getWaypoint();
+
+        if(first == Commission.COMMISSION_CLAIM && MightyMinerConfig.commClaimMethod != 0){
+          break;
         }
+
+        if(first == Commission.REFUEL && !MightyMinerConfig.commMechaGuiAccessMethod){
+          break;
+        }
+
+        RouteWaypoint end = first.getWaypoint();
 
         List<RouteWaypoint> nodes = GraphHandler.getInstance().findPath(PlayerUtil.getBlockStandingOn(), end);
         if (nodes.isEmpty()) {
-          error("Could not find a path to target. Stopping");
+          error("Could not find a path to target. Stopping. Start: " + PlayerUtil.getBlockStandingOn() + ", End: " + end);
           this.changeMainState(MainState.NONE);
           return;
         }
 
         RouteNavigator.getInstance().start(new Route(nodes));
-        this.changeMacroState(MacroState.PATHING_VERIFY);
         break;
       case PATHING_VERIFY:
         if (RouteNavigator.getInstance().isRunning()) {
@@ -333,6 +366,8 @@ public class CommissionMacro extends AbstractMacro {
           this.changeMacroState(MacroState.CLAIMING_COMMISSION);
         } else if (commName.contains("Titanium") || commName.contains("Mithril")) {
           this.changeMacroState(MacroState.START_MINING);
+        } else if (commName.contains("Refuel")) {
+          this.changeMacroState(MacroState.REFUEL);
         } else {
           this.changeMacroState(MacroState.ENABLE_MOBKILLER);
         }
@@ -449,6 +484,45 @@ public class CommissionMacro extends AbstractMacro {
           case TIMEOUT:
             log("Retrying claim");
             this.changeMacroState(MacroState.CLAIMING_COMMISSION);
+            break;
+        }
+        break;
+      case REFUEL:
+        AutoDrillRefuel.getInstance()
+            .start(MightyMinerConfig.commMiningTool, MightyMinerConfig.commMachineFuel, MightyMinerConfig.commFuelRetrievalMethod,
+                MightyMinerConfig.commMechaGuiAccessMethod);
+        this.changeMacroState(MacroState.REFUEL_VERIFY);
+        break;
+      case REFUEL_VERIFY:
+        if (AutoDrillRefuel.getInstance().isRunning()) {
+          break;
+        }
+
+        if (AutoDrillRefuel.getInstance().hasSucceeded()) {
+          log("Done refilling");
+          this.changeMacroState(MacroState.STARTING);
+          break;
+        }
+
+        if (++this.macroRetries > 3) {
+          error("Tried thrice but failed to refill. Stopping");
+          this.changeMainState(MainState.NONE);
+          break;
+        }
+
+        switch (AutoDrillRefuel.getInstance().getFailReason()) {
+          case NONE:
+            error("AutoDrillRefuel Failed but ClaimError is NONE.");
+            this.changeMainState(MainState.NONE);
+            break;
+          case INACCESSIBLE_MECHANIC:
+            error("Inaccessible NPC. Retrying");
+            this.changeMainState(MainState.WARP);
+            this.changeMacroState(MacroState.STARTING);
+            break;
+          case FAILED_REFILL:
+            error("Stopping because failed refill");
+            this.changeMainState(MainState.NONE);
             break;
         }
         break;
@@ -594,6 +668,6 @@ public class CommissionMacro extends AbstractMacro {
   }
 
   enum MacroState {
-    STARTING, CHECKING_STATS, GETTING_STATS, CHECKING_COMMISSION, PATHING, PATHING_VERIFY, TOGGLE_MACRO, START_MINING, MINING_VERIFY, ENABLE_MOBKILLER, MOBKILLER_VERIFY, CLAIMING_COMMISSION, CLAIM_VERIFY, WAITING;
+    STARTING, CHECKING_STATS, GETTING_STATS, CHECKING_COMMISSION, PATHING, PATHING_VERIFY, TOGGLE_MACRO, START_MINING, MINING_VERIFY, ENABLE_MOBKILLER, MOBKILLER_VERIFY, CLAIMING_COMMISSION, CLAIM_VERIFY, REFUEL, REFUEL_VERIFY, WAITING;
   }
 }

@@ -76,13 +76,10 @@ public class ItemChangeFailsafe extends AbstractFailsafe {
     }
 
     if(slot >= 45){
-      System.out.println("LOGOGGOOGOG");
-      System.out.println("Slot: " + slot);
-      System.out.println(packet.func_149174_e().getDisplayName());
       return false;
     }
     Slot oldSlot = mc.thePlayer.inventoryContainer.getSlot(slot);
-    if (!oldSlot.getHasStack()) {
+    if (!oldSlot.getHasStack() || !oldSlot.getStack().hasDisplayName()) {
       return false;
     }
     String oldItem = InventoryUtil.getItemId(oldSlot.getStack());
@@ -100,7 +97,7 @@ public class ItemChangeFailsafe extends AbstractFailsafe {
       Integer oldSlotNumber = removedItems.remove(newItem);
       if (oldSlotNumber != null) {
         note("Item with id " + newItem + " was removed from " + oldSlotNumber + " and added back to slot " + slot);
-        if (oldSlotNumber.intValue() != slot) {
+        if (oldSlotNumber != slot) {
           warn("Item was moved.");
           return true;
         }

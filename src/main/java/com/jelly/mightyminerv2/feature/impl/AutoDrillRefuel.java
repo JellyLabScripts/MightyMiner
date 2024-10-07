@@ -39,8 +39,7 @@ public class AutoDrillRefuel extends AbstractFeature {
   private Error failReason = Error.NONE;
   private int requiredFuelAmount = 0;
   private boolean movedSuccessfully = false;
-  private final String[] fuelList = {"Enchanted Poppy", "Goblin Egg", "Green Goblin Egg", "Yellow Goblin Egg", "Red Goblin Egg", "Blue Goblin Egg",
-      "Volta", "Oil Barrel"};
+  private final String[] fuelList = {"Enchanted Poppy", "Goblin Egg", "Green Goblin Egg", "Yellow Goblin Egg", "Red Goblin Egg", "Blue Goblin Egg", "Volta", "Oil Barrel"};
   private final Map<String, Integer> fuelAmount = new HashMap<String, Integer>() {{
     put("Enchanted Poppy", 1000);
     put("Goblin Egg", 3000);
@@ -69,7 +68,8 @@ public class AutoDrillRefuel extends AbstractFeature {
 
   public void start(String drillName, int fuelIndex, boolean getFuelFromSack, boolean useNpc) {
     if (InventoryUtil.getSlotIdOfItemInContainer(drillName) == -1) {
-      this.stop(Error.NO_DRILL);
+      error("Can't refill because no drill - dumbass");
+      this.stop(Error.FAILED_REFILL);
       return;
     }
     this.failReason = Error.NONE;
@@ -111,7 +111,7 @@ public class AutoDrillRefuel extends AbstractFeature {
   }
 
   public boolean hasSucceeded() {
-    return this.failReason != Error.NONE;
+    return this.failReason == Error.NONE;
   }
 
   public Error getFailReason() {
@@ -131,7 +131,8 @@ public class AutoDrillRefuel extends AbstractFeature {
       case LOCATING_ITEMS:
         List<String> loreList = InventoryUtil.getItemLoreFromInventory(this.drillToRefill);
         if (loreList.isEmpty()) {
-          this.stop(Error.NO_DRILL);
+          error("Can't refill because no drill - dumbass");
+          this.stop(Error.FAILED_REFILL);
           return;
         }
         boolean foundFuel = false;
@@ -148,14 +149,16 @@ public class AutoDrillRefuel extends AbstractFeature {
             e.printStackTrace();
           }
           if (capacity == 0.0f) {
-            this.stop(Error.NO_DRILL);
+            error("Couldnt find drill capacity");
+            this.stop(Error.FAILED_REFILL);
             return;
           }
 
           break;
         }
         if (!foundFuel) {
-          this.stop(Error.NO_DRILL);
+          error("Couldnt find drill fuel");
+          this.stop(Error.FAILED_REFILL);
           return;
         }
 
@@ -180,18 +183,21 @@ public class AutoDrillRefuel extends AbstractFeature {
       case VERIFYING_ITEM_FETCH:
         if (this.getFuelFromSack) {
           if (this.hasTimerEnded()) {
-            this.stop(Error.CANNOT_FETCH);
+            error("Couldnt Get Fuel From Sack in time");
+            this.stop(Error.FAILED_REFILL);
             break;
           }
           if (!this.movedSuccessfully) {
             break;
           }
-          if (InventoryUtil.getAmountOfItemInInventory(this.fuelList[this.fuelIndex]) >= this.requiredFuelAmount) {
-            this.swapState(State.ROTATING, 0);
-          } else {
-            this.stop(Error.CANNOT_FETCH);
-            break;
-          }
+          this.swapState(State.ROTATING, 0);
+//          if (InventoryUtil.getAmountOfItemInInventory(this.fuelList[this.fuelIndex]) >= this.requiredFuelAmount) {
+//            this.swapState(State.ROTATING, 0);
+//          } else {
+//            error("Not enough fuel in inventory. amount in inventory: " + InventoryUtil.getAmountOfItemInInventory(this.fuelList[this.fuelIndex]));
+//            this.stop(Error.FAILED_REFILL);
+//            break;
+//          }
         } else {
           // verify auto bazaar
           this.swapState(State.ROTATING, 0);
@@ -207,15 +213,18 @@ public class AutoDrillRefuel extends AbstractFeature {
 
           if (this.npc == null || mc.thePlayer.getDistanceSqToEntity(this.npc) > 9) {
             this.stop(Error.INACCESSIBLE_MECHANIC);
+            error("Cannot find NPC");
             break;
           }
 
           RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.npc), 300, null));
+        } else {
+          // Toggle AutoAbiphone
         }
         this.swapState(State.OPENING_MECHANICS_GUI, 0);
         break;
       case OPENING_MECHANICS_GUI:
-        time = 500;
+        time = 2000;
         if (this.useNpc) {
           Optional<Entity> entityLookingAt = EntityUtil.getEntityLookingAt();
 
@@ -246,7 +255,7 @@ public class AutoDrillRefuel extends AbstractFeature {
 
         if (InventoryUtil.getInventoryName().contains("Drill Anvil") && InventoryUtil.isInventoryLoaded()) {
           log("Opened Anvil GUI");
-          this.swapState(State.PUTTING_ITEMS, 250);
+          this.swapState(State.PUTTING_ITEMS, 500);
         }
         break;
       case PUTTING_ITEMS:
@@ -254,14 +263,17 @@ public class AutoDrillRefuel extends AbstractFeature {
           break;
         }
 
+        log("IN PUTTING ITEMS");
+
         int lowerChestSize = ((ContainerChest) mc.thePlayer.openContainer).getLowerChestInventory().getSizeInventory();
         int slotToClick;
         if (((slotToClick = InventoryUtil.getSlotIdOfItemInContainer(this.drillToRefill)) != -1 && slotToClick >= lowerChestSize)
             || ((slotToClick = InventoryUtil.getSlotIdOfItemInContainer(this.fuelList[this.fuelIndex])) != -1 && slotToClick >= lowerChestSize)) {
           InventoryUtil.clickContainerSlot(slotToClick, ClickType.LEFT, ClickMode.QUICK_MOVE);
-          this.swapState(State.PUTTING_ITEMS, 300);
+          log("Put item");
+          this.swapState(State.PUTTING_ITEMS, 500);
         } else {
-          this.swapState(State.RETRIEVING_DRILL, 300);
+          this.swapState(State.RETRIEVING_DRILL, 500);
         }
         break;
       case RETRIEVING_DRILL:
@@ -269,17 +281,24 @@ public class AutoDrillRefuel extends AbstractFeature {
           break;
         }
 
+        log("retrieving drill");
+
         int drillSlot = InventoryUtil.getSlotIdOfItemInContainer(this.drillToRefill);
+        log("drill slot: " + drillSlot);
         if (drillSlot == -1) {
-          this.stop(Error.NO_DRILL);
+          error("No drill in inventory for some reason - should never happen but if it does then :thumbsupcat:");
+          this.stop(Error.FAILED_REFILL);
           break;
         }
 
         lowerChestSize = ((ContainerChest) mc.thePlayer.openContainer).getLowerChestInventory().getSizeInventory();
+        log("lowerChestSize: " + lowerChestSize);
         if (drillSlot < lowerChestSize) {
+          log("drillslot < lowerchestsize. retrieving");
           InventoryUtil.clickContainerSlot(InventoryUtil.getSlotIdOfItemInContainer("Drill Anvil"), ClickType.LEFT, ClickMode.PICKUP);
-          this.swapState(State.RETRIEVING_DRILL, 300);
+          this.swapState(State.RETRIEVING_DRILL, 500);
         } else {
+          log("ending");
           this.swapState(State.ENDING, 300);
         }
         break;
@@ -290,7 +309,7 @@ public class AutoDrillRefuel extends AbstractFeature {
 
         InventoryUtil.closeScreen();
         this.stop();
-        log("Succeeded");
+        log("Succeeded or failed");
         break;
     }
   }
@@ -313,10 +332,7 @@ public class AutoDrillRefuel extends AbstractFeature {
 
   public enum Error {
     NONE,
-    NO_DRILL,
-    INVALID_ITEMS,
     INACCESSIBLE_MECHANIC,
-    CANNOT_FETCH,
-    FAILED_TO_REFUEL
+    FAILED_REFILL
   }
 }

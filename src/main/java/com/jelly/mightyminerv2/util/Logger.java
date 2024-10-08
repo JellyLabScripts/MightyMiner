@@ -24,19 +24,19 @@ public abstract class Logger {
   }
 
   public static void sendMessage(final String message) {
-    addMessage("§l§2[Mighty Miner] §8» §a" + message);
+    addMessage("§c[§bMighty Miner§c] §8» §e" + message);
   }
 
   public static void sendWarning(final String message) {
-    addMessage("§l§6[Mighty Miner] §8» §e" + message);
+    addMessage("§c§l[WARNING] §8» §e" + message);
   }
 
   public static void sendError(final String message) {
-    addMessage("§l§4[Mighty Miner] §8» §c" + message);
+    addMessage("§l§4§kZ§r§l§4[Mighty Miner]§kH§r §8» §c" + message);
   }
 
   public static void sendNote(final String message) {
-    addMessage("§l§6[Mighty Miner] §r§8» §e" + message);
+    addMessage("§c[§bMighty Miner§c] §8» §e" + message);
   }
 
   public static void sendLog(final String message) {

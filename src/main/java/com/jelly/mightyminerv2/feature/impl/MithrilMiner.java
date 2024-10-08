@@ -149,7 +149,7 @@ public class MithrilMiner extends AbstractFeature {
         log("Starting. stopped walking");
         break;
       case SPEED_BOOST:
-        if (!this.hasTimerEnded()) {
+        if (this.isTimerRunning()) {
           return;
         }
 

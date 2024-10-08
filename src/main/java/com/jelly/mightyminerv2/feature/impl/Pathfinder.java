@@ -158,6 +158,8 @@ public class Pathfinder extends AbstractFeature {
       this.pathfinding = true;
       try {
         Pair<BlockPos, BlockPos> startEnd = this.pathQueue.poll();
+//        if(startEnd == null) return;
+
         BlockPos start = startEnd.getFirst();
         BlockPos end = startEnd.getSecond();
         double walkSpeed = mc.thePlayer.getAIMoveSpeed();

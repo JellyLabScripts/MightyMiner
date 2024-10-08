@@ -61,7 +61,7 @@ public abstract class AbstractFeature {
   }
 
   protected boolean hasTimerEnded() {
-    return !this.timer.isScheduled() || this.timer.passed();
+    return this.timer.isScheduled() && this.timer.passed();
   }
 
   protected void onTick(ClientTickEvent event) {

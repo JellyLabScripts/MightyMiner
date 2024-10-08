@@ -178,10 +178,10 @@ public class CommissionMacro extends AbstractMacro {
         if (message.equalsIgnoreCase(it.getName() + " Commission Complete! Visit the King to claim your rewards!")) {
           this.curr.remove(it);
           this.commissionCounter++;
-          send("Commission Complete Detected. Comms Left: " + this.curr.toString());
+          log("Commission Complete Detected. Comms Left: " + this.curr.toString());
         }
         if (this.curr.isEmpty()) {
-          send("No more commissions to complete.");
+          log("No more commissions to complete.");
           this.curr.add(Commission.COMMISSION_CLAIM);
           this.stopActiveFeatures();
           this.changeMacroState(MacroState.PATHING);
@@ -198,7 +198,7 @@ public class CommissionMacro extends AbstractMacro {
       this.curr.clear();
       this.curr.add(Commission.REFUEL);
       this.stopActiveFeatures();
-      this.changeMacroState(MacroState.PATHING);
+      this.changeMacroState(MacroState.PATHING, 500);
     }
   }
 
@@ -210,9 +210,9 @@ public class CommissionMacro extends AbstractMacro {
     List<Commission> comms = CommissionUtil.getCurrentCommissionsFromTablist();
     if (comms.size() != this.curr.size()) {
       this.curr = comms;
-      send("Commission change detected from tablist");
+      log("Commission change detected from tablist");
       if (this.curr.contains(Commission.COMMISSION_CLAIM)) {
-        send("curr contains claim");
+        log("curr contains claim");
         this.stopActiveFeatures();
         this.checkForCommissionChange = false;
         this.changeMacroState(MacroState.STARTING);

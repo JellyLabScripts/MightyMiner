@@ -148,7 +148,7 @@ public class AutoInventory extends AbstractFeature {
         error("Could not get mining speed from tab. Make sure its enabled.");
         break;
       case OPEN_HOTM_MENU:
-        if (!this.hasTimerEnded()) {
+        if (this.isTimerRunning()) {
           break;
         }
 
@@ -196,7 +196,7 @@ public class AutoInventory extends AbstractFeature {
         error("Could Not Get Speed Boost Value.");
         break;
       case END:
-        if (!this.hasTimerEnded()) {
+        if (this.isTimerRunning()) {
           break;
         }
         InventoryUtil.closeScreen();

@@ -43,6 +43,7 @@ import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import jline.internal.Log;
 import kotlin.Pair;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -103,12 +104,11 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    AutoDrillRefuel.getInstance().start("Titanium Drill", 7, true, true);
-//    BlockPos targ = new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(AngleUtil.get360RotationYaw())));
-//    this.blockToDraw.clear();
-//    this.blockToDraw.add(targ);
-//    this.blockToDraw.add(PlayerUtil.getBlockStandingOn());
-//    Logger.sendLog("ShouldJump: " + com.jelly.mightyminerv2.util.BlockUtil.canWalkBetween(new CalculationContext(), PlayerUtil.getBlockStandingOn(), targ));
+    Logger.sendMessage("Message");
+    Logger.sendNote("Note");
+    Logger.sendLog("Log");
+    Logger.sendWarning("Warning");
+    Logger.sendError("Error");
   }
 
   @SubCommand

@@ -128,7 +128,7 @@ public class AutoCommissionClaim extends AbstractFeature {
         this.swapState(State.ROTATING, time);
         break;
       case ROTATING:
-        if (!this.hasTimerEnded()) {
+        if (this.isTimerRunning()) {
           return;
         }
         if (MightyMinerConfig.commClaimMethod == 0) {
@@ -156,10 +156,11 @@ public class AutoCommissionClaim extends AbstractFeature {
           break;
         }
         final Optional<Entity> entityLookingAt = EntityUtil.getEntityLookingAt();
+        time = 5000;
         switch (MightyMinerConfig.commClaimMethod) {
           case 0:
             if (RotationHandler.getInstance().isEnabled() || !entityLookingAt.isPresent()) {
-              return;
+              break;
             }
 
             // because why not
@@ -172,36 +173,50 @@ public class AutoCommissionClaim extends AbstractFeature {
           case 1:
             KeyBindUtil.rightClick();
           case 2:
+            time = 0;
             // Toggle AutoAbiphone
             break;
         }
 
-        this.swapState(State.CLAIMING, 5000);
+        log("SCheduler timer for : " + time);
+        this.swapState(State.VERIFYING_GUI, time);
         break;
-      case CLAIMING:
+      case VERIFYING_GUI:
         if (this.hasTimerEnded()) {
           this.stop(ClaimError.INACCESSIBLE_NPC);
           error("Opened a Different Inventory.");
           break;
         }
-
-        if (!(mc.thePlayer.openContainer instanceof ContainerChest) || !InventoryUtil.getInventoryName().contains("Commissions")) {
+        switch (MightyMinerConfig.commClaimMethod) {
+          case 0:
+          case 1:
+            if (!(mc.thePlayer.openContainer instanceof ContainerChest) || !InventoryUtil.getInventoryName().contains("Commissions")) {
+              break;
+            }
+            this.swapState(State.CLAIMING, 500);
+            break;
+          case 2:
+            // verify autoabiphone
+            break;
+        }
+        break;
+      case CLAIMING:
+        if (this.isTimerRunning()) {
           break;
         }
-
         final int slotToClick = CommissionUtil.getClaimableCommissionSlot();
         State nextState;
         if (slotToClick != -1) {
           InventoryUtil.clickContainerSlot(slotToClick, ClickType.LEFT, ClickMode.PICKUP);
           nextState = State.CLAIMING;
         } else {
-          send("No Commission To Claim");
+          log("No Commission To Claim");
           nextState = State.NEXT_COMM;
         }
         this.swapState(nextState, MightyMinerConfig.getRandomGuiWaitDelay());
         break;
       case NEXT_COMM:
-        if (!this.hasTimerEnded()) {
+        if (this.isTimerRunning()) {
           break;
         }
         if (mc.thePlayer.openContainer instanceof ContainerChest) {
@@ -210,7 +225,7 @@ public class AutoCommissionClaim extends AbstractFeature {
         this.swapState(State.ENDING, 0);
         break;
       case ENDING:
-        if (!this.hasTimerEnded()) {
+        if (this.isTimerRunning()) {
           return;
         }
         InventoryUtil.closeScreen();
@@ -235,11 +250,15 @@ public class AutoCommissionClaim extends AbstractFeature {
 
   private void swapState(final State state, final int time) {
     this.state = state;
-    this.timer.schedule(time);
+    if (time == 0) {
+      this.timer.reset();
+    } else {
+      this.timer.schedule(time);
+    }
   }
 
   enum State {
-    STARTING, ROTATING, OPENING, CLAIMING, NEXT_COMM, ENDING
+    STARTING, ROTATING, OPENING, VERIFYING_GUI, CLAIMING, NEXT_COMM, ENDING
   }
 
   public enum ClaimError {

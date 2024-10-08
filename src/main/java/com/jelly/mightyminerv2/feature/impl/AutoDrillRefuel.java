@@ -259,7 +259,7 @@ public class AutoDrillRefuel extends AbstractFeature {
         }
         break;
       case PUTTING_ITEMS:
-        if (!this.hasTimerEnded()) {
+        if (this.isTimerRunning()) {
           break;
         }
 
@@ -277,7 +277,7 @@ public class AutoDrillRefuel extends AbstractFeature {
         }
         break;
       case RETRIEVING_DRILL:
-        if (!this.hasTimerEnded()) {
+        if (this.isTimerRunning()) {
           break;
         }
 
@@ -303,7 +303,7 @@ public class AutoDrillRefuel extends AbstractFeature {
         }
         break;
       case ENDING:
-        if (!this.hasTimerEnded()) {
+        if (this.isTimerRunning()) {
           return;
         }
 

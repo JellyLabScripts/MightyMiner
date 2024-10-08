@@ -25,8 +25,8 @@ public class BedrockBlockChangeFailsafe extends AbstractFailsafe {
 
     private final Clock timer = new Clock();
     private final List<Long> bedrockChangeTimestamps = new ArrayList<>();
-    private static final int THRESHOLD = 10; // Maximum allowed bedrock changes
-    private static final long TIME_WINDOW = 100; // 0.1-second time window
+    private static final int THRESHOLD = 10;
+    private static final long TIME_WINDOW = 100;
     private static final int RADIUS = 10;
 
     @Override
@@ -41,18 +41,26 @@ public class BedrockBlockChangeFailsafe extends AbstractFailsafe {
 
     @Override
     public int getPriority() {
-        return 7; // Higher priority
+        return 7;
     }
 
     @Override
     public boolean onTick(ClientTickEvent event) {
         long currentTime = System.currentTimeMillis();
 
-        // Clean up old entries from the list to only keep relevant ones within TIME_WINDOW
-        bedrockChangeTimestamps.removeIf(timestamp -> currentTime - timestamp > TIME_WINDOW);
+        List<Long> validTimestamps = new ArrayList<>();
+
+        for (Long timestamp : bedrockChangeTimestamps) {
+            if (currentTime - timestamp <= TIME_WINDOW) {
+                validTimestamps.add(timestamp);
+            }
+        }
+
+        bedrockChangeTimestamps.clear();
+        bedrockChangeTimestamps.addAll(validTimestamps);
 
         if (bedrockChangeTimestamps.size() >= THRESHOLD) {
-            Logger.sendWarning("Too many Bedrock block changes in the last " + TIME_WINDOW / 1000 + " seconds. Triggering failsafe.");
+            Logger.sendWarning("Too many Bedrock block changes in the last " + TIME_WINDOW / 1000.0 + " seconds. Triggering failsafe.");
             return true;
         }
 

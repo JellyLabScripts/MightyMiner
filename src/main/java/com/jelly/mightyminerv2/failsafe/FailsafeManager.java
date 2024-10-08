@@ -75,11 +75,14 @@ public class FailsafeManager {
       return;
     }
 
-    failsafes.forEach(failsafe -> {
+
+    List<AbstractFailsafe> failsafeCopy = new ArrayList<>(failsafes);
+
+    for (AbstractFailsafe failsafe : failsafeCopy) {
       if (failsafe.onTick(event)) {
         this.emergencyQueue.add(failsafe);
       }
-    });
+    }
   }
 
   @SubscribeEvent(priority = EventPriority.HIGHEST)

@@ -1,8 +1,8 @@
 package com.jelly.mightyminerv2.util;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
-import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext;
+import com.jelly.mightyminerv2.util.helper.Angle;
 import com.jelly.mightyminerv2.util.helper.heap.MinHeap;
 import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
 import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper;
@@ -10,8 +10,6 @@ import kotlin.Pair;
 import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3;
@@ -63,8 +61,102 @@ public class BlockUtil {
   }
 
   // unfortunately this function is extremely expensive
-  public static List<BlockPos> getBestMithrilBlocksAround(final int[] priority, BlockPos blockToIgnore) {
+  public static List<BlockPos> getBestMineableBlocksAround(Map<Integer, Integer> stateIds, final int[] priority, BlockPos blockToIgnore, int miningSpeed) {
     final MinHeap<BlockPos> blocks = new MinHeap<>(500);
+    final Set<Long> visitedPositions = new HashSet<>();
+    final List<BlockPos> walkableBlocks = getWalkableBlocksAround(PlayerUtil.getBlockStandingOn());
+
+    if (blockToIgnore != null) {
+      visitedPositions.add(longHash(blockToIgnore.getX(), blockToIgnore.getY(), blockToIgnore.getZ()));
+    }
+
+    for (final BlockPos blockPos : walkableBlocks) {
+      final Vec3 blockCenter = new Vec3(blockPos).addVector(0.5, mc.thePlayer.eyeHeight, 0.5);
+      for (int x = -4; x < 5; x++) {
+        for (int z = -4; z < 5; z++) {
+          for (int y = -3; y < 5; y++) {
+            final BlockPos pos = blockPos.add(x, y + 2, z);
+            final long hash = longHash(pos.getX(), pos.getY(), pos.getZ());
+            if (visitedPositions.contains(hash)) {
+              continue;
+            }
+
+            final int stateID = Block.getStateId(mc.theWorld.getBlockState(pos));
+            Integer index = stateIds.get(stateID);
+            if (index == null) {
+              continue;
+            }
+
+            if (blockCenter.distanceTo(new Vec3(pos)) > 4) {
+              continue;
+            }
+
+            if (!hasVisibleSide(pos)) {
+              continue;
+            }
+
+            final double hardness = getBlockStrength(stateID);
+            final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).lengthSqrt();
+
+            visitedPositions.add(hash);
+            // Todo: Cost requires more testing.
+            //  an attempt to recreate *real* mining cost in time (ms)
+            blocks.add(pos, ((hardness * 1500) / miningSpeed + angleChange * 3) / priority[index]);
+          }
+        }
+      }
+    }
+    return blocks.getBlocks();
+  }
+
+  // Stole from baritoe
+  public static long longHash(int x, int y, int z) {
+    long hash = 3241;
+    hash = 3457689L * hash + x;
+    hash = 8734625L * hash + y;
+    hash = 2873465L * hash + z;
+    return hash;
+  }
+
+  // The higher the priority, the higher the chance of it getting picked
+  public static List<BlockPos> getBestMineableBlocks(Map<Integer, Integer> stateIds, int[] priority, BlockPos blockToIgnore, int miningSpeed) {
+    final MinHeap<BlockPos> blocks = new MinHeap<>(500);
+    final BlockPos blockPos = PlayerUtil.getBlockStandingOn().add(0, 2, 0);
+    final Vec3 posEyes = mc.thePlayer.getPositionEyes(1);
+    for (int x = -4; x < 5; x++) {
+      for (int z = -4; z < 5; z++) {
+        for (int y = -3; y < 5; y++) {
+          final BlockPos pos = blockPos.add(x, y + 2, z);
+          final int stateID = Block.getStateId(mc.theWorld.getBlockState(pos));
+          Integer index = stateIds.get(stateID);
+          if (index == null) {
+            continue;
+          }
+
+          if (posEyes.distanceTo(new Vec3(pos)) > 4) {
+            continue;
+          }
+
+          if (!hasVisibleSide(pos)) {
+            continue;
+          }
+
+          final double hardness = getBlockStrength(stateID);
+          final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).lengthSqrt();
+
+          // Todo: Cost requires more testing.
+            blocks.add(pos, ((hardness * 1500) / miningSpeed + angleChange * 3) / priority[index]);
+        }
+      }
+    }
+    return blocks.getBlocks();
+  }
+
+
+  public static List<Pair<BlockPos, List<Float>>> getBestMineableBlocksAroundDebug(Map<Integer, Integer> stateIds, final int[] priority, BlockPos blockToIgnore, int miningSpeed) {
+//    final MinHeap<BlockPos> blocks = new MinHeap<>(500);
+
+    List<Pair<BlockPos, List<Float>>> debugs = new ArrayList<>();
     final Set<Long> visitedPositions = new HashSet<>();
     final List<BlockPos> walkableBlocks = getWalkableBlocksAround(PlayerUtil.getBlockStandingOn());
 
@@ -83,20 +175,13 @@ public class BlockUtil {
               continue;
             }
 
-            final double hardness = getBlockStrength(pos);
-            // Modify block filtering condition based on MightyMinerConfig.oreType
-            if (MightyMinerConfig.oreType == 0) {
-              if (hardness < 500 || hardness > 2000 || hardness == 600) {
-                continue;
-              }
-            } else if (MightyMinerConfig.oreType == 1) {
-              if (hardness != 600) {
-                continue;
-              }
+            final int stateID = Block.getStateId(mc.theWorld.getBlockState(pos));
+            Integer index = stateIds.get(stateID);
+            if (index == null) {
+              continue;
             }
 
-            final double distance = blockCenter.distanceTo(new Vec3(pos));
-            if (distance > 4) {
+            if (blockCenter.distanceTo(new Vec3(pos)) > 4) {
               continue;
             }
 
@@ -104,75 +189,25 @@ public class BlockUtil {
               continue;
             }
 
-            final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(blockCenter, pos)).getValue();
-            final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
+            final double hardness = getBlockStrength(stateID);
+//            final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
+            Angle ang = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos));
+            final float angleChange = ang.lengthSqrt();
 
             visitedPositions.add(hash);
             // Todo: Cost requires more testing.
-            blocks.add(pos, ((hardness / 100) * MightyMinerConfig.devMithHard + angleChange * MightyMinerConfig.devMithRot
-                + distance * MightyMinerConfig.devMithDist) / priorityValue);
+            //  an attempt to recreate *real* mining cost in time (ms)
+            debugs.add(new Pair<>(pos, Arrays.asList((float) (hardness * 1500 * priority[index]) / miningSpeed, angleChange * 3 / priority[index], ang.yaw, ang.pitch)));
+//            blocks.add(pos, ((hardness * 1500) / miningSpeed + angleChange * 3) / priority[index]);
           }
         }
       }
     }
-    return blocks.getBlocks();
+    debugs.sort(Comparator.comparing(it -> it.getSecond().get(0) + it.getSecond().get(1)));
+    return debugs;
   }
 
-  // Stole from baritoe
-  public static long longHash(int x, int y, int z) {
-    long hash = 3241;
-    hash = 3457689L * hash + x;
-    hash = 8734625L * hash + y;
-    hash = 2873465L * hash + z;
-    return hash;
-  }
-
-  // Priority - [GrayWool, Prismarine, BlueWool, Titanium]
-  // The higher the priority, the higher the chance of it getting picked
-  public static List<BlockPos> getBestMithrilBlocks(int[] priority, BlockPos blockToIgnore) {
-    final MinHeap<BlockPos> blocks = new MinHeap<>(500);
-    final BlockPos playerHeadPos = PlayerUtil.getBlockStandingOn().add(0, 2, 0);
-    final Vec3 posEyes = mc.thePlayer.getPositionEyes(1);
-    for (int x = -4; x < 5; x++) {
-      for (int z = -4; z < 5; z++) {
-        for (int y = -3; y < 5; y++) {
-          final BlockPos pos = playerHeadPos.add(x, y, z);
-          if (pos.equals(blockToIgnore)) {
-            continue;
-          }
-
-          final double hardness = getBlockStrength(pos);
-          // Modify block filtering condition based on MightyMinerConfig.oreType
-          if (MightyMinerConfig.oreType == 0) {
-            if (hardness < 500 || hardness > 2000 || hardness == 600) {
-              continue;
-            }
-          } else if (MightyMinerConfig.oreType == 1) {
-            if (hardness != 600) {
-              continue;
-            }
-          }
-
-          final double distance = posEyes.distanceTo(new Vec3(pos));
-          if (distance > 4) {
-            continue;
-          }
-
-          if (!hasVisibleSide(pos)) {
-            continue;
-          }
-
-          final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
-          final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
-          blocks.add(pos, ((hardness / 100) * MightyMinerConfig.devMithHard + angleChange * MightyMinerConfig.devMithRot
-              + distance * MightyMinerConfig.devMithDist) / priorityValue);
-        }
-      }
-    }
-    return blocks.getBlocks();
-  }
-
-  public static List<Pair<BlockPos, List<Float>>> getBestMithrilBlocksDebug(int[] priority) {
+  public static List<Pair<BlockPos, List<Float>>> getBestMithrilBlocksDebug(Map<Integer, Integer> stateIds, int[] priority, int speed) {
 //    final MinHeap<BlockPos> blocks = new MinHeap<>(500);
     final BlockPos playerHeadPos = PlayerUtil.getBlockStandingOn().add(0, 2, 0);
     final Vec3 posEyes = mc.thePlayer.getPositionEyes(1);
@@ -182,20 +217,14 @@ public class BlockUtil {
         for (int y = -3; y < 5; y++) {
           final BlockPos pos = playerHeadPos.add(x, y, z);
 
-          final double hardness = getBlockStrength(pos);
-          // Modify block filtering condition based on MightyMinerConfig.oreType
-          if (MightyMinerConfig.oreType == 0) {
-            if (hardness < 500 || hardness > 2000 || hardness == 600) {
-              continue;
-            }
-          } else if (MightyMinerConfig.oreType == 1) {
-            if (hardness != 600) {
-              continue;
-            }
+          final IBlockState state = mc.theWorld.getBlockState(pos);
+          final int stateID = Block.getStateId(state);
+          Integer index = stateIds.get(stateID);
+          if (index == null) {
+            continue;
           }
 
-          final double distance = posEyes.distanceTo(new Vec3(pos));
-          if (distance > 4) {
+          if (posEyes.distanceTo(new Vec3(pos)) > 4) {
             continue;
           }
 
@@ -203,13 +232,12 @@ public class BlockUtil {
             continue;
           }
 
+          final double hardness = getBlockStrength(stateID);
           final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
-          final int priorityValue = Math.max(1, priority[getPriorityIndex((int) hardness)]); // In case its set to zero
-//          blocks.add(pos, (hardness / 100 + angleChange * 0.15 + distance * 0.35) / priorityValue);
           debugs.add(new Pair(pos, Arrays.asList(
-                  (float) (hardness / (100 * MightyMinerConfig.devMithHard * priorityValue)),
-                  angleChange / (MightyMinerConfig.devMithRot * priorityValue),
-                  (float) distance / (MightyMinerConfig.devMithDist * priorityValue)))
+              (float) (hardness * 1500 * priority[index] / speed),
+              angleChange * 3 / priority[index]
+              ))
           );
         }
       }
@@ -232,94 +260,77 @@ public class BlockUtil {
     }
   }
 
-  public static int getBlockStrength(final BlockPos pos) {
-    final IBlockState blockState = mc.theWorld.getBlockState(pos);
+  public static int getBlockStrength(int stateID) {
 
-    if (blockState == null) {
-      return 30;
-    }
+    switch (stateID) {
+      case 57:  // Diamond Block
+      case 41:  // Gold Block
+      case 152: // Redstone Block
+      case 22:  // Lapis Block
+      case 133: // Emerald Block
+      case 42:  // Iron Block
+      case 173: // Coal Block
+        return 600;
 
-    Block block = blockState.getBlock();
-
-    if (block == Blocks.diamond_block) {
-      return 600;
-    } else if (block == Blocks.gold_block) {
-      return 600;
-    } else if (block == Blocks.redstone_block) {
-      return 600;
-    } else if (block == Blocks.lapis_block) {
-      return 600;
-    } else if (block == Blocks.emerald_block) {
-      return 600;
-    } else if (block == Blocks.iron_block) {
-      return 600;
-    } else if (block == Blocks.coal_block) {
-      return 600;
-    } else if (block == Blocks.sponge) {
-      return 500;
-    } else if (block == Blocks.stone) {
-      switch (blockState.getValue(BlockStone.VARIANT)) {
-        case STONE:
-          return 50;
-        case DIORITE_SMOOTH:
-          return 2000;
-        default:
-          break;
-      }
-    } else if (block == Blocks.wool) {
-      switch (blockState.getValue(BlockColored.COLOR)) {
-        case GRAY:
-          return 500;
-        case LIGHT_BLUE:
-          return 1500;
-        default:
-          break;
-      }
-    } else if (block == Blocks.stained_hardened_clay) {
-      if (blockState.getValue(BlockColored.COLOR) == EnumDyeColor.CYAN) {
+      case 19:  // Sponge
         return 500;
-      }
-    } else if (block == Blocks.prismarine) {
-      switch (blockState.getValue(BlockPrismarine.VARIANT)) {
-        case ROUGH:
-        case DARK:
-        case BRICKS:
-          return 800;
-        default:
-          break;
-      }
-    } else if (block instanceof BlockGlass) {
-      switch (blockState.getValue(BlockColored.COLOR)) {
-        case RED:
-          return 2500;
-        case PURPLE:
-        case BLUE:
-        case ORANGE:
-        case LIME:
-          return 3200;
-        case WHITE:
-        case YELLOW:
-          return 4000;
-        case MAGENTA:
-          return 5000;
-//                case BLUE: - Aquamarine - Do Something about this
-        case BLACK:
-        case BROWN:
-        case GREEN:
-          return 5200;
-        default:
-          break;
-      }
-    } else {
-      return 30;
+
+      case 1:   // Stone - strength of hardstone
+        return 50;
+
+      case 16385: // polished diorite
+        return 2000;
+      case 28707: // gray wool
+        return 500;
+      case 12323: // light blue wool
+        return 1500;
+      case 37023: // cyan stained clay
+        return 500;
+
+      case 168: // Prismarine
+      case 4264: // dark prismrine
+      case 8360: // brick prismarine
+        return 800;
+
+      case 95:    // opal
+      case 160:
+      case 16544: // topaz
+      case 16479:
+        return 3800;
+      case 4191:  // amber
+      case 4256:
+      case 12383: // sapphire
+      case 12448:
+      case 20575: // jade
+      case 20640:
+      case 41055: // amethyst
+      case 41120:
+        return 3000;
+      case 8287:  // jasper
+      case 8352:
+        return 4800;
+      case 45151: // aquamarine
+      case 45216:
+      case 53343: // peridot
+      case 53408:
+      case 61535: // onyx
+      case 61600:
+      case 49247: // citrine
+      case 49312:
+        return 5200;
+      case 57504: // ruby
+      case 57439:
+        return 2300;
+      default:
+        break;
     }
 
     return 5000;
   }
 
 
-  public static int getMiningTime(final BlockPos pos, final int miningSpeed) {
-    return (int) Math.ceil((getBlockStrength(pos) * 30) / (float) miningSpeed) + MightyMinerConfig.mithrilMinerTickGlideOffset;
+  public static int getMiningTime(int stateId, final int miningSpeed) {
+    return (int) Math.ceil((getBlockStrength(stateId) * 30) / (float) miningSpeed) + MightyMinerConfig.mithrilMinerTickGlideOffset;
   }
 
   public static Vec3 getSidePos(BlockPos block, EnumFacing face) {

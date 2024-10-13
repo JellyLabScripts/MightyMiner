@@ -8,10 +8,14 @@ import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.*;
 import com.jelly.mightyminerv2.util.helper.Clock;
+import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
 import java.awt.Color;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import net.minecraft.block.Block;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -25,13 +29,13 @@ import java.util.Random;
 
 // Code here is terrible
 // Help me fix it or fix it pls
-public class MithrilMiner extends AbstractFeature {
+public class BlockMiner extends AbstractFeature {
 
-  private static MithrilMiner instance;
+  private static BlockMiner instance;
 
-  public static MithrilMiner getInstance() {
+  public static BlockMiner getInstance() {
     if (instance == null) {
-      instance = new MithrilMiner();
+      instance = new BlockMiner();
     }
     return instance;
   }
@@ -39,12 +43,14 @@ public class MithrilMiner extends AbstractFeature {
   private static BoostState boostState = BoostState.UNKNOWN;
 
   private final Random random = new Random();
+  // Map of stateId and index in priority array
+  private Map<Integer, Integer> blocks = new HashMap<>();
+  private int[] priority = {1, 1, 1, 1};  // Priority of blocks array in order
   private State state = State.STARTING;
   private MithrilError mithrilError = MithrilError.NONE;
   private int miningSpeed = 200;          // Mainly for TickGliding
   private int miningTime = 0;             // For TickGliding
   private int speedBoost = 0;             // Boost Percentage
-  private int[] priority = {1, 1, 1, 1};  // Priority - [GrayWool, Prismarine, BlueWool, Titanium]
   private BlockPos targetBlock = null;
   private Vec3 targetPoint = null;
   private Vec3 destBlock = null;
@@ -53,7 +59,7 @@ public class MithrilMiner extends AbstractFeature {
 
   @Override
   public String getName() {
-    return "MithrilMiner";
+    return "BlockMiner";
   }
 
   @Override
@@ -83,16 +89,26 @@ public class MithrilMiner extends AbstractFeature {
   }
 
   // No TickGlide
-  public void start(final int[] priority) {
-    this.start(200, 100, priority, "");
+  public void start(MineableBlock[] blockToMine, final int[] priority) {
+    this.start(blockToMine, 200, 100, priority, "");
   }
 
-  public void start(final int miningSpeed, final int speedBoost, final int[] priority, String miningTool) {
+  public void start(MineableBlock[] blocksToMine, final int miningSpeed, final int speedBoost, final int[] priority, String miningTool) {
     // this should never happen
     if (!miningTool.isEmpty() && !InventoryUtil.holdItem(miningTool)) {
       error("Cannot hold " + miningTool);
       this.stop(MithrilError.NOT_ENOUGH_BLOCKS);
       return;
+    }
+    if (blocksToMine == null) {
+      error("No blocks to mine.");
+      this.stop(MithrilError.NOT_ENOUGH_BLOCKS);
+      return;
+    }
+    for(int i = 0; i < blocksToMine.length; i++){
+      for(int j: blocksToMine[i].stateIds){
+        this.blocks.put(j, i);
+      }
     }
     this.miningSpeed = miningSpeed;
     this.speedBoost = speedBoost;
@@ -136,10 +152,6 @@ public class MithrilMiner extends AbstractFeature {
       case STARTING:
         this.swapState(State.CHOOSING_BLOCK, 0);
 
-//        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindAttack, true);
-//        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
-//        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, MightyMinerConfig.mithrilMinerSneakWhileMining);
-
         // Unknown or Available
         if (boostState.ordinal() <= 1) {
           this.swapState(State.SPEED_BOOST, 250);
@@ -159,8 +171,8 @@ public class MithrilMiner extends AbstractFeature {
         break;
       case CHOOSING_BLOCK:
         List<BlockPos> blocks;
-        if (!MightyMinerConfig.mithrilStrafe || (blocks = BlockUtil.getBestMithrilBlocksAround(priority, this.targetBlock)).isEmpty()) {
-          blocks = BlockUtil.getBestMithrilBlocks(priority, this.targetBlock);
+        if (!MightyMinerConfig.mithrilStrafe || (blocks = BlockUtil.getBestMineableBlocksAround(this.blocks, priority, this.targetBlock, this.miningSpeed)).isEmpty()) {
+          blocks = BlockUtil.getBestMineableBlocks(this.blocks, priority, this.targetBlock, this.miningSpeed);
         }
 
         if (blocks.size() < 2) {
@@ -180,7 +192,7 @@ public class MithrilMiner extends AbstractFeature {
 
         this.targetBlock = blocks.get(blocks.get(0).equals(this.targetBlock) ? 1 : 0);
         final int boostMultiplier = boostState == BoostState.ACTIVE ? this.speedBoost / 100 : 1;
-        this.miningTime = BlockUtil.getMiningTime(this.targetBlock, this.miningSpeed * boostMultiplier) * 2;
+        this.miningTime = BlockUtil.getMiningTime(Block.getStateId(mc.theWorld.getBlockState(this.targetBlock)), this.miningSpeed * boostMultiplier) * 2;
         this.swapState(State.ROTATING, 0);
 
         // fall through
@@ -230,7 +242,8 @@ public class MithrilMiner extends AbstractFeature {
         }
         // fall through
       case WALKING:
-        if ((this.destBlock == null || Math.hypot(this.destBlock.xCoord - mc.thePlayer.posX, this.destBlock.zCoord - mc.thePlayer.posZ) > 0.2) && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 3.5) {
+        if ((this.destBlock == null || Math.hypot(this.destBlock.xCoord - mc.thePlayer.posX, this.destBlock.zCoord - mc.thePlayer.posZ) > 0.2)
+            && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 3.5) {
           this.shiftTimer.reset();
           StrafeUtil.enabled = true;
           StrafeUtil.yaw = AngleUtil.getRotationYaw360(this.destBlock == null ? this.targetPoint : this.destBlock);
@@ -346,7 +359,7 @@ public class MithrilMiner extends AbstractFeature {
 
   private void swapState(final State toState, final int delay) {
     this.state = toState;
-    if(delay == 0){
+    if (delay == 0) {
       this.timer.reset();
     } else {
       this.timer.schedule(delay);

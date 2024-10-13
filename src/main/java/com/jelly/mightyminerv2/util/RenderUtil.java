@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.util.List;
 
 public final class RenderUtil {
+
   private static final Minecraft mc = Minecraft.getMinecraft();
 
   private RenderUtil() {
@@ -26,8 +27,8 @@ public final class RenderUtil {
 
   public static void drawPoint(Vec3 vec, Color color) {
     drawBox(new AxisAlignedBB(
-            vec.xCoord - 0.05, vec.yCoord - 0.05, vec.zCoord - 0.05,
-            vec.xCoord + 0.05, vec.yCoord + 0.05, vec.zCoord + 0.05
+        vec.xCoord - 0.05, vec.yCoord - 0.05, vec.zCoord - 0.05,
+        vec.xCoord + 0.05, vec.yCoord + 0.05, vec.zCoord + 0.05
     ), color);
   }
 
@@ -37,23 +38,23 @@ public final class RenderUtil {
     GlStateManager.disableDepth();
     GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
     GlStateManager.color(
-            color.getRed() / 255F,
-            color.getGreen() / 255F,
-            color.getBlue() / 255F,
-            color.getAlpha() / 255F
+        color.getRed() / 255F,
+        color.getGreen() / 255F,
+        color.getBlue() / 255F,
+        color.getAlpha() / 255F
     );
 
     GL11.glLineWidth(1.5f);
     GL11.glBegin(GL11.GL_LINES);
     GL11.glVertex3d(
-            start.xCoord - mc.getRenderManager().viewerPosX,
-            start.yCoord - mc.getRenderManager().viewerPosY,
-            start.zCoord - mc.getRenderManager().viewerPosZ
+        start.xCoord - mc.getRenderManager().viewerPosX,
+        start.yCoord - mc.getRenderManager().viewerPosY,
+        start.zCoord - mc.getRenderManager().viewerPosZ
     );
     GL11.glVertex3d(
-            end.xCoord - mc.getRenderManager().viewerPosX,
-            end.yCoord - mc.getRenderManager().viewerPosY,
-            end.zCoord - mc.getRenderManager().viewerPosZ
+        end.xCoord - mc.getRenderManager().viewerPosX,
+        end.yCoord - mc.getRenderManager().viewerPosY,
+        end.zCoord - mc.getRenderManager().viewerPosZ
     );
     GL11.glEnd();
 
@@ -65,31 +66,24 @@ public final class RenderUtil {
 
   public static void outlineBlock(BlockPos pos, Color color) {
     RenderGlobal.drawSelectionBoundingBox(new AxisAlignedBB(
-            pos.getX(), pos.getY(), pos.getZ(),
-            pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1
+        pos.getX(), pos.getY(), pos.getZ(),
+        pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1
     ).expand(0.002, 0.002, 0.002).offset(
-            -mc.getRenderManager().viewerPosX,
-            -mc.getRenderManager().viewerPosY,
-            -mc.getRenderManager().viewerPosZ
+        -mc.getRenderManager().viewerPosX,
+        -mc.getRenderManager().viewerPosY,
+        -mc.getRenderManager().viewerPosZ
     ));
   }
 
   public static void drawBlock(BlockPos blockPos, Color color) {
-    drawBox(new AxisAlignedBB(
-            blockPos.getX(),
-            blockPos.getY(),
-            blockPos.getZ(),
-            blockPos.getX() + 1,
-            blockPos.getY() + 1,
-            blockPos.getZ() + 1
-    ), color);
+    drawBox(new AxisAlignedBB(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1), color);
   }
 
   public static void drawBox(AxisAlignedBB aabb, Color color) {
     aabb = aabb.offset(
-            -mc.getRenderManager().viewerPosX,
-            -mc.getRenderManager().viewerPosY,
-            -mc.getRenderManager().viewerPosZ
+        -mc.getRenderManager().viewerPosX,
+        -mc.getRenderManager().viewerPosY,
+        -mc.getRenderManager().viewerPosZ
     );
 
     GlStateManager.pushMatrix();
@@ -103,10 +97,10 @@ public final class RenderUtil {
     final WorldRenderer worldRenderer = tessellator.getWorldRenderer();
 
     GlStateManager.color(
-            color.getRed() / 255F,
-            color.getGreen() / 255F,
-            color.getBlue() / 255F,
-            color.getAlpha() / 255F
+        color.getRed() / 255F,
+        color.getGreen() / 255F,
+        color.getBlue() / 255F,
+        color.getAlpha() / 255F
     );
 
     // Draw box
@@ -162,13 +156,7 @@ public final class RenderUtil {
 
     int yOffset = 0;
     for (String line : lines) {
-      fontRenderer.drawString(
-              line,
-              -fontRenderer.getStringWidth(line) / 2f,
-              yOffset,
-              color.getRGB(),
-              true
-      );
+      fontRenderer.drawString(line, -fontRenderer.getStringWidth(line) / 2f, yOffset, color.getRGB(), true);
       yOffset += fontRenderer.FONT_HEIGHT * 2;
     }
 
@@ -187,11 +175,11 @@ public final class RenderUtil {
     GlStateManager.scale(scale, scale, scale);
 
     fontRenderer.drawString(
-            text,
-            -fontRenderer.getStringWidth(text) / 2f,
-            0,
-            color.getRGB(),
-            true
+        text,
+        -fontRenderer.getStringWidth(text) / 2f,
+        0,
+        color.getRGB(),
+        true
     );
 
     GlStateManager.popMatrix();
@@ -247,9 +235,9 @@ public final class RenderUtil {
 
   public static void drawTracer(Vec3 to, Color color) {
     Vec3 from = new Vec3(
-            mc.thePlayer.posX,
-            mc.thePlayer.posY + mc.thePlayer.getEyeHeight(),
-            mc.thePlayer.posZ
+        mc.thePlayer.posX,
+        mc.thePlayer.posY + mc.thePlayer.getEyeHeight(),
+        mc.thePlayer.posZ
     );
     drawLine(from, to, color);
   }

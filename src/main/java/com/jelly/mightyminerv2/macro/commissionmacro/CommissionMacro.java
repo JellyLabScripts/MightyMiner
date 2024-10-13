@@ -1,6 +1,5 @@
 package com.jelly.mightyminerv2.macro.commissionmacro;
 
-import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
@@ -11,7 +10,7 @@ import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.feature.impl.AutoWarp;
-import com.jelly.mightyminerv2.feature.impl.MithrilMiner;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner;
 import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.handler.GameStateHandler;
 import com.jelly.mightyminerv2.handler.GraphHandler;
@@ -20,20 +19,15 @@ import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.macro.commissionmacro.helper.Commission;
 import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil;
-import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
+import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import com.jelly.mightyminerv2.util.helper.location.Location;
 import com.jelly.mightyminerv2.util.helper.location.SubLocation;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import lombok.Getter;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class CommissionMacro extends AbstractMacro {
@@ -114,7 +108,7 @@ public class CommissionMacro extends AbstractMacro {
   }
 
   public void stopActiveFeatures() {
-    MithrilMiner.getInstance().stop();
+    BlockMiner.getInstance().stop();
     AutoMobKiller.getInstance().stop();
   }
 
@@ -229,8 +223,9 @@ public class CommissionMacro extends AbstractMacro {
   //  private Commission last;
   private List<Commission> curr = new ArrayList<>();
 
-  private final int[] mithrilPriority = {9, 6, 4, 1};
-  private final int[] titaniumPriority = {5, 3, 1, 10};
+  private final MineableBlock[] blocksToMine = {MineableBlock.GRAY_MITHRIL, MineableBlock.GREEN_MITHRIL, MineableBlock.BLUE_MITHRIL, MineableBlock.TITANIUM};
+  private final int[] mithrilPriority = {1, 1, 1, 1};
+  private final int[] titaniumPriority = {1, 1, 1, 10};
 
   private void changeMacroState(MacroState to, int timeToWait) {
     this.macroState = to;
@@ -373,7 +368,8 @@ public class CommissionMacro extends AbstractMacro {
         }
         break;
       case START_MINING:
-        MithrilMiner.getInstance().start(
+        BlockMiner.getInstance().start(
+            blocksToMine,
             miningSpeed,
             miningSpeedBoost,
             this.curr.stream().anyMatch(it -> it.getName().contains("Titanium")) ? titaniumPriority : mithrilPriority,
@@ -382,10 +378,10 @@ public class CommissionMacro extends AbstractMacro {
         this.changeMacroState(MacroState.MINING_VERIFY);
         break;
       case MINING_VERIFY:
-        if (MithrilMiner.getInstance().isRunning()) {
+        if (BlockMiner.getInstance().isRunning()) {
           return;
         }
-        if (MithrilMiner.getInstance().hasSucceeded()) {
+        if (BlockMiner.getInstance().hasSucceeded()) {
           return;
         }
 
@@ -395,7 +391,7 @@ public class CommissionMacro extends AbstractMacro {
           break;
         }
 
-        switch (MithrilMiner.getInstance().getMithrilError()) {
+        switch (BlockMiner.getInstance().getMithrilError()) {
           case NONE:
             error("MithrilMacro Failed but error is NONE.");
             this.changeMainState(MainState.NONE);

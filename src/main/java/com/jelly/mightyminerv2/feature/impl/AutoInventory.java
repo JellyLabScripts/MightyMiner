@@ -2,7 +2,7 @@ package com.jelly.mightyminerv2.feature.impl;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
-import com.jelly.mightyminerv2.feature.impl.MithrilMiner.BoostState;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner.BoostState;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil.ClickMode;
 import com.jelly.mightyminerv2.util.InventoryUtil.ClickType;
@@ -184,7 +184,7 @@ public class AutoInventory extends AbstractFeature {
         final Matcher matcher = Pattern.compile("\\+(\\d+)%").matcher(speedBoostLore);
         if (matcher.find()) {
           this.speedBoostValues[1] = Integer.parseInt(matcher.group(1));
-          if (MithrilMiner.getBoostState() == BoostState.ACTIVE) {
+          if (BlockMiner.getBoostState() == BoostState.ACTIVE) {
             this.speedBoostValues[0] /= this.speedBoostValues[1] / 100.0;
           }
           this.swapSbState(SB.END, 500);

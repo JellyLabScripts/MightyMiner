@@ -12,6 +12,7 @@ import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner;
 import com.jelly.mightyminerv2.feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.handler.GraphHandler;
@@ -26,6 +27,7 @@ import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.helper.Angle;
 import com.jelly.mightyminerv2.util.helper.Clock;
+import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
 import com.jelly.mightyminerv2.util.helper.route.Route;
@@ -44,17 +46,26 @@ import com.jelly.mightyminerv2.pathfinder.movement.movements.MovementTraverse;
 import com.jelly.mightyminerv2.pathfinder.util.BlockUtil;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import jline.internal.Log;
 import kotlin.Pair;
 import lombok.Getter;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockGlass;
+import net.minecraft.block.BlockPrismarine;
+import net.minecraft.block.BlockStone;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.ContainerChest;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -86,6 +97,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
   PathNode curr;
   List<Pair<EntityPlayer, Pair<Double, Double>>> mobs = new ArrayList<>();
   List<Pair<String, Entity>> ents = new ArrayList<>();
+  List<Pair<BlockPos, List<Float>>> vals = new ArrayList<>();
   public boolean allowed = false;
   boolean allowedd = false;
   Clock timer = new Clock();
@@ -107,33 +119,22 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    Logger.sendMessage("Message");
-    Logger.sendNote("Note");
-    Logger.sendLog("Log");
-    Logger.sendWarning("Warning");
-    Logger.sendError("Error");
+    vals.clear();
+    Map<Integer, Integer> ma = new HashMap<>();
+    MineableBlock.GRAY_MITHRIL.stateIds.forEach(it -> ma.put(it, 0));
+    MineableBlock.GREEN_MITHRIL.stateIds.forEach(it -> ma.put(it, 1));
+    MineableBlock.BLUE_MITHRIL.stateIds.forEach(it -> ma.put(it, 2));
+    MineableBlock.TITANIUM.stateIds.forEach(it -> ma.put(it, 3));
+    this.vals.addAll(com.jelly.mightyminerv2.util.BlockUtil.getBestMineableBlocksAroundDebug(ma, new int[]{1, 1, 1, 1}, null, 2600));
+
   }
 
+  MineableBlock[] blocks = {MineableBlock.DIAMOND, MineableBlock.EMERALD, MineableBlock.GOLD, MineableBlock.COAL, MineableBlock.IRON, MineableBlock.REDSTONE, MineableBlock.LAPIS};
+
   @SubCommand
-  public void p() {
-    mc.theWorld.loadedEntityList.forEach(it -> {
-      if (it instanceof EntityArmorStand) {
-        if (it.hasCustomName()) {
-          System.out.println("ARMORSTAND");
-          System.out.println("Name: " + it.getCustomNameTag() + ", PositionVec: " + it.getPositionVector() + ", Height: " + it.height);
-          System.out.println("Casted Pos(x: " + (int) it.posX + ", realY: " + it.posY + ", z: " + (int) it.posZ + ")");
-          System.out.println("Exp Pos(x: " + (int) it.posX + ", y: " + (((int) it.posY) - 1) + ", z: " + (int) it.posZ + ")");
-          System.out.println();
-        }
-      } else if (it instanceof EntityLivingBase) {
-        System.out.println("ENTITY");
-        System.out.println("Name: " + it.getName() + ", Height: " + it.height +  ", PositionVector: " + it.getPositionVector());
-        System.out.println("Casted Pos(x: " + (int) it.posX + ", realY: " + it.posY + ", z: " + (int) it.posZ + ")");
-        System.out.println("ExpectedCastPos Pos(x: " + (int) it.posX + ", y: " + (int) (it.posY + it.height) + ", z: " + (int) it.posZ + ")");
-        System.out.println();
-      }
-    });
-    Logger.sendNote("Done");
+  public void p(int a) {
+    MineableBlock[] block = new MineableBlock[]{blocks[a]};
+    BlockMiner.getInstance().start(block, 2600, 250, new int[]{1}, "Titanium Drill");
   }
 
   public String getEntityNameFromArmorStand(String armorstandName) {
@@ -377,100 +378,111 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     Logger.sendLog(event.packet.toString());
   }
 
+  void draw(Pair<BlockPos, List<Float>> it, Color color) {
+    RenderUtil.drawBlock(it.getFirst(), color);
+    RenderUtil.drawText("Hard: " + ((int) (it.getSecond().get(0) * 1000) / 1000) + ", Ang: " + ((int) (it.getSecond().get(1) * 1000) / 1000) + ", y: " + it.getSecond().get(2) + ", p: " + it.getSecond().get(3), it.getFirst().getX() + 0.5, it.getFirst().getY() + 1.2, it.getFirst().getZ() + 0.5, 0.4f);
+  }
+
   @SubscribeEvent
   public void onRender(RenderWorldLastEvent event) {
-    if (entTodraw != null) {
-      RenderUtil.drawBox(entTodraw.getEntityBoundingBox(), new Color(123, 214, 44, 150));
-      RenderUtil.drawBlock(new BlockPos(entTodraw.posX, Math.ceil(entTodraw.posY) - 1, entTodraw.posZ), new Color(123, 214, 44, 150));
+    if (!vals.isEmpty()) {
+      draw(vals.get(0), new Color(255, 0, 0, 100));
+      for (int i = 1; i < vals.size(); i++) {
+        draw(vals.get(i), new Color(197, 19, 203, 157));
+      }
     }
-
-    if (!blockToDraw.isEmpty()) {
-      blockToDraw.forEach(b -> RenderUtil.drawBlock(b, new Color(255, 0, 0, 200)));
-    }
-
-    if (this.block != null) {
-      RenderUtil.drawBlock(this.block, new Color(255, 0, 0, 50));
-    }
-
-    if (this.first != null) {
-      RenderUtil.drawBlock(new BlockPos(this.first.toVec3()), new Color(0, 0, 0, 200));
-    }
-
-    if (this.second != null) {
-      RenderUtil.drawBlock(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
-    }
-
-//    if (pathfinder != null) {
-//      pathfinder.getClosedSet().values().forEach(it -> RenderUtil.drawBlockBox(it.getBlock(), new Color(213, 124, 124, 100)));
+//    if (entTodraw != null) {
+//      RenderUtil.drawBox(entTodraw.getEntityBoundingBox(), new Color(123, 214, 44, 150));
+//      RenderUtil.drawBlock(new BlockPos(entTodraw.posX, Math.ceil(entTodraw.posY) - 1, entTodraw.posZ), new Color(123, 214, 44, 150));
 //    }
-
-    if (path != null) {
-      path.getPath().forEach(tit -> RenderUtil.drawBlock(tit, new Color(255, 0, 0, 200)));
-    }
-
-    if (curr != null) {
-      RenderUtil.drawBlock(curr.getBlock(), new Color(0, 255, 0, 255));
-      if (curr.getParentNode() != null) {
-        RenderUtil.drawBlock(curr.getParentNode().getBlock(), new Color(0, 0, 255, 255));
-      }
-    }
-
-    if (!ents.isEmpty()) {
-      ents.forEach(ent -> {
-        Vec3 pos = ent.getSecond().getPositionVector();
-        RenderUtil.drawText(ent.getFirst(), pos.xCoord, pos.yCoord + 0.5, pos.zCoord, 1f);
-      });
-    }
-
-    if (!mobs.isEmpty()) {
-      Pair<EntityPlayer, Pair<Double, Double>> best = mobs.get(0);
-      Vec3 pos = best.getFirst().getPositionVector();
-      RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5),
-          new Color(255, 0, 241, 150));
-      RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord,
-          pos.yCoord + 2.2, pos.zCoord, 1);
-
-      for (int i = 1; i < mobs.size(); i++) {
-        best = mobs.get(i);
-        pos = best.getFirst().getPositionVector();
-        RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5),
-            new Color(123, 0, 234, 150));
-        RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord,
-            pos.yCoord + 2.2, pos.zCoord, 1);
-      }
-    }
-
-    if (!btd.isEmpty()) {
-      Pair<BlockPos, List<Float>> best = btd.get(0);
-      BlockPos pos = best.getFirst();
-      RenderUtil.drawBlock(best.getFirst(), new Color(123, 0, 234, 150));
-      if (com.jelly.mightyminerv2.util.BlockUtil.getBlockLookingAt().equals(pos)) {
-        RenderUtil.drawText(
-            String.format("Hardness: %.2f, Angle: %.2f, Dist: %.2f", best.getSecond().get(0), best.getSecond().get(1), best.getSecond().get(2)),
-            pos.getX() + 0.5,
-            pos.getY() + 1.2, pos.getZ() + 0.5, 1);
-      }
-
-      for (int i = 1; i < btd.size(); i++) {
-        best = btd.get(i);
-        pos = best.getFirst();
-        RenderUtil.drawBlock(best.getFirst(), new Color(255, 0, 241, 50));
-        if (com.jelly.mightyminerv2.util.BlockUtil.getBlockLookingAt().equals(pos)) {
-          RenderUtil.drawText(
-              String.format("Hardness: %.2f, Angle: %.2f, Dist: %.2f", best.getSecond().get(0), best.getSecond().get(1), best.getSecond().get(2)),
-              pos.getX() + 0.5,
-              pos.getY() + 1.2, pos.getZ() + 0.5, 1);
-        }
-      }
-
-
-      if(this.allowedd) {
-        BlockPos poss = new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw))));
-        if (!mc.theWorld.isAirBlock(poss)) {
-          RenderUtil.drawBlock(poss, Color.GREEN);
-        }
-      }
-    }
+//
+//    if (!blockToDraw.isEmpty()) {
+//      blockToDraw.forEach(b -> RenderUtil.drawBlock(b, new Color(255, 0, 0, 200)));
+//    }
+//
+//    if (this.block != null) {
+//      RenderUtil.drawBlock(this.block, new Color(255, 0, 0, 50));
+//    }
+//
+//    if (this.first != null) {
+//      RenderUtil.drawBlock(new BlockPos(this.first.toVec3()), new Color(0, 0, 0, 200));
+//    }
+//
+//    if (this.second != null) {
+//      RenderUtil.drawBlock(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
+//    }
+//
+////    if (pathfinder != null) {
+////      pathfinder.getClosedSet().values().forEach(it -> RenderUtil.drawBlockBox(it.getBlock(), new Color(213, 124, 124, 100)));
+////    }
+//
+//    if (path != null) {
+//      path.getPath().forEach(tit -> RenderUtil.drawBlock(tit, new Color(255, 0, 0, 200)));
+//    }
+//
+//    if (curr != null) {
+//      RenderUtil.drawBlock(curr.getBlock(), new Color(0, 255, 0, 255));
+//      if (curr.getParentNode() != null) {
+//        RenderUtil.drawBlock(curr.getParentNode().getBlock(), new Color(0, 0, 255, 255));
+//      }
+//    }
+//
+//    if (!ents.isEmpty()) {
+//      ents.forEach(ent -> {
+//        Vec3 pos = ent.getSecond().getPositionVector();
+//        RenderUtil.drawText(ent.getFirst(), pos.xCoord, pos.yCoord + 0.5, pos.zCoord, 1f);
+//      });
+//    }
+//
+//    if (!mobs.isEmpty()) {
+//      Pair<EntityPlayer, Pair<Double, Double>> best = mobs.get(0);
+//      Vec3 pos = best.getFirst().getPositionVector();
+//      RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5),
+//          new Color(255, 0, 241, 150));
+//      RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord,
+//          pos.yCoord + 2.2, pos.zCoord, 1);
+//
+//      for (int i = 1; i < mobs.size(); i++) {
+//        best = mobs.get(i);
+//        pos = best.getFirst().getPositionVector();
+//        RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord + 2, pos.zCoord + 0.5),
+//            new Color(123, 0, 234, 150));
+//        RenderUtil.drawText(String.format("Dist: %.2f, Angle: %.2f", best.getSecond().getFirst(), best.getSecond().getSecond()), pos.xCoord,
+//            pos.yCoord + 2.2, pos.zCoord, 1);
+//      }
+//    }
+//
+//    if (!btd.isEmpty()) {
+//      Pair<BlockPos, List<Float>> best = btd.get(0);
+//      BlockPos pos = best.getFirst();
+//      RenderUtil.drawBlock(best.getFirst(), new Color(123, 0, 234, 150));
+//      if (com.jelly.mightyminerv2.util.BlockUtil.getBlockLookingAt().equals(pos)) {
+//        RenderUtil.drawText(
+//            String.format("Hardness: %.2f, Angle: %.2f, Dist: %.2f", best.getSecond().get(0), best.getSecond().get(1), best.getSecond().get(2)),
+//            pos.getX() + 0.5,
+//            pos.getY() + 1.2, pos.getZ() + 0.5, 1);
+//      }
+//
+//      for (int i = 1; i < btd.size(); i++) {
+//        best = btd.get(i);
+//        pos = best.getFirst();
+//        RenderUtil.drawBlock(best.getFirst(), new Color(255, 0, 241, 50));
+//        if (com.jelly.mightyminerv2.util.BlockUtil.getBlockLookingAt().equals(pos)) {
+//          RenderUtil.drawText(
+//              String.format("Hardness: %.2f, Angle: %.2f, Dist: %.2f", best.getSecond().get(0), best.getSecond().get(1), best.getSecond().get(2)),
+//              pos.getX() + 0.5,
+//              pos.getY() + 1.2, pos.getZ() + 0.5, 1);
+//        }
+//      }
+//
+//      if (this.allowedd) {
+//        BlockPos poss = new BlockPos(
+//            mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(AngleUtil.normalizeAngle(mc.thePlayer.rotationYaw))));
+//        if (!mc.theWorld.isAirBlock(poss)) {
+//          RenderUtil.drawBlock(poss, Color.GREEN);
+//        }
+//      }
+//    }
   }
 
   @SubCommand

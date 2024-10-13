@@ -5,7 +5,7 @@ import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
 import com.jelly.mightyminerv2.feature.impl.AutoWarp;
-import com.jelly.mightyminerv2.feature.impl.MithrilMiner;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner;
 import com.jelly.mightyminerv2.feature.impl.MobTracker;
 import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
 import com.jelly.mightyminerv2.feature.impl.Pathfinder;
@@ -34,7 +34,7 @@ public class FeatureManager {
         AutoInventory.getInstance(),
         AutoMobKiller.getInstance(),
         AutoWarp.getInstance(),
-        MithrilMiner.getInstance(),
+        BlockMiner.getInstance(),
         MouseUngrab.getInstance(),
         Pathfinder.getInstance(),
         RouteBuilder.getInstance(),

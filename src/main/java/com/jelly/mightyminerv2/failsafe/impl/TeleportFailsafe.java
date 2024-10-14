@@ -69,7 +69,6 @@ public class TeleportFailsafe extends AbstractFailsafe {
     if (monitoringDeathMessages) {
       if (deathCheckClock.passed() || isPlayerRecentlyDied()) {
         if (isPlayerRecentlyDied()) {
-          // Remove from failsafe queue if a death message is detected
           warn("Death message detected, canceling teleport failsafe.");
           FailsafeManager.getInstance().removeFailsafeFromQueue(this);
           /*Commissionmacro state should be set to pathing or pathing should be restarted because other wise it causes bugs (iam too dumb for this)

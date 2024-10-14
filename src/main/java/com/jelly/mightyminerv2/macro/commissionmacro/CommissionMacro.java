@@ -466,8 +466,9 @@ public class CommissionMacro extends AbstractMacro {
 
         if (AutoCommissionClaim.getInstance().succeeded()) {
           List<Commission> nextComm = AutoCommissionClaim.getInstance().getNextComm();
-          if (nextComm.isEmpty()) {
-            error("Couldn't retrieve next comm from NPC gui. Waiting for Tablist to update.");
+
+          if (nextComm == null || nextComm.isEmpty()) {
+            error("Couldn't retrieve next comm from NPC GUI. Waiting for Tablist to update.");
             this.changeMacroState(MacroState.WAITING, 3000);
             this.checkForCommissionChange = true;
           } else {
@@ -476,6 +477,7 @@ public class CommissionMacro extends AbstractMacro {
           }
           return;
         }
+
 
         if (++this.macroRetries > 3) {
           error("Tried three time but kept getting timed out. Disabling");

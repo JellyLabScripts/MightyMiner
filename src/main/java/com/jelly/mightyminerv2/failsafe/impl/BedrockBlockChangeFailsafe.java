@@ -25,7 +25,7 @@ public class BedrockBlockChangeFailsafe extends AbstractFailsafe {
 
     private final Clock timer = new Clock();
     private final List<Long> bedrockChangeTimestamps = new ArrayList<>();
-    private static final int THRESHOLD = 10;
+    private static final int THRESHOLD = 20;
     private static final long TIME_WINDOW = 100;
     private static final int RADIUS = 10;
 

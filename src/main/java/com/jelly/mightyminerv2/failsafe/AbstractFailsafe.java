@@ -80,6 +80,7 @@ public abstract class AbstractFailsafe {
     KNOCKBACK,
     ROTATION,
     TELEPORT,
-    BEDROCK_CHECK
+    BEDROCK_CHECK,
+    SLOT_CHANGE
   }
 }

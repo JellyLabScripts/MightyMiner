@@ -2,15 +2,19 @@ package com.jelly.mightyminerv2.config;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
+import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.config.data.OptionSize;
 import cc.polyfrost.oneconfig.libs.common.value.qual.DoubleVal;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.hud.DebugHUD;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.macro.MacroManager;
+import com.jelly.mightyminerv2.util.helper.AudioManager;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.input.Keyboard;
 
@@ -434,6 +438,78 @@ public class MightyMinerConfig extends Config {
           category = COMMISSION
   )
   public static CommissionHUD commissionHUD = CommissionHUD.getInstance();
+
+  //</editor-fold>
+
+  //<editor-fold desc="Failsafe">
+
+  @Switch(
+          name = "Enable Failsafe Trigger Sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound", size = OptionSize.DUAL,
+          description = "Makes a sound when a failsafe has been triggered"
+  )
+  public static boolean enableFailsafeSound = true;
+  @DualOption(
+          name = "Failsafe Sound Type", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The failsafe sound type to play when a failsafe has been triggered",
+          left = "Minecraft",
+          right = "Custom",
+          size = 2
+  )
+  public static boolean failsafeSoundType = false;
+  @Dropdown(
+          name = "Minecraft Sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The Minecraft sound to play when a failsafe has been triggered",
+          options = {
+                  "Ping", // 0
+                  "Anvil" // 1
+          }
+  )
+  public static int failsafeMcSoundSelected = 1;
+
+  @Dropdown(
+          name = "Custom Sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The custom sound to play when a failsafe has been triggered",
+          options = {
+                  "Custom", // 0
+                  "Voice", // 1
+                  "Metal Pipe", // 2
+                  "AAAAAAAAAA", // 3
+                  "Loud Buzz", // 4
+          }
+  )
+  public static int failsafeSoundSelected = 1;
+  @Number(
+          name = "Number of times to play custom sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The number of times to play custom sound when a failsafe has been triggered",
+          min = 1, max = 10
+  )
+  public static int failsafeSoundTimes = 13;
+
+  @Slider(
+          name = "Failsafe Sound Volume (in %)", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The volume of the failsafe sound",
+          min = 0, max = 100
+  )
+  public static float failsafeSoundVolume = 50.0f;
+  @Switch(
+          name = "Max out Master category sounds while pinging", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "Maxes out the sounds while failsafe"
+  )
+  public static boolean maxOutMinecraftSounds = false;
+
+  @Button(
+          name = "", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "Plays the selected sound",
+          text = "Play"
+  )
+  Runnable _playFailsafeSoundButton = () -> AudioManager.getInstance().playSound();
+
+  @Button(
+          name = "", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "Stops playing the selected sound",
+          text = "Stop"
+  )
+  Runnable _stopFailsafeSoundButton = () -> AudioManager.getInstance().resetSound();
 
 
   //</editor-fold>

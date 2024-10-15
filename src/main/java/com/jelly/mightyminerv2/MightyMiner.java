@@ -18,6 +18,7 @@ import com.jelly.mightyminerv2.util.ReflectionUtils;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.TablistUtil;
 import com.jelly.mightyminerv2.handler.RouteHandler;
+import com.jelly.mightyminerv2.util.helper.AudioManager;
 import com.jelly.mightyminerv2.util.helper.graph.Graph;
 import com.jelly.mightyminerv2.util.helper.graph.GraphSerializer;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
@@ -134,6 +135,7 @@ public class MightyMiner {
     MinecraftForge.EVENT_BUS.register(GraphHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(MacroManager.getInstance());
     MinecraftForge.EVENT_BUS.register(FailsafeManager.getInstance());
+    MinecraftForge.EVENT_BUS.register(AudioManager.getInstance());
     FeatureManager.getInstance().allFeatures.forEach(MinecraftForge.EVENT_BUS::register);
     MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
     MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());

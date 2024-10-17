@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.feature;
 
+import com.jelly.mightyminerv2.feature.impl.AutoChestUnlocker;
 import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
@@ -40,7 +41,8 @@ public class FeatureManager {
         RouteBuilder.getInstance(),
         RouteNavigator.getInstance(),
         MobTracker.getInstance(),
-        AutoDrillRefuel.getInstance()
+        AutoDrillRefuel.getInstance(),
+        AutoChestUnlocker.getInstance()
     ));
   }
 

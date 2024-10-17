@@ -2,16 +2,15 @@ package com.jelly.mightyminerv2.feature.impl;
 
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.AngleUtil;
+import com.jelly.mightyminerv2.util.BlockUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
-import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.StrafeUtil;
 import com.jelly.mightyminerv2.util.helper.Angle;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
@@ -37,12 +36,12 @@ public class PathExecutor {
   private boolean enabled = false;
   private final Minecraft mc = Minecraft.getMinecraft();
 
-  private Deque<Path> pathQueue = new LinkedList<>();
+  private final Deque<Path> pathQueue = new LinkedList<>();
   private Path prev;
   private Path curr;
 
-  private Map<Long, List<Long>> map = new HashMap<>();
-  private List<BlockPos> blockPath = new ArrayList<>();
+  private final Map<Long, List<Long>> map = new HashMap<>();
+  private final List<BlockPos> blockPath = new ArrayList<>();
 
   private boolean failed = false;
   private boolean succeeded = false;
@@ -56,14 +55,12 @@ public class PathExecutor {
   private boolean interpolated = true;
   private float interpolYawDiff = 0f;
 
-  private float tempIpYaw = 0;
-
   private State state = State.STARTING_PATH;
 
   private boolean allowSprint = true;
   private boolean allowInterpolation = false;
 
-  private Clock stuckTimer = new Clock();
+  private final Clock stuckTimer = new Clock();
 
   public void queuePath(Path path) {
     if (path.getPath().isEmpty()) {
@@ -130,30 +127,39 @@ public class PathExecutor {
       this.stop();
     }
 
-    if (this.curr == null) {
-      if (this.stuckTimer.isScheduled()) {
-        this.stuckTimer.reset();
+    BlockPos playerPos = PlayerUtil.getBlockStandingOn();
+    if (this.curr != null) {
+      // this is utterly useless but im useless as well
+      List<Long> blockHashes = this.map.get(this.pack(playerPos.getX(), playerPos.getZ()));
+      int current = -1;
+      if (blockHashes != null && !blockHashes.isEmpty()) {
+        int bestY = -1;
+        double playerY = mc.thePlayer.posY;
+        for (Long blockHash : blockHashes) {
+          Pair<Integer, Integer> block = this.unpack(blockHash);
+          int blockY = block.getFirst();
+          int blockTarget = block.getSecond();
+          if (blockTarget > this.previous) {
+            if (bestY == -1 || (blockY < playerY && blockY > bestY) || (blockY >= playerY && blockY < bestY)) {
+              bestY = block.getFirst();
+              current = blockTarget;
+            }
+          }
+        }
       }
-      if (this.pathQueue.isEmpty()) {
-        this.state = State.WAITING;
-        return true;
-      }
-      log("loading new path");
-      this.blockPath.clear();
-      this.map.clear();
-      this.previous = -1;
-      this.target = 0;
 
-      this.curr = this.pathQueue.poll();
-      this.blockPath.addAll(this.curr.getSmoothedPath());
-      for (int i = 0; i < this.blockPath.size(); i++) {
-        BlockPos pos = this.blockPath.get(i);
-        this.map.computeIfAbsent(this.pack(pos.getX(), pos.getZ()), k -> new ArrayList<>()).add(this.pack(pos.getY(), i));
+      if (current != -1 && current > previous) {
+        this.previous = current;
+        this.target = current + 1;
+        this.state = State.TRAVERSING;
+        this.pastTarget = false;
+        this.interpolated = false;
+        this.interpolYawDiff = 0;
+        this.nodeChangeTime = System.currentTimeMillis();
+        log("changed target from " + this.previous + " to " + this.target);
+        RotationHandler.getInstance().stop();
       }
 
-      this.enabled = true;
-      this.state = State.STARTING_PATH;
-    } else {
       if (Math.hypot(mc.thePlayer.motionX, mc.thePlayer.motionZ) < 0.05) {
         if (!this.stuckTimer.isScheduled()) {
           this.stuckTimer.schedule(1000);
@@ -161,55 +167,38 @@ public class PathExecutor {
       } else {
         this.stuckTimer.reset();
       }
-    }
-
-    // this is utterly useless but im useless as well
-
-    BlockPos playerPos = PlayerUtil.getBlockStandingOn();
-//    Vec3 nextTickPos = PlayerUtil.getNextTickPosition();
-    List<Long> blockHashes = this.map.get(this.pack(playerPos.getX(), playerPos.getZ()));
-    int current = -1;
-    if (blockHashes != null && !blockHashes.isEmpty()) {
-      int bestY = -1;
-      double playerY = mc.thePlayer.posY;
-      for (Long blockHash : blockHashes) {
-        Pair<Integer, Integer> block = this.unpack(blockHash);
-        int blockY = block.getFirst();
-        int blockTarget = block.getSecond();
-        if (blockTarget > this.previous) {
-          if (bestY == -1 || (blockY < playerY && blockY > bestY) || (blockY >= playerY && blockY < bestY)) {
-            bestY = block.getFirst();
-            current = blockTarget;
-          }
-        }
+    } else {
+      if (this.stuckTimer.isScheduled()) {
+        this.stuckTimer.reset();
       }
-    }
-
-    if (current != -1 && current > previous) {
-      this.previous = current;
-      this.target = current + 1;
-      this.state = State.TRAVERSING;
-      this.pastTarget = false;
-      this.interpolated = false;
-      this.interpolYawDiff = 0;
-      this.nodeChangeTime = System.currentTimeMillis();
-      StrafeUtil.enabled = false;
-      log("changed target");
-      RotationHandler.getInstance().stop();
-      if (this.target == this.blockPath.size()) {
-        log("Path traversed");
-        this.succeeded = true;
-        this.failed = false;
-        this.prev = this.curr;
-        this.curr = null;
+      if (this.pathQueue.isEmpty()) {
         return true;
       }
     }
 
-    BlockPos target = this.blockPath.get(this.target);
-    boolean onGround = mc.thePlayer.onGround;
+    if (this.curr == null || this.target == this.blockPath.size()) {
+      log("Path traversed");
+      this.succeeded = true;
+      this.failed = false;
+      this.prev = this.curr;
+      if (this.pathQueue.isEmpty()) {
+        log("Pathqueue is empty");
+        this.curr = null;
+        this.target = 0;
+        this.previous = -1;
+        return true;
+      }
+      this.target = 1;
+      this.previous = 0;
+      loadPath(this.pathQueue.poll());
+      if (this.target == this.blockPath.size()) {
+        return true;
+      }
+      log("loaded new path target: " + this.target + ", prev: " + this.previous);
+    }
 
-    // effectively removes backtracking and makes detection better
+    BlockPos target = this.blockPath.get(this.target);
+
     if (this.target < this.blockPath.size() - 1) {
       BlockPos nextTarget = this.blockPath.get(this.target + 1);
       double playerDistToNext = playerPos.distanceSq(nextTarget);
@@ -218,15 +207,19 @@ public class PathExecutor {
       if ((this.pastTarget || (this.pastTarget = playerDistToNext > targetDistToNext)) && playerDistToNext < targetDistToNext) {
         this.previous = this.target;
         this.target++;
+        target = this.blockPath.get(this.target);
         log("walked past target");
-        return false;
       }
     }
+
+    boolean onGround = mc.thePlayer.onGround;
+
+    // effectively removes backtracking and makes detection better
 
     int targetX = target.getX();
     int targetZ = target.getZ();
     double horizontalDistToTarget = Math.hypot(mc.thePlayer.posX - targetX - 0.5, mc.thePlayer.posZ - targetZ - 0.5);
-    float yaw = AngleUtil.getRotationYaw360(PlayerUtil.getNextTickPosition(0.6f), new Vec3(targetX + 0.5, 0.0, targetZ + 0.5));
+    float yaw = AngleUtil.getRotationYaw360(mc.thePlayer.getPositionVector(), new Vec3(targetX + 0.5, 0.0, targetZ + 0.5));
     float yawDiff = Math.abs(AngleUtil.get360RotationYaw() - yaw);
 
     if (this.interpolYawDiff == 0) {
@@ -250,7 +243,6 @@ public class PathExecutor {
               new Angle(rotYaw, 15f),
               Math.max(300, (long) (400 - horizontalDistToTarget * 2f)), null
           )
-//        .easeFunction(Ease.EASE_OUT_QUAD)
       );
     }
 
@@ -259,7 +251,6 @@ public class PathExecutor {
       float time = 200f;
       long timePassed = Math.min((long) time, System.currentTimeMillis() - this.nodeChangeTime);
       ipYaw -= this.interpolYawDiff * (1 - (timePassed / time));
-      tempIpYaw = ipYaw;
       if (timePassed == time) {
         this.interpolated = true;
       }
@@ -268,7 +259,8 @@ public class PathExecutor {
     StrafeUtil.enabled = yawDiff > 3;
     StrafeUtil.yaw = ipYaw;
 
-    boolean shouldJump = com.jelly.mightyminerv2.util.BlockUtil.canWalkBetween(this.curr.getCtx(), PlayerUtil.getBlockStandingOn(), new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(yaw))));
+    boolean shouldJump = BlockUtil.canWalkBetween(this.curr.getCtx(), PlayerUtil.getBlockStandingOn(),
+        new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(yaw))));
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSprint, this.allowSprint && yawDiff < 40 && !shouldJump);
     if (shouldJump && onGround) {
@@ -278,6 +270,18 @@ public class PathExecutor {
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindJump, shouldJump);
 
     return playerPos.distanceSqToCenter(target.getX(), target.getY(), target.getZ()) < 100;
+  }
+
+  public void loadPath(Path path) {
+    this.blockPath.clear();
+    this.map.clear();
+
+    this.curr = path;
+    this.blockPath.addAll(this.curr.getSmoothedPath());
+    for (int i = 0; i < this.blockPath.size(); i++) {
+      BlockPos pos = this.blockPath.get(i);
+      this.map.computeIfAbsent(this.pack(pos.getX(), pos.getZ()), k -> new ArrayList<>()).add(this.pack(pos.getY(), i));
+    }
   }
 
   public State getState() {
@@ -296,7 +300,7 @@ public class PathExecutor {
     return this.curr;
   }
 
-  public Deque<Path> getPathQueue(){
+  public Deque<Path> getPathQueue() {
     return this.pathQueue;
   }
 

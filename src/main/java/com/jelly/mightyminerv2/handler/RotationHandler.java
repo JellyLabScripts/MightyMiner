@@ -58,7 +58,7 @@ public class RotationHandler {
   }
 
   public void start() {
-    if (this.rotations.isEmpty()) {
+    if (this.rotations.isEmpty() || this.enabled) {
       return;
     }
     this.easeTo(rotations.poll());
@@ -113,14 +113,13 @@ public class RotationHandler {
       return;
     }
 
-    if (System.currentTimeMillis() <= this.endTime && !this.stopRequested) {
-      Angle bezierAngle = getBezierAngle();
+    Angle bezierAngle = getBezierAngle();
 
-      mc.thePlayer.rotationYaw += bezierAngle.getYaw() - lastBezierYaw;
-      mc.thePlayer.rotationPitch += bezierAngle.getPitch() - lastBezierPitch;
-      lastBezierYaw = bezierAngle.getYaw();
-      lastBezierPitch = bezierAngle.getPitch();
-    } else {
+    mc.thePlayer.rotationYaw += bezierAngle.getYaw() - lastBezierYaw;
+    mc.thePlayer.rotationPitch += bezierAngle.getPitch() - lastBezierPitch;
+    lastBezierYaw = bezierAngle.getYaw();
+    lastBezierPitch = bezierAngle.getPitch();
+    if (System.currentTimeMillis() > this.endTime || this.stopRequested) {
       handleRotationEnd();
     }
   }
@@ -131,17 +130,16 @@ public class RotationHandler {
       return;
     }
 
-    if (System.currentTimeMillis() <= this.endTime && !this.stopRequested) {
-      Angle bezierAngle = getBezierAngle();
+    Angle bezierAngle = getBezierAngle();
 
-      serverSideYaw += bezierAngle.getYaw() - lastBezierYaw;
-      serverSidePitch += bezierAngle.getPitch() - lastBezierPitch;
-      event.yaw = serverSideYaw;
-      event.pitch = serverSidePitch;
+    serverSideYaw += bezierAngle.getYaw() - lastBezierYaw;
+    serverSidePitch += bezierAngle.getPitch() - lastBezierPitch;
+    event.yaw = serverSideYaw;
+    event.pitch = serverSidePitch;
 
-      lastBezierYaw = bezierAngle.getYaw();
-      lastBezierPitch = bezierAngle.getPitch();
-    } else {
+    lastBezierYaw = bezierAngle.getYaw();
+    lastBezierPitch = bezierAngle.getPitch();
+    if (System.currentTimeMillis() > this.endTime || this.stopRequested) {
       handleRotationEnd();
     }
   }
@@ -168,6 +166,7 @@ public class RotationHandler {
   private void handleRotationEnd() {
     if (!this.stopRequested) {
       if (this.configuration.followTarget()) {
+        System.out.println("Following Target");
         this.easeTo(configuration);
         this.followingTarget = true;
         return;

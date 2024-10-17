@@ -21,6 +21,7 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 
 public class Pathfinder extends AbstractFeature {
 
@@ -120,7 +121,10 @@ public class Pathfinder extends AbstractFeature {
       return;
     }
 
-    boolean okToPath = pathExecutor.onTick();
+    boolean okToPath = false;
+    if (event.phase == Phase.START) {
+      okToPath = pathExecutor.onTick();
+    }
 
     // just to let pathexecutor update after path has been found
     if (this.skipTick) {
@@ -155,6 +159,9 @@ public class Pathfinder extends AbstractFeature {
 
     MightyMiner.executor().execute(() -> {
       log("creating thread. wasPathfinding: " + this.pathfinding);
+      if (this.pathfinding) {
+        return;
+      }
       this.pathfinding = true;
       try {
         Pair<BlockPos, BlockPos> startEnd = this.pathQueue.poll();

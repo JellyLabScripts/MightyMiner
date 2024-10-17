@@ -160,7 +160,7 @@ public class AutoCommissionClaim extends AbstractFeature {
         switch (MightyMinerConfig.commClaimMethod) {
           case 0:
             if (RotationHandler.getInstance().isEnabled() || !entityLookingAt.isPresent()) {
-              break;
+              return;
             }
 
             // because why not
@@ -178,13 +178,13 @@ public class AutoCommissionClaim extends AbstractFeature {
             break;
         }
 
-        log("SCheduler timer for : " + time);
+        log("Scheduler timer for : " + time);
         this.swapState(State.VERIFYING_GUI, time);
         break;
       case VERIFYING_GUI:
         if (this.hasTimerEnded()) {
           this.stop(ClaimError.INACCESSIBLE_NPC);
-          error("Opened a Different Inventory.");
+          error("Opened a Different Inventory Named: " + InventoryUtil.getInventoryName());
           break;
         }
         switch (MightyMinerConfig.commClaimMethod) {

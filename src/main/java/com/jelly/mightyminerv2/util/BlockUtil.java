@@ -61,7 +61,8 @@ public class BlockUtil {
   }
 
   // unfortunately this function is extremely expensive
-  public static List<BlockPos> getBestMineableBlocksAround(Map<Integer, Integer> stateIds, final int[] priority, BlockPos blockToIgnore, int miningSpeed) {
+  public static List<BlockPos> getBestMineableBlocksAround(Map<Integer, Integer> stateIds, final int[] priority, BlockPos blockToIgnore,
+      int miningSpeed) {
     final MinHeap<BlockPos> blocks = new MinHeap<>(500);
     final Set<Long> visitedPositions = new HashSet<>();
     final List<BlockPos> walkableBlocks = getWalkableBlocksAround(PlayerUtil.getBlockStandingOn());
@@ -72,8 +73,8 @@ public class BlockUtil {
 
     for (final BlockPos blockPos : walkableBlocks) {
       final Vec3 blockCenter = new Vec3(blockPos).addVector(0.5, mc.thePlayer.eyeHeight, 0.5);
-      for (int x = -4; x < 5; x++) {
-        for (int z = -4; z < 5; z++) {
+      for (int x = -5; x < 6; x++) {
+        for (int z = -5; z < 6; z++) {
           for (int y = -3; y < 5; y++) {
             final BlockPos pos = blockPos.add(x, y + 2, z);
             final long hash = longHash(pos.getX(), pos.getY(), pos.getZ());
@@ -101,7 +102,7 @@ public class BlockUtil {
             visitedPositions.add(hash);
             // Todo: Cost requires more testing.
             //  an attempt to recreate *real* mining cost in time (ms)
-            blocks.add(pos, ((hardness * 1500) / miningSpeed + angleChange * 3) / priority[index]);
+            blocks.add(pos, ((hardness * 1500) / miningSpeed + angleChange * MightyMinerConfig.devMithRot) / priority[index]);
           }
         }
       }
@@ -145,7 +146,7 @@ public class BlockUtil {
           final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).lengthSqrt();
 
           // Todo: Cost requires more testing.
-            blocks.add(pos, ((hardness * 1500) / miningSpeed + angleChange * 3) / priority[index]);
+          blocks.add(pos, ((hardness * 1500) / miningSpeed + angleChange * MightyMinerConfig.devMithRot) / priority[index]);
         }
       }
     }
@@ -153,7 +154,8 @@ public class BlockUtil {
   }
 
 
-  public static List<Pair<BlockPos, List<Float>>> getBestMineableBlocksAroundDebug(Map<Integer, Integer> stateIds, final int[] priority, BlockPos blockToIgnore, int miningSpeed) {
+  public static List<Pair<BlockPos, List<Float>>> getBestMineableBlocksAroundDebug(Map<Integer, Integer> stateIds, final int[] priority,
+      BlockPos blockToIgnore, int miningSpeed) {
 //    final MinHeap<BlockPos> blocks = new MinHeap<>(500);
 
     List<Pair<BlockPos, List<Float>>> debugs = new ArrayList<>();
@@ -197,7 +199,7 @@ public class BlockUtil {
             visitedPositions.add(hash);
             // Todo: Cost requires more testing.
             //  an attempt to recreate *real* mining cost in time (ms)
-            debugs.add(new Pair<>(pos, Arrays.asList((float) (hardness * 1500 * priority[index]) / miningSpeed, angleChange * 3 / priority[index], ang.yaw, ang.pitch)));
+            debugs.add(new Pair<>(pos, Arrays.asList((float) (hardness * 1500 * priority[index]) / miningSpeed, angleChange * MightyMinerConfig.devMithRot / priority[index], ang.yaw, ang.pitch)));
 //            blocks.add(pos, ((hardness * 1500) / miningSpeed + angleChange * 3) / priority[index]);
           }
         }
@@ -235,8 +237,8 @@ public class BlockUtil {
           final double hardness = getBlockStrength(stateID);
           final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).getValue();
           debugs.add(new Pair(pos, Arrays.asList(
-              (float) (hardness * 1500 * priority[index] / speed),
-              angleChange * 3 / priority[index]
+                  (float) (hardness * 1500 * priority[index] / speed),
+                  angleChange * 3 / priority[index]
               ))
           );
         }
@@ -244,20 +246,6 @@ public class BlockUtil {
     }
     debugs.sort(Comparator.comparing(it -> it.getSecond().stream().reduce(0f, Float::sum)));
     return debugs;
-  }
-
-
-  private static int getPriorityIndex(final int hardness) {
-    switch (hardness) {
-      case 500:
-        return 0;
-      case 800:
-        return 1;
-      case 1500:
-        return 2;
-      default:
-        return 3;
-    }
   }
 
   public static int getBlockStrength(int stateID) {
@@ -632,5 +620,15 @@ public class BlockUtil {
 //      return true;
 //    }
 //    return false;
+  }
+
+  public static boolean canStandOn(BlockPos pos) {
+    BlockStateAccessor bsa = new BlockStateAccessor(mc.theWorld);
+    int x = pos.getX();
+    int y = pos.getY();
+    int z = pos.getZ();
+    return MovementHelper.INSTANCE.canStandOn(bsa, x, y, z, bsa.get(x, y, z)) &&
+        MovementHelper.INSTANCE.canWalkThrough(bsa, x, y + 1, z, bsa.get(x, y + 1, z)) &&
+        MovementHelper.INSTANCE.canWalkThrough(bsa, x, y + 2, z, bsa.get(x, y + 2, z));
   }
 }

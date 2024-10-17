@@ -8,6 +8,7 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.PacketEvent;
+import com.jelly.mightyminerv2.feature.impl.AutoChestUnlocker;
 import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoInventory;
@@ -30,6 +31,7 @@ import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
+import com.jelly.mightyminerv2.util.helper.Target;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
@@ -119,17 +121,27 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    vals.clear();
-    Map<Integer, Integer> ma = new HashMap<>();
-    MineableBlock.GRAY_MITHRIL.stateIds.forEach(it -> ma.put(it, 0));
-    MineableBlock.GREEN_MITHRIL.stateIds.forEach(it -> ma.put(it, 1));
-    MineableBlock.BLUE_MITHRIL.stateIds.forEach(it -> ma.put(it, 2));
-    MineableBlock.TITANIUM.stateIds.forEach(it -> ma.put(it, 3));
-    this.vals.addAll(com.jelly.mightyminerv2.util.BlockUtil.getBestMineableBlocksAroundDebug(ma, new int[]{1, 1, 1, 1}, null, 2600));
+//    AutoChestUnlocker.getInstance().start("Jasper Drill", false);
+    MineableBlock[] blocksToMine = {MineableBlock.GRAY_MITHRIL, MineableBlock.GREEN_MITHRIL, MineableBlock.BLUE_MITHRIL, MineableBlock.TITANIUM};
 
+    Map<Integer, Integer> blocks = new HashMap<>();
+    for (int i = 0; i < blocksToMine.length; i++) {
+      for (int j : blocksToMine[i].stateIds) {
+        blocks.put(j, i);
+      }
+    }
+    vals = com.jelly.mightyminerv2.util.BlockUtil.getBestMineableBlocksAroundDebug(blocks, new int[]{MightyMinerConfig.cost1, MightyMinerConfig.cost2, MightyMinerConfig.cost3, 1}, null, 2600);
   }
 
-  MineableBlock[] blocks = {MineableBlock.DIAMOND, MineableBlock.EMERALD, MineableBlock.GOLD, MineableBlock.COAL, MineableBlock.IRON, MineableBlock.REDSTONE, MineableBlock.LAPIS};
+  @SubCommand
+  public void t() {
+//    RotationHandler.getInstance().stopFollowingTarget();
+    this.block = PlayerUtil.getBlockStandingOn();
+    System.out.println(Block.getStateId(mc.theWorld.getBlockState(PlayerUtil.getBlockStandingOn())));
+  }
+
+  MineableBlock[] blocks = {MineableBlock.DIAMOND, MineableBlock.EMERALD, MineableBlock.GOLD, MineableBlock.COAL, MineableBlock.IRON,
+      MineableBlock.REDSTONE, MineableBlock.LAPIS};
 
   @SubCommand
   public void p(int a) {
@@ -215,7 +227,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     path.forEach(k -> route.insert(k));
     blockToDraw.clear();
     path.forEach(i -> blockToDraw.add(new BlockPos(i.toVec3())));
-//    RouteNavigator.getInstance().start(route);
+    RouteNavigator.getInstance().start(route);
   }
 
   @SubCommand
@@ -230,6 +242,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     AutoMobKiller.getInstance().stop();
     Pathfinder.getInstance().stop();
     RotationHandler.getInstance().stop();
+    AutoChestUnlocker.getInstance().stop();
   }
 
   @SubCommand
@@ -272,6 +285,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @SubCommand
   public void clear() {
+    vals.clear();
     blockToDraw.clear();
     entTodraw = null;
     block = null;
@@ -380,7 +394,9 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   void draw(Pair<BlockPos, List<Float>> it, Color color) {
     RenderUtil.drawBlock(it.getFirst(), color);
-    RenderUtil.drawText("Hard: " + ((int) (it.getSecond().get(0) * 1000) / 1000) + ", Ang: " + ((int) (it.getSecond().get(1) * 1000) / 1000) + ", y: " + it.getSecond().get(2) + ", p: " + it.getSecond().get(3), it.getFirst().getX() + 0.5, it.getFirst().getY() + 1.2, it.getFirst().getZ() + 0.5, 0.4f);
+    RenderUtil.drawText("Hard: " + ((int) (it.getSecond().get(0) * 1000) / 1000) + ", Ang: " + ((int) (it.getSecond().get(1) * 1000) / 1000) + ", y: "
+            + it.getSecond().get(2) + ", p: " + it.getSecond().get(3), it.getFirst().getX() + 0.5, it.getFirst().getY() + 1.2, it.getFirst().getZ() + 0.5,
+        0.4f);
   }
 
   @SubscribeEvent
@@ -396,21 +412,21 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //      RenderUtil.drawBlock(new BlockPos(entTodraw.posX, Math.ceil(entTodraw.posY) - 1, entTodraw.posZ), new Color(123, 214, 44, 150));
 //    }
 //
-//    if (!blockToDraw.isEmpty()) {
-//      blockToDraw.forEach(b -> RenderUtil.drawBlock(b, new Color(255, 0, 0, 200)));
-//    }
-//
-//    if (this.block != null) {
-//      RenderUtil.drawBlock(this.block, new Color(255, 0, 0, 50));
-//    }
+    if (!blockToDraw.isEmpty()) {
+      blockToDraw.forEach(b -> RenderUtil.drawBlock(b, new Color(255, 0, 0, 200)));
+    }
+
+    if (this.block != null) {
+      RenderUtil.drawBlock(this.block, new Color(255, 0, 0, 50));
+    }
 //
 //    if (this.first != null) {
 //      RenderUtil.drawBlock(new BlockPos(this.first.toVec3()), new Color(0, 0, 0, 200));
 //    }
 //
-//    if (this.second != null) {
-//      RenderUtil.drawBlock(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
-//    }
+    if (this.second != null) {
+      RenderUtil.drawBlock(new BlockPos(this.second.toVec3()), new Color(0, 0, 0, 200));
+    }
 //
 ////    if (pathfinder != null) {
 ////      pathfinder.getClosedSet().values().forEach(it -> RenderUtil.drawBlockBox(it.getBlock(), new Color(213, 124, 124, 100)));

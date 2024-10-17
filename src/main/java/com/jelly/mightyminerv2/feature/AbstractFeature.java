@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
@@ -80,6 +81,14 @@ public abstract class AbstractFeature {
   }
 
   protected void onPacketReceive(PacketEvent.Received event) {
+  }
+
+  protected void onWorldLoad(WorldEvent.Load event){
+
+  }
+
+  protected void onWorldUnload(WorldEvent.Unload event){
+
   }
 
   protected void onBlockChange(BlockChangeEvent event) {

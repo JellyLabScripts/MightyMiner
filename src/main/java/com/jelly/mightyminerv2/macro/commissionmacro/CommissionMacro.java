@@ -92,7 +92,7 @@ public class CommissionMacro extends AbstractMacro {
       List<String> items = new ArrayList<>();
       items.add(MightyMinerConfig.commMiningTool);
       items.add(MightyMinerConfig.commSlayerWeapon);
-      if (MightyMinerConfig.commClaimMethod == 2 || !MightyMinerConfig.commMechaGuiAccessMethod) {
+      if (MightyMinerConfig.commClaimMethod == 2 || (MightyMinerConfig.commDrillRefuel && !MightyMinerConfig.commMechaGuiAccessMethod)) {
         items.add("Abiphone");
       }
       if (MightyMinerConfig.commClaimMethod == 1) {
@@ -135,8 +135,7 @@ public class CommissionMacro extends AbstractMacro {
     if (this.mainState == MainState.MACRO) {
       if (GameStateHandler.getInstance().getCurrentLocation() != Location.DWARVEN_MINES) {
         this.changeMainState(MainState.WARP, 0);
-      } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY
-          && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
+      } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
         log("Items Arent In Inventory And Failsafe Isnt Active");
         this.changeMainState(MainState.NONE);
       } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY

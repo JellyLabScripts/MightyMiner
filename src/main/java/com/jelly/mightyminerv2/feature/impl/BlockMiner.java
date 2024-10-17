@@ -26,6 +26,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.List;
 import java.util.Random;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 
 // Code here is terrible
 // Help me fix it or fix it pls
@@ -47,7 +48,7 @@ public class BlockMiner extends AbstractFeature {
   private Map<Integer, Integer> blocks = new HashMap<>();
   private int[] priority = {1, 1, 1, 1};  // Priority of blocks array in order
   private State state = State.STARTING;
-  private MithrilError mithrilError = MithrilError.NONE;
+  private BlockMinerError mithrilError = BlockMinerError.NONE;
   private int miningSpeed = 200;          // Mainly for TickGliding
   private int miningTime = 0;             // For TickGliding
   private int speedBoost = 0;             // Boost Percentage
@@ -97,16 +98,16 @@ public class BlockMiner extends AbstractFeature {
     // this should never happen
     if (!miningTool.isEmpty() && !InventoryUtil.holdItem(miningTool)) {
       error("Cannot hold " + miningTool);
-      this.stop(MithrilError.NOT_ENOUGH_BLOCKS);
+      this.stop(BlockMinerError.NOT_ENOUGH_BLOCKS);
       return;
     }
     if (blocksToMine == null) {
       error("No blocks to mine.");
-      this.stop(MithrilError.NOT_ENOUGH_BLOCKS);
+      this.stop(BlockMinerError.NOT_ENOUGH_BLOCKS);
       return;
     }
-    for(int i = 0; i < blocksToMine.length; i++){
-      for(int j: blocksToMine[i].stateIds){
+    for (int i = 0; i < blocksToMine.length; i++) {
+      for (int j : blocksToMine[i].stateIds) {
         this.blocks.put(j, i);
       }
     }
@@ -114,22 +115,22 @@ public class BlockMiner extends AbstractFeature {
     this.speedBoost = speedBoost;
     this.priority = priority;
     this.enabled = true;
-    this.mithrilError = MithrilError.NONE;
+    this.mithrilError = BlockMinerError.NONE;
 
     this.start();
     send("Enabled");
   }
 
-  public void stop(MithrilError error) {
+  public void stop(BlockMinerError error) {
     this.mithrilError = error;
     this.stop();
   }
 
   public boolean hasSucceeded() {
-    return !this.enabled && this.mithrilError == MithrilError.NONE;
+    return !this.enabled && this.mithrilError == BlockMinerError.NONE;
   }
 
-  public MithrilError getMithrilError() {
+  public BlockMinerError getMithrilError() {
     return this.mithrilError;
   }
 
@@ -139,7 +140,7 @@ public class BlockMiner extends AbstractFeature {
 
   @SubscribeEvent
   protected void onTick(TickEvent.ClientTickEvent event) {
-    if (!this.enabled || mc.currentScreen != null) {
+    if (!this.enabled || mc.currentScreen != null || event.phase == Phase.END) {
       return;
     }
 
@@ -150,6 +151,7 @@ public class BlockMiner extends AbstractFeature {
 
     switch (this.state) {
       case STARTING:
+        this.breakAttemptTime = 0;
         this.swapState(State.CHOOSING_BLOCK, 0);
 
         // Unknown or Available
@@ -170,9 +172,11 @@ public class BlockMiner extends AbstractFeature {
         boostState = BoostState.INACTIVE;
         break;
       case CHOOSING_BLOCK:
+        int[] prio = {MightyMinerConfig.cost1, MightyMinerConfig.cost2, MightyMinerConfig.cost3, this.priority[3]};
         List<BlockPos> blocks;
-        if (!MightyMinerConfig.mithrilStrafe || (blocks = BlockUtil.getBestMineableBlocksAround(this.blocks, priority, this.targetBlock, this.miningSpeed)).isEmpty()) {
-          blocks = BlockUtil.getBestMineableBlocks(this.blocks, priority, this.targetBlock, this.miningSpeed);
+        if (!MightyMinerConfig.mithrilStrafe || (blocks = BlockUtil.getBestMineableBlocksAround(this.blocks, prio, this.targetBlock,
+            this.miningSpeed)).isEmpty()) {
+          blocks = BlockUtil.getBestMineableBlocks(this.blocks, prio, this.targetBlock, this.miningSpeed);
         }
 
         if (blocks.size() < 2) {
@@ -183,7 +187,7 @@ public class BlockMiner extends AbstractFeature {
 
           if (this.hasTimerEnded()) {
             error("Cannot find enough mithril blocks to mine.");
-            this.stop(MithrilError.NOT_ENOUGH_BLOCKS);
+            this.stop(BlockMinerError.NOT_ENOUGH_BLOCKS);
           }
           return;
         } else if (this.timer.isScheduled()) {
@@ -192,7 +196,7 @@ public class BlockMiner extends AbstractFeature {
 
         this.targetBlock = blocks.get(blocks.get(0).equals(this.targetBlock) ? 1 : 0);
         final int boostMultiplier = boostState == BoostState.ACTIVE ? this.speedBoost / 100 : 1;
-        this.miningTime = BlockUtil.getMiningTime(Block.getStateId(mc.theWorld.getBlockState(this.targetBlock)), this.miningSpeed * boostMultiplier) * 2;
+        this.miningTime = BlockUtil.getMiningTime(Block.getStateId(mc.theWorld.getBlockState(this.targetBlock)), this.miningSpeed * boostMultiplier);
         this.swapState(State.ROTATING, 0);
 
         // fall through
@@ -252,32 +256,33 @@ public class BlockMiner extends AbstractFeature {
           this.destBlock = null;
           StrafeUtil.enabled = false;
           this.swapState(State.BREAKING, 0);
-          this.shiftTimer.schedule(500);
+          this.shiftTimer.schedule(this.getRandomSneakTime());
           KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
-          System.out.println("Should stop walking");
         }
         // fall through
       case BREAKING:
         KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindAttack, true);
 
         // sometimes it gets stuck while moving and doesnt look at targetBlock so it keeps trying infinitely
-        if (++this.breakAttemptTime > 60) {
+        if (++this.breakAttemptTime > this.miningTime + 60) {
+          log("BreakAttempTime > MiningTime + 60");
           this.swapState(State.STARTING, 0);
-          this.breakAttemptTime = 0;
         }
 
         if (this.targetBlock.equals(BlockUtil.getBlockLookingAt())) {
           if (--this.miningTime <= 0) {
+            log("MiningTime <= 0");
             this.swapState(State.STARTING, 0);
           }
-        } else if (this.state == State.BREAKING && !RotationHandler.getInstance().isEnabled()) {
+        } else if (this.state != State.WALKING && !RotationHandler.getInstance().isEnabled()) {
+          log("!Rotating");
           this.swapState(State.STARTING, 0);
         }
 
         if (StrafeUtil.enabled && this.state == State.BREAKING) {
           this.destBlock = null;
           StrafeUtil.enabled = false;
-          this.shiftTimer.schedule(500);
+          this.shiftTimer.schedule(this.getRandomSneakTime());
           KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
         }
 
@@ -370,6 +375,10 @@ public class BlockMiner extends AbstractFeature {
     return MightyMinerConfig.mithrilMinerRotationTime + (int) (this.random.nextFloat() * MightyMinerConfig.mithrilMinerRotationTimeRandomizer);
   }
 
+  private int getRandomSneakTime() {
+    return MightyMinerConfig.mithrilMinerSneakTime + (int) (this.random.nextFloat() * MightyMinerConfig.mithrilMinerSneakTimeRandomizer);
+  }
+
   // DO NOT REARRANGE THIS
   enum State {
     STARTING, SPEED_BOOST, CHOOSING_BLOCK, ROTATING, WALKING, BREAKING
@@ -379,7 +388,7 @@ public class BlockMiner extends AbstractFeature {
     UNKNOWN, AVAILABLE, ACTIVE, INACTIVE,
   }
 
-  public enum MithrilError {
+  public enum BlockMinerError {
     NONE, NOT_ENOUGH_BLOCKS
   }
 }

@@ -121,6 +121,20 @@ public class MightyMinerConfig extends Config {
   )
   public static int mithrilMinerTickGlideOffset = 4;
 
+  @Slider(
+      name = "Sneak Time",
+      category = MITHRIL,
+      min = 0, max = 2000
+  )
+  public static int mithrilMinerSneakTime = 500;
+
+  @Slider(
+      name = "Sneak Time Randomizer",
+      category = MITHRIL,
+      min = 0, max = 2000
+  )
+  public static int mithrilMinerSneakTimeRandomizer = 300;
+
   //</editor-fold>
 
   //<editor-fold desc="Commission Macro">
@@ -155,7 +169,6 @@ public class MightyMinerConfig extends Config {
       subcategory = "MobKiller"
   )
   public static boolean commMobKillerInterpolate = true;
-
 
   @Switch(
       name = "Refuel Drill",
@@ -332,25 +345,9 @@ public class MightyMinerConfig extends Config {
       name = "Rotation",
       category = "Dev",
       subcategory = "MithrilMiner",
-      min = 0f, max = 10f
+      min = 0, max = 10
   )
-  public static float devMithRot = 0.4f;
-
-  @Slider(
-      name = "Distance",
-      category = "Dev",
-      subcategory = "MithrilMiner",
-      min = 0f, max = 10f
-  )
-  public static float devMithDist = 1f;
-
-  @Slider(
-      name = "Hardness",
-      category = "Dev",
-      subcategory = "MithrilMiner",
-      min = 0f, max = 10f
-  )
-  public static float devMithHard = 1f;
+  public static int devMithRot = 3;
 
   @Slider(
       name = "MobKiller Dist Cost",
@@ -375,6 +372,30 @@ public class MightyMinerConfig extends Config {
       placeholder = "Enter Mobname Here"
   )
   public static String devMKillerMob = "Goblin";
+
+  @Slider(
+      name = "Cost1",
+      category = "Dev",
+      subcategory = "Cost",
+      min = 0, max = 10
+  )
+  public static int cost1 = 1;
+
+  @Slider(
+      name = "Cost2",
+      category = "Dev",
+      subcategory = "Cost",
+      min = 0, max = 10
+  )
+  public static int cost2 = 1;
+
+  @Slider(
+      name = "Cost3",
+      category = "Dev",
+      subcategory = "Cost",
+      min = 0, max = 10
+  )
+  public static int cost3 = 1;
   //</editor-fold>
 
   //<editor-fold desc="Debug">

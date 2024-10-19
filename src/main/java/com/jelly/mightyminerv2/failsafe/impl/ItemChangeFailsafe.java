@@ -89,7 +89,7 @@ public class ItemChangeFailsafe extends AbstractFailsafe {
       String oldName = StringUtils.stripControlCodes(oldSlot.getStack().getDisplayName());
       if (MacroManager.getInstance().getCurrentMacro().getNecessaryItems().stream().anyMatch(oldName::contains)) {
         removedItems.put(oldItem, slot);
-        note("Item with id " + oldItem + " was removed from slot " + slot);
+        note("Item " + oldName + " with id " + oldItem + " was removed from slot " + slot);
       }
     }
 

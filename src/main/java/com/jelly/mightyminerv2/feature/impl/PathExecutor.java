@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.feature.impl;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.AngleUtil;
 import com.jelly.mightyminerv2.util.BlockUtil;
@@ -238,10 +239,11 @@ public class PathExecutor {
         }
       }
 
+      float time = MightyMinerConfig.fixrot ? MightyMinerConfig.rottime : Math.max(300, (long) (400 - horizontalDistToTarget * MightyMinerConfig.rotmult));
       RotationHandler.getInstance().easeTo(
           new RotationConfiguration(
               new Angle(rotYaw, 15f),
-              Math.max(300, (long) (400 - horizontalDistToTarget * 2f)), null
+              (long) time, null
           )
       );
     }

@@ -88,12 +88,6 @@ public class MightyMinerConfig extends Config {
   public static boolean mithrilMinerSneakWhileMining = false;
 
   @Switch(
-      name = "Gives Titanium a higher priority",
-      category = MITHRIL
-  )
-  public static boolean mithrilMinerTitaniumHighPriority = false;
-
-  @Switch(
       name = "Precision Miner", description = "Looks at particles spawned by precision miner perk (Might/Will Mess Up TickGLide)",
       category = MITHRIL
   )
@@ -157,6 +151,12 @@ public class MightyMinerConfig extends Config {
   public static int commClaimMethod = 0;
 
   @Switch(
+      name = "Always Mine Titanium", description = "Mines titanium even if it isnt a titanium commission",
+      category = COMMISSION
+  )
+  public static boolean commMineTitanium = false;
+
+  @Switch(
       name = "Sprint During MobKiller", description = "Allow Sprinting while mobkiller is active (looks sussy with sprint)",
       category = COMMISSION,
       subcategory = "MobKiller"
@@ -169,6 +169,7 @@ public class MightyMinerConfig extends Config {
       subcategory = "MobKiller"
   )
   public static boolean commMobKillerInterpolate = true;
+
 
   @Switch(
       name = "Refuel Drill",
@@ -206,6 +207,7 @@ public class MightyMinerConfig extends Config {
       left = "Abiphone", right = "From NPC"
   )
   public static boolean commMechaGuiAccessMethod = false;
+
   //</editor-fold>
 
   //<editor-fold desc="Failsafe">
@@ -374,28 +376,36 @@ public class MightyMinerConfig extends Config {
   public static String devMKillerMob = "Goblin";
 
   @Slider(
-      name = "Cost1",
+      name = "Rotation Curve",
       category = "Dev",
       subcategory = "Cost",
-      min = 0, max = 10
+      min = 0, max = 5
   )
-  public static int cost1 = 1;
+  public static int cost4 = 1;
+
+  @Switch(
+      name = "Use Fixed Rotation Time",
+      category = "Dev",
+      subcategory = "Path"
+  )
+  public static boolean fixrot = false;
 
   @Slider(
-      name = "Cost2",
+      name = "Rotation time" ,
       category = "Dev",
-      subcategory = "Cost",
-      min = 0, max = 10
+      subcategory = "Path",
+      min = 0, max = 2000
   )
-  public static int cost2 = 1;
+  public static int rottime = 500;
 
   @Slider(
-      name = "Cost3",
+      name = "Rota mult",
       category = "Dev",
-      subcategory = "Cost",
-      min = 0, max = 10
+      subcategory = "Path",
+      min = 0f, max = 10f
   )
-  public static int cost3 = 1;
+  public static float rotmult = 2f;
+
   //</editor-fold>
 
   //<editor-fold desc="Debug">

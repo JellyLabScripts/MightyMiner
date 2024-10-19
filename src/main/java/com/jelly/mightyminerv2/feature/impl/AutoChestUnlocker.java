@@ -14,16 +14,12 @@ import com.jelly.mightyminerv2.util.helper.Target;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Stack;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
@@ -41,7 +37,7 @@ public class AutoChestUnlocker extends AbstractFeature {
     return instance;
   }
 
-  public static Stack<BlockPos> chestQueue = new Stack<>();
+  public static List<BlockPos> chestQueue = new ArrayList<>();
   private State state = State.STARTING;
   private Vec3 particlePos = null;
   private boolean particleSpawned = true;
@@ -114,7 +110,8 @@ public class AutoChestUnlocker extends AbstractFeature {
           this.changeState(State.ENDING, 0);
           break;
         }
-        this.chestSolving = chestQueue.pop();
+        chestQueue.sort(Comparator.comparing(mc.thePlayer::getDistanceSqToCenter));
+        this.chestSolving = chestQueue.remove(0);
         if (PlayerUtil.getPlayerEyePos().distanceTo(new Vec3(this.chestSolving).addVector(0.5, 0.5, 0.5)) > 4) {
           this.changeState(State.FINDING_WALKABLE_BLOCKS, 0);
         } else {
@@ -146,6 +143,7 @@ public class AutoChestUnlocker extends AbstractFeature {
         }
         BlockPos target = this.walkableBlocks.remove(0);
         log("Walking to " + target);
+        Pathfinder.getInstance().setInterpolationState(true);
         Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), target);
         Pathfinder.getInstance().start();
         this.changeState(State.WAITING, 0);
@@ -169,10 +167,10 @@ public class AutoChestUnlocker extends AbstractFeature {
         break;
       case LOOKING:
         if (!this.chestSolving.equals(BlockUtil.getBlockLookingAt()) && !RotationHandler.getInstance().isEnabled()) {
-          RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.chestSolving), 400, null));
+          RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(BlockUtil.getClosestVisibleSidePos(this.chestSolving)), 400, null));
         }
         if (this.clickChest) {
-          this.changeState(State.CLICKING, 3000);
+          this.changeState(State.VERIFYING_ROTATION, 3000);
           break;
         }
 
@@ -197,28 +195,36 @@ public class AutoChestUnlocker extends AbstractFeature {
           this.particleSpawned = false;
         }
         break;
-      case CLICKING:
+      case VERIFYING_ROTATION:
         if (this.hasTimerEnded()) {
           error("Couldn't look at chest.");
           this.changeState(State.STARTING, 0);
         }
-        if (!RotationHandler.getInstance().isEnabled() || this.chestSolving.equals(BlockUtil.getBlockLookingAt())) {
+        if (this.chestSolving.equals(BlockUtil.getBlockLookingAt())) {
           RotationHandler.getInstance().stop();
-          KeyBindUtil.rightClick();
-          this.changeState(State.STARTING, 0);
+          KeyBindUtil.releaseAllExcept();
+          this.changeState(State.CLICKING, 250);
+        } else if (!RotationHandler.getInstance().isEnabled()) {
+          KeyBindUtil.holdThese(mc.gameSettings.keyBindAttack);
         }
+        break;
+      case CLICKING:
+        if (this.isTimerRunning()) {
+          return;
+        }
+        KeyBindUtil.rightClick();
+        this.changeState(State.STARTING, 0);
         break;
       case ENDING:
         log("Ended. Stopping");
         this.stop();
         break;
     }
-
   }
 
   @SubscribeEvent
   protected void onParticleSpawn(SpawnParticleEvent event) {
-    if (this.state != State.LOOKING) {
+    if (!this.enabled || this.state != State.LOOKING || !this.clickChest) {
       return;
     }
     if (event.getParticleTypes() == EnumParticleTypes.CRIT && mc.thePlayer.getPositionVector().squareDistanceTo(event.getPos()) < 64) {
@@ -253,7 +259,9 @@ public class AutoChestUnlocker extends AbstractFeature {
   // maybe move this into powdermacro class
   @SubscribeEvent
   protected void onBlockChange(BlockChangeEvent event) {
-    if(mc.thePlayer == null) return;
+    if (mc.thePlayer == null) {
+      return;
+    }
     BlockPos eventPos = event.pos;
     if (mc.thePlayer.getDistanceSq(eventPos) > 64) {
       return;
@@ -261,32 +269,14 @@ public class AutoChestUnlocker extends AbstractFeature {
     Block newBlock = event.update.getBlock();
     Block oldBlock = event.old.getBlock();
 
-    if (newBlock instanceof BlockChest) {
-      TileEntity entity = mc.theWorld.getTileEntity(eventPos);
-      if (!(entity instanceof TileEntityChest)) {
-        return;
-      }
-
-      TileEntityChest chest = (TileEntityChest) entity;
-      if (chest.numPlayersUsing == 0) {
-        note("Chest Spawned. Last: " + event.old.getBlock());
-        chestQueue.add(eventPos);
-      } else if (eventPos.equals(this.chestSolving)) {
-        note("Chest solved");
-        this.chestSolved = true;
-      } else {
-        note("Chest despawned");
-        chestQueue.remove(eventPos);
-      }
-      return;
-    }
-
-    if (newBlock instanceof BlockAir && oldBlock instanceof BlockChest) {
+    if (oldBlock instanceof BlockAir && newBlock instanceof BlockChest) {
+      chestQueue.add(eventPos);
+    } else if (newBlock instanceof BlockAir && oldBlock instanceof BlockChest) {
       if (eventPos.equals(this.chestSolving)) {
         log("Chest removed; solved");
         this.chestSolved = true;
       } else {
-        log("Chest despawned");
+        log("Chest Despawned");
         chestQueue.remove(eventPos);
       }
     }
@@ -309,7 +299,7 @@ public class AutoChestUnlocker extends AbstractFeature {
   }
 
   enum State {
-    STARTING, FINDING_WALKABLE_BLOCKS, WALKING, WAITING, LOOKING, CLICKING, ENDING
+    STARTING, FINDING_WALKABLE_BLOCKS, WALKING, WAITING, LOOKING, VERIFYING_ROTATION, CLICKING, ENDING
   }
 
   enum ChestFailure {

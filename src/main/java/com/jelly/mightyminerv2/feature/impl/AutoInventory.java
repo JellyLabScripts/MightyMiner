@@ -1,11 +1,14 @@
 package com.jelly.mightyminerv2.feature.impl;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BoostState;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil.ClickMode;
 import com.jelly.mightyminerv2.util.InventoryUtil.ClickType;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +33,10 @@ public class AutoInventory extends AbstractFeature {
     return instance;
   }
 
+  public AutoInventory(){
+    this.failsafesToIgnore = new ArrayList<>(Arrays.asList(Failsafe.ITEM_CHANGE));
+  }
+
   private Task mainTask = Task.NONE;
 
   @Override
@@ -42,11 +49,6 @@ public class AutoInventory extends AbstractFeature {
     this.mainTask = Task.NONE;
     this.sbState = SB.STARTING;
     this.moveState = MoveState.STARTING;
-  }
-
-  @Override
-  public boolean shouldNotCheckForFailsafe(){
-    return true;
   }
 
   @SubscribeEvent

@@ -1,11 +1,15 @@
 package com.jelly.mightyminerv2.feature.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.GameStateHandler;
 import com.jelly.mightyminerv2.util.helper.location.Location;
 import com.jelly.mightyminerv2.util.helper.location.SubLocation;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -21,6 +25,10 @@ public class AutoWarp extends AbstractFeature {
       instance = new AutoWarp();
     }
     return instance;
+  }
+
+  public AutoWarp(){
+    this.failsafesToIgnore = Arrays.asList(Failsafe.values());
   }
 
   private Error failReason = Error.NONE;

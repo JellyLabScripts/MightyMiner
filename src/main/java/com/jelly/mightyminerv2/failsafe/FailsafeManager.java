@@ -12,8 +12,10 @@ import com.jelly.mightyminerv2.util.StrafeUtil;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import javax.crypto.Mac;
 import net.minecraft.client.Minecraft;
 
@@ -43,6 +45,7 @@ public class FailsafeManager {
   public final List<AbstractFailsafe> failsafes = new ArrayList<>();
   public Optional<AbstractFailsafe> triggeredFailsafe = Optional.empty();
   public final Queue<AbstractFailsafe> emergencyQueue = new PriorityQueue<>(Comparator.comparing(AbstractFailsafe::getPriority));
+  public Set<Failsafe> failsafesToIgnore = new HashSet<>();
 
   public FailsafeManager() {
     this.failsafes.addAll(Arrays.asList(
@@ -52,7 +55,7 @@ public class FailsafeManager {
             KnockbackFailsafe.getInstance(),
             TeleportFailsafe.getInstance(),
             RotationFailsafe.getInstance(),
-            BedrockBlockChangeFailsafe.getInstance(),
+//            BedrockBlockChangeFailsafe.getInstance(),
             BedrockCheckFailsafe.getInstance()
         )
     );
@@ -64,9 +67,7 @@ public class FailsafeManager {
   }
 
   public boolean shouldNotCheckForFailsafe() {
-    return (!OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance().allowed && !MacroManager.getInstance().isRunning())
-        || FeatureManager.getInstance().shouldNotCheckForFailsafe()
-        || this.triggeredFailsafe.isPresent();
+    return !MacroManager.getInstance().isRunning() || this.triggeredFailsafe.isPresent();
   }
 
   @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -75,11 +76,12 @@ public class FailsafeManager {
       return;
     }
 
-
     List<AbstractFailsafe> failsafeCopy = new ArrayList<>(failsafes);
+    this.failsafesToIgnore.clear();
+    this.failsafesToIgnore.addAll(FeatureManager.getInstance().getFailsafesToIgnore());
 
     for (AbstractFailsafe failsafe : failsafeCopy) {
-      if (failsafe.onTick(event)) {
+      if (!this.failsafesToIgnore.contains(failsafe.getFailsafeType()) && failsafe.onTick(event)) {
         this.emergencyQueue.add(failsafe);
       }
     }
@@ -92,7 +94,7 @@ public class FailsafeManager {
     }
 
     failsafes.forEach(failsafe -> {
-      if (failsafe.onBlockChange(event)) {
+      if (!this.failsafesToIgnore.contains(failsafe.getFailsafeType()) && failsafe.onBlockChange(event)) {
         this.emergencyQueue.add(failsafe);
       }
     });
@@ -105,7 +107,7 @@ public class FailsafeManager {
     }
 
     failsafes.forEach(failsafe -> {
-      if (failsafe.onPacketReceive(event)) {
+      if (!this.failsafesToIgnore.contains(failsafe.getFailsafeType()) && failsafe.onPacketReceive(event)) {
         this.emergencyQueue.add(failsafe);
       }
     });
@@ -118,7 +120,7 @@ public class FailsafeManager {
     }
 
     failsafes.forEach(failsafe -> {
-      if (failsafe.onChat(event)) {
+      if (!this.failsafesToIgnore.contains(failsafe.getFailsafeType()) && failsafe.onChat(event)) {
         this.emergencyQueue.add(failsafe);
       }
     });
@@ -131,7 +133,7 @@ public class FailsafeManager {
     }
 
     failsafes.forEach(failsafe -> {
-      if (failsafe.onWorldUnload(event)) {
+      if (!this.failsafesToIgnore.contains(failsafe.getFailsafeType()) && failsafe.onWorldUnload(event)) {
         this.emergencyQueue.add(failsafe);
       }
     });
@@ -144,7 +146,7 @@ public class FailsafeManager {
     }
 
     failsafes.forEach(failsafe -> {
-      if (failsafe.onDisconnect(event)) {
+      if (!this.failsafesToIgnore.contains(failsafe.getFailsafeType()) && failsafe.onDisconnect(event)) {
         this.emergencyQueue.add(failsafe);
       }
     });
@@ -188,6 +190,7 @@ public class FailsafeManager {
   }
 
   public boolean isFailsafeActive(Failsafe failsafe) {
+    System.out.println("failsafequeue: " + this.emergencyQueue);
     return this.emergencyQueue.stream().anyMatch(it -> it.getFailsafeType().equals(failsafe));
   }
 }

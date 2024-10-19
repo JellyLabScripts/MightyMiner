@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.feature;
 
+import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
 import com.jelly.mightyminerv2.feature.impl.AutoChestUnlocker;
 import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
 import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
@@ -13,6 +14,7 @@ import com.jelly.mightyminerv2.feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -80,5 +82,15 @@ public class FeatureManager {
 
   public boolean shouldNotCheckForFailsafe() {
     return this.allFeatures.stream().filter(AbstractFeature::isRunning).anyMatch(AbstractFeature::shouldNotCheckForFailsafe);
+  }
+
+  public Set<Failsafe> getFailsafesToIgnore(){
+    Set<Failsafe> failsafes = new HashSet<>();
+    this.allFeatures.forEach(it -> {
+      if(it.isRunning()){
+        failsafes.addAll(it.getFailsafesToIgnore());
+      }
+    });
+    return failsafes;
   }
 }

@@ -136,10 +136,9 @@ public class CommissionMacro extends AbstractMacro {
       if (GameStateHandler.getInstance().getCurrentLocation() != Location.DWARVEN_MINES) {
         this.changeMainState(MainState.WARP, 0);
       } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
-        log("Items Arent In Inventory And Failsafe Isnt Active");
+        error("Items Arent In Inventory And Failsafe Isnt Active");
         this.changeMainState(MainState.NONE);
-      } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY
-          && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
+      } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
         this.changeMainState(MainState.ITEMS, 0);
       }
     }
@@ -167,19 +166,21 @@ public class CommissionMacro extends AbstractMacro {
     }
 
     if (message.contains("Commission Complete")) {
-      this.curr.forEach(it -> {
+      this.curr.removeIf(it -> {
         if (message.equalsIgnoreCase(it.getName() + " Commission Complete! Visit the King to claim your rewards!")) {
-          this.curr.remove(it);
           this.commissionCounter++;
-          log("Commission Complete Detected. Comms Left: " + this.curr.toString());
+          log("Commission Complete Detected");
+          return true;
         }
-        if (this.curr.isEmpty()) {
-          log("No more commissions to complete.");
-          this.curr.add(Commission.COMMISSION_CLAIM);
-          this.stopActiveFeatures();
-          this.changeMacroState(MacroState.PATHING);
-        }
+        return false;
       });
+
+      if (this.curr.isEmpty()) {
+        log("No more commissions to complete.");
+        this.curr.add(Commission.COMMISSION_CLAIM);
+        this.stopActiveFeatures();
+        this.changeMacroState(MacroState.PATHING);
+      }
     }
 
     if (message.endsWith("is empty! Refuel it by talking to a Drill Mechanic!")) {
@@ -222,9 +223,10 @@ public class CommissionMacro extends AbstractMacro {
   //  private Commission last;
   private List<Commission> curr = new ArrayList<>();
 
-  private final MineableBlock[] blocksToMine = {MineableBlock.GRAY_MITHRIL, MineableBlock.GREEN_MITHRIL, MineableBlock.BLUE_MITHRIL, MineableBlock.TITANIUM};
-  private final int[] mithrilPriority = {1, 1, 1, 1};
-  private final int[] titaniumPriority = {1, 1, 1, 10};
+  private final MineableBlock[] blocksToMine = {MineableBlock.GRAY_MITHRIL, MineableBlock.GREEN_MITHRIL, MineableBlock.BLUE_MITHRIL,
+      MineableBlock.TITANIUM};
+  private final int[] mithrilPriority = {2, 3, 4, 1};
+  private final int[] titaniumPriority = {2, 3, 4, 10};
 
   private void changeMacroState(MacroState to, int timeToWait) {
     this.macroState = to;
@@ -306,11 +308,11 @@ public class CommissionMacro extends AbstractMacro {
         this.changeMacroState(MacroState.PATHING_VERIFY);
         Commission first = this.curr.get(0);
 
-        if(first == Commission.COMMISSION_CLAIM && MightyMinerConfig.commClaimMethod != 0){
+        if (first == Commission.COMMISSION_CLAIM && MightyMinerConfig.commClaimMethod != 0) {
           break;
         }
 
-        if(first == Commission.REFUEL && !MightyMinerConfig.commMechaGuiAccessMethod){
+        if (first == Commission.REFUEL && !MightyMinerConfig.commMechaGuiAccessMethod) {
           break;
         }
 
@@ -349,6 +351,7 @@ public class CommissionMacro extends AbstractMacro {
             break;
           case TIME_FAIL:
           case PATHFIND_FAILED:
+            error("Failed to Pathfind. Warping");
             this.changeMainState(MainState.WARP);
             this.changeMacroState(MacroState.PATHING);
             break;
@@ -371,7 +374,7 @@ public class CommissionMacro extends AbstractMacro {
             blocksToMine,
             miningSpeed,
             miningSpeedBoost,
-            this.curr.stream().anyMatch(it -> it.getName().contains("Titanium")) ? titaniumPriority : mithrilPriority,
+            this.curr.stream().anyMatch(it -> it.getName().contains("Titanium")) || MightyMinerConfig.commMineTitanium ? titaniumPriority : mithrilPriority,
             MightyMinerConfig.commMiningTool
         );
         this.changeMacroState(MacroState.MINING_VERIFY);

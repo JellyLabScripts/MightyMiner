@@ -1,5 +1,7 @@
 package com.jelly.mightyminerv2.handler;
 
+import com.jelly.mightyminerv2.MightyMiner;
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.MotionUpdateEvent;
 import com.jelly.mightyminerv2.util.AngleUtil;
 import com.jelly.mightyminerv2.util.helper.Angle;
@@ -14,9 +16,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RotationHandler {
 
+  private static final Logger log = LoggerFactory.getLogger(RotationHandler.class);
   private static RotationHandler instance;
 
   public static RotationHandler getInstance() {
@@ -73,7 +78,7 @@ public class RotationHandler {
     Angle change = AngleUtil.getNeededChange(this.startRotation, this.target.getTargetAngle());
     this.endTime = this.startTime + getTime(pythagoras(change.getYaw(), change.getPitch()), configuration.time());
 
-    this.randomMultiplier1 = randomMultiplier2 = random.nextBoolean() ? 1 : -1;
+    this.randomMultiplier1 = randomMultiplier2 = random.nextBoolean() ? MightyMinerConfig.cost4 : -MightyMinerConfig.cost4;
 
     this.lastBezierYaw = 0;
     this.lastBezierPitch = 0;
@@ -93,18 +98,22 @@ public class RotationHandler {
   }
 
   private void reset() {
+    if (this.stopRequested) {
+      this.configuration = null;
+      this.target = null;
+      this.startTime = this.endTime = 0L;
+      this.serverSideYaw = this.serverSidePitch = this.lastBezierYaw = this.lastBezierPitch = 0;
+    }
     this.enabled = false;
     this.followingTarget = false;
     this.stopRequested = false;
-    this.configuration = null;
-    this.target = null;
-    this.startTime = this.endTime = 0L;
-    this.serverSideYaw = this.serverSidePitch = this.lastBezierYaw = this.lastBezierPitch = 0;
   }
 
+  //so that we can stop rotation from anywhere, not JUST a tick (crashes if you call it from other events that aren't synchronized properly)
   public void stop() {
     this.rotations.clear();
     this.stopRequested = true;
+    this.enabled = false;
   }
 
   @SubscribeEvent

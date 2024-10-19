@@ -362,24 +362,22 @@ public class BlockUtil {
   }
 
   public static Vec3 getClosestVisibleSidePos(BlockPos block) {
-    if (!mc.theWorld.isBlockFullCube(block)) {
-      return null;
-    }
-    final Vec3 eyePos = mc.thePlayer.getPositionEyes(1);
-    double dist = Double.MAX_VALUE;
     EnumFacing face = null;
-    for (EnumFacing side : BLOCK_SIDES.keySet()) {
-      if (side != null && !mc.theWorld.getBlockState(block).getBlock()
-          .shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
-        continue;
-      }
-      final double distanceToThisSide = eyePos.distanceTo(getSidePos(block, side));
-      if (canSeeSide(block, side) && distanceToThisSide < dist) {
-        if (side == null && face != null) {
+    if (mc.theWorld.isBlockFullCube(block)) {
+      final Vec3 eyePos = mc.thePlayer.getPositionEyes(1);
+      double dist = Double.MAX_VALUE;
+      for (EnumFacing side : BLOCK_SIDES.keySet()) {
+        if (side != null && !mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
           continue;
         }
-        dist = distanceToThisSide;
-        face = side;
+        final double distanceToThisSide = eyePos.distanceTo(getSidePos(block, side));
+        if (canSeeSide(block, side) && distanceToThisSide < dist) {
+          if (side == null && face != null) {
+            continue;
+          }
+          dist = distanceToThisSide;
+          face = side;
+        }
       }
     }
     final float[] offset = BLOCK_SIDES.get(face);
@@ -388,22 +386,21 @@ public class BlockUtil {
 
 
   public static Vec3 getClosestVisibleSidePos(Vec3 from, BlockPos block) {
-    if (!mc.theWorld.isBlockFullCube(block)) {
-      return null;
-    }
-    double dist = Double.MAX_VALUE;
     EnumFacing face = null;
-    for (EnumFacing side : BLOCK_SIDES.keySet()) {
-      if (side != null && !mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
-        continue;
-      }
-      final double distanceToThisSide = from.distanceTo(getSidePos(block, side));
-      if (canSeeSide(from, block, side) && distanceToThisSide < dist) {
-        if (side == null && face != null) {
+    if (mc.theWorld.isBlockFullCube(block)) {
+      double dist = Double.MAX_VALUE;
+      for (EnumFacing side : BLOCK_SIDES.keySet()) {
+        if (side != null && !mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
           continue;
         }
-        dist = distanceToThisSide;
-        face = side;
+        final double distanceToThisSide = from.distanceTo(getSidePos(block, side));
+        if (canSeeSide(from, block, side) && distanceToThisSide < dist) {
+          if (side == null && face != null) {
+            continue;
+          }
+          dist = distanceToThisSide;
+          face = side;
+        }
       }
     }
     final float[] offset = BLOCK_SIDES.get(face);

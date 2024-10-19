@@ -4,8 +4,11 @@ import com.jelly.mightyminerv2.event.BlockChangeEvent;
 import com.jelly.mightyminerv2.event.BlockDestroyEvent;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
+import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.Clock;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -18,12 +21,21 @@ public abstract class AbstractFeature {
 
   protected final Minecraft mc = Minecraft.getMinecraft();
   protected final Clock timer = new Clock();
+  protected List<Failsafe> failsafesToIgnore;
   protected boolean enabled = false;
+
+  public AbstractFeature() {
+    this.failsafesToIgnore = new ArrayList<>();
+  }
 
   public abstract String getName();
 
   public boolean isRunning() {
     return this.enabled;
+  }
+
+  public List<Failsafe> getFailsafesToIgnore() {
+    return this.failsafesToIgnore;
   }
 
   public void start() {
@@ -83,11 +95,11 @@ public abstract class AbstractFeature {
   protected void onPacketReceive(PacketEvent.Received event) {
   }
 
-  protected void onWorldLoad(WorldEvent.Load event){
+  protected void onWorldLoad(WorldEvent.Load event) {
 
   }
 
-  protected void onWorldUnload(WorldEvent.Unload event){
+  protected void onWorldUnload(WorldEvent.Unload event) {
 
   }
 

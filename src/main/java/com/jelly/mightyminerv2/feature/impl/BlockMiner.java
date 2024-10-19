@@ -172,11 +172,10 @@ public class BlockMiner extends AbstractFeature {
         boostState = BoostState.INACTIVE;
         break;
       case CHOOSING_BLOCK:
-        int[] prio = {MightyMinerConfig.cost1, MightyMinerConfig.cost2, MightyMinerConfig.cost3, this.priority[3]};
         List<BlockPos> blocks;
-        if (!MightyMinerConfig.mithrilStrafe || (blocks = BlockUtil.getBestMineableBlocksAround(this.blocks, prio, this.targetBlock,
+        if (!MightyMinerConfig.mithrilStrafe || (blocks = BlockUtil.getBestMineableBlocksAround(this.blocks, this.priority, this.targetBlock,
             this.miningSpeed)).isEmpty()) {
-          blocks = BlockUtil.getBestMineableBlocks(this.blocks, prio, this.targetBlock, this.miningSpeed);
+          blocks = BlockUtil.getBestMineableBlocks(this.blocks, this.priority, this.targetBlock, this.miningSpeed);
         }
 
         if (blocks.size() < 2) {
@@ -232,7 +231,6 @@ public class BlockMiner extends AbstractFeature {
 
         if (this.targetPoint != null && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 4) {
           this.swapState(State.WALKING, 0);
-//          note("Should walk");
           Vec3 vec = AngleUtil.getVectorForRotation(AngleUtil.getRotationYaw(this.targetPoint));
           if (mc.theWorld.isAirBlock(new BlockPos(mc.thePlayer.getPositionVector().add(vec)))) {
             this.destBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOn())
@@ -244,6 +242,7 @@ public class BlockMiner extends AbstractFeature {
         } else {
           this.swapState(State.BREAKING, 0);
         }
+        log("Rotating");
         // fall through
       case WALKING:
         if ((this.destBlock == null || Math.hypot(this.destBlock.xCoord - mc.thePlayer.posX, this.destBlock.zCoord - mc.thePlayer.posZ) > 0.2)
@@ -321,6 +320,7 @@ public class BlockMiner extends AbstractFeature {
       Vec3 particlePos = new Vec3(event.getXCoord(), event.getYCoord(), event.getZCoord());
       MovingObjectPosition raytrace = RaytracingUtil.raytraceTowards(PlayerUtil.getPlayerEyePos(), particlePos, 4);
       if (raytrace != null && this.targetBlock.equals(raytrace.getBlockPos())) {
+        log("stopped rot");
         RotationHandler.getInstance().stop();
         RotationHandler.getInstance().easeTo(new RotationConfiguration(
             new Target(particlePos),

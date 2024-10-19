@@ -121,16 +121,16 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-//    AutoChestUnlocker.getInstance().start("Jasper Drill", false);
-    MineableBlock[] blocksToMine = {MineableBlock.GRAY_MITHRIL, MineableBlock.GREEN_MITHRIL, MineableBlock.BLUE_MITHRIL, MineableBlock.TITANIUM};
-
-    Map<Integer, Integer> blocks = new HashMap<>();
-    for (int i = 0; i < blocksToMine.length; i++) {
-      for (int j : blocksToMine[i].stateIds) {
-        blocks.put(j, i);
-      }
-    }
-    vals = com.jelly.mightyminerv2.util.BlockUtil.getBestMineableBlocksAroundDebug(blocks, new int[]{MightyMinerConfig.cost1, MightyMinerConfig.cost2, MightyMinerConfig.cost3, 1}, null, 2600);
+    AutoChestUnlocker.getInstance().start("Jasper Drill", true);
+//    MineableBlock[] blocksToMine = {MineableBlock.GRAY_MITHRIL, MineableBlock.GREEN_MITHRIL, MineableBlock.BLUE_MITHRIL, MineableBlock.TITANIUM};
+//
+//    Map<Integer, Integer> blocks = new HashMap<>();
+//    for (int i = 0; i < blocksToMine.length; i++) {
+//      for (int j : blocksToMine[i].stateIds) {
+//        blocks.put(j, i);
+//      }
+//    }
+//    vals = com.jelly.mightyminerv2.util.BlockUtil.getBestMineableBlocksAroundDebug(blocks, new int[]{MightyMinerConfig.cost1, MightyMinerConfig.cost2, MightyMinerConfig.cost3, 1}, null, 2600);
   }
 
   @SubCommand

@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.feature.impl;
 
+import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.EntityUtil;
@@ -54,11 +55,6 @@ public class AutoDrillRefuel extends AbstractFeature {
   @Override
   public String getName() {
     return "AutoDrillRefuel";
-  }
-
-  @Override
-  public boolean shouldNotCheckForFailsafe() {
-    return true;
   }
 
   @Override
@@ -310,6 +306,15 @@ public class AutoDrillRefuel extends AbstractFeature {
         InventoryUtil.closeScreen();
         this.stop();
         log("Succeeded or failed");
+        break;
+    }
+
+    switch (this.state){
+      case PUTTING_ITEMS:
+        this.failsafesToIgnore.add(Failsafe.ITEM_CHANGE);
+        break;
+      case ENDING:
+        this.failsafesToIgnore.remove(Failsafe.ITEM_CHANGE);
         break;
     }
   }

@@ -108,6 +108,16 @@ public class PathExecutor {
     KeyBindUtil.releaseAllExcept();
   }
 
+  public void clearQueue() {
+    this.pathQueue.clear();
+    this.curr = null;
+    this.succeeded = true;
+    this.failed = false;
+    this.interpolated = false;
+    this.target = 0;
+    this.previous = -1;
+  }
+
   public void setAllowSprint(boolean sprint) {
     this.allowSprint = sprint;
   }
@@ -179,16 +189,19 @@ public class PathExecutor {
 
     if (this.curr == null || this.target == this.blockPath.size()) {
       log("Path traversed");
+      if (this.pathQueue.isEmpty()) {
+        log("Pathqueue is empty");
+        if (this.curr != null) {
+          this.curr = null;
+          this.target = 0;
+          this.previous = -1;
+        }
+        this.state = State.WAITING;
+        return true;
+      }
       this.succeeded = true;
       this.failed = false;
       this.prev = this.curr;
-      if (this.pathQueue.isEmpty()) {
-        log("Pathqueue is empty");
-        this.curr = null;
-        this.target = 0;
-        this.previous = -1;
-        return true;
-      }
       this.target = 1;
       this.previous = 0;
       loadPath(this.pathQueue.poll());
@@ -257,6 +270,22 @@ public class PathExecutor {
         this.interpolated = true;
       }
     }
+//    else {
+//      String because = "";
+//      if (!onGround) {
+//        because = "onGround";
+//      }
+//      if (horizontalDistToTarget < 8) {
+//        because = "hhriz < 8";
+//      }
+//      if (!this.allowInterpolation) {
+//        because = "interp not allowed";
+//      }
+//      if (this.interpolated) {
+//        because = "interp done";
+//      }
+//      error("not interpolating cuz " + because);
+//    }
 
     StrafeUtil.enabled = yawDiff > 3;
     StrafeUtil.yaw = ipYaw;

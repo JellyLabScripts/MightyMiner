@@ -124,10 +124,10 @@ public class BlockUtil {
     final MinHeap<BlockPos> blocks = new MinHeap<>(500);
     final BlockPos blockPos = PlayerUtil.getBlockStandingOn().add(0, 2, 0);
     final Vec3 posEyes = mc.thePlayer.getPositionEyes(1);
-    for (int x = -4; x < 5; x++) {
-      for (int z = -4; z < 5; z++) {
+    for (int x = -5; x < 6; x++) {
+      for (int z = -5; z < 6; z++) {
         for (int y = -3; y < 5; y++) {
-          final BlockPos pos = blockPos.add(x, y + 2, z);
+          final BlockPos pos = blockPos.add(x, y, z);
           final int stateID = Block.getStateId(mc.theWorld.getBlockState(pos));
           Integer index = stateIds.get(stateID);
           if (index == null) {
@@ -458,7 +458,7 @@ public class BlockUtil {
       return false;
     }
     for (EnumFacing side : EnumFacing.values()) {
-      if (!mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
+      if (side != null && !mc.theWorld.getBlockState(block).getBlock().shouldSideBeRendered(mc.theWorld, block.offset(side), side)) {
         continue;
       }
       if (canSeeSide(block, side)) {

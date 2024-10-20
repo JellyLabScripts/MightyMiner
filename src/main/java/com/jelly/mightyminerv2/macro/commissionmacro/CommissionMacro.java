@@ -135,10 +135,12 @@ public class CommissionMacro extends AbstractMacro {
     if (this.mainState == MainState.MACRO) {
       if (GameStateHandler.getInstance().getCurrentLocation() != Location.DWARVEN_MINES) {
         this.changeMainState(MainState.WARP, 0);
-      } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
+      } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY
+          && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
         error("Items Arent In Inventory And Failsafe Isnt Active");
         this.changeMainState(MainState.NONE);
-      } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
+      } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY
+          && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
         this.changeMainState(MainState.ITEMS, 0);
       }
     }
@@ -374,7 +376,8 @@ public class CommissionMacro extends AbstractMacro {
             blocksToMine,
             miningSpeed,
             miningSpeedBoost,
-            this.curr.stream().anyMatch(it -> it.getName().contains("Titanium")) || MightyMinerConfig.commMineTitanium ? titaniumPriority : mithrilPriority,
+            this.curr.stream().anyMatch(it -> it.getName().contains("Titanium")) || MightyMinerConfig.commMineTitanium ? titaniumPriority
+                : mithrilPriority,
             MightyMinerConfig.commMiningTool
         );
         this.changeMacroState(MacroState.MINING_VERIFY);
@@ -476,8 +479,7 @@ public class CommissionMacro extends AbstractMacro {
             break;
           case INACCESSIBLE_NPC:
             error("Inaccessible NPC. Retrying");
-            this.changeMainState(MainState.WARP);
-            this.changeMacroState(MacroState.STARTING);
+            this.changeMacroState(MacroState.PATHING);
             break;
           case TIMEOUT:
             log("Retrying claim");

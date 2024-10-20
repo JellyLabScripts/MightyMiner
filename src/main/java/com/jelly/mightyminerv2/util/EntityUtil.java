@@ -13,6 +13,7 @@ import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 
 public class EntityUtil {
@@ -27,6 +28,10 @@ public class EntityUtil {
       return false;
     }
     return !TablistUtil.getTabListPlayersSkyblock().contains(entity.getName());
+  }
+
+  public static BlockPos getBlockStandingOn(Entity entity){
+    return new BlockPos(entity.posX, Math.ceil(entity.posY - 0.25) - 1, entity.posZ);
   }
 
   public static Optional<Entity> getEntityLookingAt() {
@@ -95,9 +100,8 @@ public class EntityUtil {
         .filter(EntityLivingBase::isEntityAlive)
         .sorted(Comparator.comparingDouble(ent -> {
               Vec3 entPos = ent.getPositionVector();
-              double distanceCost =
-                  Math.hypot(playerPos.xCoord - entPos.xCoord, playerPos.zCoord - entPos.zCoord) + Math.abs(entPos.yCoord - playerPos.yCoord) * 2;
-              double angleCost = Math.abs(AngleUtil.normalizeAngle((normalizedYaw - AngleUtil.getRotation(ent).yaw)));
+              double distanceCost = playerPos.distanceTo(entPos);
+              double angleCost = Math.abs(AngleUtil.getNeededYawChange(normalizedYaw, AngleUtil.getRotationYaw(entPos)));
               return distanceCost * ((float) MightyMinerConfig.devMKillDist / 100f) + angleCost * ((float) MightyMinerConfig.devMKillRot / 100f);
             }
         )).collect(Collectors.toList());

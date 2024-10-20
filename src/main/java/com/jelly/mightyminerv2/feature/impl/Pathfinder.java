@@ -15,6 +15,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import jdk.nashorn.internal.ir.Block;
 import kotlin.Pair;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
@@ -92,6 +93,15 @@ public class Pathfinder extends AbstractFeature {
     log("Queued Path");
   }
 
+  public void stopAndRequeue(BlockPos pos) {
+    if (this.enabled) {
+      this.pathQueue.clear();
+      this.pathExecutor.clearQueue();
+      this.finder.requestStop();
+    }
+    this.queue(pos);
+  }
+
   public void queue(BlockPos end) {
     BlockPos start;
     if (this.pathQueue.isEmpty()) {
@@ -144,11 +154,10 @@ public class Pathfinder extends AbstractFeature {
     }
 
     if (this.pathQueue.isEmpty()) {
-      if (pathExecutor.getState() == State.WAITING && !this.pathfinding) {
+      if (this.pathExecutor.getState() == State.WAITING && !this.pathfinding) {
         this.stop();
         this.succeeded = true;
         log("pathqueue empty stopping");
-        return;
       }
       return;
     }

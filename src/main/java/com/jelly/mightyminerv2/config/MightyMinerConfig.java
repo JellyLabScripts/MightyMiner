@@ -170,7 +170,6 @@ public class MightyMinerConfig extends Config {
   )
   public static boolean commMobKillerInterpolate = true;
 
-
   @Switch(
       name = "Refuel Drill",
       category = COMMISSION,

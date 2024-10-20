@@ -124,6 +124,11 @@ public class AngleUtil {
     return yaw;
   }
 
+  // start and end should be normalized;
+  public static float getNeededYawChange(float start, float end){
+    return normalizeAngle(end - start);
+  }
+
   // Todo: More testing
   // edit this prolly bad pls fix this
   public static Angle getNeededChange(Angle startAngle, Angle endAngle) {

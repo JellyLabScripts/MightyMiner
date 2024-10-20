@@ -5,6 +5,7 @@ import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.pathfinder.helper.BlockStateAccessor;
 import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper;
+import com.jelly.mightyminerv2.util.BlockUtil;
 import com.jelly.mightyminerv2.util.EntityUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
@@ -16,11 +17,15 @@ import com.jelly.mightyminerv2.util.helper.Target;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import kotlin.Pair;
+import kotlin.Triple;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -44,12 +49,15 @@ public class AutoMobKiller extends AbstractFeature {
 
   private State state = State.STARTING;
   private MKError mkError = MKError.NONE;
-  private Clock shutdownTimer = new Clock();
-  private Clock queueTimer = new Clock();
-  private Set<EntityLivingBase> mobQueue = new HashSet<>();
+  private final Clock shutdownTimer = new Clock();
+  private final Clock queueTimer = new Clock();
+  private final Clock recheckTimer = new Clock();
+  private final Set<EntityLivingBase> mobQueue = new HashSet<>();
   private Optional<EntityLivingBase> targetMob = Optional.empty();
   private Optional<Vec3> entityLastPosition = Optional.empty();
-  private Set<String> mobToKill = new HashSet<>();
+  private final Set<String> mobToKill = new HashSet<>();
+  private Map<EntityLivingBase, Pair<String, BlockPos>> debug = new HashMap<>();
+  int pathRetry = 0;
 //  private Set<String> mobToKill = ImmutableSet.of("Glacite Walker", "Goblin", "Knifethrower", "Zombie", "Crypt Ghoul", "");
 //  private List<EntityLivingBase> mobs = new ArrayList<>();
 
@@ -69,6 +77,7 @@ public class AutoMobKiller extends AbstractFeature {
     this.mkError = MKError.NONE;
     this.enabled = true;
 
+    debug.clear();
     this.start();
     log("Started");
   }
@@ -130,54 +139,58 @@ public class AutoMobKiller extends AbstractFeature {
       case STARTING:
         this.targetMob.ifPresent(this.mobQueue::add);
         this.changeState(State.FINDING_MOB, 0);
+        this.recheckTimer.reset();
         log("Starting");
       case FINDING_MOB:
-        List<EntityLivingBase> mobs = EntityUtil.getEntities(this.mobToKill, this.mobQueue);
-        if (mobs.isEmpty()) {
-          if (!this.shutdownTimer.isScheduled()) {
-            log("Cannot find mobs. Starting a 10 second timer");
-            this.shutdownTimer.schedule(10_000);
+        if (!this.recheckTimer.isScheduled() || this.recheckTimer.passed()) {
+          List<EntityLivingBase> mobs = EntityUtil.getEntities(this.mobToKill, this.mobQueue);
+          if (mobs.isEmpty()) {
+            if (!this.shutdownTimer.isScheduled()) {
+              log("Cannot find mobs. Starting a 10 second timer");
+              this.shutdownTimer.schedule(10_000);
+            }
+            return;
+          } else if (this.shutdownTimer.isScheduled()) {
+            this.shutdownTimer.reset();
           }
-          return;
-        } else if (this.shutdownTimer.isScheduled()) {
-          this.shutdownTimer.reset();
+
+          EntityLivingBase best = null;
+          for (EntityLivingBase mob : mobs) {
+            BlockPos mobPos = EntityUtil.getBlockStandingOn(mob);
+            if (BlockUtil.canStandOn(mobPos)) {
+              best = mob;
+              break;
+            }
+          }
+          if (best == null) {
+            log("Didnt find a mob that has a valid position. ");
+            this.changeState(State.STARTING, 0);
+            return;
+          }
+          if (!this.targetMob.isPresent() || !this.targetMob.get().equals(best)) {
+            this.targetMob = Optional.of(best);
+            this.entityLastPosition = Optional.of(best.getPositionVector());
+            Pathfinder.getInstance().stopAndRequeue(EntityUtil.getBlockStandingOn(this.targetMob.get()));
+          }
+          this.recheckTimer.schedule(2000);
         }
 
-//        this.mobs = mobs;
-        EntityLivingBase best = mobs.get(0);
-        this.targetMob = Optional.ofNullable(best);
-        this.entityLastPosition = Optional.ofNullable(best.getPositionVector());
-        this.changeState(State.WALKING_TO_MOB, 0);
-        break;
-      case WALKING_TO_MOB:
         if (!this.targetMob.isPresent() || !this.entityLastPosition.isPresent()) {
           this.stop(MKError.NO_ENTITIES);
           log("no target mob || no last position saved"); // idk why this would happen but better safe than sorry (im schizophrenic)
           return;
         }
-        Vec3 mobPos = this.targetMob.get().getPositionVector();
-        int mpx = (int) mobPos.xCoord;
-        int mpy = (int) Math.ceil(mobPos.yCoord) - 1;
-        int mpz = (int) mobPos.zCoord;
 
-        BlockPos pos = new BlockPos(mpx, mpy, mpz);
-        BlockStateAccessor bsa = new BlockStateAccessor(mc.theWorld);
-        if (!MovementHelper.INSTANCE.canStandOn(bsa, mpx, mpy, mpz, bsa.get(mpx, mpy, mpz))) {
-          pos = pos.down();
-        }
-        Pathfinder.getInstance().queue(pos);
-        log("Queued new to " + mobPos);
         if (!Pathfinder.getInstance().isRunning()) {
           log("Pathfinder wasnt enabled. starting");
           Pathfinder.getInstance().setSprintState(MightyMinerConfig.commMobKillerSprint);
           Pathfinder.getInstance().setInterpolationState(MightyMinerConfig.commMobKillerInterpolate);
           Pathfinder.getInstance().start();
         }
-        this.changeState(State.WAITING_FOR_MOB, 0);
-        break;
-      case WAITING_FOR_MOB:
-        // next tick pos makes hits more accurate
-        if (PlayerUtil.getNextTickPosition().squareDistanceTo(this.targetMob.get().getPositionVector()) < 8 && mc.thePlayer.canEntityBeSeen(this.targetMob.get())) { // 8 cuz why not
+
+        if (PlayerUtil.getNextTickPosition().squareDistanceTo(this.targetMob.get().getPositionVector()) < 8 && mc.thePlayer.canEntityBeSeen(
+            this.targetMob.get())) { // 8 cuz why not
+          log("Looking at mob");
           this.changeState(State.LOOKING_AT_MOB, 0);
           return;
         }
@@ -190,9 +203,16 @@ public class AutoMobKiller extends AbstractFeature {
         }
 
         if (this.targetMob.get().getPositionVector().squareDistanceTo(this.entityLastPosition.get()) > 9) {
-          this.changeState(State.STARTING, 0);
-          log("target mob moved away. repathing");
-          Pathfinder.getInstance().stop();
+          if (++this.pathRetry > 3) {
+            this.changeState(State.STARTING, 0);
+            log("target mob moved away. repathing");
+            Pathfinder.getInstance().stop();
+            this.pathRetry = 0;
+            return;
+          }
+          log("Repathing");
+          this.entityLastPosition = Optional.of(this.targetMob.get().getPositionVector());
+          Pathfinder.getInstance().stopAndRequeue(EntityUtil.getBlockStandingOn(this.targetMob.get()));
           return;
         }
 
@@ -217,6 +237,7 @@ public class AutoMobKiller extends AbstractFeature {
           }
           if (!Pathfinder.getInstance().isRunning() && !RotationHandler.getInstance().isEnabled()) {
             this.changeState(State.STARTING, 0);
+//            this.debug.put(this.targetMob.get(), new Pair<>("NPNR", walkPos));
           }
           return;
         }
@@ -230,6 +251,12 @@ public class AutoMobKiller extends AbstractFeature {
 
   @SubscribeEvent
   protected void onRender(RenderWorldLastEvent event) {
+//    debug.forEach((a, b) -> {
+//      RenderUtil.drawText(b.getFirst(), a.posX, a.posY + a.height, a.posZ, 1);
+//      if (b.getSecond() != null) {
+//        RenderUtil.drawBlock(b.getSecond(), new Color(255, 0, 241, 150));
+//      }
+//    });
     if (!this.enabled || !this.targetMob.isPresent()) {
       return;
     }
@@ -237,10 +264,7 @@ public class AutoMobKiller extends AbstractFeature {
 
     RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord, pos.zCoord + 0.5),
         new Color(255, 0, 241, 150));
-//
-//    this.mobs.forEach(it -> {
-//      RenderUtil.drawText("Mob", it.posX, it.posY + it.height, it.posZ, 1);
-//    });
+
   }
 
   private void changeState(State state, int time) {

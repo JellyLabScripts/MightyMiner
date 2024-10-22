@@ -325,20 +325,6 @@
           "transportMethod": "WALK"
         }
       ],
-      "{\"x\":-7,\"y\":144,\"z\":-21,\"transportMethod\":\"WALK\"}": [
-        {
-          "x": -10,
-          "y": 144,
-          "z": -26,
-          "transportMethod": "WALK"
-        },
-        {
-          "x": -17,
-          "y": 144,
-          "z": -18,
-          "transportMethod": "WALK"
-        }
-      ],
       "{\"x\":-111,\"y\":141,\"z\":103,\"transportMethod\":\"WALK\"}": [
         {
           "x": -116,
@@ -587,9 +573,9 @@
           "transportMethod": "WALK"
         },
         {
-          "x": -7,
+          "x": -9,
           "y": 144,
-          "z": -21,
+          "z": -20,
           "transportMethod": "WALK"
         }
       ],
@@ -799,9 +785,9 @@
           "transportMethod": "WALK"
         },
         {
-          "x": -7,
+          "x": -9,
           "y": 144,
-          "z": -21,
+          "z": -20,
           "transportMethod": "WALK"
         }
       ],
@@ -2822,6 +2808,20 @@
           "x": 150,
           "y": 150,
           "z": 34,
+          "transportMethod": "WALK"
+        }
+      ],
+      "{\"x\":-9,\"y\":144,\"z\":-20,\"transportMethod\":\"WALK\"}": [
+        {
+          "x": -10,
+          "y": 144,
+          "z": -26,
+          "transportMethod": "WALK"
+        },
+        {
+          "x": -17,
+          "y": 144,
+          "z": -18,
           "transportMethod": "WALK"
         }
       ],

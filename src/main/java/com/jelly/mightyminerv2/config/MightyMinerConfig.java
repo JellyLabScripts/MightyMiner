@@ -375,6 +375,14 @@ public class MightyMinerConfig extends Config {
   public static String devMKillerMob = "Goblin";
 
   @Slider(
+      name = "MobKiller Check Timer",
+      category = "Dev",
+      subcategory = "MobKiller",
+      min = 0, max = 5000
+  )
+  public static int devMKillTimer = 1000;
+
+  @Slider(
       name = "Rotation Curve",
       category = "Dev",
       subcategory = "Cost",

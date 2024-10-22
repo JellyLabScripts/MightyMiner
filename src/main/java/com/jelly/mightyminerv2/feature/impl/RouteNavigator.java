@@ -283,9 +283,8 @@ public class RouteNavigator extends AbstractFeature {
         break;
       case WALK_VERIFY:
         BlockPos targetPos = this.routeToFollow.get(this.currentRouteIndex).toBlockPos();
-        if (Pathfinder.getInstance().completedPathTo(targetPos) || PlayerUtil.getBlockStandingOn().equals(targetPos)) {
+        if (Pathfinder.getInstance().completedPathTo(targetPos) || (!Pathfinder.getInstance().isRunning() && Pathfinder.getInstance().succeeded()) || PlayerUtil.getBlockStandingOn().equals(targetPos)) {
           log("Completed path. going to next");
-//          PathfindUtil.stop();
           this.swapState(State.STARTING, 0);
           log("Done Walking");
           return;

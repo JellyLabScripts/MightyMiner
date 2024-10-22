@@ -224,7 +224,6 @@ object BlockUtil {
                 }
             }
 
-
             val delta = (y0 + i) - lastPos.y
             if (delta > 0) {
                 if (delta > 1) {
@@ -236,6 +235,8 @@ object BlockUtil {
                 val destSmallStair = MovementHelper.isValidStair(currState, x0 - lastPos.x, z0 - lastPos.z);
 
                 if (!srcSmall == !(destSmall || destSmallStair)) {
+                    return false
+                } else if (srcSmall) {
                     return false
                 }
             }

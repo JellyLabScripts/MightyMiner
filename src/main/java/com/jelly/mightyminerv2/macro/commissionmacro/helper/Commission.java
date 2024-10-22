@@ -52,7 +52,7 @@ public enum Commission {
 
     Map<SubLocation, RouteWaypoint[]> veinsMap = new EnumMap<SubLocation, RouteWaypoint[]>(SubLocation.class) {{
       put(SubLocation.FORGE_BASIN, new RouteWaypoint[]{
-          new RouteWaypoint(-7, 144, -21, TransportMethod.WALK)
+          new RouteWaypoint(-9, 144, -20, TransportMethod.WALK)
       });
       put(SubLocation.THE_FORGE, new RouteWaypoint[]{
           new RouteWaypoint(44, 134, 21, TransportMethod.WALK),

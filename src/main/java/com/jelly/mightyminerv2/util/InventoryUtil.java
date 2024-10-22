@@ -1,6 +1,8 @@
 package com.jelly.mightyminerv2.util;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
@@ -252,6 +254,66 @@ public class InventoryUtil {
       return false;
     }
     return true;
+  }
+
+  public static String getFullName(String name) {
+    for (int i = 0; i < mc.thePlayer.openContainer.inventorySlots.size(); i++) {
+      Slot slot = mc.thePlayer.openContainer.getSlot(i);
+      if (slot == null || !slot.getHasStack()) {
+        continue;
+      }
+      ItemStack stack = slot.getStack();
+      if (!stack.hasDisplayName()) {
+        continue;
+      }
+      String itemName = StringUtils.stripControlCodes(stack.getDisplayName());
+      if (!itemName.toLowerCase().contains(name.toLowerCase())) {
+        continue;
+      }
+      return itemName;
+    }
+    return "";
+  }
+
+  public static int getDrillFuelCapacity(String drillName) {
+    List<String> loreList = InventoryUtil.getItemLoreFromInventory(drillName);
+    if (loreList.isEmpty()) {
+      return -1;
+    }
+    for (String lore : loreList) {
+      if (!lore.startsWith("Fuel: ")) {
+        continue;
+      }
+      try {
+        return Integer.parseInt(lore.split("/")[1].replace("k", "000"));
+      } catch (Exception e) {
+        Logger.sendNote("Could not retrieve fuel capacity. Lore: " + lore + ", Splitted: " + Arrays.toString(lore.split("/")));
+        e.printStackTrace();
+        break;
+      }
+    }
+    return -1;
+  }
+
+  public static int getDrillRemainingFuel(String drillName) {
+    List<String> loreList = InventoryUtil.getItemLoreFromInventory(drillName);
+    if (loreList.isEmpty()) {
+      return -1;
+    }
+    for (String lore : loreList) {
+      if (!lore.startsWith("Fuel: ")) {
+        continue;
+      }
+      try {
+        return Integer.parseInt(lore.split(" ")[1].split("/")[0].replace(",", ""));
+      } catch (Exception e) {
+        Logger.sendNote("Could not retrieve fuel. Lore: " + lore + ", Splitted: " + Arrays.toString(lore.split("/")));
+        e.printStackTrace();
+        break;
+      }
+    }
+    return -1;
+
   }
 
   public enum ClickType {

@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.macro.commissionmacro;
 
+import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
@@ -48,7 +49,17 @@ public class CommissionMacro extends AbstractMacro {
 
   @Override
   public void onEnable() {
-    this.mainState = MainState.MACRO;
+    this.changeMainState(MainState.MACRO);
+    String miningTool = MightyMinerConfig.commMiningTool;
+    if((miningTool.toLowerCase().contains("drill") || InventoryUtil.getFullName(miningTool).contains("Drill"))){
+      int drillFuel =  InventoryUtil.getDrillRemainingFuel(miningTool);
+      note("Using Drill. Drill Fuel: " + drillFuel);
+      if(drillFuel == 0){
+        note("DrillFuel = 0. MacroState: " + this.macroState + ", Comms: " + this.curr);
+        this.changeMacroState(MacroState.PATHING);
+        this.curr.add(Commission.REFUEL);
+      }
+    }
     log("CommMacro::onEnable");
   }
 

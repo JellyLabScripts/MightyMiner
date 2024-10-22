@@ -40,7 +40,8 @@ public class AutoDrillRefuel extends AbstractFeature {
   private Error failReason = Error.NONE;
   private int requiredFuelAmount = 0;
   private boolean movedSuccessfully = false;
-  private final String[] fuelList = {"Enchanted Poppy", "Goblin Egg", "Green Goblin Egg", "Yellow Goblin Egg", "Red Goblin Egg", "Blue Goblin Egg", "Volta", "Oil Barrel"};
+  private final String[] fuelList = {"Enchanted Poppy", "Goblin Egg", "Green Goblin Egg", "Yellow Goblin Egg", "Red Goblin Egg", "Blue Goblin Egg",
+      "Volta", "Oil Barrel"};
   private final Map<String, Integer> fuelAmount = new HashMap<String, Integer>() {{
     put("Enchanted Poppy", 1000);
     put("Goblin Egg", 3000);
@@ -60,6 +61,8 @@ public class AutoDrillRefuel extends AbstractFeature {
   @Override
   public void resetStatesAfterStop() {
     this.state = State.STARTING;
+
+    this.failsafesToIgnore.remove(Failsafe.ITEM_CHANGE);
   }
 
   public void start(String drillName, int fuelIndex, boolean getFuelFromSack, boolean useNpc) {
@@ -125,41 +128,14 @@ public class AutoDrillRefuel extends AbstractFeature {
         this.swapState(State.LOCATING_ITEMS, 0);
         break;
       case LOCATING_ITEMS:
-        List<String> loreList = InventoryUtil.getItemLoreFromInventory(this.drillToRefill);
-        if (loreList.isEmpty()) {
-          error("Can't refill because no drill - dumbass");
+        int capacity = InventoryUtil.getDrillFuelCapacity(this.drillToRefill);
+        if (capacity == -1) {
+          error("Cannot find drill fuel capacity. stopping");
           this.stop(Error.FAILED_REFILL);
           return;
         }
-        boolean foundFuel = false;
-        float capacity = 0;
-        for (String lore : loreList) {
-          if (!lore.startsWith("Fuel: ")) {
-            continue;
-          }
-          foundFuel = true;
-          try {
-            capacity = Float.parseFloat(lore.split("/")[1].replace("k", "000"));
-          } catch (Exception e) {
-            Logger.sendNote("Could not retrieve fuel capacity. Lore: " + lore + ", Splitted: " + Arrays.toString(lore.split("/")));
-            e.printStackTrace();
-          }
-          if (capacity == 0.0f) {
-            error("Couldnt find drill capacity");
-            this.stop(Error.FAILED_REFILL);
-            return;
-          }
-
-          break;
-        }
-        if (!foundFuel) {
-          error("Couldnt find drill fuel");
-          this.stop(Error.FAILED_REFILL);
-          return;
-        }
-
         String chosenFuel = this.fuelList[this.fuelIndex];
-        this.requiredFuelAmount = MathHelper.ceiling_float_int(capacity / this.fuelAmount.get(chosenFuel));
+        this.requiredFuelAmount = MathHelper.ceiling_float_int((float) capacity / this.fuelAmount.get(chosenFuel));
         if (InventoryUtil.getAmountOfItemInInventory(chosenFuel) >= this.requiredFuelAmount) {
           this.swapState(State.ROTATING, 0);
         } else {
@@ -237,6 +213,8 @@ public class AutoDrillRefuel extends AbstractFeature {
           // Toggle AutoAbiphone
           time = 0;
         }
+
+        this.failsafesToIgnore.add(Failsafe.ITEM_CHANGE);
         this.swapState(State.GUI_VERIFY, time);
         break;
       case GUI_VERIFY:
@@ -295,26 +273,23 @@ public class AutoDrillRefuel extends AbstractFeature {
           this.swapState(State.RETRIEVING_DRILL, 500);
         } else {
           log("ending");
-          this.swapState(State.ENDING, 300);
+          this.swapState(State.WAITING, 300);
         }
+        break;
+      // so that extra items (if there are any) can be properly added back to inventory - kinda dumb imo
+      case WAITING:
+        if (this.isTimerRunning()) {
+          return;
+        }
+        InventoryUtil.closeScreen();
+        this.swapState(State.ENDING, 300);
         break;
       case ENDING:
         if (this.isTimerRunning()) {
           return;
         }
-
-        InventoryUtil.closeScreen();
         this.stop();
         log("Succeeded or failed");
-        break;
-    }
-
-    switch (this.state){
-      case PUTTING_ITEMS:
-        this.failsafesToIgnore.add(Failsafe.ITEM_CHANGE);
-        break;
-      case ENDING:
-        this.failsafesToIgnore.remove(Failsafe.ITEM_CHANGE);
         break;
     }
   }
@@ -332,7 +307,7 @@ public class AutoDrillRefuel extends AbstractFeature {
   }
 
   enum State {
-    STARTING, LOCATING_ITEMS, FETCHING_ITEMS, VERIFYING_ITEM_FETCH, ROTATING, OPENING_MECHANICS_GUI, GUI_VERIFY, PUTTING_ITEMS, RETRIEVING_DRILL, ENDING
+    STARTING, LOCATING_ITEMS, FETCHING_ITEMS, VERIFYING_ITEM_FETCH, ROTATING, OPENING_MECHANICS_GUI, GUI_VERIFY, PUTTING_ITEMS, RETRIEVING_DRILL, WAITING, ENDING
   }
 
   public enum Error {

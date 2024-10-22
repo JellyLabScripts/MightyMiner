@@ -12,6 +12,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
 import java.util.*;
@@ -617,6 +618,28 @@ public class BlockUtil {
 //      return true;
 //    }
 //    return false;
+  }
+
+  public static boolean canWalkBetween(CalculationContext ctx, Vec3 start, Vec3 end) {
+    int ey = MathHelper.floor_double(end.yCoord);
+    int ex = MathHelper.floor_double(end.xCoord);
+    int ez = MathHelper.floor_double(end.zCoord);
+//    int ex = end.getX();
+//    int ez = end.getZ();
+    IBlockState endState = ctx.get(ex, ey, ez);
+    if (!MovementHelper.INSTANCE.canStandOn(ctx.getBsa(), ex, ey, ez, endState)) {
+//      Logger.sendLog("Cannot stand on x: " + ex + ", y: " + ey + ", z: " + ez);
+      return false;
+    }
+    if (!MovementHelper.INSTANCE.canWalkThrough(ctx.getBsa(), ex, ey + 1, ez, ctx.get(ex, ey + 1, ez))) {
+//      Logger.sendLog("Cannot walk throug x: " + ex + ", y: " + (ey + 1) + ", z: " + ez);
+      return false;
+    }
+    if (!MovementHelper.INSTANCE.canWalkThrough(ctx.getBsa(), ex, ey + 2, ez, ctx.get(ex, ey + 2, ez))) {
+//      Logger.sendLog("Cannot walk throug x: " + ex + ", y: " + (ey + 2) + ", z: " + ez);
+      return false;
+    }
+    return !com.jelly.mightyminerv2.pathfinder.util.BlockUtil.INSTANCE.bresenham(ctx, start, end);
   }
 
   public static boolean canStandOn(BlockPos pos) {

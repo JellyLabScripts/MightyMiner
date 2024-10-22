@@ -205,7 +205,7 @@ public class Pathfinder extends AbstractFeature {
     if (!this.enabled) {
       return;
     }
-
+//    this.pathExecutor.onRender();
     Deque<Path> paths = new LinkedList<>(this.pathExecutor.getPathQueue());
     if (pathExecutor.getCurrentPath() != null) {
       paths.add(pathExecutor.getCurrentPath());

@@ -23,6 +23,7 @@ import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
 import com.jelly.mightyminerv2.util.AngleUtil;
 import com.jelly.mightyminerv2.util.CommissionUtil;
+import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
@@ -79,10 +80,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.LoggerFactory;
 
 @Command(value = "set")
 public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(OsamaTestCommandNobodyTouchPleaseLoveYou.class);
   @Getter
   private static OsamaTestCommandNobodyTouchPleaseLoveYou instance = new OsamaTestCommandNobodyTouchPleaseLoveYou();
   private final Minecraft mc = Minecraft.getMinecraft();
@@ -121,16 +124,16 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @Main
   public void main() {
-    AutoChestUnlocker.getInstance().start("Jasper Drill", true);
-//    MineableBlock[] blocksToMine = {MineableBlock.GRAY_MITHRIL, MineableBlock.GREEN_MITHRIL, MineableBlock.BLUE_MITHRIL, MineableBlock.TITANIUM};
-//
-//    Map<Integer, Integer> blocks = new HashMap<>();
-//    for (int i = 0; i < blocksToMine.length; i++) {
-//      for (int j : blocksToMine[i].stateIds) {
-//        blocks.put(j, i);
-//      }
-//    }
-//    vals = com.jelly.mightyminerv2.util.BlockUtil.getBestMineableBlocksAroundDebug(blocks, new int[]{MightyMinerConfig.cost1, MightyMinerConfig.cost2, MightyMinerConfig.cost3, 1}, null, 2600);
+//    AutoChestUnlocker.getInstance().start("Jasper Drill", true);
+    String miningTool = MightyMinerConfig.commMiningTool;
+    System.out.println("Fullname: " + InventoryUtil.getFullName(miningTool));
+    if (miningTool.toLowerCase().contains("drill")) {
+      System.out.println("MininGtool contains drill. Fuel: " + InventoryUtil.getDrillRemainingFuel(miningTool));
+    } else if (InventoryUtil.getFullName(miningTool).contains("Drill")) {
+      System.out.println("Fullname contains drill. Fuel: " + InventoryUtil.getDrillRemainingFuel(miningTool));
+    } else {
+      System.out.println("No Drillj");
+    }
   }
 
   @SubCommand

@@ -132,7 +132,7 @@ public class AutoMobKiller extends AbstractFeature {
     if (this.queueTimer.passed()) {
       log("Queue celared");
       this.mobQueue.clear();
-      this.queueTimer.schedule(2000);
+      this.queueTimer.schedule(MightyMinerConfig.devMKillTimer);
     }
 
     switch (this.state) {
@@ -188,8 +188,7 @@ public class AutoMobKiller extends AbstractFeature {
           Pathfinder.getInstance().start();
         }
 
-        if (PlayerUtil.getNextTickPosition().squareDistanceTo(this.targetMob.get().getPositionVector()) < 8 && mc.thePlayer.canEntityBeSeen(
-            this.targetMob.get())) { // 8 cuz why not
+        if (PlayerUtil.getNextTickPosition().squareDistanceTo(this.targetMob.get().getPositionVector()) < 8 && mc.thePlayer.canEntityBeSeen(this.targetMob.get())) { // 8 cuz why not
           log("Looking at mob");
           this.changeState(State.LOOKING_AT_MOB, 0);
           return;
@@ -206,7 +205,7 @@ public class AutoMobKiller extends AbstractFeature {
           if (++this.pathRetry > 3) {
             this.changeState(State.STARTING, 0);
             log("target mob moved away. repathing");
-            Pathfinder.getInstance().stop();
+//            Pathfinder.getInstance().stop();
             this.pathRetry = 0;
             return;
           }

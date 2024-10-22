@@ -7,11 +7,13 @@ import com.jelly.mightyminerv2.util.BlockUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
+import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.StrafeUtil;
 import com.jelly.mightyminerv2.util.helper.Angle;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
@@ -21,7 +23,9 @@ import java.util.Map;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import sun.awt.geom.AreaOp.CAGOp;
 
 public class PathExecutor {
 
@@ -252,7 +256,8 @@ public class PathExecutor {
         }
       }
 
-      float time = MightyMinerConfig.fixrot ? MightyMinerConfig.rottime : Math.max(300, (long) (400 - horizontalDistToTarget * MightyMinerConfig.rotmult));
+      float time =
+          MightyMinerConfig.fixrot ? MightyMinerConfig.rottime : Math.max(300, (long) (400 - horizontalDistToTarget * MightyMinerConfig.rotmult));
       RotationHandler.getInstance().easeTo(
           new RotationConfiguration(
               new Angle(rotYaw, 15f),
@@ -270,28 +275,13 @@ public class PathExecutor {
         this.interpolated = true;
       }
     }
-//    else {
-//      String because = "";
-//      if (!onGround) {
-//        because = "onGround";
-//      }
-//      if (horizontalDistToTarget < 8) {
-//        because = "hhriz < 8";
-//      }
-//      if (!this.allowInterpolation) {
-//        because = "interp not allowed";
-//      }
-//      if (this.interpolated) {
-//        because = "interp done";
-//      }
-//      error("not interpolating cuz " + because);
-//    }
 
     StrafeUtil.enabled = yawDiff > 3;
     StrafeUtil.yaw = ipYaw;
 
-    boolean shouldJump = BlockUtil.canWalkBetween(this.curr.getCtx(), PlayerUtil.getBlockStandingOn(),
-        new BlockPos(mc.thePlayer.getPositionVector().add(AngleUtil.getVectorForRotation(yaw))));
+    Vec3 pos = new Vec3(mc.thePlayer.posX, playerPos.getY() + 0.5, mc.thePlayer.posZ);
+    Vec3 vec4Rot = AngleUtil.getVectorForRotation(yaw);
+    boolean shouldJump = BlockUtil.canWalkBetween(this.curr.getCtx(), pos, pos.addVector(vec4Rot.xCoord, 1, vec4Rot.zCoord));
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSprint, this.allowSprint && yawDiff < 40 && !shouldJump);
     if (shouldJump && onGround) {
@@ -312,6 +302,24 @@ public class PathExecutor {
     for (int i = 0; i < this.blockPath.size(); i++) {
       BlockPos pos = this.blockPath.get(i);
       this.map.computeIfAbsent(this.pack(pos.getX(), pos.getZ()), k -> new ArrayList<>()).add(this.pack(pos.getY(), i));
+    }
+  }
+
+  public void onRender() {
+    System.out.println("OnRender");
+    if (this.target != -1 && this.target < this.blockPath.size()) {
+      System.out.println("valtarg");
+      BlockPos playerPos = PlayerUtil.getBlockStandingOn();
+      BlockPos target = this.blockPath.get(this.target);
+      int targetX = target.getX();
+      int targetZ = target.getZ();
+      float yaw = AngleUtil.getRotationYaw360(mc.thePlayer.getPositionVector(), new Vec3(targetX + 0.5, 0.0, targetZ + 0.5));
+      Vec3 pos = new Vec3(mc.thePlayer.posX, playerPos.getY() + 0.5, mc.thePlayer.posZ);
+      Vec3 vec4Rot = AngleUtil.getVectorForRotation(yaw);
+      Vec3 newV = pos.addVector(vec4Rot.xCoord, playerPos.getY() + 1, vec4Rot.zCoord);
+      RenderUtil.drawBlock(new BlockPos(MathHelper.floor_double(newV.xCoord), MathHelper.floor_double(newV.yCoord), MathHelper.floor_double(newV.zCoord)),
+          new Color(255, 0, 0, 255));
+      RenderUtil.drawBlock(playerPos, new Color(255 ,255, 0 , 100));
     }
   }
 

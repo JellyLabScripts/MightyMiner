@@ -10,6 +10,7 @@ import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.OptionSize;
 import cc.polyfrost.oneconfig.libs.common.value.qual.DoubleVal;
+import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.hud.DebugHUD;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
@@ -79,6 +80,13 @@ public class MightyMinerConfig extends Config {
   //</editor-fold>
 
   //<editor-fold desc="Mithril">
+
+  @Text(
+          name = "Mining Tool", description = "The tool to use during comm macro",
+          category = COMMISSION, placeholder = "Mining Tool Name"
+  )
+  public static String mithrilMiningTool = "Pickonimbus 2000";
+
   @Switch(
       name = "Strafe While Mining", description = "Walk Around The Vein While Mining",
       category = MITHRIL
@@ -132,6 +140,58 @@ public class MightyMinerConfig extends Config {
       min = 0, max = 2000
   )
   public static int mithrilMinerSneakTimeRandomizer = 300;
+
+  @Dropdown(
+          name = "Ore Type",
+          category = MITHRIL,
+          options = {
+                  "Diamond",
+                  "Emerald",
+                  "Redstone",
+                  "Lapis",
+                  "Gold",
+                  "Iron",
+                  "Coal",
+                  "Mithril"
+          }
+  )
+  public static int oreType = 0;
+
+  @Slider(
+          name = "Gray Mithril Priority",
+          category = "BlockMiner",
+          min = 1,
+          max = 10,
+          step = 1
+  )
+  public static int grayMithrilPriority = 5;
+
+  @Slider(
+          name = "Green Mithril Priority",
+          category = "BlockMiner",
+          min = 1,
+          max = 10,
+          step = 1
+  )
+  public static int greenMithrilPriority = 5;
+
+  @Slider(
+          name = "Blue Mithril Priority",
+          category = "BlockMiner",
+          min = 1,
+          max = 10,
+          step = 1
+  )
+  public static int blueMithrilPriority = 5;
+
+  @Slider(
+          name = "Titanium Priority",
+          category = "BlockMiner",
+          min = 1,
+          max = 10,
+          step = 1
+  )
+  public static int titaniumPriority = 5;
 
   //</editor-fold>
 
@@ -189,13 +249,6 @@ public class MightyMinerConfig extends Config {
   )
   public static int commMachineFuel = 6;
 
-  @Dropdown(
-          name = "Oretype",
-          category = MITHRIL,
-          options = {"Mithril", "Pure Ore"}
-
-  )
-  public static int oreType = 0;
   @DualOption(name= "Fuel Retrieval Method",
       category = COMMISSION,
       subcategory = "Refuel",
@@ -511,6 +564,15 @@ public class MightyMinerConfig extends Config {
   )
   Runnable _stopFailsafeSoundButton = () -> AudioManager.getInstance().resetSound();
 
+  //</editor-fold>
+
+  //<editor-fold desc="Misc">
+
+  @KeyBind(
+          name = "Nuker",
+          category = EXPERIMENTAL
+  )
+  public static OneKeyBind nuker_keyBind = new OneKeyBind(UKeyboard.KEY_LSHIFT);
 
   //</editor-fold>
 

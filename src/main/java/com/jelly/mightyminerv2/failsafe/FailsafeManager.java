@@ -152,6 +152,15 @@ public class FailsafeManager {
     });
   }
 
+  public void removeFailsafeFromQueue(AbstractFailsafe failsafe) {
+    boolean removed = emergencyQueue.remove(failsafe);
+    if (removed) {
+      System.out.println("Successfully removed failsafe: " + failsafe.getFailsafeType());
+    } else {
+      System.out.println("Failsafe not found in the queue: " + failsafe.getFailsafeType());
+    }
+  }
+
   @SubscribeEvent
   public void onTickChooseEmergency(ClientTickEvent event) {
     if (this.shouldNotCheckForFailsafe()) {

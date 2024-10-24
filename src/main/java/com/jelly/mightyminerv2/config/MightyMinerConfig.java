@@ -567,12 +567,24 @@ public class MightyMinerConfig extends Config {
   //</editor-fold>
 
   //<editor-fold desc="Misc">
+  @Info(
+          text = "Will probaply get you banned",
+          type = InfoType.WARNING,
+          category = EXPERIMENTAL
+  )
+  public static boolean ignore;
 
   @KeyBind(
           name = "Nuker",
           category = EXPERIMENTAL
   )
-  public static OneKeyBind nuker_keyBind = new OneKeyBind(UKeyboard.KEY_LSHIFT);
+  public static OneKeyBind nuker_keyBind = new OneKeyBind(UKeyboard.KEY_COMMA);
+
+  @Switch(
+          name = "Nuker Toggle",
+          category = EXPERIMENTAL
+  )
+public static boolean nuker_toggle = false;
 
   //</editor-fold>
 

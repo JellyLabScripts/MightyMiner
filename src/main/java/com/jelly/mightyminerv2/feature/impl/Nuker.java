@@ -3,13 +3,17 @@ package com.jelly.mightyminerv2.feature.impl;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.util.PlayerUtil;
+import com.jelly.mightyminerv2.util.RenderUtil;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import net.minecraft.block.Block;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +27,9 @@ public class Nuker extends AbstractFeature {
 
     private boolean enabled = false;
     private final int radius = 3;
-    private FastBreak fastBreak = FastBreak.getInstance();
+    private final FastBreak fastBreak = FastBreak.getInstance();
     private boolean wasKeyPressed = false;
+    private List<BlockPos> currentBlocksToBreak = new ArrayList<>();
 
     @Override
     public String getName() {
@@ -38,20 +43,19 @@ public class Nuker extends AbstractFeature {
 
     @SubscribeEvent
     protected void onTick(ClientTickEvent event) {
-        // Check if the key has been pressed
-        if (MightyMinerConfig.nuker_keyBind.isActive()) {
-            if (!wasKeyPressed) {
-                // Toggle Nuker when the key is first pressed down
-                toggle();
-                wasKeyPressed = true;
+        if (MightyMinerConfig.nuker_toggle) {
+            if (MightyMinerConfig.nuker_keyBind.isActive()) {
+                if (!wasKeyPressed) {
+                    toggle();
+                    wasKeyPressed = true;
+                }
+            } else {
+                wasKeyPressed = false;
             }
-        } else {
-            // Reset the key press state when the key is released
-            wasKeyPressed = false;
-        }
 
-        if (!this.enabled) {
-            return; // Early return if not enabled
+            if (!this.enabled) {
+                return;
+            }
         }
 
         Vec3 playerPosition = PlayerUtil.getPlayerEyePos();
@@ -59,7 +63,7 @@ public class Nuker extends AbstractFeature {
         int playerY = (int) playerPosition.yCoord;
         int playerZ = (int) playerPosition.zCoord;
 
-        List<BlockPos> blocksToBreak = new ArrayList<>();
+        currentBlocksToBreak.clear();
 
         for (int x = playerX - radius; x <= playerX + radius; x++) {
             for (int y = playerY - radius; y <= playerY + radius; y++) {
@@ -68,23 +72,42 @@ public class Nuker extends AbstractFeature {
                     Block block = mc.theWorld.getBlockState(blockPos).getBlock();
 
                     if (block.getMaterial().isSolid() && block.getBlockHardness(mc.theWorld, blockPos) >= 0) {
-                        blocksToBreak.add(blockPos);
+                        currentBlocksToBreak.add(blockPos);
                     }
                 }
             }
         }
 
+        // Run block breaking asynchronously
         Multithreading.runAsync(() -> {
-            for (BlockPos pos : blocksToBreak) {
-                fastBreak.breakBlockInstantly(pos);
-                /*try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }*/
+            for (BlockPos pos : currentBlocksToBreak) {
+                fastBreak.onBlockBreakingProgress(pos, EnumFacing.UP);
             }
         });
     }
+
+    public void onRenderWorldLast(RenderWorldLastEvent event) {
+        if (!this.enabled) {
+            return;
+        }
+
+        // Highlighting blocks in the area
+        for (BlockPos pos : currentBlocksToBreak) {
+            RenderUtil.outlineBlock(pos, new Color(255, 0, 0, 128)); // Highlight the blocks being mined
+        }
+
+        // Highlight the last block being mined by FastBreak
+        BlockPos lastMinedBlock = fastBreak.getLastBlockPos(); // Access last block from FastBreak
+        if (lastMinedBlock != null) {
+            RenderUtil.outlineBlock(lastMinedBlock, new Color(0, 255, 0, 128)); // Highlight it in green
+            RenderUtil.drawText("Mining: " + mc.theWorld.getBlockState(lastMinedBlock).getBlock().getLocalizedName(),
+                    lastMinedBlock.getX() + 0.5,
+                    lastMinedBlock.getY() + 1.2,
+                    lastMinedBlock.getZ() + 0.5,
+                    0.02f); // Draw the name of the block being mined
+        }
+    }
+
 
     public void onPlayerBreakBlock(BlockPos blockPos) {
         if (!this.enabled) {
@@ -98,7 +121,7 @@ public class Nuker extends AbstractFeature {
                     Block block = mc.theWorld.getBlockState(nearbyBlockPos).getBlock();
 
                     if (block.getMaterial().isSolid() && block.getBlockHardness(mc.theWorld, nearbyBlockPos) >= 0) {
-                        fastBreak.breakBlockInstantly(nearbyBlockPos);
+                        fastBreak.onBlockBreakingProgress(nearbyBlockPos, EnumFacing.UP);
                     }
                 }
             }

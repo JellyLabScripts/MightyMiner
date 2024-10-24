@@ -24,24 +24,36 @@ public class CommissionHUD extends TextHud {
     super(true, 1f, 10f, 1.0f, true, true, 1, 5, 5, new OneColor(0, 0, 0, 150), false, 2, new OneColor(0, 0, 0, 127));
   }
 
+  private final transient CommissionMacro macro = CommissionMacro.getInstance();
+
   @Override
   protected void getLines(List<String> lines, boolean example) {
-    CommissionMacro macro = CommissionMacro.getInstance();
-
     long uptime = macro.uptime.getTimePassed() / 1000;
-    double commissionsCompleted = macro.getCompletedCommissions();
+    int totalComms = macro.getCompletedCommissions();
+    int commsPerHour = 0;
+    if (uptime > 0) {
+      commsPerHour = (int) ((float) totalComms / uptime * 3600);
+    }
 
     lines.add("§6§lCommission Macro Stats");
-    lines.add("§7Runtime: §f" + formatElapsedTime(uptime, !macro.isEnabled()));
-    lines.add("§7Total Commissions: §f" + commissionsCompleted);
-    lines.add("§7Commissions per Hour: §f" + String.format("%.2f", (uptime > 0 ? (commissionsCompleted / uptime * 3600.0) : 0)));
+    lines.add("§7Runtime: §f" + formatElapsedTime(uptime));
+    lines.add("§7Total Commissions: §f" + totalComms);
+    lines.add("§7HOTM Exp Gained: §f" + totalComms * 400);
+    lines.add("§7Commissions per Hour: §f" + commsPerHour);
+    lines.add("§7HOTM Exp/H: §f" + commsPerHour * 400);
+    if (macro.isEnabled()) {
+      lines.add("§7Active Commissions:");
+      macro.getActiveCommissions().forEach(it -> {
+        lines.add("  §f" + it.getName());
+      });
+    }
   }
 
-  private String formatElapsedTime(long elapsedTimeSeconds, boolean paused) {
+  private String formatElapsedTime(long elapsedTimeSeconds) {
     long seconds = elapsedTimeSeconds % 60;
     long minutes = (elapsedTimeSeconds / 60) % 60;
     long hours = (elapsedTimeSeconds / 3600);
 
-    return String.format("%02d:%02d:%02d%s", hours, minutes, seconds, (paused ? " (Paused)" : ""));
+    return String.format("%02d:%02d:%02d%s", hours, minutes, seconds, (!macro.isEnabled() ? " (Paused)" : ""));
   }
 }

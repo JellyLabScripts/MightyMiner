@@ -71,7 +71,7 @@ object MovementHelper {
             if (!bsa.isBlockInLoadedChunks(x, z)) {
                 return true
             }
-            if (state.getValue(BlockSnow.LAYERS) >= 3) {
+            if (state.getValue(BlockSnow.LAYERS) >= 1) {
                 return false
             }
             return canStandOn(bsa, x, y - 1, z)
@@ -112,6 +112,7 @@ object MovementHelper {
             }
             isLava(state) -> false
             block is BlockSlab -> true
+            block is BlockSnow -> true
             else -> false
         }
     }

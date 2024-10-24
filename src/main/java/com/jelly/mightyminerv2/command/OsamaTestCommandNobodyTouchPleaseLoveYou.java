@@ -324,33 +324,33 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 //      LogUtil.error("First or sec is null");
 //      return;
 //    }
-//    Multithreading.schedule(() -> {
-//      double walkSpeed = mc.thePlayer.getAIMoveSpeed();
-//      CalculationContext ctx = new CalculationContext(walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
-//      BlockPos first = PlayerUtil.getBlockStandingOn();
-//      BlockPos second = this.block;
-//      AStarPathFinder finder = new AStarPathFinder(
-//          first.getX(), first.getY(), first.getZ(),
-//          new Goal(second.getX(), second.getY(), second.getZ(), ctx),
-//          ctx
-//      );
-//      Path path = finder.calculatePath();
-//      if (path == null) {
-//        Logger.sendMessage("No path found");
-//      } else {
-//        Logger.sendMessage("path found");
-//        blockToDraw.clear();
-//        if (go == 0) {
-//          blockToDraw.addAll(path.getSmoothedPath());
+    Multithreading.schedule(() -> {
+      double walkSpeed = mc.thePlayer.getAIMoveSpeed();
+      CalculationContext ctx = new CalculationContext(walkSpeed * 1.3, walkSpeed, walkSpeed * 0.3);
+      BlockPos first = PlayerUtil.getBlockStandingOn();
+      BlockPos second = this.block;
+      AStarPathFinder finder = new AStarPathFinder(
+          first.getX(), first.getY(), first.getZ(),
+          new Goal(second.getX(), second.getY(), second.getZ(), ctx),
+          ctx
+      );
+      Path path = finder.calculatePath();
+      if (path == null) {
+        Logger.sendMessage("No path found");
+      } else {
+        Logger.sendMessage("path found");
+        blockToDraw.clear();
+        if (go == 0) {
+          blockToDraw.addAll(path.getSmoothedPath());
 //          Pathfinder.getInstance().queue();
-//        } else {
-//          blockToDraw.addAll(path.getPath());
-//        }
-//      }
-//    }, 0, TimeUnit.MILLISECONDS);
-    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), this.block);
-    Pathfinder.getInstance().setInterpolationState(go == 0);
-    Pathfinder.getInstance().start();
+        } else {
+          blockToDraw.addAll(path.getPath());
+        }
+      }
+    }, 0, TimeUnit.MILLISECONDS);
+//    Pathfinder.getInstance().queue(PlayerUtil.getBlockStandingOn(), this.block);
+//    Pathfinder.getInstance().setInterpolationState(go == 0);
+//    Pathfinder.getInstance().start();
 //    Pathfinder.getInstance().queue(new BlockPos(first.toVec3()), new BlockPos(second.toVec3()));
 
   }
@@ -515,6 +515,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     trav.calculateCost(ctx, res);
     Logger.sendMessage("Movement cost: " + res.getCost());
     this.block = res.getDest();
+    this.blockToDraw.clear();
+    this.blockToDraw.add(pp);
   }
 
   @SubCommand
@@ -527,6 +529,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     trav.calculateCost(ctx, res);
     Logger.sendMessage("Movement cost: " + res.getCost());
     this.block = res.getDest();
+    this.blockToDraw.clear();
+    this.blockToDraw.add(pp);
   }
 
   @SubCommand
@@ -540,6 +544,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     trav.calculateCost(ctx, res);
     Logger.sendMessage("Movement cost: " + res.getCost());
     this.block = res.getDest();
+    this.blockToDraw.clear();
+    this.blockToDraw.add(pp);
   }
 
   @SubCommand
@@ -552,5 +558,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     diag.calculateCost(ctx, res);
     Logger.sendMessage("Movement cost: " + res.getCost());
     this.block = res.getDest();
+    this.blockToDraw.clear();
+    this.blockToDraw.add(pp);
   }
 }

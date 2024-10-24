@@ -33,7 +33,7 @@ public class AutoInventory extends AbstractFeature {
     return instance;
   }
 
-  public AutoInventory(){
+  public AutoInventory() {
     this.failsafesToIgnore = new ArrayList<>(Arrays.asList(Failsafe.ITEM_CHANGE));
   }
 
@@ -122,13 +122,11 @@ public class AutoInventory extends AbstractFeature {
           break;
         }
 
-        if (!(mc.currentScreen instanceof GuiChest)
-            || !InventoryUtil.getInventoryName().equals("SkyBlock Menu")
-            || !InventoryUtil.isInventoryLoaded()) {
+        if (!(mc.currentScreen instanceof GuiChest) || !InventoryUtil.getInventoryName().equals("SkyBlock Menu") || !InventoryUtil.isInventoryLoaded()) {
           break;
         }
 
-        List<String> loreList = InventoryUtil.getLoreOfItemInContainer(InventoryUtil.getSlotIdOfItemInContainer("Your SkyBlock Profile"));
+        List<String> loreList = InventoryUtil.getItemLoreFromOpenContainer("Your SkyBlock Profile");
         for (String lore : loreList) {
           if (!lore.contains("Mining Speed")) {
             continue;
@@ -136,7 +134,7 @@ public class AutoInventory extends AbstractFeature {
 
           try {
             String[] splitValues = lore.replace(",", "").split(" ");
-            this.speedBoostValues[0] = Integer.parseInt(splitValues[splitValues.length - 1]);
+            this.speedBoostValues[0] = (int) Float.parseFloat(splitValues[splitValues.length - 1]);
             this.swapSbState(SB.OPEN_HOTM_MENU, MightyMinerConfig.getRandomGuiWaitDelay());
             return;
           } catch (Exception e) {
@@ -147,7 +145,7 @@ public class AutoInventory extends AbstractFeature {
 
         this.stop();
         this.sbError = SBError.CANNOT_GET_VALUE;
-        error("Could not get mining speed from tab. Make sure its enabled.");
+        error("Could not get mining speed from profile.");
         break;
       case OPEN_HOTM_MENU:
         if (this.isTimerRunning()) {

@@ -118,6 +118,10 @@ public class CommissionMacro extends AbstractMacro {
     return this.commissionCounter;
   }
 
+  public List<Commission> getActiveCommissions(){
+    return this.curr;
+  }
+
   public void stopActiveFeatures() {
     BlockMiner.getInstance().stop();
     AutoMobKiller.getInstance().stop();

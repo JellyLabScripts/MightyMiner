@@ -5,6 +5,7 @@ import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext
 import com.jelly.mightyminerv2.pathfinder.movement.Movement
 import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper
 import com.jelly.mightyminerv2.pathfinder.movement.MovementResult
+import net.minecraft.block.BlockSnow
 import net.minecraft.util.BlockPos
 
 class MovementTraverse(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement(mm, from, to) {
@@ -15,18 +16,32 @@ class MovementTraverse(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
   }
 
   companion object {
-    fun calculateCost(ctx: CalculationContext, x: Int, y: Int, z: Int, destX: Int, destZ: Int, res: MovementResult) {
+    fun calculateCost(
+      ctx: CalculationContext,
+      x: Int,
+      y: Int,
+      z: Int,
+      destX: Int,
+      destZ: Int,
+      res: MovementResult
+    ) {
       res.set(destX, y, destZ)
       cost(ctx, x, y, z, destX, destZ, res)
     }
 
-    private fun cost(ctx: CalculationContext, x: Int, y: Int, z: Int, destX: Int, destZ: Int, res: MovementResult) {
+    private fun cost(
+      ctx: CalculationContext,
+      x: Int,
+      y: Int,
+      z: Int,
+      destX: Int,
+      destZ: Int,
+      res: MovementResult
+    ) {
       if (!MovementHelper.canStandOn(ctx.bsa, destX, y, destZ)) return
 
       val destUpState = ctx.get(destX, y + 1, destZ)
-      if (!MovementHelper.canWalkThrough(ctx.bsa, destX, y + 1, destZ, destUpState)
-          || !MovementHelper.canWalkThrough(ctx.bsa, destX, y + 2, destZ))
-        return
+      if (!MovementHelper.canWalkThrough(ctx.bsa, destX, y + 1, destZ, destUpState) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y + 2, destZ)) return
 
       val srcUpState = ctx.get(x, y + 1, z)
 
@@ -39,6 +54,37 @@ class MovementTraverse(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
       }
       if (MovementHelper.isLadder(srcUpState) && !isSourceTopWalkableLadder) {
         res.cost = ctx.cost.INF_COST
+        return
+      }
+      val sourceState = ctx.get(x, y, z)
+      val destState = ctx.get(destX, y, destZ)
+      var sourceHeight = -1.0
+      var destHeight = -1.0
+      var snow = false
+      if (sourceState.block is BlockSnow) {
+        sourceHeight = (sourceState.getValue(BlockSnow.LAYERS) - 1) * 0.125
+        snow = true;
+      }
+      if (destState.block is BlockSnow) {
+        destHeight = (destState.getValue(BlockSnow.LAYERS) - 1) * 0.125
+        snow = true
+      }
+      if (snow) {
+        println("SNOW")
+        if (destHeight == -1.0) {
+          destHeight = destState.block.blockBoundsMaxY
+        }
+
+        if (sourceHeight == -1.0) {
+          sourceHeight = sourceState.block.blockBoundsMaxY
+        }
+        val diff = destHeight - sourceHeight
+        println("Diff: $diff, SourceHeight: $sourceHeight, destHeight: $destHeight")
+        res.cost = when {
+          diff <= 0.5 -> ctx.cost.ONE_BLOCK_SPRINT_COST
+          diff <= 1 -> ctx.cost.JUMP_ONE_BLOCK_COST
+          else -> ctx.cost.INF_COST
+        }
         return
       }
       res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST

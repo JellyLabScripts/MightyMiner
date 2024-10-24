@@ -160,8 +160,7 @@ public class RotationHandler {
 
     Angle bezierEnd = AngleUtil.getNeededChange(this.startRotation, this.target.getTargetAngle());
     Angle control1 = new Angle(bezierEnd.getYaw() * 0.05f * this.randomMultiplier1, bezierEnd.getYaw() * 0.1f * this.randomMultiplier2);
-    Angle control2 = new Angle(bezierEnd.getYaw() - bezierEnd.getYaw() * 0.05f * this.randomMultiplier2,
-        bezierEnd.getPitch() - bezierEnd.getYaw() * 0.1f * this.randomMultiplier1);
+    Angle control2 = new Angle(bezierEnd.getYaw() - bezierEnd.getYaw() * 0.05f * this.randomMultiplier2, bezierEnd.getPitch() - bezierEnd.getYaw() * 0.1f * this.randomMultiplier1);
 
     double bezierYawSoFar = bezier(rotationProgress, control1.getYaw(), control2.getYaw(), bezierEnd.getYaw());
     double bezierPitchSoFar = bezier(rotationProgress, control1.getPitch(), control2.getPitch(), bezierEnd.getPitch());

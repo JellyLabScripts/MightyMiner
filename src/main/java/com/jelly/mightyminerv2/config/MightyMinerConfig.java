@@ -2,15 +2,20 @@ package com.jelly.mightyminerv2.config;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
+import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.config.data.OptionSize;
 import cc.polyfrost.oneconfig.libs.common.value.qual.DoubleVal;
+import cc.polyfrost.oneconfig.libs.universal.UKeyboard;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.hud.DebugHUD;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.macro.MacroManager;
+import com.jelly.mightyminerv2.util.helper.AudioManager;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.input.Keyboard;
 
@@ -75,6 +80,13 @@ public class MightyMinerConfig extends Config {
   //</editor-fold>
 
   //<editor-fold desc="Mithril">
+
+  @Text(
+          name = "Mining Tool", description = "The tool to use during comm macro",
+          category = COMMISSION, placeholder = "Mining Tool Name"
+  )
+  public static String mithrilMiningTool = "Pickonimbus 2000";
+
   @Switch(
       name = "Strafe While Mining", description = "Walk Around The Vein While Mining",
       category = MITHRIL
@@ -128,6 +140,58 @@ public class MightyMinerConfig extends Config {
       min = 0, max = 2000
   )
   public static int mithrilMinerSneakTimeRandomizer = 300;
+
+  @Dropdown(
+          name = "Ore Type",
+          category = MITHRIL,
+          options = {
+                  "Diamond",
+                  "Emerald",
+                  "Redstone",
+                  "Lapis",
+                  "Gold",
+                  "Iron",
+                  "Coal",
+                  "Mithril"
+          }
+  )
+  public static int oreType = 0;
+
+  @Slider(
+          name = "Gray Mithril Priority",
+          category = "BlockMiner",
+          min = 1,
+          max = 10,
+          step = 1
+  )
+  public static int grayMithrilPriority = 5;
+
+  @Slider(
+          name = "Green Mithril Priority",
+          category = "BlockMiner",
+          min = 1,
+          max = 10,
+          step = 1
+  )
+  public static int greenMithrilPriority = 5;
+
+  @Slider(
+          name = "Blue Mithril Priority",
+          category = "BlockMiner",
+          min = 1,
+          max = 10,
+          step = 1
+  )
+  public static int blueMithrilPriority = 5;
+
+  @Slider(
+          name = "Titanium Priority",
+          category = "BlockMiner",
+          min = 1,
+          max = 10,
+          step = 1
+  )
+  public static int titaniumPriority = 5;
 
   //</editor-fold>
 
@@ -185,13 +249,6 @@ public class MightyMinerConfig extends Config {
   )
   public static int commMachineFuel = 6;
 
-  @Dropdown(
-          name = "Oretype",
-          category = MITHRIL,
-          options = {"Mithril", "Pure Ore"}
-
-  )
-  public static int oreType = 0;
   @DualOption(name= "Fuel Retrieval Method",
       category = COMMISSION,
       subcategory = "Refuel",
@@ -435,6 +492,87 @@ public class MightyMinerConfig extends Config {
   )
   public static CommissionHUD commissionHUD = CommissionHUD.getInstance();
 
+  //</editor-fold>
+
+  //<editor-fold desc="Failsafe">
+
+  @Switch(
+          name = "Enable Failsafe Trigger Sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound", size = OptionSize.DUAL,
+          description = "Makes a sound when a failsafe has been triggered"
+  )
+  public static boolean enableFailsafeSound = true;
+  @DualOption(
+          name = "Failsafe Sound Type", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The failsafe sound type to play when a failsafe has been triggered",
+          left = "Minecraft",
+          right = "Custom",
+          size = 2
+  )
+  public static boolean failsafeSoundType = false;
+  @Dropdown(
+          name = "Minecraft Sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The Minecraft sound to play when a failsafe has been triggered",
+          options = {
+                  "Ping", // 0
+                  "Anvil" // 1
+          }
+  )
+  public static int failsafeMcSoundSelected = 1;
+
+  @Dropdown(
+          name = "Custom Sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The custom sound to play when a failsafe has been triggered",
+          options = {
+                  "Custom", // 0
+                  "Voice", // 1
+                  "Metal Pipe", // 2
+                  "AAAAAAAAAA", // 3
+                  "Loud Buzz", // 4
+          }
+  )
+  public static int failsafeSoundSelected = 1;
+  @Number(
+          name = "Number of times to play custom sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The number of times to play custom sound when a failsafe has been triggered",
+          min = 1, max = 10
+  )
+  public static int failsafeSoundTimes = 13;
+
+  @Slider(
+          name = "Failsafe Sound Volume (in %)", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "The volume of the failsafe sound",
+          min = 0, max = 100
+  )
+  public static float failsafeSoundVolume = 50.0f;
+  @Switch(
+          name = "Max out Master category sounds while pinging", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "Maxes out the sounds while failsafe"
+  )
+  public static boolean maxOutMinecraftSounds = false;
+
+  @Button(
+          name = "", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "Plays the selected sound",
+          text = "Play"
+  )
+  Runnable _playFailsafeSoundButton = () -> AudioManager.getInstance().playSound();
+
+  @Button(
+          name = "", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
+          description = "Stops playing the selected sound",
+          text = "Stop"
+  )
+  Runnable _stopFailsafeSoundButton = () -> AudioManager.getInstance().resetSound();
+
+  //</editor-fold>
+
+  //<editor-fold desc="Misc">
+
+  @KeyBind(
+          name = "Nuker",
+          category = EXPERIMENTAL
+  )
+  public static OneKeyBind nuker_keyBind = new OneKeyBind(UKeyboard.KEY_LSHIFT);
 
   //</editor-fold>
 

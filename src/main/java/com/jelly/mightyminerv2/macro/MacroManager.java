@@ -5,6 +5,7 @@ import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.macro.commissionmacro.CommissionMacro;
+import com.jelly.mightyminerv2.macro.mithrilmacro.MithrilMacro;
 import com.jelly.mightyminerv2.util.Logger;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -26,6 +27,8 @@ public class MacroManager {
     switch (MightyMinerConfig.macroType) {
       case 0:
         return CommissionMacro.getInstance();
+      case 1:
+        return MithrilMacro.getInstance();
       default:
         return CommissionMacro.getInstance(); // Throw error or something
     }

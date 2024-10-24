@@ -1,18 +1,8 @@
 package com.jelly.mightyminerv2.feature;
 
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
-import com.jelly.mightyminerv2.feature.impl.AutoChestUnlocker;
-import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
-import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel;
-import com.jelly.mightyminerv2.feature.impl.AutoInventory;
-import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
-import com.jelly.mightyminerv2.feature.impl.AutoWarp;
-import com.jelly.mightyminerv2.feature.impl.BlockMiner;
-import com.jelly.mightyminerv2.feature.impl.MobTracker;
-import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
-import com.jelly.mightyminerv2.feature.impl.Pathfinder;
-import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
-import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
+import com.jelly.mightyminerv2.feature.impl.*;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -44,7 +34,9 @@ public class FeatureManager {
         RouteNavigator.getInstance(),
         MobTracker.getInstance(),
         AutoDrillRefuel.getInstance(),
-        AutoChestUnlocker.getInstance()
+        AutoChestUnlocker.getInstance(),
+        Nuker.getInstance(),
+        FastBreak.getInstance()
     ));
   }
 

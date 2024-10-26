@@ -1,13 +1,7 @@
 package com.jelly.mightyminerv2.macro.commissionmacro.helper;
 
-import com.jelly.mightyminerv2.util.CommissionUtil;
-import com.jelly.mightyminerv2.util.Logger;
-import com.jelly.mightyminerv2.util.helper.location.SubLocation;
-import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
-import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -15,8 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import com.jelly.mightyminerv2.util.CommissionUtil;
+import com.jelly.mightyminerv2.util.Logger;
+import com.jelly.mightyminerv2.util.helper.location.SubLocation;
+import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
+import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
+
 import net.minecraft.util.Vec3;
-import net.minecraftforge.client.event.sound.PlayStreamingSourceEvent;
 
 public enum Commission {
   // maybe set it to null and choose a random one? - DO NOT REARRANGE THIS

@@ -65,15 +65,20 @@ dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
+
     compileOnly("cc.polyfrost:oneconfig-1.8.9-forge:0.2.2-alpha+")
-    compileOnly("org.spongepowered:mixin:0.8.5")
-    compileOnly("org.projectlombok:lombok:1.18.32")
-    runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.0")
-    annotationProcessor("org.spongepowered:mixin:0.8.5")
-    annotationProcessor("org.projectlombok:lombok:1.18.32")
-    shadowImpl("it.unimi.dsi:fastutil:8.2.1")
-    shadowImpl("org.java-websocket:Java-WebSocket:1.5.4")
     shadowImpl("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+")
+
+    compileOnly("org.spongepowered:mixin:0.8.5")
+    annotationProcessor("org.spongepowered:mixin:0.8.5")
+
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+    
+    shadowImpl("org.java-websocket:Java-WebSocket:1.5.4")
+    
+    runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.0")
+    shadowImpl("it.unimi.dsi:fastutil:8.2.1")
 }
 
 // Tasks:

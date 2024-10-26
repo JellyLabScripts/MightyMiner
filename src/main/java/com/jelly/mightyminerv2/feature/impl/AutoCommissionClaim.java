@@ -1,5 +1,9 @@
 package com.jelly.mightyminerv2.feature.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
@@ -13,9 +17,7 @@ import com.jelly.mightyminerv2.util.KeyBindUtil;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
 import com.jelly.mightyminerv2.util.helper.Target;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;

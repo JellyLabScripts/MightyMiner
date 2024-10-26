@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import com.google.gson.annotations.Expose;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.MightyMiner;
+import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
@@ -14,12 +15,10 @@ import java.awt.Color;
 import java.io.BufferedWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -37,10 +36,28 @@ public class GraphHandler {
   }
 
   @Expose
-  private final Graph<RouteWaypoint> graph = new Graph<RouteWaypoint>();
+  public Map<String, Graph<RouteWaypoint>> graphs = new HashMap<>();  // Multiple graphs
+  private String activeGraphKey = "default";  // Default graph
+
   private boolean editing = false;
   private volatile boolean dirty = false;
   private RouteWaypoint lastPos = null;
+
+  // Get the active graph
+  public Graph<RouteWaypoint> getActiveGraph() {
+    return graphs.getOrDefault(activeGraphKey, new Graph<>());  // Return active graph or create a new one if not present
+  }
+
+  // Switch to a different graph by key
+  public void switchGraph(AbstractMacro macro) {
+    activeGraphKey = macro.getName();
+    graphs.putIfAbsent(macro.getName(), new Graph<>());  // Create new graph if it doesn't exist
+    Logger.sendMessage("Switched to graph: " + macro.getName());
+  }
+
+  public Graph<RouteWaypoint> getGraph(AbstractMacro macro) {
+    return graphs.get(macro.getName());
+  }
 
   public void toggleEdit() {
     if (editing) {
@@ -64,8 +81,10 @@ public class GraphHandler {
 
   public List<RouteWaypoint> findPath(BlockPos start, RouteWaypoint end) {
     RouteWaypoint startWp = new RouteWaypoint(start, TransportMethod.WALK);
-    if (!this.graph.map.containsKey(startWp)) {
-      startWp = this.graph.map.keySet().stream().min(Comparator.comparing(it -> start.distanceSq(it.toBlockPos()))).orElse(null);
+    Graph<RouteWaypoint> graph = getActiveGraph();  // Use the active graph
+
+    if (!graph.map.containsKey(startWp)) {
+      startWp = graph.map.keySet().stream().min(Comparator.comparing(it -> start.distanceSq(it.toBlockPos()))).orElse(null);
     }
 
     if (startWp == null) {
@@ -73,7 +92,7 @@ public class GraphHandler {
       return new ArrayList<>();
     }
 
-    if (!this.graph.map.containsKey(end)) {
+    if (!graph.map.containsKey(end)) {
       Logger.sendLog("GraphMap Does Not Contain End");
       return new ArrayList<>();
     }
@@ -82,7 +101,8 @@ public class GraphHandler {
   }
 
   public List<RouteWaypoint> findPath(RouteWaypoint first, RouteWaypoint second) {
-    List<RouteWaypoint> route = this.graph.findPath(first, second);
+    Graph<RouteWaypoint> graph = getActiveGraph();  // Use the active graph
+    List<RouteWaypoint> route = graph.findPath(first, second);
     if (route.size() < 2) {
       return route;
     }
@@ -93,18 +113,22 @@ public class GraphHandler {
   }
 
   public synchronized void save() {
-    Logger.sendMessage("Started Save");
     while (this.editing) {
-      if (!this.dirty) {
-        continue;
+      if (!this.dirty) continue;
+
+      for (Map.Entry<String, Graph<RouteWaypoint>> entry : graphs.entrySet()) {
+        String graphKey = entry.getKey();
+        Graph<RouteWaypoint> graph = entry.getValue();
+        // Use file name from graph key
+        try (BufferedWriter writer = Files.newBufferedWriter(MightyMiner.routesDirectory.resolve(graphKey + ".json"), StandardCharsets.UTF_8)) {
+          writer.write(MightyMiner.gson.toJson(graph));
+          Logger.sendLog("Saved graph: " + graphKey);
+        } catch (Exception e) {
+          Logger.sendLog("Failed to save graph: " + graphKey);
+          e.printStackTrace();
+        }
       }
-      try (BufferedWriter writer = Files.newBufferedWriter(MightyMiner.commRoutePath, StandardCharsets.UTF_8)) {
-        writer.write(MightyMiner.gson.toJson(instance));
-        Logger.sendMessage("saved Data");
-      } catch (Exception e) {
-        Logger.sendMessage("No saved data");
-        e.printStackTrace();
-      }
+
       this.dirty = false;
     }
   }
@@ -116,6 +140,7 @@ public class GraphHandler {
     }
 
     RouteWaypoint currentWaypoint = new RouteWaypoint(PlayerUtil.getBlockStandingOn(), TransportMethod.WALK);
+    Graph<RouteWaypoint> graph = getActiveGraph();  // Use the active graph
 
     if (MightyMinerConfig.routeBuilderSelect.isActive()) {
       lastPos = currentWaypoint;
@@ -124,11 +149,11 @@ public class GraphHandler {
 
     if (MightyMinerConfig.routeBuilderUnidi.isActive() || MightyMinerConfig.routeBuilderBidi.isActive()) {
       if (lastPos != null) {
-        boolean bidi = MightyMinerConfig.routeBuilderBidi.isActive(); // Check if KEY_8 is pressed for bidirectional edges
-        this.graph.add(lastPos, currentWaypoint, bidi);
+        boolean bidi = MightyMinerConfig.routeBuilderBidi.isActive();  // Check if bidirectional edges
+        graph.add(lastPos, currentWaypoint, bidi);
         Logger.sendMessage("Added " + (bidi ? "Bidirectional" : "Unidirectional"));
       } else {
-        this.graph.add(currentWaypoint);
+        graph.add(currentWaypoint);
         Logger.sendMessage("Added Single Waypoint");
       }
       lastPos = currentWaypoint;
@@ -139,7 +164,7 @@ public class GraphHandler {
       if (lastPos == null) {
         return;
       }
-      this.graph.update(lastPos, currentWaypoint);
+      graph.update(lastPos, currentWaypoint);
       lastPos = currentWaypoint;
       this.dirty = true;
       Logger.sendMessage("Updated");
@@ -149,7 +174,7 @@ public class GraphHandler {
       if (lastPos == null) {
         return;
       }
-      this.graph.remove(lastPos);
+      graph.remove(lastPos);
       lastPos = null;
       this.dirty = true;
       Logger.sendMessage("Removed");
@@ -161,7 +186,8 @@ public class GraphHandler {
     if (!this.editing) {
       return;
     }
-    for (Entry<RouteWaypoint, List<RouteWaypoint>> entry : this.graph.map.entrySet()) {
+    Graph<RouteWaypoint> graph = getActiveGraph();  // Use the active graph
+    for (Entry<RouteWaypoint, List<RouteWaypoint>> entry : graph.map.entrySet()) {
       RenderUtil.drawBlock(entry.getKey().toBlockPos(), new Color(101, 10, 142, 186));
       for (RouteWaypoint edge : entry.getValue()) {
         RenderUtil.drawLine(entry.getKey().toVec3().addVector(0.5, 0.5, 0.5), edge.toVec3().addVector(0.5, 0.5, 0.5), new Color(194, 12, 164, 179));

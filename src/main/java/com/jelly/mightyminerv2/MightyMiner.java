@@ -57,50 +57,52 @@ public class MightyMiner {
   public static MightyMinerConfig config;
   public static boolean sendNotSupportedMessage = false;
   private static final Minecraft mc = Minecraft.getMinecraft();
-  public static final Path routePath = Paths.get("./config/mightyminerv2/mighty_miner_routes.json");
-  public static final Path commRoutePath = Paths.get("./config/mightyminerv2/comm_routes.json");
+  public static final Path routesDirectory = Paths.get("./config/mightyminerv2/");
+//  public static final Path routePath = Paths.get("./config/mightyminerv2/mighty_miner_routes.json");
+//  public static final Path commRoutePath = Paths.get("./config/mightyminerv2/comm_routes.json");
 
   @Mod.Instance
   public static MightyMiner instance;
 
   @Mod.EventHandler
   public void preInit(FMLPreInitializationEvent event) {
-    File coordFile = routePath.toFile();
-    if (!coordFile.exists()) {
-      coordFile.getParentFile().mkdirs();
+    File routesDir = routesDirectory.toFile();
+    if (!routesDir.exists()) routesDir.mkdirs();
+
+    loadGraphFiles();
+  }
+
+  private void loadGraphFiles() {
+    // Check if the routes directory exists, if not create it and return
+    if (!routesDirectory.toFile().exists()) {
+      System.out.println("Routes directory not found, creating it now.");
       try {
-        coordFile.createNewFile();
+        Files.createDirectories(routesDirectory);
       } catch (IOException e) {
-        System.out.println("Something went wrong while creating RouteFile");
-        e.printStackTrace();
+        System.out.println("Something went wrong while creating the routes directory.");
+        System.out.println(e.getMessage());
       }
+      return;
     }
 
-    try {
-      Reader reader = Files.newBufferedReader(routePath);
-      RouteHandler.instance = gson.fromJson(reader, RouteHandler.class);
-    } catch (Exception e) {
-      System.out.println("Something is wrong with Routes. Please Notify the devs.");
-      e.printStackTrace();
+    File[] files = routesDirectory.toFile().listFiles();
+    if (files == null) {
+      System.out.println("No files found in the routes directory.");
+      return;
     }
 
-    File commRouteFile = commRoutePath.toFile();
-    if (!commRouteFile.exists()) {
-      commRouteFile.getParentFile().mkdirs();
-      try {
-        Files.copy(getClass().getResourceAsStream("/comm_routes.json"), commRoutePath, StandardCopyOption.REPLACE_EXISTING);
-      } catch (IOException e) {
-        System.out.println("Something went wrong while creating CommRouteFile");
-        e.printStackTrace();
+    for (File file : files) {
+      if (file.isFile() && file.getName().endsWith(".json")) {
+        try (Reader reader = Files.newBufferedReader(file.toPath())) {
+          Graph<RouteWaypoint> graph = MightyMiner.gson.fromJson(reader, new TypeToken<Graph<RouteWaypoint>>(){}.getType());
+          String graphKey = file.getName().replace(".json", "");
+          GraphHandler.getInstance().graphs.put(graphKey, graph);
+          System.out.println("Loaded graph for: " + graphKey);
+        } catch (Exception e) {
+          System.out.println("Something went wrong while loading the graph for: " + file.getName());
+          e.printStackTrace();
+        }
       }
-    }
-
-    try {
-      Reader reader = Files.newBufferedReader(commRoutePath);
-      GraphHandler.instance = gson.fromJson(reader, GraphHandler.class);
-    } catch (Exception e) {
-      System.out.println("Something is wrong with Comm Routes. Please Notify the devs.");
-      e.printStackTrace();
     }
   }
 

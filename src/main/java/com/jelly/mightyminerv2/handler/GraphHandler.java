@@ -141,7 +141,7 @@ public class GraphHandler {
       return new ArrayList<>();
     }
 
-    return findPath(startWp, end);
+    return findPathFrom(graphName, startWp, end);
   }
 
   public List<RouteWaypoint> findPathFrom(String graphName, RouteWaypoint first, RouteWaypoint second) {

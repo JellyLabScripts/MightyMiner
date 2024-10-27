@@ -20,6 +20,8 @@ import com.jelly.mightyminerv2.util.helper.graph.Graph;
 import com.jelly.mightyminerv2.util.helper.graph.GraphSerializer;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -33,7 +35,6 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import org.lwjgl.opengl.Display;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,17 +47,16 @@ public class MightyMiner {
   public static final String modid = "mightyminerv2";
   private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
   public static final Gson gson = new GsonBuilder()
-      .registerTypeAdapter(new TypeToken<Graph<RouteWaypoint>>() {
-      }.getType(), new GraphSerializer<RouteWaypoint>())
+      .registerTypeAdapter(new TypeToken<Graph<RouteWaypoint>>() {}.getType(), new GraphSerializer())
       .excludeFieldsWithoutExposeAnnotation()
       .setPrettyPrinting()
       .create();
   public static MightyMinerConfig config;
-  public static boolean sendNotSupportedMessage = false;
   private static final Minecraft mc = Minecraft.getMinecraft();
-  public static final Path routesDirectory = Paths.get("./config/mightyminerv2/");
-//  public static final Path routePath = Paths.get("./config/mightyminerv2/mighty_miner_routes.json");
-//  public static final Path commRoutePath = Paths.get("./config/mightyminerv2/comm_routes.json");
+  private static final List<String> expectedRoutes = Arrays.asList("Commission Macro.json");
+  public static final Path routesDirectory = Paths.get("./config/mightyminerv2/predefined");
+  public static final Path routePath = Paths.get("./config/mightyminerv2/mighty_miner_routes.json");
+//  public static final Path commRoutePath = Paths.get("./config/mightyminerv2/Commission Macro.json");
 
   @Mod.Instance
   public static MightyMiner instance;
@@ -64,42 +64,58 @@ public class MightyMiner {
   @Mod.EventHandler
   public void preInit(FMLPreInitializationEvent event) {
     File routesDir = routesDirectory.toFile();
-    if (!routesDir.exists()) routesDir.mkdirs();
-
-    loadGraphFiles();
-  }
-
-  private void loadGraphFiles() {
-    // Check if the routes directory exists, if not create it and return
-    if (!routesDirectory.toFile().exists()) {
+    if (!routesDir.exists()) {
       System.out.println("Routes directory not found, creating it now.");
-      try {
-        Files.createDirectories(routesDirectory);
-      } catch (IOException e) {
-        System.out.println("Something went wrong while creating the routes directory.");
-        System.out.println(e.getMessage());
-      }
-      return;
+      routesDir.mkdirs();
     }
 
-    File[] files = routesDirectory.toFile().listFiles();
-    if (files == null) {
-      System.out.println("No files found in the routes directory.");
+    File[] files = routesDir.listFiles();
+    if (files == null || files.length != expectedRoutes.size()) {
+      Arrays.stream(files).forEach(it -> {
+        try {
+          Files.deleteIfExists(it.toPath());
+        } catch (Exception e) {
+          System.out.println("Failed to delete " + it);
+          e.printStackTrace();
+        }
+      });
+      for (String file : expectedRoutes) {
+        Path filePath = routesDir.toPath().resolve(file);
+        try {
+          Files.copy(getClass().getResourceAsStream("/" + file), filePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+          System.out.println("Failed to copy " + file);
+          continue;
+        }
+
+        if(!loadGraph(filePath)){
+          System.out.println("Filed to load graph " + file);
+        }
+      }
       return;
     }
 
     for (File file : files) {
-      if (file.isFile() && file.getName().endsWith(".json")) {
-        try (Reader reader = Files.newBufferedReader(file.toPath())) {
-          Graph<RouteWaypoint> graph = MightyMiner.gson.fromJson(reader, new TypeToken<Graph<RouteWaypoint>>(){}.getType());
-          String graphKey = file.getName().replace(".json", "");
-          GraphHandler.getInstance().graphs.put(graphKey, graph);
-          System.out.println("Loaded graph for: " + graphKey);
-        } catch (Exception e) {
-          System.out.println("Something went wrong while loading the graph for: " + file.getName());
-          e.printStackTrace();
+      if (file.isFile() && expectedRoutes.contains(file.getName())) {
+        if(!loadGraph(file.toPath())){
+          System.out.println("Couldn't load " + file.getName());
         }
       }
+    }
+  }
+
+  private boolean loadGraph(Path path) {
+    String graphKey = path.getFileName().toString().replace(".json", "");
+    try (Reader reader = Files.newBufferedReader(path)) {
+      Graph<RouteWaypoint> graph = gson.fromJson(reader, new TypeToken<Graph<RouteWaypoint>>() {
+      }.getType());
+      GraphHandler.instance.graphs.put(graphKey, graph);
+      System.out.println("Loaded graph for: " + graphKey);
+      return true;
+    } catch (Exception e) {
+      System.out.println("Something went wrong while loading the graph for: " + graphKey);
+      e.printStackTrace();
+      return false;
     }
   }
 
@@ -112,7 +128,8 @@ public class MightyMiner {
     mc.gameSettings.gammaSetting = 1000;
     mc.gameSettings.pauseOnLostFocus = false;
 
-    Display.setTitle("Mighty Miner 〔v" + VERSION + "〕 " + (MightyMinerConfig.debugMode ? "wazzadev!" : "Chilling huh?") + " ☛ " + mc.getSession().getUsername());
+    Display.setTitle(
+        "Mighty Miner 〔v" + VERSION + "〕 " + (MightyMinerConfig.debugMode ? "wazzadev!" : "Chilling huh?") + " ☛ " + mc.getSession().getUsername());
   }
 
   @Mod.EventHandler
@@ -131,7 +148,7 @@ public class MightyMiner {
     MinecraftForge.EVENT_BUS.register(GameStateHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
     MinecraftForge.EVENT_BUS.register(RouteHandler.getInstance());
-    MinecraftForge.EVENT_BUS.register(GraphHandler.getInstance());
+    MinecraftForge.EVENT_BUS.register(GraphHandler.instance);
     MinecraftForge.EVENT_BUS.register(MacroManager.getInstance());
     MinecraftForge.EVENT_BUS.register(FailsafeManager.getInstance());
     MinecraftForge.EVENT_BUS.register(AudioManager.getInstance());

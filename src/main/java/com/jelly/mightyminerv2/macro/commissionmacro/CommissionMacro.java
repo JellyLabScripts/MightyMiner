@@ -335,7 +335,7 @@ public class CommissionMacro extends AbstractMacro {
 
         RouteWaypoint end = first.getWaypoint();
 
-        List<RouteWaypoint> nodes = GraphHandler.getInstance().findPath(PlayerUtil.getBlockStandingOn(), end);
+        List<RouteWaypoint> nodes = GraphHandler.instance.findPathFrom(getName(), PlayerUtil.getBlockStandingOn(), end);
         if (nodes.isEmpty()) {
           error("Could not find a path to target. Stopping. Start: " + PlayerUtil.getBlockStandingOn() + ", End: " + end);
           this.changeMainState(MainState.NONE);

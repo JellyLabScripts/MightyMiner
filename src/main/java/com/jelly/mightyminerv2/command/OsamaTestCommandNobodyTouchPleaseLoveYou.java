@@ -20,6 +20,7 @@ import com.jelly.mightyminerv2.handler.GraphHandler;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.MightyMiner;
+import com.jelly.mightyminerv2.macro.commissionmacro.CommissionMacro;
 import com.jelly.mightyminerv2.pathfinder.goal.Goal;
 import com.jelly.mightyminerv2.util.AngleUtil;
 import com.jelly.mightyminerv2.util.CommissionUtil;
@@ -218,14 +219,14 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @SubCommand
   public void graph() {
-    GraphHandler.getInstance().toggleEdit();
+    GraphHandler.instance.toggleEdit(CommissionMacro.getInstance().getName());
   }
 
   @SubCommand
   public void findg() {
 //    GraphHandler.getInstance().stop();
     Logger.sendNote("sec: " + second);
-    List<RouteWaypoint> path = GraphHandler.getInstance().findPath(PlayerUtil.getBlockStandingOn(), second);
+    List<RouteWaypoint> path = GraphHandler.instance.findPath(PlayerUtil.getBlockStandingOn(), second);
     Route route = new Route();
     path.forEach(k -> route.insert(k));
     blockToDraw.clear();

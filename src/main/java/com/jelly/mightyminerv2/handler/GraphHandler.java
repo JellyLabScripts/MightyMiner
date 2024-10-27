@@ -26,14 +26,8 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 public class GraphHandler {
 
-  public static GraphHandler instance;
-
-  public static GraphHandler getInstance() {
-    if (instance == null) {
-      instance = new GraphHandler();
-    }
-    return instance;
-  }
+  // no need for a redundant getInstance() call - useless overhead
+  public static GraphHandler instance = new GraphHandler();
 
   @Expose
   public Map<String, Graph<RouteWaypoint>> graphs = new HashMap<>();  // Multiple graphs
@@ -59,13 +53,26 @@ public class GraphHandler {
     return graphs.get(macro.getName());
   }
 
+  public void toggleEdit(String graphName) {
+    if (!this.graphs.containsKey(graphName)) {
+      return;
+    }
+    this.activeGraphKey = graphName;
+    if (editing) {
+      stop();
+    } else {
+      start();
+    }
+    Logger.sendMessage((this.editing ? "" : "Stopped ") + "Editing " + this);
+  }
+
   public void toggleEdit() {
     if (editing) {
       stop();
     } else {
       start();
     }
-    Logger.sendMessage("Editing: " + this.editing);
+    Logger.sendMessage((this.editing ? "" : "Stopped ") + "Editing " + this.activeGraphKey);
   }
 
   public void start() {
@@ -112,21 +119,62 @@ public class GraphHandler {
     return route;
   }
 
+  public List<RouteWaypoint> findPathFrom(String graphName, BlockPos start, RouteWaypoint end) {
+    RouteWaypoint startWp = new RouteWaypoint(start, TransportMethod.WALK);
+    Graph<RouteWaypoint> graph = this.graphs.get(graphName);  // Use the active graph
+    if (graph == null) {
+      System.out.println("No graph found for " + graphName);
+      return Collections.emptyList();
+    }
+
+    if (!graph.map.containsKey(startWp)) {
+      startWp = graph.map.keySet().stream().min(Comparator.comparing(it -> start.distanceSq(it.toBlockPos()))).orElse(null);
+    }
+
+    if (startWp == null) {
+      Logger.sendLog("StartWP is null");
+      return new ArrayList<>();
+    }
+
+    if (!graph.map.containsKey(end)) {
+      Logger.sendLog("GraphMap Does Not Contain End");
+      return new ArrayList<>();
+    }
+
+    return findPath(startWp, end);
+  }
+
+  public List<RouteWaypoint> findPathFrom(String graphName, RouteWaypoint first, RouteWaypoint second) {
+    Graph<RouteWaypoint> graph = this.graphs.get(graphName);  // Use the active graph
+    if (graph == null) {
+      System.out.println("No graph found for " + graphName);
+      return Collections.emptyList();
+    }
+    List<RouteWaypoint> route = graph.findPath(first, second);
+    if (route.size() < 2) {
+      return route;
+    }
+    if (PlayerUtil.getBlockStandingOn().distanceSq(route.get(0).toBlockPos()) < route.get(0).toBlockPos().distanceSq(route.get(1).toBlockPos())) {
+      route.remove(0);
+    }
+    return route;
+  }
+
   public synchronized void save() {
     while (this.editing) {
-      if (!this.dirty) continue;
+      if (!this.dirty) {
+        continue;
+      }
 
-      for (Map.Entry<String, Graph<RouteWaypoint>> entry : graphs.entrySet()) {
-        String graphKey = entry.getKey();
-        Graph<RouteWaypoint> graph = entry.getValue();
-        // Use file name from graph key
-        try (BufferedWriter writer = Files.newBufferedWriter(MightyMiner.routesDirectory.resolve(graphKey + ".json"), StandardCharsets.UTF_8)) {
-          writer.write(MightyMiner.gson.toJson(graph));
-          Logger.sendLog("Saved graph: " + graphKey);
-        } catch (Exception e) {
-          Logger.sendLog("Failed to save graph: " + graphKey);
-          e.printStackTrace();
-        }
+      String graphKey = this.activeGraphKey;
+      Graph<RouteWaypoint> graph = this.graphs.get(graphKey);
+      // Use file name from graph key
+      try (BufferedWriter writer = Files.newBufferedWriter(MightyMiner.routesDirectory.resolve(graphKey + ".json"), StandardCharsets.UTF_8)) {
+        writer.write(MightyMiner.gson.toJson(graph));
+        Logger.sendLog("Saved graph: " + graphKey);
+      } catch (Exception e) {
+        Logger.sendLog("Failed to save graph: " + graphKey);
+        e.printStackTrace();
       }
 
       this.dirty = false;

@@ -259,10 +259,8 @@ public class AutoMobKiller extends AbstractFeature {
     if (!this.enabled || !this.targetMob.isPresent()) {
       return;
     }
-    Vec3 pos = this.targetMob.get().getPositionVector();
 
-    RenderUtil.drawBox(new AxisAlignedBB(pos.xCoord - 0.5, pos.yCoord, pos.zCoord - 0.5, pos.xCoord + 0.5, pos.yCoord, pos.zCoord + 0.5),
-        new Color(255, 0, 241, 150));
+    RenderUtil.drawBox(this.targetMob.get().getEntityBoundingBox(), new Color(255, 255, 255, 200));
 
   }
 

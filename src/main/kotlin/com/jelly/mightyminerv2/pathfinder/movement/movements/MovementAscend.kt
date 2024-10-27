@@ -56,43 +56,28 @@ class MovementAscend(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement(m
       // big = fill block
       // this logic is actually fucking sick ngl
 
-      var sourceHeight = -1.0
-      var destHeight = -1.0
-      var snow = false
-      if (sourceState.block is BlockSnow) {
-        sourceHeight = (sourceState.getValue(BlockSnow.LAYERS) - 1) * 0.125
-        snow = true;
-      }
-      if (destState.block is BlockSnow) {
-        destHeight = (destState.getValue(BlockSnow.LAYERS) - 1) * 0.125
-        snow = true
-      }
-      if (!snow) {
-        val srcSmall = MovementHelper.isBottomSlab(sourceState);
-        val destSmall = MovementHelper.isBottomSlab(destState);
-
-        val destSmallStair = MovementHelper.isValidStair(destState, destX - x, destZ - z);
-
-        if (!srcSmall == !(destSmall || destSmallStair)) {
-          res.cost = ctx.cost.JUMP_ONE_BLOCK_COST
-        } else if (!srcSmall) {
-          res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
-        }
-      } else {
-        if (destHeight == -1.0) {
-          destHeight = destState.block.blockBoundsMaxY
-        }
-
-        if (sourceHeight == -1.0) {
-          sourceHeight = sourceState.block.blockBoundsMaxY
-        }
+      val sourceHeight = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY ?: return
+      val destHeight = destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y + 1, destZ), destState)?.maxY ?: return
+//      if (!snow) {
+//        val srcSmall = MovementHelper.isBottomSlab(sourceState);
+//        val destSmall = MovementHelper.isBottomSlab(destState);
+//
+//        val destSmallStair = MovementHelper.isValidStair(destState, destX - x, destZ - z);
+//
+//        if (!srcSmall == !(destSmall || destSmallStair)) {
+//          res.cost = ctx.cost.JUMP_ONE_BLOCK_COST
+//        } else if (!srcSmall) {
+//          res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
+//        }
+//      } else {
         val diff = destHeight - sourceHeight
+//      println("SourceHeight: $sourceHeight, DestHeight: $destHeight, Diff: $diff")
         res.cost = when {
-          diff <= -0.5 -> ctx.cost.ONE_BLOCK_SPRINT_COST
-          diff <= 0.125 -> ctx.cost.JUMP_ONE_BLOCK_COST
+          diff <= 0.5 -> ctx.cost.ONE_BLOCK_SPRINT_COST
+          diff <= 1.125 -> ctx.cost.JUMP_ONE_BLOCK_COST
           else -> ctx.cost.INF_COST
         }
       }
-    }
+//    }
   }
 }

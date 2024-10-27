@@ -25,7 +25,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import sun.awt.geom.AreaOp.CAGOp;
 
 public class PathExecutor {
 

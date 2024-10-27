@@ -41,7 +41,7 @@ public class Nuker extends AbstractFeature {
         note("Nuker " + (enabled ? "enabled" : "disabled"));
     }
 
-    @SubscribeEvent
+//    @SubscribeEvent
     protected void onTick(ClientTickEvent event) {
         if (MightyMinerConfig.nuker_toggle) {
             if (MightyMinerConfig.nuker_keyBind.isActive()) {

@@ -431,6 +431,14 @@ public class MightyMinerConfig extends Config {
   )
   public static String devMKillerMob = "Goblin";
 
+  @Text(
+      name = "MobKiller Weapon",
+      category = "Dev",
+      subcategory = "MobKiller",
+      placeholder = "Enter Weapon Name Here"
+  )
+  public static String devMKillerWeapon = "Aspect of the Dragon";
+
   @Slider(
       name = "MobKiller Check Timer",
       category = "Dev",

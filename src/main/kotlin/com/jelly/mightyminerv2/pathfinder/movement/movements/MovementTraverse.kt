@@ -5,6 +5,7 @@ import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext
 import com.jelly.mightyminerv2.pathfinder.movement.Movement
 import com.jelly.mightyminerv2.pathfinder.movement.MovementHelper
 import com.jelly.mightyminerv2.pathfinder.movement.MovementResult
+import net.minecraft.block.BlockLadder
 import net.minecraft.block.BlockSnow
 import net.minecraft.util.BlockPos
 
@@ -47,7 +48,6 @@ class MovementTraverse(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
 
       val isSourceTopWalkableLadder = MovementHelper.canWalkIntoLadder(srcUpState, x - destX, z - destZ)
       val isDestTopWalkableLadder = MovementHelper.canWalkIntoLadder(destUpState, destX - x, destZ - z)
-      res.cost = ctx.cost.ONE_BLOCK_WALK_COST
       if (MovementHelper.isLadder(destUpState) && !isDestTopWalkableLadder) {
         res.cost = ctx.cost.INF_COST
         return
@@ -58,36 +58,26 @@ class MovementTraverse(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
       }
       val sourceState = ctx.get(x, y, z)
       val destState = ctx.get(destX, y, destZ)
-      var sourceHeight = -1.0
-      var destHeight = -1.0
-      var snow = false
-      if (sourceState.block is BlockSnow) {
-        sourceHeight = (sourceState.getValue(BlockSnow.LAYERS) - 1) * 0.125
-        snow = true;
-      }
-      if (destState.block is BlockSnow) {
-        destHeight = (destState.getValue(BlockSnow.LAYERS) - 1) * 0.125
-        snow = true
-      }
-      if (snow) {
-        println("SNOW")
-        if (destHeight == -1.0) {
-          destHeight = destState.block.blockBoundsMaxY
-        }
-
-        if (sourceHeight == -1.0) {
-          sourceHeight = sourceState.block.blockBoundsMaxY
-        }
+      val sourceHeight = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY ?: return
+      val destHeight = destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y, destZ), destState)?.maxY ?: return
+//      if (snow) {
+//        if (destHeight == -1.0) {
+//          destHeight = destState.block.blockBoundsMaxY
+//        }
+//
+//        if (sourceHeight == -1.0) {
+//          sourceHeight = sourceState.block.blockBoundsMaxY
+//        }
         val diff = destHeight - sourceHeight
-        println("Diff: $diff, SourceHeight: $sourceHeight, destHeight: $destHeight")
+//      println("SourceHeight: $sourceHeight, DestHeight: $destHeight, Diff: $diff")
         res.cost = when {
           diff <= 0.5 -> ctx.cost.ONE_BLOCK_SPRINT_COST
           diff <= 1 -> ctx.cost.JUMP_ONE_BLOCK_COST
           else -> ctx.cost.INF_COST
         }
-        return
-      }
-      res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST
+//        return
+//      }
+//      res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST
     }
   }
 }

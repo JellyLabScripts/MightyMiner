@@ -63,6 +63,9 @@ public class InventoryUtil {
   }
 
   public static int getHotbarSlotOfItem(String items) {
+    if (items.isEmpty()) {
+      return -1;
+    }
     for (int i = 0; i < 9; i++) {
       ItemStack slot = mc.thePlayer.inventory.getStackInSlot(i);
       if (slot == null || !slot.hasDisplayName()) {

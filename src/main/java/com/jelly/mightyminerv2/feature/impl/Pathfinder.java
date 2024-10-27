@@ -35,9 +35,9 @@ public class Pathfinder extends AbstractFeature {
     return instance;
   }
 
-  private Deque<Pair<BlockPos, BlockPos>> pathQueue = new ConcurrentLinkedDeque<>();
+  private final Deque<Pair<BlockPos, BlockPos>> pathQueue = new ConcurrentLinkedDeque<>();
+  private final PathExecutor pathExecutor = PathExecutor.getInstance();
   private AStarPathFinder finder;
-  private PathExecutor pathExecutor = PathExecutor.getInstance();
 
   private volatile boolean skipTick = false;
   private volatile boolean pathfinding = false;
@@ -108,13 +108,12 @@ public class Pathfinder extends AbstractFeature {
       if (this.pathExecutor.getCurrentPath() == null) {
         start = PlayerUtil.getBlockStandingOn();
       } else {
-        Goal goal = this.pathExecutor.getCurrentPath().getGoal();
-        start = new BlockPos(goal.getGoalX(), goal.getGoalY(), goal.getGoalZ());
+        start = this.pathExecutor.getCurrentPath().getEnd();
       }
     } else {
       start = this.pathQueue.peekLast().getFirst();
     }
-    this.pathQueue.offer(new Pair(start, end));
+    this.pathQueue.offer(new Pair<>(start, end));
   }
 
   public void setSprintState(boolean sprint) {

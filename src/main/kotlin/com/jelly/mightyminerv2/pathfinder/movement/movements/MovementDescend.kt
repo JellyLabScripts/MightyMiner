@@ -62,30 +62,40 @@ class MovementDescend(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement(
                 return
             }
 
+            val sourceHeight = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY?:return
+            val destHeight = destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y - 1, destZ), destState)?.maxY?:return
+            val diff = sourceHeight - destHeight
+//            println("SourceHeight: $sourceHeight, DestHeight: $destHeight, Diff: $diff")
+            res.cost = when{
+                diff <= 0.5 -> ctx.cost.ONE_BLOCK_WALK_COST
+                diff <= 1.125 -> ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
+                else -> ctx.cost.INF_COST
+            }
             // small = half block / stair - in this case stair should be facing the player otherwise its descend instead of a walk
             // big = fill block
-            val srcSmall = MovementHelper.isBottomSlab(sourceState);
-            val destSmall = MovementHelper.isBottomSlab(destState);
 
-            val srcSmallStair =
-                MovementHelper.isValidReversedStair(sourceState, destX - x, destZ - z);
-            val destSmallStair =
-                MovementHelper.isValidReversedStair(destState, destX - x, destZ - z);
-
-            // Todo: this can ** probably ** be simplified
-            if (!(srcSmall || srcSmallStair) == !(destSmall || destSmallStair)) {
-                if (destSmallStair) {
-                    res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
-                } else {
-                    res.cost =
-                        ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
-                }
-            } else if (!(destSmall || destSmallStair)) {
-                res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
-            } else if (!(srcSmall || srcSmallStair)) {
-                res.cost =
-                    ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
-            }
+//            val srcSmall = MovementHelper.isBottomSlab(sourceState);
+//            val destSmall = MovementHelper.isBottomSlab(destState);
+//
+//            val srcSmallStair =
+//                MovementHelper.isValidReversedStair(sourceState, destX - x, destZ - z);
+//            val destSmallStair =
+//                MovementHelper.isValidReversedStair(destState, destX - x, destZ - z);
+//
+//             Todo: this can ** probably ** be simplified
+//            if (!(srcSmall || srcSmallStair) == !(destSmall || destSmallStair)) {
+//                if (destSmallStair) {
+//                    res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
+//                } else {
+//                    res.cost =
+//                        ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
+//                }
+//            } else if (!(destSmall || destSmallStair)) {
+//                res.cost = ctx.cost.ONE_BLOCK_SPRINT_COST;
+//            } else if (!(srcSmall || srcSmallStair)) {
+//                res.cost =
+//                    ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
+//            }
 
 //            if (srcSmall == destSmall && srcSmallStair == destSmallStair) {
 //                if (destSmallStair) {

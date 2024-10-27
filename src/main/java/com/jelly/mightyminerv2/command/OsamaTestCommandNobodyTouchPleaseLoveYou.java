@@ -235,7 +235,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
 
   @SubCommand
   public void k() {
-    AutoMobKiller.getInstance().start(Arrays.asList(MightyMinerConfig.devMKillerMob), "");
+    AutoMobKiller.getInstance().start(Arrays.asList(MightyMinerConfig.devMKillerMob.split(";")), MightyMinerConfig.devMKillerWeapon);
 //    this.c = !this.c;
   }
 

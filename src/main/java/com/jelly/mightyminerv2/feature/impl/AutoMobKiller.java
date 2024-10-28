@@ -79,6 +79,7 @@ public class AutoMobKiller extends AbstractFeature {
 
     debug.clear();
     this.start();
+    note("Mobkiller started for " + mobsToKill);
     log("Started");
   }
 
@@ -172,7 +173,7 @@ public class AutoMobKiller extends AbstractFeature {
             this.entityLastPosition = Optional.of(best.getPositionVector());
             Pathfinder.getInstance().stopAndRequeue(EntityUtil.getBlockStandingOn(this.targetMob.get()));
           }
-          this.recheckTimer.schedule(2000);
+          this.recheckTimer.schedule(MightyMinerConfig.devMKillTimer);
         }
 
         if (!this.targetMob.isPresent() || !this.entityLastPosition.isPresent()) {

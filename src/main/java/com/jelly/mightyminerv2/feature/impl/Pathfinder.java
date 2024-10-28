@@ -173,7 +173,10 @@ public class Pathfinder extends AbstractFeature {
       this.pathfinding = true;
       try {
         Pair<BlockPos, BlockPos> startEnd = this.pathQueue.poll();
-//        if(startEnd == null) return;
+        if (startEnd == null) {
+          this.pathfinding = false;
+          return;
+        }
 
         BlockPos start = startEnd.getFirst();
         BlockPos end = startEnd.getSecond();

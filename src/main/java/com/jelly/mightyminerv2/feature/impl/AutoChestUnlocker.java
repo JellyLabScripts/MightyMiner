@@ -31,11 +31,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class AutoChestUnlocker extends AbstractFeature {
 
-  private static AutoChestUnlocker instance = new AutoChestUnlocker();
-
-  public static AutoChestUnlocker getInstance() {
-    return instance;
-  }
+  public static AutoChestUnlocker instance = new AutoChestUnlocker();
 
   public static List<BlockPos> chestQueue = new ArrayList<>();
   private State state = State.STARTING;

@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.feature.impl;
 
+import com.jelly.mightyminerv2.command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.mightyminerv2.event.UpdateEntityEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.util.EntityUtil;
@@ -50,22 +51,26 @@ public class MobTracker extends AbstractFeature {
 
   public Set<EntityLivingBase> getEntity(String name) {
     Set<EntityLivingBase> list = mobs.get(name);
+//    note("Getting Mob: " + name);
     if (list == null) {
+//      note("Cannot find any " + name);
       return new HashSet<>();
     }
+//    note("Found " + list.size() + " " + name+"s");
     return new HashSet<>(list);
   }
 
-//  @SubscribeEvent
-//  public void render(RenderWorldLastEvent event) {
-//    mobs.computeIfPresent("Goblin", (k, v) -> {
-//      v.forEach(it -> {
-//        RenderUtil.outlineBox(it.getEntityBoundingBox(), new Color(255, 255, 255, 200));
-//        RenderUtil.drawText(k, it.posX, it.posY + it.height, it.posZ, 1);
-//      });
-//      return v;
-//    });
-//  }
+  @SubscribeEvent
+  public void render(RenderWorldLastEvent event) {
+    if(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance().allowed) {
+      mobs.forEach((k, v) -> {
+        v.forEach(it -> {
+          RenderUtil.outlineBox(it.getEntityBoundingBox(), new Color(255, 255, 255, 200));
+          RenderUtil.drawText(k, it.posX, it.posY + it.height, it.posZ, 1);
+        });
+      });
+    }
+  }
 
   @SubscribeEvent
   public void onWorldUnload(WorldEvent.Unload event) {

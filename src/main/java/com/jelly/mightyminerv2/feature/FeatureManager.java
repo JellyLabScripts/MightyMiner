@@ -34,7 +34,7 @@ public class FeatureManager {
         RouteNavigator.getInstance(),
         MobTracker.getInstance(),
         AutoDrillRefuel.getInstance(),
-        AutoChestUnlocker.getInstance(),
+        AutoChestUnlocker.instance,
         Nuker.getInstance(),
         FastBreak.getInstance()
     ));

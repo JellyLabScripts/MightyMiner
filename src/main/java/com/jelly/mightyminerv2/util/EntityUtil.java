@@ -87,6 +87,7 @@ public class EntityUtil {
   }
 
   public static List<EntityLivingBase> getEntities(Set<String> entityNames, Set<EntityLivingBase> entitiesToIgnore) {
+//    Logger.sendNote("Getting Entities for: " + entityNames + ", IgnoreList: " + entitiesToIgnore);
     List<EntityLivingBase> entities = new ArrayList<>();
     entityNames.forEach(it -> {
       Set<EntityLivingBase> set = MobTracker.getInstance().getEntity(it);

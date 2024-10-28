@@ -54,7 +54,7 @@ public class AutoChestUnlocker extends AbstractFeature {
 
   public void start(String itemToHold, boolean clickChest) {
     if (!itemToHold.isEmpty()) {
-      // doesnt matter if i can hold it or not
+      // doesn't matter if I can hold it or not
       InventoryUtil.holdItem(itemToHold);
     }
     this.chestFailure = ChestFailure.NONE;

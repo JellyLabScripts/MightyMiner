@@ -82,8 +82,8 @@ public class MightyMinerConfig extends Config {
   //<editor-fold desc="Mithril">
 
   @Text(
-          name = "Mining Tool", description = "The tool to use during comm macro",
-          category = COMMISSION, placeholder = "Mining Tool Name"
+          name = "Mining Tool", description = "The tool to use during mithrill macro",
+          category = MITHRIL, placeholder = "Mining Tool Name"
   )
   public static String mithrilMiningTool = "Pickonimbus 2000";
 

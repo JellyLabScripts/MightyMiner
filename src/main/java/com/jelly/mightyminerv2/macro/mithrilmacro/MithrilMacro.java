@@ -6,57 +6,91 @@ import com.jelly.mightyminerv2.feature.impl.AutoInventory;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.util.InventoryUtil;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
+import com.jelly.mightyminerv2.feature.impl.Pathfinder;
+import com.jelly.mightyminerv2.handler.RotationHandler;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MithrilMacro extends AbstractMacro {
     private static MithrilMacro instance = new MithrilMacro();
 
-    public static MithrilMacro getInstance() {
-        return instance;
+    private static final Vec3 WARP_MINES_BLOCK = new Vec3(-49, 200, -122);
+    private static final Vec3 STATION_MASTER_LOCATION = new Vec3(39, 200, -87);
+    private static final Vec3 LOWER_MINES_LOCATION = new Vec3(84, 113, 132);
+
+    private enum State {
+        NONE, INITIALIZATION, CHECKING_STATS, GETTING_STATS, MINING,
+        PATHFINDING, WAITING_ON_PATHFINDING, END
     }
 
+    private enum NavigationState {
+        CHECK_POSITION,
+        WARP_TO_MINES,
+        WAIT_FOR_WARP,
+        GO_TO_STATION_MASTER,
+        WAIT_FOR_PATHFINDER,
+        LOOK_AT_STATION_MASTER,
+        OPEN_STATION_MASTER,
+        CLICK_LOWER_MINES,
+        CLOSE_MASTER_GUI,
+        WAIT_FOR_CART,
+        LOOK_AT_CART,
+        RIGHT_CLICK_CART,
+        WAIT_FOR_TELEPORT,
+        AOTV_TO_POSITION
+    }
+
+    private State currentState = State.NONE;
+    private NavigationState navigationState = NavigationState.CHECK_POSITION;
     private List<String> necessaryItems = new ArrayList<>();
     private int miningSpeed = 0;
     private int miningSpeedBoost = 0;
     private MineableBlock[] blocksToMine = {};
     private int macroRetries = 0;
     private boolean isMining = false;
+    private final RotationHandler rotationHandler = RotationHandler.getInstance();
 
-    private enum State {NONE, START, CHECKING_STATS, GETTING_STATS, MINING, END}
-    private MithrilMacro.State state = State.NONE;
+    public static MithrilMacro getInstance() {
+        return instance;
+    }
 
     @Override
     public String getName() {
         return "Mithril Macro";
     }
 
+    @Override
     public List<String> getNecessaryItems() {
-        if (this.necessaryItems.isEmpty()) {
+        if (necessaryItems.isEmpty()) {
             necessaryItems.add(MightyMinerConfig.mithrilMiningTool);
             log("Necessary items initialized: " + necessaryItems);
         }
-        return this.necessaryItems;
+        return necessaryItems;
     }
 
     @Override
     public void onEnable() {
-        this.state = State.START;
-        log("Mithril Macro enabled");
+        log("Enabling Mithril Macro");
+        resetVariables();
+        this.currentState = State.INITIALIZATION;
     }
 
     @Override
     public void onDisable() {
+        log("Disabling Mithril Macro");
         if (isMining) {
             BlockMiner.getInstance().stop();
             isMining = false;
-            log("Stopped mining on disable");
         }
-        this.changeMacroState(State.END);
-        log("Mithril Macro disabled");
+        resetVariables();
     }
 
     @Override
@@ -71,114 +105,150 @@ public class MithrilMacro extends AbstractMacro {
         log("Mithril Macro resumed");
     }
 
-    private void changeMacroState(State to) {
-        log("Changing state from " + this.state + " to " + to);
-        this.state = to;
+    private void resetVariables() {
+        navigationState = NavigationState.CHECK_POSITION;
+        currentState = State.NONE;
+        macroRetries = 0;
+        miningSpeed = 0;
+        miningSpeedBoost = 0;
+        necessaryItems.clear();
+        isMining = false;
     }
 
     public void onTick(TickEvent.ClientTickEvent event) {
-        log("Current state: " + this.state);
-        switch (this.state) {
-            case START:
-                log("Entering START state");
-                setBlocksToMineBasedOnOreType();
+        if (timer.isScheduled() && !timer.passed()) return;
 
-                if (this.miningSpeed == 0 && this.miningSpeedBoost == 0) {
-                    log("Mining speed and boost not set, checking inventory");
-                    if (!InventoryUtil.holdItem(MightyMinerConfig.commMiningTool)) {
-                        error("Cannot hold mining tool");
-                        this.changeMacroState(State.NONE);
-                        return;
-                    }
-                    this.changeMacroState(State.CHECKING_STATS);
-                    log("Transitioning to CHECKING_STATS state");
-                } else {
-                    log("Mining speed or boost already set, skipping to MINING");
-                    this.changeMacroState(State.MINING);
-                }
+        log("Current state: " + currentState);
+        switch (currentState) {
+            case INITIALIZATION:
+                handleInitializationState();
                 break;
-
             case CHECKING_STATS:
-                log("Checking stats...");
-                AutoInventory.getInstance().retrieveSpeedBoost();
-                this.changeMacroState(State.GETTING_STATS);
+                handleCheckingStatsState();
                 break;
-
             case GETTING_STATS:
-                log("Getting stats...");
-                if (AutoInventory.getInstance().isRunning()) {
-                    return;
-                }
-
-                if (AutoInventory.getInstance().sbSucceeded()) {
-                    int[] sb = AutoInventory.getInstance().getSpeedBoostValues();
-                    this.miningSpeed = sb[0];
-                    this.miningSpeedBoost = sb[1];
-                    this.macroRetries = 0;
-                    log("Successfully retrieved stats - MiningSpeed: " + miningSpeed + ", MiningSpeedBoost: " + miningSpeedBoost);
-                    this.changeMacroState(State.MINING);
-                } else {
-                    log("Failed to retrieve stats, handling error");
-                    handleSpeedBoostError();
-                }
+                handleGettingStatsState();
                 break;
-
             case MINING:
-                log("Entering MINING state");
-                if (!isMining) {
-                    BlockMiner.getInstance().start(
-                            blocksToMine,
-                            miningSpeed,
-                            miningSpeedBoost,
-                            determinePriority(),
-                            MightyMinerConfig.commMiningTool
-                    );
-                    isMining = true;
-                    log("Started mining with speed: " + miningSpeed + " and boost: " + miningSpeedBoost);
-
-                    if (BlockMiner.getInstance().getMithrilError() == BlockMiner.BlockMinerError.NOT_ENOUGH_BLOCKS) {
-                        log("Not enough blocks to mine. Stopping macro.");
-                        this.changeMacroState(State.NONE);
-                    }
-                }
+                handleMiningState();
                 break;
-
+            case PATHFINDING:
+                handlePathfindingState();
+                break;
+            case WAITING_ON_PATHFINDING:
+                handleWaitingOnPathfindingState();
+                break;
             case END:
-                log("Entering END state");
-                this.macroRetries = 0;
-                this.miningSpeed = this.miningSpeedBoost = 0;
-                this.necessaryItems.clear();
-                this.isMining = false;
-                this.changeMacroState(State.NONE);
-                break;
-
-            default:
-                log("Unhandled state: " + this.state);
+                handleEndState();
                 break;
         }
     }
 
+    private void handleInitializationState() {
+        log("Handling initialization state");
+        setBlocksToMineBasedOnOreType();
+
+        if (miningSpeed == 0 && miningSpeedBoost == 0) {
+            if (!InventoryUtil.holdItem(MightyMinerConfig.mithrilMiningTool)) {
+                disable("Cannot hold mining tool");
+                return;
+            }
+            changeState(State.CHECKING_STATS);
+        } else {
+            changeState(State.MINING);
+        }
+    }
+
+    private void handleCheckingStatsState() {
+        log("Checking mining stats");
+        AutoInventory.getInstance().retrieveSpeedBoost();
+        changeState(State.GETTING_STATS);
+    }
+
+    private void handleGettingStatsState() {
+        if (AutoInventory.getInstance().isRunning()) return;
+
+        if (AutoInventory.getInstance().sbSucceeded()) {
+            int[] sb = AutoInventory.getInstance().getSpeedBoostValues();
+            miningSpeed = sb[0];
+            miningSpeedBoost = sb[1];
+            macroRetries = 0;
+            log("Retrieved stats - Speed: " + miningSpeed + ", Boost: " + miningSpeedBoost);
+            changeState(State.MINING);
+        } else {
+            handleSpeedBoostError();
+        }
+    }
+
+    private void handleMiningState() {
+        if (!checkValidLocation()) {
+            changeState(State.INITIALIZATION);
+            return;
+        }
+
+        if (BlockMiner.getInstance().getMithrilError() == BlockMiner.BlockMinerError.NOT_ENOUGH_BLOCKS) {
+            changeState(State.PATHFINDING);
+            return;
+        }
+
+        if (!isMining) {
+            startMining();
+        }
+    }
+
+    private void handlePathfindingState() {
+        if (!Pathfinder.getInstance().isRunning()) {
+            movePosition();
+            changeState(State.WAITING_ON_PATHFINDING);
+        }
+    }
+
+    private void handleWaitingOnPathfindingState() {
+        if (!Pathfinder.getInstance().isRunning()) {
+            changeState(State.MINING);
+        }
+    }
+
+    private void handleEndState() {
+        macroRetries = 0;
+        miningSpeed = 0;
+        miningSpeedBoost = 0;
+        necessaryItems.clear();
+        isMining = false;
+        changeState(State.NONE);
+    }
+
+    private void startMining() {
+        BlockMiner.getInstance().start(
+                blocksToMine,
+                miningSpeed,
+                miningSpeedBoost,
+                determinePriority(),
+                MightyMinerConfig.mithrilMiningTool
+        );
+        isMining = true;
+        log("Started mining with speed: " + miningSpeed + ", boost: " + miningSpeedBoost);
+
+        if (BlockMiner.getInstance().getMithrilError() == BlockMiner.BlockMinerError.NOT_ENOUGH_BLOCKS) {
+            log("Not enough blocks to mine. Stopping macro.");
+            changeState(State.NONE);
+        }
+    }
+
     private void handleSpeedBoostError() {
-        log("Handling speed boost error...");
+        log("Handling speed boost error");
         switch (AutoInventory.getInstance().getSbError()) {
             case NONE:
-                log("Error: AutoInventory#getSbError failed but returned NONE");
                 throw new IllegalStateException("AutoInventory#getSbError failed but returned NONE");
             case CANNOT_OPEN_INV:
-                log("Error: Cannot open inventory");
-                if (++this.macroRetries > 3) {
-                    this.changeMacroState(State.NONE);
-                    error("Tried 3 times to open inventory but failed. Stopping");
+                if (++macroRetries > 3) {
+                    disable("Failed to open inventory after 3 attempts");
                 } else {
-                    log("Retry attempt " + this.macroRetries);
-                    this.changeMacroState(State.START);
-                    log("Failed to open inventory. Retrying");
+                    changeState(State.INITIALIZATION);
                 }
                 break;
             case CANNOT_GET_VALUE:
-                log("Error: Failed to get value. Contact the developer.");
-                this.changeMacroState(State.NONE);
-                error("Failed To Get Value. Contact the developer.");
+                disable("Failed to get value. Contact the developer.");
                 break;
         }
     }
@@ -217,30 +287,71 @@ public class MithrilMacro extends AbstractMacro {
                 break;
             default:
                 blocksToMine = new MineableBlock[]{};
-                log("Invalid ore type selected. No blocks to mine.");
+                log("Invalid ore type selected");
                 break;
         }
-        log("Blocks to mine: " + java.util.Arrays.toString(blocksToMine));
+        log("Blocks to mine: " + Arrays.toString(blocksToMine));
     }
 
     private int[] determinePriority() {
-        log("Determining priority for ore type: " + MightyMinerConfig.oreType);
-        int[] priorities;
-
-        if (MightyMinerConfig.oreType == 7) { // Mithril
-            priorities = new int[]{ 
+        log("Determining mining priorities");
+        if (MightyMinerConfig.oreType == 7) {
+            return new int[]{
                     MightyMinerConfig.grayMithrilPriority,
                     MightyMinerConfig.greenMithrilPriority,
                     MightyMinerConfig.blueMithrilPriority,
                     MightyMinerConfig.titaniumPriority
             };
-            log("Mithril priorities: " + java.util.Arrays.toString(priorities));
-        } else {
-            // General case priorities, can be customized further if needed
-            priorities = new int[]{1, 1, 1, 1};
-            log("General priorities: " + java.util.Arrays.toString(priorities));
         }
+        return new int[]{1, 1, 1, 1};
+    }
 
-        return priorities;
+    @Nullable
+    private Entity getMinecart() {
+        return mc.theWorld.getLoadedEntityList()
+                .stream()
+                .filter(entity -> entity instanceof EntityMinecart)
+                .min(Comparator.comparingDouble(entity ->
+                        entity.getDistanceSqToCenter(mc.thePlayer.getPosition())))
+                .orElse(null);
+    }
+
+    @Nullable
+    private Entity getStationMaster() {
+        return mc.theWorld.getLoadedEntityList()
+                .stream()
+                .filter(this::isStationMaster)
+                .min(Comparator.comparingDouble(entity ->
+                        entity.getDistanceSqToCenter(mc.thePlayer.getPosition())))
+                .orElse(null);
+    }
+
+    private boolean isStationMaster(Entity entity) {
+        if (!(entity instanceof EntityOtherPlayerMP)) return false;
+        EntityOtherPlayerMP player = (EntityOtherPlayerMP) entity;
+        return player.getGameProfile().getProperties().containsKey("textures") &&
+                player.getGameProfile().getProperties().get("textures")
+                        .stream()
+                        .anyMatch(p -> p.getValue().contains("ewogICJ0aW1lc3RhbXAiIDogMTYwODMxMzM3MzE3MywKICAicHJvZmlsZUlkIiA6ICI0MWQzYWJjMmQ3NDk0MDBjOTA5MGQ1NDM0ZDAzODMxYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJNZWdha2xvb24iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjVmMzFjMWMyMTVhNTdlOTM3ZmQ3NWFiMzU3ODJmODVlYzI0MmExYjFmOTUwYTI2YTQyYmI1ZTBhYTVjYmVkYSIKICAgIH0KICB9Cn0="));
+    }
+
+    private void movePosition() {
+        // Didnt implement it currently
+        log("Moving to next mining position");
+    }
+
+    private boolean checkValidLocation() {
+        // Same as above
+        return true;
+    }
+
+    private void changeState(State newState) {
+        log("Changing state from " + currentState + " to " + newState);
+        currentState = newState;
+    }
+
+    private void disable(String reason) {
+        Logger.sendError("[Mithril Macro] " + reason);
+        this.onDisable();
     }
 }

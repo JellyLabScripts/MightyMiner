@@ -159,7 +159,7 @@ public class MightyMinerConfig extends Config {
 
   @Slider(
           name = "Gray Mithril Priority",
-          category = "BlockMiner",
+          category = MITHRIL,
           min = 1,
           max = 10,
           step = 1
@@ -168,7 +168,7 @@ public class MightyMinerConfig extends Config {
 
   @Slider(
           name = "Green Mithril Priority",
-          category = "BlockMiner",
+          category = MITHRIL,
           min = 1,
           max = 10,
           step = 1
@@ -177,7 +177,7 @@ public class MightyMinerConfig extends Config {
 
   @Slider(
           name = "Blue Mithril Priority",
-          category = "BlockMiner",
+          category = MITHRIL,
           min = 1,
           max = 10,
           step = 1
@@ -186,7 +186,7 @@ public class MightyMinerConfig extends Config {
 
   @Slider(
           name = "Titanium Priority",
-          category = "BlockMiner",
+          category = MITHRIL,
           min = 1,
           max = 10,
           step = 1

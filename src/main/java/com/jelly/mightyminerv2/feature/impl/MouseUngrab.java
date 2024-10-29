@@ -7,23 +7,30 @@ import org.lwjgl.input.Mouse;
 
 public class MouseUngrab extends AbstractFeature {
 
-  private static MouseUngrab instance;
+  private static volatile MouseUngrab instance;
 
   public static MouseUngrab getInstance() {
     if (instance == null) {
-      instance = new MouseUngrab();
+      synchronized (MouseUngrab.class) {
+        if (instance == null) {
+          instance = new MouseUngrab();
+        }
+      }
     }
     return instance;
   }
 
   private MouseHelper oldMouseHelper;
+  private boolean mouseUngrabbed = false;
 
   public void ungrabMouse() {
-    if (!Mouse.isGrabbed() || enabled) {
+    if (mouseUngrabbed || !Mouse.isGrabbed()) {
       return;
     }
+
     oldMouseHelper = mc.mouseHelper;
-    oldMouseHelper.ungrabMouseCursor();
+    mc.mouseHelper.ungrabMouseCursor();
+
     mc.mouseHelper = new MouseHelper() {
       @Override
       public void mouseXYChange() {
@@ -37,18 +44,27 @@ public class MouseUngrab extends AbstractFeature {
       public void ungrabMouseCursor() {
       }
     };
-    enabled = true;
+
+    mouseUngrabbed = true;
+    log("Mouse ungrabbed successfully.");
   }
 
   public void regrabMouse() {
-    if (!enabled) {
+    if (!mouseUngrabbed) {
       return;
     }
-    mc.mouseHelper = oldMouseHelper;
+
+    if (oldMouseHelper != null) {
+      mc.mouseHelper = oldMouseHelper;
+      oldMouseHelper = null;
+    }
+
     if (mc.currentScreen == null) {
       mc.mouseHelper.grabMouseCursor();
     }
-    enabled = false;
+
+    mouseUngrabbed = false;
+    log("Mouse regrabbed successfully.");
   }
 
   @Override
@@ -68,20 +84,22 @@ public class MouseUngrab extends AbstractFeature {
 
   @Override
   public void start() {
-    log("MouseUngrab::onEnable");
+    log("MouseUngrab::start");
     try {
       ungrabMouse();
     } catch (Exception e) {
+      log("Failed to ungrab mouse: " + e.getMessage());
       e.printStackTrace();
     }
   }
 
   @Override
   public void stop() {
-    log("MouseUngrab::onDisable");
+    log("MouseUngrab::stop");
     try {
       regrabMouse();
     } catch (Exception e) {
+      log("Failed to regrab mouse: " + e.getMessage());
       e.printStackTrace();
     }
   }

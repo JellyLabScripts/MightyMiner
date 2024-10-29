@@ -35,8 +35,7 @@ public class FeatureManager {
         MobTracker.getInstance(),
         AutoDrillRefuel.getInstance(),
         AutoChestUnlocker.instance,
-        Nuker.getInstance(),
-        FastBreak.getInstance()
+        Nuker.getInstance()
     ));
   }
 

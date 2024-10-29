@@ -57,6 +57,7 @@ public class BlockMiner extends AbstractFeature {
   private Vec3 destBlock = null;
   private int breakAttemptTime = 0;
   private final Clock shiftTimer = new Clock();
+  public int wait_threshold = 2000;
 
   @Override
   public String getName() {
@@ -181,7 +182,7 @@ public class BlockMiner extends AbstractFeature {
         if (blocks.size() < 2) {
           if (!this.timer.isScheduled()) {
             log("Scheduled a 2 second timer to see if mithril spawns back or not");
-            this.timer.schedule(2000);
+            this.timer.schedule(wait_threshold);
           }
 
           if (this.hasTimerEnded()) {

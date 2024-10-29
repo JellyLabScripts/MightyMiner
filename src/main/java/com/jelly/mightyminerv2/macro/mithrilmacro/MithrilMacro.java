@@ -147,7 +147,7 @@ public class MithrilMacro extends AbstractMacro {
     private void handleInitializationState() {
         log("Handling initialization state");
         setBlocksToMineBasedOnOreType();
-
+        BlockMiner.getInstance().wait_threshold = 500;
         if (miningSpeed == 0 && miningSpeedBoost == 0) {
             if (!InventoryUtil.holdItem(MightyMinerConfig.mithrilMiningTool)) {
                 disable("Cannot hold mining tool");

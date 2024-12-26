@@ -1,0 +1,702 @@
+[21:58:14] [main/INFO] (LaunchWrapper) Loading tweak class name net.minecraftforge.fml.common.launcher.FMLTweaker
+[21:58:14] [main/INFO] (LaunchWrapper) Using primary tweak class name net.minecraftforge.fml.common.launcher.FMLTweaker
+[21:58:14] [main/INFO] (LaunchWrapper) Loading tweak class name cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker
+[21:58:15] [main/INFO] (mixin) SpongePowered MIXIN Subsystem Version=0.7.11 Source=file:/home/marius/Downloads/MightyMinerv2/run/./OneConfig/OneConfig%20(1.8.9-forge).jar Service=LaunchWrapper Env=CLIENT
+[21:58:15] [main/INFO] (mixin) Attempting to load Fernflower decompiler (Threaded mode)
+[21:58:15] [main/INFO] (mixin) Fernflower could not be loaded, exported classes will not be decompiled. NoClassDefFoundError: org/jetbrains/java/decompiler/main/extern/IResultSaver
+[21:58:15] [main/INFO] (LaunchWrapper) Calling tweak class net.minecraftforge.fml.common.launcher.FMLTweaker
+[21:58:15] [main/INFO] (FML) Forge Mod Loader version 11.15.1.2318 for Minecraft 1.8.9 loading
+[21:58:15] [main/INFO] (FML) Java is OpenJDK 64-Bit Server VM, version 1.8.0_432, running on Linux:amd64:6.11.5-zen1-1-zen, installed at /usr/lib/jvm/java-8-openjdk/jre
+[21:58:15] [main/INFO] (FML) Managed to load a deobfuscated Minecraft name- we are in a deobfuscated environment. Skipping runtime deobfuscation
+[21:58:15] [main/WARN] (FML) The coremod me.djtheredstoner.devauth.forge.legacy.DevAuthLoadingPlugin does not have a MCVersion annotation, it may cause issues with this version of Minecraft
+[21:58:15] [main/INFO] (LaunchWrapper) Calling tweak class org.spongepowered.asm.launch.MixinTweaker
+[21:58:15] [main/INFO] (mixin) Compatibility level set to JAVA_8
+[21:58:15] [main/INFO] (mixin) Preparing mixins for MixinEnvironment[PREINIT]
+[21:58:15] [main/INFO] (mixin) Initialised Mixin FML Remapper Adapter with net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper@64b73e7a
+[21:58:15] [main/INFO] (LaunchWrapper) Calling tweak class cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker
+[21:58:15] [main/INFO] (LaunchWrapper) Loading tweak class name net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[21:58:15] [main/INFO] (LaunchWrapper) Loading tweak class name net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[21:58:15] [main/INFO] (LaunchWrapper) Loading tweak class name org.spongepowered.asm.mixin.EnvironmentStateTweaker
+[21:58:15] [main/INFO] (LaunchWrapper) Calling tweak class net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[21:58:15] [main/INFO] (LaunchWrapper) Calling tweak class net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[21:58:15] [main/INFO] (LaunchWrapper) Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[21:58:15] [main/ERROR] (FML) The binary patch set is missing. Either you are in a development environment, or things are not going to work!
+[21:58:16] [main/ERROR] (FML) FML appears to be missing any signature data. This is not a good thing
+[21:58:16] [main/INFO] (LaunchWrapper) Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[21:58:16] [main/INFO] (LaunchWrapper) Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[21:58:16] [main/INFO] (LaunchWrapper) Calling tweak class org.spongepowered.asm.mixin.EnvironmentStateTweaker
+[21:58:16] [main/INFO] (LaunchWrapper) Calling tweak class net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[21:58:16] [main/INFO] (mixin) Preparing mixins for MixinEnvironment[INIT]
+[21:58:16] [main/INFO] (LaunchWrapper) Loading tweak class name net.minecraftforge.fml.common.launcher.TerminalTweaker
+[21:58:16] [main/INFO] (LaunchWrapper) Calling tweak class net.minecraftforge.fml.common.launcher.TerminalTweaker
+[21:58:16] [main/INFO] (mixin) Preparing mixins for MixinEnvironment[DEFAULT]
+[21:58:16] [main/INFO] (mixin) Selecting config mixins.oneconfig.json
+[21:58:16] [main/INFO] (mixin) Remapping refMap mixins.oneconfig.refmap.json using /home/marius/.gradle/caches/polyfrost-loom/1.8.9/de.oceanlabs.mcp.mcp_stable.1_8_9.22-1.8.9-forge-1.8.9-11.15.1.2318-1.8.9/mappings-srg-named.srg
+[21:58:16] [main/INFO] (mixin) Selecting config mixins.mightyminerv2.json
+[21:58:16] [main/INFO] (mixin) Remapping refMap mixins.mightyminerv2.refmap.json using /home/marius/.gradle/caches/polyfrost-loom/1.8.9/de.oceanlabs.mcp.mcp_stable.1_8_9.22-1.8.9-forge-1.8.9-11.15.1.2318-1.8.9/mappings-srg-named.srg
+[21:58:16] [main/INFO] (mixin) Preparing mixins.oneconfig.json (10)
+[21:58:16] [main/WARN] (mixin) Error loading class: Config (java.lang.ClassNotFoundException: The specified class 'Config' was not found)
+[21:58:16] [main/WARN] (mixin) Error loading class: net/wyvest/redaction/features/NameHighlight (java.lang.ClassNotFoundException: The specified class 'net.wyvest.redaction.features.NameHighlight' was not found)
+[21:58:16] [main/WARN] (mixin) Error loading class: org/polyfrost/redaction/features/NameHighlight (java.lang.ClassNotFoundException: The specified class 'org.polyfrost.redaction.features.NameHighlight' was not found)
+[21:58:16] [main/INFO] (mixin) Preparing mixins.mightyminerv2.json (16)
+[21:58:16] [main/INFO] (mixin) Prepared 23 mixins in 0.531 sec (23.1ms avg) (22ms load, 259ms transform, 0ms plugin)
+[21:58:16] [main/INFO] (LaunchWrapper) Launching wrapped minecraft {net.minecraft.client.main.Main}
+[21:58:16] [main/INFO] (DevAuth) DevAuth disabled, not logging in!
+[21:58:17] [main/INFO] (mixin) Mixing MinecraftMixin from mixins.oneconfig.json into net.minecraft.client.Minecraft
+[21:58:17] [main/INFO] (mixin) Mixing client.MixinMinecraft from mixins.mightyminerv2.json into net.minecraft.client.Minecraft
+[21:58:17] [main/INFO] (mixin) Mixing client.MinecraftAccessor from mixins.mightyminerv2.json into net.minecraft.client.Minecraft
+[21:58:17] [main/INFO] (mixin) Mixing WorldClientMixin from mixins.oneconfig.json into net.minecraft.client.multiplayer.WorldClient
+[21:58:17] [main/INFO] (mixin) Mixing client.MixinEntityLivingBase from mixins.mightyminerv2.json into net.minecraft.entity.EntityLivingBase
+[21:58:17] [main/INFO] (mixin) Mixing EntityPlayerSPMixin from mixins.oneconfig.json into net.minecraft.client.entity.EntityPlayerSP
+[21:58:17] [main/INFO] (mixin) Mixing client.EntityPlayerSPAccessor from mixins.mightyminerv2.json into net.minecraft.client.entity.EntityPlayerSP
+[21:58:17] [main/INFO] (mixin) Mixing client.MixinEntityPlayerSP from mixins.mightyminerv2.json into net.minecraft.client.entity.EntityPlayerSP
+[21:58:17] [main/INFO] (mixin) Mixing GuiScreenMixin from mixins.oneconfig.json into net.minecraft.client.gui.GuiScreen
+[21:58:17] [main/INFO] (mixin) Mixing gui.MixinGuiContainer from mixins.mightyminerv2.json into net.minecraft.client.gui.inventory.GuiContainer
+[21:58:17] [main/INFO] (mixin) Mixing GuiIngameForgeMixin from mixins.oneconfig.json into net.minecraftforge.client.GuiIngameForge
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:17] [main/INFO] (STDOUT) [net.minecraft.client.main.Main:main:57]: Completely ignored arguments: [--mixin, mixins.mightyminerv2.json, -Ddevauth.enabled, true]
+[21:58:17] [main/INFO] (Minecraft) Setting user: Player818
+[21:58:18] [main/INFO] (mixin) Mixing client.MixinBlockStainedGlassPane from mixins.mightyminerv2.json into net.minecraft.block.BlockStainedGlassPane
+[21:58:20] [main/INFO] (mixin) Mixing EventBusMixin from mixins.oneconfig.json into net.minecraftforge.fml.common.eventhandler.EventBus
+[21:58:20] [main/INFO] (Minecraft) LWJGL Version: 2.9.4
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:20] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.input, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.input, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.input, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.input, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengles, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.input, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.input, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.input, but that path is defined and not secure
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/INFO] (STDOUT) [net.minecraftforge.fml.client.SplashProgress:start:246]: ---- Minecraft Crash Report ----
+// Quite honestly, I wouldn't worry myself about that.
+
+Time: 10/29/24 9:58 PM
+Description: Loading screen debug info
+
+This is just a prompt for computer specs to be printed. THIS IS NOT A ERROR
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- System Details --
+Details:
+	Minecraft Version: 1.8.9
+	Operating System: Linux (amd64) version 6.11.5-zen1-1-zen
+	Java Version: 1.8.0_432, Arch Linux
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode), Arch Linux
+	Memory: 447166328 bytes (426 MB) / 902823936 bytes (861 MB) up to 3719299072 bytes (3547 MB)
+	JVM Flags: 0 total; 
+	IntCache: cache: 0, tcache: 0, allocated: 0, tallocated: 0
+	FML: 
+	Loaded coremods (and transformers): 
+DevAuthLoadingPlugin (DevAuth-forge-legacy-1.2.0.jar)
+  me.djtheredstoner.devauth.forge.legacy.ClassTransformer
+	GL info: ' Vendor: 'NVIDIA Corporation' Version: '4.6.0 NVIDIA 560.35.03' Renderer: 'NVIDIA GeForce RTX 4060/PCIe/SSE2'
+[21:58:21] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:21] [main/INFO] (FML) MinecraftForge v11.15.1.2318 Initialized
+[21:58:21] [main/INFO] (FML) Replaced 229 ore recipies
+[21:58:22] [Thread-5/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:22] [Thread-5/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:22] [main/INFO] (FML) Found 0 mods from the command line. Injecting into mod discoverer
+[21:58:22] [main/INFO] (FML) Searching /home/marius/Downloads/MightyMinerv2/run/mods for mods
+[21:58:22] [main/WARN] (mightyminerv2) Mod mightyminerv2 is missing the required element 'version' and a version.properties file could not be found. Falling back to metadata version 2.6.2
+[21:58:22] [main/ERROR] (FML) Unable to read a class file correctly
+java.lang.IllegalArgumentException: null
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) [ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+[21:58:22] [main/ERROR] (FML) There was a problem reading the entry META-INF/versions/9/module-info.class in the jar /home/marius/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.9.0/e000bd084353d84c9e888f6fb341dc1f5b79d948/kotlin-stdlib-jdk8-1.9.0.jar - probably a corrupt zip
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:22] [main/WARN] (FML) Zip file kotlin-stdlib-jdk8-1.9.0.jar failed to read properly, it will be ignored
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:23] [main/ERROR] (FML) Unable to read a class file correctly
+java.lang.IllegalArgumentException: null
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) [ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+[21:58:23] [main/ERROR] (FML) There was a problem reading the entry META-INF/versions/9/module-info.class in the jar /home/marius/.gradle/caches/modules-2/files-2.1/org.java-websocket/Java-WebSocket/1.5.4/58242a8c9a30ecf23548761a7d6c08735c0eaec3/Java-WebSocket-1.5.4.jar - probably a corrupt zip
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:23] [main/WARN] (FML) Zip file Java-WebSocket-1.5.4.jar failed to read properly, it will be ignored
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:24] [main/ERROR] (FML) Unable to read a class file correctly
+java.lang.IllegalArgumentException: null
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) [ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+[21:58:24] [main/ERROR] (FML) There was a problem reading the entry META-INF/versions/9/module-info.class in the jar /home/marius/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.9.0/f320478990d05e0cfaadd74f9619fd6027adbf37/kotlin-stdlib-jdk7-1.9.0.jar - probably a corrupt zip
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:24] [main/WARN] (FML) Zip file kotlin-stdlib-jdk7-1.9.0.jar failed to read properly, it will be ignored
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:24] [main/ERROR] (FML) Unable to read a class file correctly
+java.lang.IllegalArgumentException: null
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) [ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+[21:58:24] [main/ERROR] (FML) There was a problem reading the entry META-INF/versions/9/module-info.class in the jar /home/marius/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.9.0/8ee15ef0c67dc83d874f412d84378d7f0eb50b63/kotlin-stdlib-1.9.0.jar - probably a corrupt zip
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:24] [main/WARN] (FML) Zip file kotlin-stdlib-1.9.0.jar failed to read properly, it will be ignored
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:24] [main/ERROR] (FML) Unable to read a class file correctly
+java.lang.IllegalArgumentException: null
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) [ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+[21:58:24] [main/ERROR] (FML) There was a problem reading the entry META-INF/versions/9/module-info.class in the jar /home/marius/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.6/88c40d8b4f33326f19a7d3c0aaf2c7e8721d4953/slf4j-api-2.0.6.jar - probably a corrupt zip
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:24] [main/WARN] (FML) Zip file slf4j-api-2.0.6.jar failed to read properly, it will be ignored
+net.minecraftforge.fml.common.LoaderException: java.lang.IllegalArgumentException
+
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:58) ~[ASMModParser.class:?]
+	at net.minecraftforge.fml.common.discovery.JarDiscoverer.discover(JarDiscoverer.java:69) [JarDiscoverer.class:?]
+	at net.minecraftforge.fml.common.discovery.ContainerType.findMods(ContainerType.java:42) [ContainerType.class:?]
+	at net.minecraftforge.fml.common.discovery.ModCandidate.explore(ModCandidate.java:71) [ModCandidate.class:?]
+	at net.minecraftforge.fml.common.discovery.ModDiscoverer.identifyMods(ModDiscoverer.java:134) [ModDiscoverer.class:?]
+	at net.minecraftforge.fml.common.Loader.identifyMods(Loader.java:363) [Loader.class:?]
+	at net.minecraftforge.fml.common.Loader.loadMods(Loader.java:488) [Loader.class:?]
+	at net.minecraftforge.fml.client.FMLClientHandler.beginMinecraftLoading(FMLClientHandler.java:208) [FMLClientHandler.class:?]
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:417) [Minecraft.class:?]
+	at net.minecraft.client.Minecraft.run(Minecraft.java:329) [Minecraft.class:?]
+	at net.minecraft.client.main.Main.main(Main.java:124) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_432]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_432]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_432]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_432]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
+Caused by: java.lang.IllegalArgumentException
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:170) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:153) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at org.objectweb.asm.ClassReader.<init>(ClassReader.java:424) ~[asm-debug-all-5.0.3.jar:5.0.3]
+	at net.minecraftforge.fml.common.discovery.asm.ASMModParser.<init>(ASMModParser.java:52) ~[ASMModParser.class:?]
+	... 17 more
+[21:58:25] [main/INFO] (FML) Forge Mod Loader has identified 5 mods to load
+[21:58:26] [main/INFO] (FML) Attempting connection with missing mods [mcp, FML, Forge, mightyminerv2, oneconfig] at CLIENT
+[21:58:26] [main/INFO] (FML) Attempting connection with missing mods [mcp, FML, Forge, mightyminerv2, oneconfig] at SERVER
+[21:58:27] [main/INFO] (Minecraft) Reloading ResourceManager: Default, FMLFileResourcePack:Forge Mod Loader, FMLFileResourcePack:Minecraft Forge, FMLFileResourcePack:MightyMiner V2, FMLFileResourcePack:OneConfig
+[21:58:27] [main/INFO] (FML) Processing ObjectHolder annotations
+[21:58:27] [main/INFO] (FML) Found 384 ObjectHolder annotations
+[21:58:27] [main/INFO] (FML) Identifying ItemStackHolder annotations
+[21:58:27] [main/INFO] (FML) Found 0 ItemStackHolder annotations
+[21:58:27] [main/INFO] (FML) Configured a dormant chunk cache size of 0
+[21:58:27] [Forge Version Check/INFO] (ForgeVersionCheck) [Forge] Starting version check at http://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json
+[21:58:27] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.MightyMiner:loadGraph:113]: Loaded graph for: Commission Macro
+[21:58:27] [main/INFO] (FML) Applying holder lookups
+[21:58:27] [main/INFO] (FML) Holder lookups applied
+[21:58:27] [main/INFO] (FML) Injecting itemstacks
+[21:58:27] [main/INFO] (FML) Itemstack injection complete
+[21:58:27] [main/INFO] (STDOUT) [tv.twitch.StandardCoreAPI:<init>:16]: If on Windows, make sure to provide all of the necessary dll's as specified in the twitchsdk README. Also, make sure to set the PATH environment variable to point to the directory containing the dll's.
+[21:58:27] [main/ERROR] (Minecraft) Couldn't initialize twitch stream
+[21:58:27] [main/INFO] (mixin) Mixing client.MixinSoundManager from mixins.mightyminerv2.json into net.minecraft.client.audio.SoundManager
+[21:58:27] [Sound Library Loader/INFO] (Minecraft) Starting up SoundSystem...
+[21:58:27] [Thread-6/INFO] (Minecraft) Initializing LWJGL OpenAL
+[21:58:27] [Thread-6/INFO] (Minecraft) (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl, but that path is defined and not secure
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.openal, but that path is defined and not secure
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.openal, but that path is defined and not secure
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.openal, but that path is defined and not secure
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.openal, but that path is defined and not secure
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.openal, but that path is defined and not secure
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.openal, but that path is defined and not secure
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.openal, but that path is defined and not secure
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.openal, but that path is defined and not secure
+[21:58:27] [Thread-6/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.openal, but that path is defined and not secure
+[21:58:27] [Thread-6/INFO] (Minecraft) OpenAL initialized.
+[21:58:28] [Sound Library Loader/INFO] (Minecraft) Sound engine started
+[21:58:30] [main/INFO] (FML) Max texture size: 16384
+[21:58:30] [main/INFO] (Minecraft) Created: 16x16 textures-atlas
+[21:58:30] [main/INFO] (mixin) Mixing render.MixinModelBiped from mixins.mightyminerv2.json into net.minecraft.client.model.ModelBiped
+[21:58:30] [main/INFO] (mixin) Mixing EntityRendererMixin from mixins.oneconfig.json into net.minecraft.client.renderer.EntityRenderer
+[21:58:31] [main/INFO] (mixin) Mixing network.MixinNetworkManager from mixins.mightyminerv2.json into net.minecraft.network.NetworkManager
+[21:58:31] [main/INFO] (mixin) Mixing NetworkManagerMixin from mixins.oneconfig.json into net.minecraft.network.NetworkManager
+[21:58:31] [main/INFO] (FML) Injecting itemstacks
+[21:58:31] [main/INFO] (FML) Itemstack injection complete
+[21:58:31] [main/INFO] (FML) Forge Mod Loader has successfully loaded 5 mods
+[21:58:31] [main/INFO] (Minecraft) Reloading ResourceManager: Default, FMLFileResourcePack:Forge Mod Loader, FMLFileResourcePack:Minecraft Forge, FMLFileResourcePack:MightyMiner V2, FMLFileResourcePack:OneConfig
+[21:58:31] [main/INFO] (Minecraft) SoundSystem shutting down...
+[21:58:31] [main/WARN] (Minecraft) Author: Paul Lamb, www.paulscode.com
+[21:58:31] [Sound Library Loader/INFO] (Minecraft) Starting up SoundSystem...
+[21:58:32] [Thread-8/INFO] (Minecraft) Initializing LWJGL OpenAL
+[21:58:32] [Thread-8/INFO] (Minecraft) (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[21:58:32] [Thread-8/INFO] (Minecraft) OpenAL initialized.
+[21:58:32] [Sound Library Loader/INFO] (Minecraft) Sound engine started
+[21:58:33] [main/INFO] (FML) Max texture size: 16384
+[21:58:34] [main/INFO] (Minecraft) Created: 512x512 textures-atlas
+[21:58:34] [main/INFO] (mixin) Mixing ShaderGroupAccessor from mixins.oneconfig.json into net.minecraft.client.shader.ShaderGroup
+[21:58:34] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:35] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:35] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:37] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure
+[21:58:40] [Server thread/INFO] (Minecraft) Starting integrated minecraft server version 1.8.9
+[21:58:40] [Server thread/INFO] (Minecraft) Generating keypair
+[21:58:40] [Server thread/INFO] (FML) Injecting existing block and item data into this server instance
+[21:58:40] [Server thread/INFO] (FML) Applying holder lookups
+[21:58:40] [Server thread/INFO] (FML) Holder lookups applied
+[21:58:40] [Server thread/INFO] (mixin) Mixing client.MixinScoreboard from mixins.mightyminerv2.json into net.minecraft.scoreboard.Scoreboard
+[21:58:41] [Server thread/INFO] (mixin) Mixing client.MixinChunk from mixins.mightyminerv2.json into net.minecraft.world.chunk.Chunk
+[21:58:41] [Server thread/INFO] (FML) Loading dimension 0 (New World) (net.minecraft.server.integrated.IntegratedServer@2dc99b38)
+[21:58:41] [Server thread/INFO] (FML) Loading dimension 1 (New World) (net.minecraft.server.integrated.IntegratedServer@2dc99b38)
+[21:58:41] [Server thread/INFO] (FML) Loading dimension -1 (New World) (net.minecraft.server.integrated.IntegratedServer@2dc99b38)
+[21:58:41] [Server thread/INFO] (Minecraft) Preparing start region for level 0
+[21:58:42] [Server thread/INFO] (Minecraft) Changing view distance to 12, from 10
+[21:58:42] [Netty Local Client IO #0/INFO] (mixin) Mixing FML.MixinFMLHandshakeMessage from mixins.mightyminerv2.json into net.minecraftforge.fml.common.network.handshake.FMLHandshakeMessage$ModList
+[21:58:42] [Server thread/INFO] (mixin) Mixing gui.MixinInventoryPlayer from mixins.mightyminerv2.json into net.minecraft.entity.player.InventoryPlayer
+[21:58:42] [Netty Local Client IO #0/INFO] (mixin) Mixing network.MixinNetHandlerPlayClient from mixins.mightyminerv2.json into net.minecraft.client.network.NetHandlerPlayClient
+[21:58:43] [Netty Local Client IO #0/INFO] (FML) Server protocol version 2
+[21:58:43] [Netty Server IO #1/INFO] (FML) Client protocol version 2
+[21:58:43] [Netty Server IO #1/INFO] (FML) Client attempting to join with 5 mods : FML@8.0.99.99,Forge@11.15.1.2318,oneconfig@0.2.2-alpha216,mcp@9.19,mightyminerv2@2.6.2
+[21:58:43] [Netty Local Client IO #0/INFO] (FML) [Netty Local Client IO #0] Client side modded connection established
+[21:58:43] [Server thread/INFO] (FML) [Server thread] Server side modded connection established
+[21:58:43] [Server thread/INFO] (Minecraft) Player818[local:E:f438f7fa] logged in with entity id 764 at (300.8318032390782, 3.0, 237.30000001192093)
+[21:58:43] [Server thread/INFO] (Minecraft) Player818 joined the game
+[21:58:43] [main/INFO] (mixin) Mixing client.MixinChunkProviderClient from mixins.mightyminerv2.json into net.minecraft.client.multiplayer.ChunkProviderClient
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] Toggling
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] CurrMacro == null
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] Macro::enable
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Ungrab Mouse] MouseUngrab::start
+[21:58:49] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.input, but that path is defined and not secure
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Ungrab Mouse] Mouse ungrabbed successfully.
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] AbstractMacro::enable
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] Enabling Mithril Macro
+[21:58:49] [main/INFO] (Minecraft) [CHAT] §c[§9§bMighty Miner§c] §8» §e[MacroHandler] Mithril Macro Enabled
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] Current state: INITIALIZATION
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] Handling initialization state
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] Setting blocks to mine based on ore type: 1
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] Blocks to mine: [EMERALD]
+[21:58:49] [main/INFO] (Minecraft) [CHAT] §l§4§kZ§r§l§4[Mighty Miner]§kH§r §8» §c[Mithril Macro] Cannot hold mining tool
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] Disabling Mithril Macro
+[21:58:49] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] Current state: NONE
+[21:58:50] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] Toggling
+[21:58:50] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] CurrMacro != null
+[21:58:50] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] Macro::disable
+[21:58:50] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] AbstractMacro::disable
+[21:58:50] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Mithril Macro] Disabling Mithril Macro
+[21:58:50] [main/INFO] (Minecraft) [CHAT] §c[§9§bMighty Miner§c] §8» §e[MacroHandler] Mithril Macro Disabled
+[21:58:59] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] Toggling
+[21:58:59] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] CurrMacro == null
+[21:58:59] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] Macro::enable
+[21:58:59] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Ungrab Mouse] MouseUngrab::start
+[21:58:59] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Ungrab Mouse] Mouse is already ungrabbed or not grabbed.
+[21:58:59] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Commission Macro] AbstractMacro::enable
+[21:58:59] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Commission Macro] CommMacro::onEnable
+[21:58:59] [main/INFO] (Minecraft) [CHAT] §c[§9§bMighty Miner§c] §8» §e[MacroHandler] Commission Macro Enabled
+[21:58:59] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [AutoWarp] Enabled
+[21:58:59] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [AutoWarp] Player is not on skyblock.
+[21:58:59] [main/INFO] (Minecraft) [CHAT] Unknown command. Try /help for a list of commands
+[21:59:04] [main/INFO] (Minecraft) [CHAT] Unknown command. Try /help for a list of commands
+[21:59:07] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] Toggling
+[21:59:07] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] CurrMacro != null
+[21:59:07] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [MacroHandler] Macro::disable
+[21:59:07] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [AutoWarp] Disabled
+[21:59:07] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Commission Macro] AbstractMacro::disable
+[21:59:07] [main/INFO] (STDOUT) [com.jelly.mightyminerv2.util.Logger:sendLog:50]: [Mighty Miner] [Commission Macro] CommMacro::onDisable
+[21:59:07] [main/INFO] (Minecraft) [CHAT] §c[§9§bMighty Miner§c] §8» §e[MacroHandler] Commission Macro Disabled
+[21:59:12] [Server thread/INFO] (Minecraft) Saving and pausing game...
+[21:59:12] [Server thread/INFO] (Minecraft) Saving chunks for level 'New World'/Overworld
+[21:59:12] [Server thread/INFO] (Minecraft) Saving chunks for level 'New World'/Nether
+[21:59:12] [Server thread/INFO] (Minecraft) Saving chunks for level 'New World'/The End
+[21:59:13] [Server thread/INFO] (Minecraft) Stopping server
+[21:59:13] [Server thread/INFO] (Minecraft) Saving players
+[21:59:13] [Server thread/INFO] (Minecraft) Saving worlds
+[21:59:13] [Server thread/INFO] (Minecraft) Saving chunks for level 'New World'/Overworld
+[21:59:13] [Server thread/INFO] (Minecraft) Saving chunks for level 'New World'/Nether
+[21:59:13] [Server thread/INFO] (Minecraft) Saving chunks for level 'New World'/The End
+[21:59:13] [Server thread/INFO] (FML) Unloading dimension 0
+[21:59:13] [Server thread/INFO] (FML) Unloading dimension -1
+[21:59:13] [Server thread/INFO] (FML) Unloading dimension 1
+[21:59:13] [Server thread/INFO] (FML) Applying holder lookups
+[21:59:13] [Server thread/INFO] (FML) Holder lookups applied
+[21:59:14] [main/INFO] (Minecraft) Stopping!
+[21:59:14] [main/INFO] (Minecraft) SoundSystem shutting down...
+[21:59:14] [main/WARN] (Minecraft) Author: Paul Lamb, www.paulscode.com
+[21:59:14] [main/ERROR] (LaunchWrapper) The jar file /home/marius/.gradle/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl/2.9.4-nightly-20150209/697517568c68e78ae0b4544145af031c81082dfe/lwjgl-2.9.4-nightly-20150209.jar has a security seal for path org.lwjgl.opengl, but that path is defined and not secure

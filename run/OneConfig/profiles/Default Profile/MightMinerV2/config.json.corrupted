@@ -1,0 +1,211 @@
+{
+  "macroType": 0,
+  "oreType": 1,
+  "toggleMacro": {
+    "keyBinds": [
+      52
+    ]
+  },
+  "ungrabMouse": true,
+  "mithrilStrafe": false,
+  "mithrilMinerSneakWhileMining": false,
+  "mithrilMinerTitaniumHighPriority": false,
+  "mithrilMinerPrecisionMiner": false,
+  "mithrilMinerRotationTime": 300,
+  "mithrilMinerRotationTimeRandomizer": 300,
+  "mithrilMinerTickGlideOffset": 4,
+  "commMiningTool": "Pickonimbus 2000",
+  "commSlayerWeapon": "Sword",
+  "commMobKillerSprint": true,
+  "commMobKillerInterpolate": true,
+  "commDistCost": 50,
+  "commRotCost": 25,
+  "commDrillRefuel": false,
+  "commMachineFuel": 6,
+  "commFuelRetrievalMethod": true,
+  "commMechaGuiAccessMethod": true,
+  "failsafeToggleDelay": 3000,
+  "routeBuilder": {
+    "keyBinds": [
+      26
+    ]
+  },
+  "routeBuilderAotvAddKeybind": {
+    "keyBinds": [
+      25
+    ]
+  },
+  "routeBuilderEtherwarpAddKeybind": {
+    "keyBinds": [
+      23
+    ]
+  },
+  "routeBuilderRemoveKeybind": {
+    "keyBinds": [
+      24
+    ]
+  },
+  "routeBuilderNodeColor": {
+    "hsba": [
+      180,
+      100,
+      100,
+      100
+    ],
+    "dataBit": -1
+  },
+  "routeBuilderTracerColor": {
+    "hsba": [
+      180,
+      100,
+      100,
+      100
+    ],
+    "dataBit": -1
+  },
+  "routeBuilderUnidi": {
+    "keyBinds": [
+      71
+    ]
+  },
+  "routeBuilderBidi": {
+    "keyBinds": [
+      72
+    ]
+  },
+  "routeBuilderSelect": {
+    "keyBinds": [
+      75
+    ]
+  },
+  "routeBuilderMove": {
+    "keyBinds": [
+      76
+    ]
+  },
+  "routeBuilderDelete": {
+    "keyBinds": [
+      77
+    ]
+  },
+  "delaysGuiDelay": 450,
+  "delaysGuiDelayRandomizer": 250,
+  "delayAutoAotvLookDelay": 250,
+  "delayAutoAotvEtherwarpLookDelay": 500,
+  "delayAutoAotvServerRotation": 500,
+  "devMithRot": 0.4,
+  "devMithDist": 1.0,
+  "devMithHard": 1.0,
+  "devMKillDist": 100,
+  "devMKillRot": 5,
+  "devMKillerMob": "Goblin",
+  "debugMode": true,
+  "debugHUD": {
+    "count": 0,
+    "color": {
+      "hsba": [
+        0,
+        0,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "textType": 0,
+    "background": true,
+    "rounded": true,
+    "border": false,
+    "bgColor": {
+      "hsba": [
+        0,
+        0,
+        0,
+        150
+      ],
+      "dataBit": -1
+    },
+    "borderColor": {
+      "hsba": [
+        0,
+        0,
+        0,
+        127
+      ],
+      "dataBit": -1
+    },
+    "cornerRadius": 1.0,
+    "borderSize": 2.0,
+    "defaultPaddingX": 5.0,
+    "paddingX": 5.0,
+    "defaultPaddingY": 5.0,
+    "paddingY": 5.0,
+    "enabled": false,
+    "locked": false,
+    "ignoreCaching": false,
+    "position": {
+      "anchor": "0",
+      "x": 1.0,
+      "y": 10.0
+    },
+    "scale": 0.5,
+    "positionAlignment": 0,
+    "showInChat": true,
+    "showInDebug": false,
+    "showInGuis": true
+  },
+  "commissionHUD": {
+    "color": {
+      "hsba": [
+        0,
+        0,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "textType": 0,
+    "background": true,
+    "rounded": true,
+    "border": false,
+    "bgColor": {
+      "hsba": [
+        0,
+        0,
+        0,
+        150
+      ],
+      "dataBit": -1
+    },
+    "borderColor": {
+      "hsba": [
+        0,
+        0,
+        0,
+        127
+      ],
+      "dataBit": -1
+    },
+    "cornerRadius": 1.0,
+    "borderSize": 2.0,
+    "defaultPaddingX": 5.0,
+    "paddingX": 5.0,
+    "defaultPaddingY": 5.0,
+    "paddingY": 5.0,
+    "enabled": true,
+    "locked": false,
+    "ignoreCaching": false,
+    "position": {
+      "anchor": "0",
+      "x": 1.0,
+      "y": 10.0
+    },
+    "scale": 0.5,
+    "positionAlignment": 0,
+    "showInChat": true,
+    "showInDebug": false,
+    "showInGuis": true
+  },
+  "miscFullBlock": false,
+  "enabled": true,
+  "canToggle": true
+}

@@ -50,7 +50,7 @@ public class MouseUngrab extends AbstractFeature {
   }
 
   public void regrabMouse() {
-    if (!mouseUngrabbed) {
+    if (!mouseUngrabbed || Mouse.isGrabbed()) {
       return;
     }
 

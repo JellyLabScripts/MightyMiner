@@ -4,6 +4,7 @@ import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
+import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
 import com.jelly.mightyminerv2.macro.commissionmacro.CommissionMacro;
 import com.jelly.mightyminerv2.macro.mithrilmacro.MithrilMacro;
 import com.jelly.mightyminerv2.util.Logger;
@@ -59,6 +60,7 @@ public class MacroManager {
     }
     log("Macro::disable");
     FeatureManager.getInstance().disableAll();
+    MouseUngrab.getInstance().regrabMouse();
     this.currentMacro.disable();
     send(this.currentMacro.getName() + " Disabled");
     this.currentMacro = null;

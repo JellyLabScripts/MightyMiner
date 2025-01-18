@@ -15,8 +15,12 @@ import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.hud.DebugHUD;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.macro.MacroManager;
+import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.AudioManager;
+import com.jelly.mightyminerv2.macro.commissionmacro.helper.Commission;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
 import org.lwjgl.input.Keyboard;
 
 import java.io.File;
@@ -42,6 +46,8 @@ public class MightyMinerConfig extends Config {
   private transient static final String DISCORD_INTEGRATION = "Discord Integration";
   private transient static final String EXPERIMENTAL = "Experimental";
   private transient static final File WAYPOINTS_FILE = new File(mc.mcDataDir, "mm_waypoints.json");
+
+
 
   // <editor-fold desc="General">
   @Dropdown(
@@ -196,17 +202,25 @@ public class MightyMinerConfig extends Config {
   //</editor-fold>
 
   //<editor-fold desc="Commission Macro">
-  @Text(
-      name = "Mining Tool", description = "The tool to use during comm macro",
-      category = COMMISSION, placeholder = "Mining Tool Name"
-  )
-  public static String commMiningTool = "Pickonimbus 2000";
+  // Button to set the mining tool to the name of the item the player is holding
+  @Button(name = "Set Mining Tool", text = "Set mining tool", description = "Set the Mining Tool to the currently held item", category = "Commission")
+  public static void setCommMiningTool() {
+    ItemStack currentItem = mc.thePlayer.inventory.mainInventory[mc.thePlayer.inventory.currentItem];
+    if (currentItem != null) {
+      Commission.commMiningTool = currentItem.getDisplayName();  // Set the mining tool name to the held item
+    }
+    Logger.sendLog("Mining Tool set to: " + Commission.commMiningTool);  // Log the result
+  };
 
-  @Text(
-      name = "Slayer Weapon", description = "Weapon to use for slayers",
-      category = COMMISSION, placeholder = "Slayer Weapon Name"
-  )
-  public static String commSlayerWeapon = "Sword";
+  // Button to set the slayer weapon to the name of the item the player is holding
+  @Button(name = "Set Slayer Weapon", text = "Set slayer weapon", description = "Set the Slayer Weapon to the currently held item", category = "Commission")
+  public static void setSlayerWeapon() {
+    ItemStack currentItem = mc.thePlayer.inventory.mainInventory[mc.thePlayer.inventory.currentItem];
+    if (currentItem != null) {
+      Commission.commSlayerWeapon = currentItem.getDisplayName();  // Set the slayer weapon name to the held item
+    }
+    Logger.sendLog("Slayer Weapon set to: " + Commission.commSlayerWeapon);  // Log the result
+  };
 
   @Dropdown(
       name = "Claim Method", category = COMMISSION,

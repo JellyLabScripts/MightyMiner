@@ -16,6 +16,8 @@ import com.jelly.mightyminerv2.util.helper.location.SubLocation;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.util.Vec3;
 
 public enum Commission {
@@ -42,6 +44,12 @@ public enum Commission {
 
   private static final Map<String, Commission> COMMISSIONS;
   private static final Map<SubLocation, RouteWaypoint[]> VEINS;
+
+
+  @Getter @Setter
+  public static String commMiningTool = "Pickonimbus 2000";
+  @Getter @Setter
+  public static String commSlayerWeapon = "Pickonimbus 2000";
 
   static {
     Map<String, Commission> commissionsMap = new HashMap<>();

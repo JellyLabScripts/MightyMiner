@@ -50,7 +50,7 @@ public class CommissionMacro extends AbstractMacro {
   @Override
   public void onEnable() {
     this.changeMainState(MainState.MACRO);
-    String miningTool = MightyMinerConfig.commMiningTool;
+    String miningTool = Commission.commMiningTool;
     if((miningTool.toLowerCase().contains("drill") || InventoryUtil.getFullName(miningTool).contains("Drill"))){
       int drillFuel =  InventoryUtil.getDrillRemainingFuel(miningTool);
       note("Using Drill. Drill Fuel: " + drillFuel);
@@ -101,8 +101,8 @@ public class CommissionMacro extends AbstractMacro {
   public List<String> getNecessaryItems() {
     if (this.necessaryItems.isEmpty()) {
       List<String> items = new ArrayList<>();
-      items.add(MightyMinerConfig.commMiningTool);
-      items.add(MightyMinerConfig.commSlayerWeapon);
+      items.add(Commission.commMiningTool);
+      items.add(Commission.commSlayerWeapon);
       if (MightyMinerConfig.commClaimMethod == 2 || (MightyMinerConfig.commDrillRefuel && !MightyMinerConfig.commMechaGuiAccessMethod)) {
         items.add("Abiphone");
       }
@@ -259,7 +259,7 @@ public class CommissionMacro extends AbstractMacro {
       case STARTING:
         this.changeMacroState(MacroState.CHECKING_COMMISSION);
         if (this.miningSpeed == 0 && this.miningSpeedBoost == 0) {
-          if (!InventoryUtil.holdItem(MightyMinerConfig.commMiningTool)) {
+          if (!InventoryUtil.holdItem(Commission.commMiningTool)) {
             error("Something went wrong. Cannot hold mining tool");
             this.changeMainState(MainState.NONE);
             return;
@@ -393,7 +393,7 @@ public class CommissionMacro extends AbstractMacro {
             miningSpeedBoost,
             this.curr.stream().anyMatch(it -> it.getName().contains("Titanium")) || MightyMinerConfig.commMineTitanium ? titaniumPriority
                 : mithrilPriority,
-            MightyMinerConfig.commMiningTool
+            Commission.commMiningTool
         );
         this.changeMacroState(MacroState.MINING_VERIFY);
         break;
@@ -430,7 +430,7 @@ public class CommissionMacro extends AbstractMacro {
           return;
         }
         AutoMobKiller.getInstance()
-            .start(mobName, this.curr.get(0).getName().startsWith("Glacite") ? MightyMinerConfig.commMiningTool : MightyMinerConfig.commSlayerWeapon);
+            .start(mobName, this.curr.get(0).getName().startsWith("Glacite") ? Commission.commMiningTool : Commission.commSlayerWeapon);
         this.changeMacroState(MacroState.MOBKILLER_VERIFY);
         break;
       case MOBKILLER_VERIFY:
@@ -506,7 +506,7 @@ public class CommissionMacro extends AbstractMacro {
         break;
       case REFUEL:
         AutoDrillRefuel.getInstance()
-            .start(MightyMinerConfig.commMiningTool, MightyMinerConfig.commMachineFuel, MightyMinerConfig.commFuelRetrievalMethod,
+            .start(Commission.commMiningTool, MightyMinerConfig.commMachineFuel, MightyMinerConfig.commFuelRetrievalMethod,
                 MightyMinerConfig.commMechaGuiAccessMethod);
         this.changeMacroState(MacroState.REFUEL_VERIFY);
         break;

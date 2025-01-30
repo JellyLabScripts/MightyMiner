@@ -25,6 +25,7 @@ import java.util.Set;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -97,7 +98,7 @@ public class MobTracker extends AbstractFeature {
       }
       l.add(entity.getPositionVector());
       List<Entity> ents = mc.theWorld.getEntitiesInAABBexcluding(entity, entity.getEntityBoundingBox().expand(0.0, 3.0, 0.0),
-          (it) -> it instanceof EntityLivingBase);
+              (it) -> it instanceof EntityLivingBase && !(it instanceof EntityPlayer)); // Exclude player
       if (ents.isEmpty()) {
         return;
       }
@@ -105,6 +106,7 @@ public class MobTracker extends AbstractFeature {
     } else if (updateType == 1) {
       mobs.values().forEach(it -> it.remove(entity));
     }
+
 //    long hash = pack((int) Math.round(entity.posX) / 3, (int) Math.round(entity.posZ) / 3);
 //    String name = "";
 //    int entityId = -1;

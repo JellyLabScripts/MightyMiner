@@ -32,3 +32,9 @@ Their combined expertise and passion for Hypixel Skyblock drive the continuous i
 
 ## Support
 For support, bug reports, or feature requests, feel free to open an issue in the repository or join our [community Discord channel](https://discord.gg/6mSHC2Xd9y).
+
+## License
+MightyMinerV2 © 2024 by Nima0908 is licensed under CC BY-NC-ND 4.0
+
+You may share this mod, but you may not modify or use it commercially.
+Full license: https://creativecommons.org/licenses/by-nc-nd/4.0/

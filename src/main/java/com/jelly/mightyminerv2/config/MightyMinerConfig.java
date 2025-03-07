@@ -47,8 +47,6 @@ public class MightyMinerConfig extends Config {
   private transient static final String EXPERIMENTAL = "Experimental";
   private transient static final File WAYPOINTS_FILE = new File(mc.mcDataDir, "mm_waypoints.json");
 
-
-
   // <editor-fold desc="General">
   @Dropdown(
       name = "Macro Type",
@@ -86,12 +84,19 @@ public class MightyMinerConfig extends Config {
   //</editor-fold>
 
   //<editor-fold desc="Mithril">
+  public static String mithrilMiningTool = "Pickonimbus 2000"; // Default Tool
 
-  @Text(
-          name = "Mining Tool", description = "The tool to use during mithrill macro",
-          category = MITHRIL, placeholder = "Mining Tool Name"
-  )
-  public static String mithrilMiningTool = "Pickonimbus 2000";
+  // Button to set the mithril mining tool to the name of the item the player is holding
+  @Button(name = "Set Mining Tool", text = "Set mining tool", description = "Set the Mining Tool to the currently held item for Mithril mining", category = MITHRIL)
+  public static void setMithrilMiningTool() {
+    ItemStack currentItem = mc.thePlayer.inventory.mainInventory[mc.thePlayer.inventory.currentItem];
+    if (currentItem != null) {
+      mithrilMiningTool = currentItem.getDisplayName();  // Set the mining tool name to the held item
+      Logger.sendLog("Mining tool set to: " + mithrilMiningTool);  // Log the result
+    } else {
+      Logger.sendLog("Select the hotbar slot containing your item."); // Log for empty hotbar slot
+    }
+  }
 
   @Switch(
       name = "Strafe While Mining", description = "Walk Around The Vein While Mining",

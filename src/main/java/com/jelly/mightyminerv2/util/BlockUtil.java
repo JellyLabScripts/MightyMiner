@@ -127,7 +127,7 @@ public class BlockUtil {
         final float MAX_DISTANCE = 3.5f;  // Maximum reach for player is 4, 0.5 for buffer
 
         // Pre-calculations
-        final float miningCoefficient = 1500.0f / miningSpeed;
+        final float miningCoefficient = 500.0f / miningSpeed;
         final float angleCoefficient = MightyMinerConfig.devMithRot;
 
         // Calculate bounds for the block
@@ -185,8 +185,6 @@ public class BlockUtil {
                     // Calculate mining cost components
                     final double hardness = getBlockStrength(stateID);
                     final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).lengthSqrt();
-
-
 
                     // Calculate final cost and add to heap
                     final float miningCost = (float) ((hardness * miningCoefficient) + (angleChange * angleCoefficient)) / blockPriority;

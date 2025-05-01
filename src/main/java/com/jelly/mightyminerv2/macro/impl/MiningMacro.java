@@ -242,7 +242,7 @@ public class MiningMacro extends AbstractMacro {
     }
 
     private int[] determinePriority() {
-        if (MightyMinerConfig.oreType == 7) {
+        if (MightyMinerConfig.oreType == 0) {
             return new int[]{
                     MightyMinerConfig.mineGrayMithril ? 1 : 0,
                     MightyMinerConfig.mineGreenMithril ? 1 : 0,

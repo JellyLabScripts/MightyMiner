@@ -6,7 +6,10 @@ MightyMinerV2 is a cutting-edge mining macro designed specifically for Hypixel S
 
 ### Current Features:
 - **Commission Macro**: Automatically completes mining commissions, helping you earn rewards faster and with minimal effort.
-- **Mithril/Pure Ore Macro**: Optimized for efficient Mithril mining, ensuring you collect the maximum amount of resources.
+- **Mining Macro**: Optimized for efficient mithril / pure ore mining, ensuring you collect the maximum amount of resources.
+- **Glacial Macro**: Experimental!
+- **Route Mining Macro**: Experimental!
+- **Powder Macro**: Re-release soon!
 
 ### Upcoming Features:
 Our dedicated development team is actively working on integrating more features, including but not limited to:
@@ -21,7 +24,8 @@ MightyMinerV2 is brought to you by a talented team of developers:
 - **Osama**
 - **Nima0908**
 - **Mr. Shadow**
-- **Nathan**
+- **Nathan** <p>
+- **JellyLab** (returned!!!)
 
 Their combined expertise and passion for Hypixel Skyblock drive the continuous improvement and innovation of MightyMinerV2.
 

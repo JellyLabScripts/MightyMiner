@@ -1,6 +1,5 @@
 package com.jelly.mightyminerv2.event;
 
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
 public class MotionUpdateEvent extends Event {

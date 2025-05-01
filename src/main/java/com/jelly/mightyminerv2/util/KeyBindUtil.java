@@ -32,6 +32,12 @@ public class KeyBindUtil {
             mc.gameSettings.keyBindRight,
             mc.gameSettings.keyBindJump,
     };
+    public static final Map<KeyBinding, Integer> keyBindMap = ImmutableMap.of(
+            mc.gameSettings.keyBindForward, 0,
+            mc.gameSettings.keyBindLeft, 90,
+            mc.gameSettings.keyBindBack, 180,
+            mc.gameSettings.keyBindRight, -90
+    );
 
     public static void rightClick() {
         ((MinecraftAccessor) mc).rightClick();
@@ -51,11 +57,11 @@ public class KeyBindUtil {
         }
     }
 
-    public static int getRightClickDelayTimer(){
+    public static int getRightClickDelayTimer() {
         return ((MinecraftAccessor) mc).getRightClickDelayTimer();
     }
 
-    public static void resetRightClickDelayTimer(){
+    public static void resetRightClickDelayTimer() {
         ((MinecraftAccessor) mc).setRightClickDelayTimer(0);
     }
 
@@ -155,13 +161,6 @@ public class KeyBindUtil {
         }
         return keybinds;
     }
-
-    public static final Map<KeyBinding, Integer> keyBindMap = ImmutableMap.of(
-            mc.gameSettings.keyBindForward, 0,
-            mc.gameSettings.keyBindLeft, 90,
-            mc.gameSettings.keyBindBack, 180,
-            mc.gameSettings.keyBindRight, -90
-    );
 
     public static List<KeyBinding> getNeededKeyPresses(Vec3 orig, Vec3 dest) {
         List<KeyBinding> keys = new ArrayList<>();

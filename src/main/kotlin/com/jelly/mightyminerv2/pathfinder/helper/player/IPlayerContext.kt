@@ -7,9 +7,9 @@ import net.minecraft.util.BlockPos
 import net.minecraft.world.World
 
 interface IPlayerContext {
-  val mc: Minecraft
-  val player: EntityPlayerSP
-  val playerController: PlayerControllerMP
-  val world: World
-  val playerPosition: BlockPos
+    val mc: Minecraft
+    val player: EntityPlayerSP
+    val playerController: PlayerControllerMP
+    val world: World
+    val playerPosition: BlockPos
 }

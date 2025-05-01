@@ -1,9 +1,9 @@
 package com.jelly.mightyminerv2.util.helper.location;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import lombok.Getter;
 
 @Getter
 public enum SubLocation {
@@ -260,6 +260,9 @@ public enum SubLocation {
     WIZARD_TOWER_RIFT("Wizard Tower"),
     YOUR_ISLAND("Your Island"),
     WYLD_WOODS("Wyld Woods"),
+    DWARVEN_BASE_CAMP("Dwarven Base Camp"),
+    GLACITE_TUNNELS("Glacite Tunnels"),
+    GLACITE_MINESHAFT("Glacite Mineshafts"),
     //</editor-fold>
 
     KNOWHERE("Knowhere");
@@ -278,8 +281,7 @@ public enum SubLocation {
     }
 
     public static SubLocation fromName(String name) {
-        final SubLocation loc = nameToLocationMap.get(name);
-        if(loc == null) return SubLocation.KNOWHERE;
-        return loc;
+        return nameToLocationMap.get(name);
     }
+
 }

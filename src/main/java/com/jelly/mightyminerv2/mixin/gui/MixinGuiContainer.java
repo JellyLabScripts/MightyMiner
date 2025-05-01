@@ -11,10 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GuiContainer.class)
 public abstract class MixinGuiContainer {
 
-  @Inject(method = "handleMouseClick", at = @At("HEAD"), cancellable = true)
-  public void handleMouseClick(Slot slotIn, int slotId, int clickedButton, int clickType, CallbackInfo ci) {
-    if(MacroManager.getInstance().isRunning()){
-      ci.cancel();
+    @Inject(method = "handleMouseClick", at = @At("HEAD"), cancellable = true)
+    public void handleMouseClick(Slot slotIn, int slotId, int clickedButton, int clickType, CallbackInfo ci) {
+        if (MacroManager.getInstance().isRunning()) {
+            ci.cancel();
+        }
     }
-  }
 }

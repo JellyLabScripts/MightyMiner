@@ -75,9 +75,9 @@ public class RouteBuilderCommand {
     }
 
     @SubCommand
-    public void follow(int rotation){
+    public void follow(int rotation) {
         Route route = RouteHandler.getInstance().getSelectedRoute();
-        if(route.isEmpty()){
+        if (route.isEmpty()) {
             success("Route is empty.");
             return;
         }

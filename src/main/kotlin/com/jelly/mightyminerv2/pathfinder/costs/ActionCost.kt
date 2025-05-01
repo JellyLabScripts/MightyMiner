@@ -28,17 +28,17 @@ class ActionCosts(
 
     init {
         // to discourage jumping unless necessary
-        var vel = 0.42 + (JUMP_BOOST_LEVEL + 1) * 0.1;
-        var height = 0.0;
-        var time = 1.0;
+        var vel = 0.42 + (JUMP_BOOST_LEVEL + 1) * 0.1
+        var height = 0.0
+        var time = 1.0
         for (i in 1..20) {
-            height += vel;
-            vel = (vel - 0.08) * 0.98;
+            height += vel
+            vel = (vel - 0.08) * 0.98
             if (vel < 0)
                 break
-            time++;
+            time++
         }
-        JUMP_ONE_BLOCK_COST = time + fallDistanceToTicks(height - 1);
+        JUMP_ONE_BLOCK_COST = time + fallDistanceToTicks(height - 1)
     }
 
     private fun getWalkingFriction(landMovementFactor: Double): Double {

@@ -11,15 +11,15 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin({BlockStainedGlassPane.class})
 public abstract class MixinBlockStainedGlassPane extends BlockPane {
 
-  protected MixinBlockStainedGlassPane(Material materialIn, boolean canDrop) {
-    super(materialIn, canDrop);
-  }
-
-  public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
-    if (MightyMinerConfig.miscFullBlock) {
-      this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-    } else {
-      super.setBlockBoundsBasedOnState(worldIn, pos);
+    protected MixinBlockStainedGlassPane(Material materialIn, boolean canDrop) {
+        super(materialIn, canDrop);
     }
-  }
+
+    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
+        if (MightyMinerConfig.miscFullBlock) {
+            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+        } else {
+            super.setBlockBoundsBasedOnState(worldIn, pos);
+        }
+    }
 }

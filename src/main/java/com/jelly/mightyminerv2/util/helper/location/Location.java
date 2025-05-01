@@ -28,7 +28,6 @@ public enum Location {
     // Knowhere - Avengers: Infinity War
     KNOWHERE("Knowhere");
 
-    private final String name;
     private static final Map<String, Location> nameToLocationMap = new HashMap<>();
 
     static {
@@ -37,13 +36,15 @@ public enum Location {
         }
     }
 
+    private final String name;
+
     Location(String name) {
         this.name = name;
     }
 
     public static Location fromName(String name) {
         final Location loc = nameToLocationMap.get(name);
-        if(loc == null) return Location.KNOWHERE;
+        if (loc == null) return Location.KNOWHERE;
         return loc;
     }
 }

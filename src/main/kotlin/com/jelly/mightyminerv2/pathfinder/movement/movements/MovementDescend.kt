@@ -62,11 +62,14 @@ class MovementDescend(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement(
                 return
             }
 
-            val sourceHeight = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY?:return
-            val destHeight = destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y - 1, destZ), destState)?.maxY?:return
+            val sourceHeight =
+                sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY ?: return
+            val destHeight =
+                destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y - 1, destZ), destState)?.maxY
+                    ?: return
             val diff = sourceHeight - destHeight
 //            println("SourceHeight: $sourceHeight, DestHeight: $destHeight, Diff: $diff")
-            res.cost = when{
+            res.cost = when {
                 diff <= 0.5 -> ctx.cost.ONE_BLOCK_WALK_COST
                 diff <= 1.125 -> ctx.cost.WALK_OFF_ONE_BLOCK_COST * ctx.cost.SPRINT_MULTIPLIER + ctx.cost.N_BLOCK_FALL_COST[1]
                 else -> ctx.cost.INF_COST

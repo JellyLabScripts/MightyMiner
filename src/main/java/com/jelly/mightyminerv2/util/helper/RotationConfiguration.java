@@ -1,15 +1,13 @@
 package com.jelly.mightyminerv2.util.helper;
 
-import java.util.Random;
-import java.util.function.Function;
-
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.client.Minecraft;
 
 import java.util.Optional;
+import java.util.Random;
+import java.util.function.Function;
 
 @Getter
 @Setter
@@ -77,18 +75,12 @@ public class RotationConfiguration {
         return this;
     }
 
-    public enum RotationType {
-        SERVER,
-        CLIENT
-    }
-
-    public RotationConfiguration easeFunction(Ease ease){
+    public RotationConfiguration easeFunction(Ease ease) {
         this.easeFunction = ease;
         return this;
     }
 
-
-    public Ease easeFunction(){
+    public Ease easeFunction() {
         return this.easeFunction;
     }
 
@@ -101,8 +93,13 @@ public class RotationConfiguration {
         }
     }
 
+    public enum RotationType {
+        SERVER,
+        CLIENT
+    }
+
     public enum Ease {
-//        EASE_OUT_BACK(x -> 1 + (1 + 2 * (x - 1)) * (x - 1) * (x - 1)),
+        //        EASE_OUT_BACK(x -> 1 + (1 + 2 * (x - 1)) * (x - 1) * (x - 1)),
         EASE_OUT_SINE(x -> (float) Math.sin((x * Math.PI) / 2)),
         EASE_IN_OUT_SINE(x -> (float) (-(Math.cos(x * Math.PI) - 1) / 2)),
         EASE_OUT_QUAD(x -> 1 - (1 - x) * (1 - x)),

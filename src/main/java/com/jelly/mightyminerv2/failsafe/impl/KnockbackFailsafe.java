@@ -1,61 +1,43 @@
 package com.jelly.mightyminerv2.failsafe.impl;
 
+import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import com.jelly.mightyminerv2.util.Logger;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.Vec3;
+import lombok.Getter;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
 
 public class KnockbackFailsafe extends AbstractFailsafe {
 
-  private static final KnockbackFailsafe instance = new KnockbackFailsafe();
-  private Vec3 lastPlayerPos = null;
+    @Getter
+    private static final KnockbackFailsafe instance = new KnockbackFailsafe();
 
-  public static KnockbackFailsafe getInstance() {
-    return instance;
-  }
-
-  public int getPriority() {
-    return 8;
-
-  }
-
-  @Override
-  public String getName() {
-    return "";
-  }
-
-  @Override
-  public Failsafe getFailsafeType() {
-    return Failsafe.KNOCKBACK;
-  }
-
-
-  public boolean check() {
-
-    Vec3 currentPlayerPos = Minecraft.getMinecraft().thePlayer.getPositionVector();
-
-    if (lastPlayerPos != null) {
-      double deltaX = currentPlayerPos.xCoord - lastPlayerPos.xCoord;
-      double deltaZ = currentPlayerPos.zCoord - lastPlayerPos.zCoord;
-      double knockbackDistance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-
-      double knockbackThreshold = 0.4;
-
-      if (knockbackDistance > knockbackThreshold) {
-        return true;
-      }
+    public int getPriority() {
+        return 8;
     }
 
-    lastPlayerPos = currentPlayerPos;
+    @Override
+    public String getName() {
+        return "";
+    }
 
-    return false;
-  }
+    @Override
+    public Failsafe getFailsafeType() {
+        return Failsafe.KNOCKBACK;
+    }
 
-  @Override
-  public boolean react() {
-    MacroManager.getInstance().disable();
-    Logger.sendWarning("Knockback has been detected! Disabeling macro.");
-    return true;
-  }
+
+    @Override
+    public boolean onPacketReceive(PacketEvent.Received event) {
+        if (!(event.packet instanceof S12PacketEntityVelocity)) return false;
+        if (((S12PacketEntityVelocity) event.packet).getEntityID() != mc.thePlayer.getEntityId()) return false;
+        return ((S12PacketEntityVelocity) event.packet).getMotionY() >= 4000;
+    }
+
+    @Override
+    public boolean react() {
+        MacroManager.getInstance().disable();
+        Logger.sendWarning("Knockback has been detected! Disabling macro.");
+        return true;
+    }
 }

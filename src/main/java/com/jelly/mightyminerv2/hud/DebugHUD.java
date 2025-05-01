@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.hud.TextHud;
 import com.jelly.mightyminerv2.handler.GameStateHandler;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.Display;
 
@@ -11,52 +12,47 @@ import java.util.List;
 
 public class DebugHUD extends TextHud {
 
-  private transient static DebugHUD instance = new DebugHUD();
+    @Getter
+    private final static DebugHUD instance = new DebugHUD();
+    private final transient Minecraft mc = Minecraft.getMinecraft();
 
-  public static DebugHUD getInstance() {
-    return instance;
-  }
+    public DebugHUD() {
+        super(
+                true,
+                1f,
+                10f,
+                0.8f,
+                true,
+                true,
+                1,
+                5,
+                5,
+                new OneColor(0, 0, 0, 150),
+                false,
+                2,
+                new OneColor(0, 0, 0, 127)
+        );
+    }
 
-  private transient Minecraft mc = Minecraft.getMinecraft();
+    @Override
+    protected void getLines(List<String> lines, boolean example) {
 
-  public DebugHUD() {
-    super(
-            true,
-            1f,
-            10f,
-            0.8f,
-            true,
-            true,
-            1,
-            5,
-            5,
-            new OneColor(0, 0, 0, 150),
-            false,
-            2,
-            new OneColor(0, 0, 0, 127)
-    );
-  }
+        lines.add("§6§lScoreboard");
+        lines.add("§7Title: §f" + ScoreboardUtil.getScoreboardTitle());
+        lines.addAll(ScoreboardUtil.getScoreboard());
+        lines.add("Custom Cold: " + ScoreboardUtil.cold);
+        lines.add("");
 
-  @Override
-  protected void getLines(List<String> lines, boolean example) {
+        lines.add("§6§lPlayer Location");
+        lines.add("§7Current Location: §f" + GameStateHandler.getInstance().getCurrentLocation().getName());
+        lines.add("§7Sub Location: §f" + GameStateHandler.getInstance().getCurrentSubLocation().getName());
+        lines.add("");
 
-    lines.add("§6§lScoreboard");
-    lines.add("§7Title: §f" + ScoreboardUtil.getScoreboardTitle());
-    lines.addAll(ScoreboardUtil.getScoreboard());
-    lines.add("");
-
-    lines.add("§6§lPlayer Location");
-    lines.add("§7Current Location: §f" + GameStateHandler.getInstance().getCurrentLocation().getName());
-    lines.add("§7Sub Location: §f" + GameStateHandler.getInstance().getCurrentSubLocation().getName());
-    lines.add("");
-
-    // Add display and game state information
-    lines.add("§6§lDisplay & Game State");
-    lines.add("§7In-Game Focus: §f" + mc.inGameHasFocus);
-    lines.add("§7Display Active: §f" + Display.isActive());
-  }
-
-
+        // Add display and game state information
+        lines.add("§6§lDisplay & Game State");
+        lines.add("§7In-Game Focus: §f" + mc.inGameHasFocus);
+        lines.add("§7Display Active: §f" + Display.isActive());
+    }
 
     /*
     public void addList(String featureName, DebugList list) {

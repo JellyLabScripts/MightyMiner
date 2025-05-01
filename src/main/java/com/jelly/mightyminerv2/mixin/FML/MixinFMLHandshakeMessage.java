@@ -1,4 +1,4 @@
-package com.jelly.mightyminerv2.mixin.FML;
+package com.jelly.mightyminerv2.mixin.fml;
 
 import com.jelly.mightyminerv2.MightyMiner;
 import net.minecraft.client.Minecraft;

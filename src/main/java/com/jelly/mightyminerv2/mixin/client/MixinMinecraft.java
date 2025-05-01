@@ -13,19 +13,19 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
 
-  @Shadow
-  public EntityPlayerSP thePlayer;
+    @Shadow
+    public EntityPlayerSP thePlayer;
 
-  @Redirect(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/settings/KeyBinding;isPressed()Z", ordinal = 2))
-  public boolean isPressed(KeyBinding instance) {
-    return instance.isKeyDown() && !MacroManager.getInstance().isRunning();
-  }
-
-  @Redirect(method = "setIngameFocus", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/Display;isActive()Z"))
-  public boolean isActive() {
-    if (MacroManager.getInstance().isRunning()) {
-      return true;
+    @Redirect(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/settings/KeyBinding;isPressed()Z", ordinal = 2))
+    public boolean isPressed(KeyBinding instance) {
+        return instance.isKeyDown() && !MacroManager.getInstance().isRunning();
     }
-    return Display.isActive();
-  }
+
+    @Redirect(method = "setIngameFocus", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/Display;isActive()Z"))
+    public boolean isActive() {
+        if (MacroManager.getInstance().isRunning()) {
+            return true;
+        }
+        return Display.isActive();
+    }
 }

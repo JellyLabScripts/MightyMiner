@@ -9,7 +9,13 @@ import kotlin.math.abs
 
 object MovementHelper {
 
-    fun canWalkThrough(bsa: BlockStateAccessor, x: Int, y: Int, z: Int, state: IBlockState = bsa.get(x, y, z)): Boolean {
+    fun canWalkThrough(
+        bsa: BlockStateAccessor,
+        x: Int,
+        y: Int,
+        z: Int,
+        state: IBlockState = bsa.get(x, y, z)
+    ): Boolean {
         val canWalk = canWalkThroughBlockState(state)
         if (canWalk != null) {
             return canWalk
@@ -64,7 +70,7 @@ object MovementHelper {
         val block = state.block
 
         if (block == Blocks.carpet) {
-            return canStandOn(bsa, x, y - 1, z);
+            return canStandOn(bsa, x, y - 1, z)
         }
 
         if (block is BlockSnow) {
@@ -104,12 +110,9 @@ object MovementHelper {
             block == Blocks.sea_lantern -> true
             isWotah(state) -> {
                 val up = bsa.get(x, y + 1, z).block
-                if (up == Blocks.waterlily || up == Blocks.carpet) {
-                    true
-                } else{
-                    false
-                }
+                up == Blocks.waterlily || up == Blocks.carpet
             }
+
             isLava(state) -> false
             block is BlockSlab -> true
             block is BlockSnow -> true

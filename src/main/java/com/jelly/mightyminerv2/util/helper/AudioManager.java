@@ -18,17 +18,15 @@ import java.util.concurrent.TimeUnit;
 public class AudioManager {
 
     private static volatile AudioManager instance;
+    private static Clip clip;
     private final Minecraft mc = Minecraft.getMinecraft();
-
+    private final Clock delayBetweenPings = new Clock();
     @Getter
     @Setter
     private boolean minecraftSoundEnabled = false;
-
-    private final Clock delayBetweenPings = new Clock();
     private int numSounds = 15;
     @Setter
     private float soundBeforeChange = 0;
-    private static Clip clip;
 
     private AudioManager() {
         // Private constructor for Singleton
@@ -104,19 +102,19 @@ public class AudioManager {
     private AudioInputStream getAudioStreamForSelectedSound() throws Exception {
         switch (MightyMinerConfig.failsafeSoundSelected) {
             case 0: // Custom sound file
-                File audioFile = new File(mc.mcDataDir.getAbsolutePath() + "/farmhelper_sound.wav");
+                File audioFile = new File(mc.mcDataDir.getAbsolutePath() + "/mightyminer_sound.wav");
                 if (audioFile.exists() && audioFile.isFile()) {
                     return AudioSystem.getAudioInputStream(audioFile);
                 }
                 break;
             case 1:
-                return AudioSystem.getAudioInputStream(getClass().getResource("/farmhelper/sounds/staff_check_voice_notification.wav"));
+                return AudioSystem.getAudioInputStream(getClass().getResource("/mightyminer/sounds/staff_check_voice_notification.wav"));
             case 2:
-                return AudioSystem.getAudioInputStream(getClass().getResource("/farmhelper/sounds/metal_pipe.wav"));
+                return AudioSystem.getAudioInputStream(getClass().getResource("/mightyminer/sounds/metal_pipe.wav"));
             case 3:
-                return AudioSystem.getAudioInputStream(getClass().getResource("/farmhelper/sounds/AAAAAAAAAA.wav"));
+                return AudioSystem.getAudioInputStream(getClass().getResource("/mightyminer/sounds/AAAAAAAAAA.wav"));
             case 4:
-                return AudioSystem.getAudioInputStream(getClass().getResource("/farmhelper/sounds/loud_buzz.wav"));
+                return AudioSystem.getAudioInputStream(getClass().getResource("/mightyminer/sounds/loud_buzz.wav"));
             default:
                 Logger.sendError("[Audio Manager] Invalid sound selection!");
         }

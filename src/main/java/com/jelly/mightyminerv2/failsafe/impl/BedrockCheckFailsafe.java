@@ -2,6 +2,7 @@ package com.jelly.mightyminerv2.failsafe.impl;
 
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
+import lombok.Getter;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
@@ -9,13 +10,10 @@ import net.minecraft.util.Vec3;
 
 public class BedrockCheckFailsafe extends AbstractFailsafe {
 
+    @Getter
     private static final BedrockCheckFailsafe instance = new BedrockCheckFailsafe();
     private static final int CHECK_RADIUS = 5;
     private static final int BEDROCK_THRESHOLD = 10;
-
-    public static BedrockCheckFailsafe getInstance() {
-        return instance;
-    }
 
     @Override
     public String getName() {
@@ -51,7 +49,6 @@ public class BedrockCheckFailsafe extends AbstractFailsafe {
                     }
 
                     if (bedrockCount >= BEDROCK_THRESHOLD) {
-                        warn("BedrockCheckFailsafe triggered: found " + bedrockCount + " bedrock blocks.");
                         return true;
                     }
                 }
@@ -67,5 +64,6 @@ public class BedrockCheckFailsafe extends AbstractFailsafe {
         warn("Disabling macro due to bedrock surroundings.");
         return true;
     }
+
 }
 

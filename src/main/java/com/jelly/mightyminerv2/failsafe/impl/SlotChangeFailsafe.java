@@ -5,21 +5,19 @@ import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.Clock;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class SlotChangeFailsafe extends AbstractFailsafe {
 
+    @Getter
     private static final SlotChangeFailsafe instance = new SlotChangeFailsafe();
     private final Minecraft mc = Minecraft.getMinecraft();
     private final Clock timer = new Clock();
     private int lastSelectedSlot;
     private boolean slotChanged = false;
-
-    public static SlotChangeFailsafe getInstance() {
-        return instance;
-    }
 
     private SlotChangeFailsafe() {
         this.lastSelectedSlot = mc.thePlayer != null ? mc.thePlayer.inventory.currentItem : -1;
@@ -46,6 +44,7 @@ public class SlotChangeFailsafe extends AbstractFailsafe {
             Logger.sendLog("Timer passed after slot change");
             return true;
         }
+
         return false;
     }
 
@@ -65,6 +64,7 @@ public class SlotChangeFailsafe extends AbstractFailsafe {
                 }
             }
         }
+
         return false;
     }
 
@@ -76,6 +76,7 @@ public class SlotChangeFailsafe extends AbstractFailsafe {
             slotChanged = false;
             return true;
         }
+
         return false;
     }
 

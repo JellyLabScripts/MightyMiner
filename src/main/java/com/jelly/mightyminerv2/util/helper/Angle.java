@@ -23,7 +23,7 @@ public class Angle {
         return Math.abs(this.yaw) + Math.abs(this.pitch);
     }
 
-    public float lengthSqrt(){
+    public float lengthSqrt() {
         return (float) Math.sqrt(this.yaw * this.yaw + this.pitch * this.pitch);
     }
 

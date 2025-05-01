@@ -10,7 +10,7 @@
     "client.MixinMinecraft",
     "client.MixinScoreboard",
     "client.MixinSoundManager",
-    "FML.MixinFMLHandshakeMessage",
+    "fml.MixinFMLHandshakeMessage",
     "gui.MixinGuiContainer",
     "gui.MixinInventoryPlayer",
     "network.MixinNetworkManager"

@@ -1,12 +1,13 @@
 package com.jelly.mightyminerv2.failsafe.impl;
 
-import net.minecraft.network.play.server.S23PacketBlockChange;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.Clock;
+import lombok.Getter;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
@@ -17,17 +18,13 @@ import java.util.List;
 /*Hours wasted on this: None, this was easy as fuck*/
 public class BedrockBlockChangeFailsafe extends AbstractFailsafe {
 
+    @Getter
     private static final BedrockBlockChangeFailsafe instance = new BedrockBlockChangeFailsafe();
-
-    public static BedrockBlockChangeFailsafe getInstance() {
-        return instance;
-    }
-
-    private final Clock timer = new Clock();
-    private final List<Long> bedrockChangeTimestamps = new ArrayList<>();
     private static final int THRESHOLD = 20;
     private static final long TIME_WINDOW = 100;
     private static final int RADIUS = 10;
+    private final Clock timer = new Clock();
+    private final List<Long> bedrockChangeTimestamps = new ArrayList<>();
 
     @Override
     public String getName() {

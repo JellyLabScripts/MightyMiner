@@ -1,8 +1,8 @@
 package com.jelly.mightyminerv2.handler;
 
 import com.google.gson.annotations.Expose;
-import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.MightyMiner;
+import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
@@ -20,18 +20,17 @@ import java.util.HashMap;
 @Getter
 public class RouteHandler {
     public static RouteHandler instance;
-
-    public static RouteHandler getInstance() {
-        if (instance == null) instance = new RouteHandler();
-        return instance;
-    }
-
     @Expose
     private final HashMap<String, Route> routes = new HashMap<String, Route>() {{
         put("Default", new Route());
     }};
     private Route selectedRoute = this.routes.get("Default");
     private volatile boolean dirty = false;
+
+    public static RouteHandler getInstance() {
+        if (instance == null) instance = new RouteHandler();
+        return instance;
+    }
 
     public void selectRoute(String routeName) {
         if (!this.routes.containsKey(routeName)) {

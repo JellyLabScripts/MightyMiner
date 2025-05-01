@@ -10,10 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InventoryPlayer.class)
 public abstract class MixinInventoryPlayer {
 
-  @Inject(method = "changeCurrentItem", at = @At("HEAD"), cancellable = true)
-  public void changeCurrentItem(int direction, CallbackInfo ci) {
-    if (MacroManager.getInstance().isRunning()) {
-      ci.cancel();
+    @Inject(method = "changeCurrentItem", at = @At("HEAD"), cancellable = true)
+    public void changeCurrentItem(int direction, CallbackInfo ci) {
+        if (MacroManager.getInstance().isRunning()) {
+            ci.cancel();
+        }
     }
-  }
 }

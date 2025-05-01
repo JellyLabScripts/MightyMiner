@@ -7,100 +7,99 @@ import org.lwjgl.input.Mouse;
 
 public class MouseUngrab extends AbstractFeature {
 
-  private static volatile MouseUngrab instance;
+    private static volatile MouseUngrab instance;
+    private MouseHelper oldMouseHelper;
+    private boolean mouseUngrabbed = false;
 
-  public static MouseUngrab getInstance() {
-    if (instance == null) {
-      synchronized (MouseUngrab.class) {
+    public static MouseUngrab getInstance() {
         if (instance == null) {
-          instance = new MouseUngrab();
+            synchronized (MouseUngrab.class) {
+                if (instance == null) {
+                    instance = new MouseUngrab();
+                }
+            }
         }
-      }
-    }
-    return instance;
-  }
-
-  private MouseHelper oldMouseHelper;
-  private boolean mouseUngrabbed = false;
-
-  public void ungrabMouse() {
-    if (mouseUngrabbed || !Mouse.isGrabbed()) {
-      return;
+        return instance;
     }
 
-    oldMouseHelper = mc.mouseHelper;
-    mc.mouseHelper.ungrabMouseCursor();
+    public void ungrabMouse() {
+        if (mouseUngrabbed || !Mouse.isGrabbed()) {
+            return;
+        }
 
-    mc.mouseHelper = new MouseHelper() {
-      @Override
-      public void mouseXYChange() {
-      }
+        oldMouseHelper = mc.mouseHelper;
+        mc.mouseHelper.ungrabMouseCursor();
 
-      @Override
-      public void grabMouseCursor() {
-      }
+        mc.mouseHelper = new MouseHelper() {
+            @Override
+            public void mouseXYChange() {
+            }
 
-      @Override
-      public void ungrabMouseCursor() {
-      }
-    };
+            @Override
+            public void grabMouseCursor() {
+            }
 
-    mouseUngrabbed = true;
-    log("Mouse ungrabbed successfully.");
-  }
+            @Override
+            public void ungrabMouseCursor() {
+            }
+        };
 
-  public void regrabMouse() {
-    if (!mouseUngrabbed || Mouse.isGrabbed()) {
-      return;
+        mouseUngrabbed = true;
+        log("Mouse ungrabbed successfully.");
     }
 
-    if (oldMouseHelper != null) {
-      mc.mouseHelper = oldMouseHelper;
-      oldMouseHelper = null;
+    public void regrabMouse() {
+        if (!mouseUngrabbed || Mouse.isGrabbed()) {
+            return;
+        }
+
+        if (oldMouseHelper != null) {
+            mc.mouseHelper = oldMouseHelper;
+            oldMouseHelper = null;
+        }
+
+        if (mc.currentScreen == null) {
+            mc.mouseHelper.grabMouseCursor();
+        }
+
+        mouseUngrabbed = false;
+        log("Mouse regrabbed successfully.");
     }
 
-    if (mc.currentScreen == null) {
-      mc.mouseHelper.grabMouseCursor();
+    @Override
+    public String getName() {
+        return "Ungrab Mouse";
     }
 
-    mouseUngrabbed = false;
-    log("Mouse regrabbed successfully.");
-  }
-
-  @Override
-  public String getName() {
-    return "Ungrab Mouse";
-  }
-
-  @Override
-  public boolean isEnabled() {
-    return MightyMinerConfig.ungrabMouse;
-  }
-
-  @Override
-  public boolean shouldStartAtLaunch() {
-    return this.isEnabled();
-  }
-
-  @Override
-  public void start() {
-    log("MouseUngrab::start");
-    try {
-      ungrabMouse();
-    } catch (Exception e) {
-      log("Failed to ungrab mouse: " + e.getMessage());
-      e.printStackTrace();
+    @Override
+    public boolean isEnabled() {
+        return MightyMinerConfig.ungrabMouse;
     }
-  }
 
-  @Override
-  public void stop() {
-    log("MouseUngrab::stop");
-    try {
-      regrabMouse();
-    } catch (Exception e) {
-      log("Failed to regrab mouse: " + e.getMessage());
-      e.printStackTrace();
+    @Override
+    public boolean shouldStartAtLaunch() {
+        return this.isEnabled();
     }
-  }
+
+    @Override
+    public void start() {
+        log("MouseUngrab::start");
+        try {
+            ungrabMouse();
+        } catch (Exception e) {
+            log("Failed to ungrab mouse: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void stop() {
+        log("MouseUngrab::stop");
+        try {
+            regrabMouse();
+        } catch (Exception e) {
+            log("Failed to regrab mouse: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

@@ -1,12 +1,13 @@
 package com.jelly.mightyminerv2.mixin.client;
 
 import com.jelly.mightyminerv2.util.IChunkProviderClient;
-import java.util.List;
 import net.minecraft.client.multiplayer.ChunkProviderClient;
 import net.minecraft.util.LongHashMap;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.List;
 
 @Mixin(ChunkProviderClient.class)
 public class MixinChunkProviderClient implements IChunkProviderClient {

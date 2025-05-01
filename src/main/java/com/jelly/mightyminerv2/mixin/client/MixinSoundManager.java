@@ -14,10 +14,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SoundManager.class)
 public class MixinSoundManager {
-  @Inject(method = "getNormalizedVolume", at = @At("RETURN"), cancellable = true)
-  private void getNormalizedVolume(ISound sound, SoundPoolEntry entry, SoundCategory category, CallbackInfoReturnable<Float> cir) {
-    if (MacroManager.getInstance().isRunning() && MightyMinerConfig.muteGame && FailsafeManager.getInstance().emergencyQueue.isEmpty() && !FailsafeManager.getInstance().triggeredFailsafe.isPresent()) {
-      cir.setReturnValue(0f);
+    @Inject(method = "getNormalizedVolume", at = @At("RETURN"), cancellable = true)
+    private void getNormalizedVolume(ISound sound, SoundPoolEntry entry, SoundCategory category, CallbackInfoReturnable<Float> cir) {
+        if (MacroManager.getInstance().isRunning() && MightyMinerConfig.muteGame && FailsafeManager.getInstance().emergencyQueue.isEmpty() && !FailsafeManager.getInstance().triggeredFailsafe.isPresent()) {
+            cir.setReturnValue(0f);
+        }
     }
-  }
 }

@@ -41,15 +41,27 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
             var destState = ctx.bsa.get(destX, y, destZ)
             if (!MovementHelper.canWalkThrough(ctx.bsa, destX, y + 1, destZ)) {
                 ascend = true
-                if (!MovementHelper.canWalkThrough(ctx.bsa, x, y + 3, z) || !MovementHelper.canStandOn(ctx.bsa, destX, y + 1, destZ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y + 2, destZ)) {
+                if (!MovementHelper.canWalkThrough(ctx.bsa, x, y + 3, z) || !MovementHelper.canStandOn(
+                        ctx.bsa,
+                        destX,
+                        y + 1,
+                        destZ
+                    ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y + 2, destZ)
+                ) {
                     return
                 }
-                destState = ctx.bsa.get(destX, y + 1, destZ);
+                destState = ctx.bsa.get(destX, y + 1, destZ)
                 res.y = y + 1
             } else {
                 if (!MovementHelper.canStandOn(ctx.bsa, destX, y, destZ, destState)) {
                     descend = true
-                    if (!MovementHelper.canStandOn(ctx.bsa, destX, y - 1, destZ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y, destZ)) {
+                    if (!MovementHelper.canStandOn(
+                            ctx.bsa,
+                            destX,
+                            y - 1,
+                            destZ
+                        ) || !MovementHelper.canWalkThrough(ctx.bsa, destX, y, destZ)
+                    ) {
                         return
                     }
                     destState = ctx.bsa.get(destX, y - 1, destZ)
@@ -64,10 +76,10 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
             }
 
             if (MovementHelper.isWotah(ctx.get(x, y + 1, z))) {
-                if (ascend) return;
+                if (ascend) return
                 cost = ctx.cost.ONE_BLOCK_WALK_IN_WATER_COST * SQRT_2
             } else {
-                cost *= ctx.cost.SPRINT_MULTIPLIER;
+                cost *= ctx.cost.SPRINT_MULTIPLIER
             }
 
             val ALOWState = ctx.get(x, y + 1, destZ)
@@ -88,20 +100,25 @@ class MovementDiagonal(mm: MightyMiner, from: BlockPos, to: BlockPos) : Movement
                 return
             }
 
-            val sourceMaxY = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY ?: y.toDouble()
+            val sourceMaxY = sourceState.block.getCollisionBoundingBox(ctx.world, BlockPos(x, y, z), sourceState)?.maxY
+                ?: y.toDouble()
 
             if (ascend) {
-                val destMaxY = destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y + 1, destZ), destState)?.maxY ?: (y + 1.0)
+                val destMaxY =
+                    destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y + 1, destZ), destState)?.maxY
+                        ?: (y + 1.0)
                 when {
                     destMaxY - sourceMaxY <= 0.5 -> res.cost = cost * SQRT_2
-                    destMaxY - sourceMaxY <= 1.125 -> res.cost = cost * SQRT_2 + ctx.cost.JUMP_ONE_BLOCK_COST;
+                    destMaxY - sourceMaxY <= 1.125 -> res.cost = cost * SQRT_2 + ctx.cost.JUMP_ONE_BLOCK_COST
                     else -> res.cost = ctx.cost.INF_COST
                 }
                 return
             }
 
             if (descend) {
-                val destMaxY = destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y - 1, destZ), destState)?.maxY ?: (y + 1.0)
+                val destMaxY =
+                    destState.block.getCollisionBoundingBox(ctx.world, BlockPos(destX, y - 1, destZ), destState)?.maxY
+                        ?: (y + 1.0)
                 when {
                     sourceMaxY - destMaxY <= 0.5 -> res.cost = cost * SQRT_2
                     sourceMaxY - destMaxY <= 1.0 -> res.cost = ctx.cost.N_BLOCK_FALL_COST[1] + cost * SQRT_2

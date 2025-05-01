@@ -1,14 +1,16 @@
 package com.jelly.mightyminerv2.pathfinder.helper
+
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.EnumFacing
 import net.minecraft.util.BlockPos
+import net.minecraft.util.EnumFacing
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.WorldType
 import net.minecraft.world.biome.BiomeGenBase
 
-class BlockStateInterfaceAccessWrapper(private val bsi: BlockStateAccessor, private val world: IBlockAccess) : IBlockAccess {
+class BlockStateInterfaceAccessWrapper(private val bsi: BlockStateAccessor, private val world: IBlockAccess) :
+    IBlockAccess {
 
     override fun getTileEntity(pos: BlockPos): TileEntity? {
         return null

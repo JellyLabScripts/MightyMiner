@@ -15,44 +15,45 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(EntityLivingBase.class)
 public abstract class MixinEntityLivingBase extends Entity {
 
-  @Shadow public float rotationYawHead;
+    @Shadow
+    public float rotationYawHead;
 
-  public MixinEntityLivingBase(World worldIn) {
-    super(worldIn);
-  }
-
-  @Redirect(
-      method = "jump",
-      at = @At(
-          value = "FIELD",
-          target = "net/minecraft/entity/EntityLivingBase.rotationYaw:F"
-      )
-  )
-  private float overrideYaw(EntityLivingBase self) {
-    if (self instanceof EntityPlayerSP && StrafeUtil.shouldEnable()) {
-      return StrafeUtil.yaw;
-    }
-    return self.rotationYaw;
-  }
-
-  @Redirect(
-      method = "moveEntityWithHeading",
-      at = @At(
-          value = "INVOKE",
-          target = "Lnet/minecraft/entity/EntityLivingBase;moveFlying(FFF)V"
-      )
-  )
-  public void moveRelative(EntityLivingBase instance, float s, float f, float fr) {
-    if (!StrafeUtil.shouldEnable()) {
-      this.moveFlying(s, f, fr);
-      return;
+    public MixinEntityLivingBase(World worldIn) {
+        super(worldIn);
     }
 
-    final float originalYaw = this.rotationYaw;
-    this.rotationYaw = StrafeUtil.yaw;
+    @Redirect(
+            method = "jump",
+            at = @At(
+                    value = "FIELD",
+                    target = "net/minecraft/entity/EntityLivingBase.rotationYaw:F"
+            )
+    )
+    private float overrideYaw(EntityLivingBase self) {
+        if (self instanceof EntityPlayerSP && StrafeUtil.shouldEnable()) {
+            return StrafeUtil.yaw;
+        }
+        return self.rotationYaw;
+    }
 
-    this.moveFlying(s, f, fr);
+    @Redirect(
+            method = "moveEntityWithHeading",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/EntityLivingBase;moveFlying(FFF)V"
+            )
+    )
+    public void moveRelative(EntityLivingBase instance, float s, float f, float fr) {
+        if (!StrafeUtil.shouldEnable()) {
+            this.moveFlying(s, f, fr);
+            return;
+        }
 
-    this.rotationYaw = originalYaw;
-  }
+        final float originalYaw = this.rotationYaw;
+        this.rotationYaw = StrafeUtil.yaw;
+
+        this.moveFlying(s, f, fr);
+
+        this.rotationYaw = originalYaw;
+    }
 }

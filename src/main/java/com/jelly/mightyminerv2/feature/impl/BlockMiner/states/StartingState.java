@@ -18,8 +18,7 @@ public class StartingState implements BlockMinerState {
 
     @Override
     public BlockMinerState onTick(BlockMiner miner) {
-        log("Starting state delay complete. Transitioning...");
-        
+        log("Miner boost state: " + miner.getBoostState());
         // Check if speed boost is available to decide next state
         return miner.getBoostState() == BlockMiner.BoostState.AVAILABLE 
             ? new SpeedBoostState()    // Use available speed boost

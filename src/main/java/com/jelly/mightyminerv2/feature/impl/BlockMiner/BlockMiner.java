@@ -2,6 +2,7 @@ package com.jelly.mightyminerv2.feature.impl.BlockMiner;
 
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.BlockMinerState;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.SpeedBoostState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.StartingState;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
@@ -60,8 +61,14 @@ public class BlockMiner extends AbstractFeature {
         NOT_ENOUGH_BLOCKS, // Cannot find blocks to mine
         NO_TOOLS_AVAILABLE, // Required mining tool not found in inventory
         NO_POINTS_FOUND,    // Cannot find valid points to target on block
-        NO_TARGET_BLOCKS   // The user did not set any blocks for the miner to mine
+        NO_TARGET_BLOCKS,   // The user did not set any blocks for the miner to mine
+        NO_SPEED_BOOST,     // The user cannot speed boost
     }
+
+    // For every pattern (Starting -> Speed) OR (Speed -> Starting), ++noSpeedBoostFlag
+    // If it detects the pattern Starting -> Speed -> Starting -> Speed (i.e. noSpeedBoostFlag == 4)
+    // then NO_SPEED_BOOST is thrown
+    private int noSpeedBoostFlag;
 
     @Getter
     private Map<Integer, Integer> blockPriority = new HashMap<>(); // State ID of block -> priority
@@ -129,6 +136,7 @@ public class BlockMiner extends AbstractFeature {
         this.enabled = true;
         this.error = BlockMinerError.NONE;
         this.boostState = BoostState.AVAILABLE;
+        this.noSpeedBoostFlag = 0;
         
         // Initialize with starting state
         this.currentState = new StartingState();
@@ -155,6 +163,12 @@ public class BlockMiner extends AbstractFeature {
 
         BlockMinerState nextState = currentState.onTick(this);
         transitionTo(nextState);
+
+        if (noSpeedBoostFlag >= 4) {
+            setError(BlockMinerError.NO_SPEED_BOOST);
+            stop();
+        }
+
     }
 
     // Calls appropriate lifecycle methods on the states
@@ -163,12 +177,22 @@ public class BlockMiner extends AbstractFeature {
         if (currentState == nextState)
             return;
 
+        if ((currentState instanceof StartingState && nextState instanceof SpeedBoostState)
+                || (currentState instanceof SpeedBoostState && nextState instanceof StartingState)) {
+            noSpeedBoostFlag++;
+        }
+        else {
+            noSpeedBoostFlag = 0;
+        }
+
         currentState.onEnd(this);
         currentState = nextState;
+
         if (currentState == null) {
             log("null state, returning");
             return;
         }
+
         currentState.onStart(this);
     }
 
@@ -180,13 +204,15 @@ public class BlockMiner extends AbstractFeature {
         }
         String message = event.message.getUnformattedText();
 
-        if (message.equals("Mining Speed Boost is now available!")) {
+        if (message.equals("Mining Speed Boost is now available!")
+                || message.equals("Pickobulus is now available!")) {
             boostState = BoostState.AVAILABLE;
         }
-        if (message.contains("You used your Mining Speed Boost Pickaxe Ability!")) {
+        if (message.contains("You used your Mining Speed Boost Pickaxe Ability!")
+                || message.contains("You used your Pickobulus Pickaxe Ability!")) {
             boostState = BoostState.ACTIVE;
         }
-        if (message.equals("Your Mining Speed Boost has expired!")
+        if (message.equals("Your Mining Speed Boost has expired!") || message.contains("Your Pickobulus destroyed")
                 || (boostState != BoostState.ACTIVE && message.startsWith("Your pickaxe ability is on cooldown for"))) {
             boostState = BoostState.INACTIVE;
         }

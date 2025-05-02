@@ -26,12 +26,11 @@ import java.util.Random;
 public class BreakingState implements BlockMinerState{
 
     private static final double MIN_WALK_DISTANCE = 0.2;  // Minimum distance to trigger walking
-    private static final double MAX_MINE_DISTANCE = 3.5;  // Maximum mining distance for player
+    private static final double MAX_MINE_DISTANCE = 4;    // Maximum mining distance for player
     private static final int FAILSAFE_TICKS = 40;         // Safety mechanism if we've been trying to break for too long
 
     private final Minecraft mc = Minecraft.getMinecraft();
     private final Random random = new Random();
-    private final Clock shiftTimer = new Clock();
 
     private int breakAttemptTime;  // Tracks how long we've been trying to break the block (in ticks)
     private int miningTime;        // Expected time to break the block (in ticks)
@@ -42,7 +41,6 @@ public class BreakingState implements BlockMinerState{
     @Override
     public void onStart(BlockMiner miner) {
         log("Entering Breaking State");
-        shiftTimer.reset();
         breakAttemptTime = 0;
         isWalking = false;
 
@@ -82,14 +80,6 @@ public class BreakingState implements BlockMinerState{
             return new StartingState();
         }
 
-        // If automatic movement (strafing) is enabled, disable it
-        if (StrafeUtil.enabled) {
-            walkingDestinationBlock = null;
-            StrafeUtil.enabled = false;
-            this.shiftTimer.schedule(MightyMinerConfig.getRandomSneakTime());
-            KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
-        }
-
         return this;
     }
 
@@ -105,14 +95,9 @@ public class BreakingState implements BlockMinerState{
     private void handleKeybinds() {
         // Hold left-click to break blocks
         KeyBindUtil.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack, true);
-        
-        // Toggle sneaking based on timer
-        if (this.shiftTimer.isScheduled() && this.shiftTimer.passed()) {
+
+        if (!isWalking)
             KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, MightyMinerConfig.sneakWhileMining);
-            this.shiftTimer.reset();
-        } else {
-            KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, false);
-        }
     }
 
     /**
@@ -130,16 +115,11 @@ public class BreakingState implements BlockMinerState{
 
         // Move toward target if too far away
         if (walkingDistance > MIN_WALK_DISTANCE && miningDistance > MAX_MINE_DISTANCE) {
-            this.shiftTimer.reset();
-            StrafeUtil.enabled = true;
-            StrafeUtil.yaw = AngleUtil.getRotationYaw360(this.walkingDestinationBlock == null ? this.targetPoint : this.walkingDestinationBlock);
             KeyBindUtil.holdThese(mc.gameSettings.keyBindForward, mc.gameSettings.keyBindSneak);
         } else {
             // Close enough, stop walking
             isWalking = false;
             this.walkingDestinationBlock = null;
-            StrafeUtil.enabled = false;
-            this.shiftTimer.schedule(MightyMinerConfig.getRandomSneakTime());
             KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
         }
     }
@@ -192,7 +172,7 @@ public class BreakingState implements BlockMinerState{
         RotationHandler.getInstance().start();
 
         // Determine if player needs to walk toward block (too far away)
-        if (this.targetPoint != null && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > 4) {
+        if (this.targetPoint != null && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > MAX_MINE_DISTANCE) {
             isWalking = true;
             Vec3 vec = AngleUtil.getVectorForRotation(AngleUtil.getRotationYaw(this.targetPoint));
             

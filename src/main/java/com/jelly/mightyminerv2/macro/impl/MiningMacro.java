@@ -44,6 +44,8 @@ public class MiningMacro extends AbstractMacro {
     private final List<String> necessaryItems = new ArrayList<>();
     private int miningSpeed = 0;
     private int miningSpeedBoost = 0;
+    private boolean usingSpeedBoost = true;
+
     private MineableBlock[] blocksToMine = {};
     private int macroRetries = 0;
     private boolean isMining = false;
@@ -175,6 +177,10 @@ public class MiningMacro extends AbstractMacro {
                 break;
             case NO_TOOLS_AVAILABLE:
                 disable("Cannot find tools in hotbar! Please set it in configs");
+                break;
+            case NO_SPEED_BOOST:
+                disable("Cannot find speed boost messages! " +
+                        "Either enable the speed boost skill in HOTM or enable speed boost chat messages");
                 break;
         }
 

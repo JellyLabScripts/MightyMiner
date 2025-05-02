@@ -285,7 +285,6 @@ public class CommissionMacro extends AbstractMacro {
                     log("MiningSpeed: " + miningSpeed + ", MiningSpeedBoost: " + miningSpeedBoost);
                     return;
                 }
-
                 switch (AutoInventory.getInstance().getSbError()) {
                     case NONE:
                         throw new IllegalStateException("AutoInventory#getSbError failed but returned NONE");

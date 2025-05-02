@@ -124,7 +124,7 @@ public class BlockUtil {
         final int HORIZONTAL_RADIUS = 5;
         final int VERTICAL_LOWER = -3;
         final int VERTICAL_UPPER = 4;
-        final float MAX_DISTANCE = 3.5f;  // Maximum reach for player is 4, 0.5 for buffer
+        final double MAX_DISTANCE = (4 - Math.sqrt(3) / 2d);  // Buffer = distance from center of cube to corner
 
         // Pre-calculations
         final float miningCoefficient = 500.0f / miningSpeed;

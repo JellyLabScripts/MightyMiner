@@ -43,7 +43,7 @@ public class MightyMinerConfig extends Config {
 
 
     public MightyMinerConfig() {
-        super(new Mod("Mighty Miner", ModType.HYPIXEL), "/MightMinerV2/config.json");
+        super(new Mod("Mighty Miner", ModType.HYPIXEL), "/MightMinerV2.7/config.json");
         initialize();
 
         // Register keybinds
@@ -61,7 +61,7 @@ public class MightyMinerConfig extends Config {
             options = {
                     "Commission",
                     "Glacial Commissions",
-                    "Mining Bot",
+                    "Mining Macro",
                     "Route Miner",
                     "Gemstone Powder"
             }
@@ -267,7 +267,7 @@ public class MightyMinerConfig extends Config {
 
     //</editor-fold>
 
-    //<editor-fold desc="Mining Bot">
+    //<editor-fold desc="Mining Macro">
 
     @Dropdown(
             name = "Ore Type",

@@ -18,7 +18,7 @@ public class DebugHUD extends TextHud {
 
     public DebugHUD() {
         super(
-                true,
+                false,
                 1f,
                 10f,
                 0.8f,

@@ -34,15 +34,6 @@ public class ChoosingBlockState implements BlockMinerState {
                 blockMiner.getMiningSpeed()
         );
 
-        // If strafe is enabled and no blocks found, try alternative search method
-        if (MightyMinerConfig.strafe && blocks.isEmpty()) {
-            blocks = BlockUtil.findMineableBlocksAroundHead(
-                    blockMiner.getBlockPriority(),
-                    blockMiner.getTargetBlockPos(),
-                    blockMiner.getMiningSpeed()
-            );
-        }
-
         // Handle case where no blocks are found
         if (blocks.isEmpty()) {
             if (!timer.isScheduled()) {

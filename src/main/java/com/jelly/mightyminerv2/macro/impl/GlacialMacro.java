@@ -40,7 +40,6 @@ public class GlacialMacro extends AbstractMacro {
     private final Map<Pair<GlaciteVeins, RouteWaypoint>, Long> previousVeins = new HashMap<>();
 
     public int miningSpeed = 200;
-    public int miningSpeedBoost = 0;
     
     @Override
     public void onEnable() {
@@ -166,11 +165,10 @@ public class GlacialMacro extends AbstractMacro {
                 if (AutoInventory.getInstance().sbSucceeded()) {
                     int[] sb = AutoInventory.getInstance().getSpeedBoostValues();
                     this.miningSpeed = sb[0];
-                    this.miningSpeedBoost = sb[1];
                     this.macroRetries = 0;
                     this.mainState = MainState.MACRO;
                     this.state = State.PATHFINDING;
-                    log("MiningSpeed: " + miningSpeed + ", MiningSpeedBoost: " + miningSpeedBoost);
+                    log("MiningSpeed: " + miningSpeed);
                     return;
                 }
 
@@ -257,7 +255,7 @@ public class GlacialMacro extends AbstractMacro {
                 }
 
                 if (!miner.isRunning()) {
-                    miner.start(getBlocksToMine(), miningSpeed, miningSpeedBoost, getBlockPriority(), MightyMinerConfig.miningTool);
+                    miner.start(getBlocksToMine(), miningSpeed, getBlockPriority(), MightyMinerConfig.miningTool);
                     return;
                 }
 

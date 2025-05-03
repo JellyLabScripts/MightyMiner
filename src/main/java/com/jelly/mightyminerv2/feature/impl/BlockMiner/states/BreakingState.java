@@ -44,14 +44,9 @@ public class BreakingState implements BlockMinerState{
         breakAttemptTime = 0;
         isWalking = false;
 
-        // Calculate mining time
-        int boostMultiplier = 1;
-        if (miner.getBoostState() == BlockMiner.BoostState.ACTIVE) {
-            boostMultiplier = miner.getSpeedBoost();
-        }
         miningTime = BlockUtil.getMiningTime(
             Block.getStateId(Minecraft.getMinecraft().theWorld.getBlockState(miner.getTargetBlockPos())),
-            miner.getMiningSpeed() * boostMultiplier
+            miner.getMiningSpeed()
         );
 
         // Setup rotation to look at the block
@@ -96,8 +91,10 @@ public class BreakingState implements BlockMinerState{
         // Hold left-click to break blocks
         KeyBindUtil.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack, true);
 
-        if (!isWalking)
+        if (!isWalking) {
             KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, MightyMinerConfig.sneakWhileMining);
+            KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
+        }
     }
 
     /**
@@ -120,7 +117,6 @@ public class BreakingState implements BlockMinerState{
             // Close enough, stop walking
             isWalking = false;
             this.walkingDestinationBlock = null;
-            KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, false);
         }
     }
 

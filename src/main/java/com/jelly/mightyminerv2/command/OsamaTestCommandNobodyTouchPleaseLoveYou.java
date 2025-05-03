@@ -140,7 +140,7 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     @SubCommand
     public void p(int a) {
         MineableBlock[] block = new MineableBlock[]{blocks[a]};
-        BlockMiner.getInstance().start(block, 2600, 250, new int[]{1}, "Titanium Drill");
+        BlockMiner.getInstance().start(block, 2600, new int[]{1}, "Titanium Drill");
     }
 
     public String getEntityNameFromArmorStand(String armorstandName) {

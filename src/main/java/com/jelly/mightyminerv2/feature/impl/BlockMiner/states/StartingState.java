@@ -1,7 +1,6 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner.states;
 
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
-import com.jelly.mightyminerv2.util.KeyBindUtil;
 
 /**
  * StartingState
@@ -18,10 +17,10 @@ public class StartingState implements BlockMinerState {
 
     @Override
     public BlockMinerState onTick(BlockMiner miner) {
-        log("Miner boost state: " + miner.getBoostState());
-        // Check if speed boost is available to decide next state
-        return miner.getBoostState() == BlockMiner.BoostState.AVAILABLE 
-            ? new SpeedBoostState()    // Use available speed boost
+        log("Miner boost state: " + miner.getPickaxeAbilityState());
+
+        return miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE
+            ? new ApplyAbilityState()    // Use available ability
             : new ChoosingBlockState(); // Find blocks to mine
     }
 

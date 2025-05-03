@@ -124,11 +124,7 @@ public class BlockUtil {
         final int HORIZONTAL_RADIUS = 5;
         final int VERTICAL_LOWER = -3;
         final int VERTICAL_UPPER = 4;
-        final double MAX_DISTANCE = (4 - Math.sqrt(3) / 2d);  // Buffer = distance from center of cube to corner
-
-        // Pre-calculations
-        final float miningCoefficient = 500.0f / miningSpeed;
-        final float angleCoefficient = MightyMinerConfig.devMithRot;
+        final double MAX_DISTANCE = 4;
 
         // Calculate bounds for the block
         final double baseX = point.xCoord;
@@ -187,7 +183,10 @@ public class BlockUtil {
                     final float angleChange = AngleUtil.getNeededChange(AngleUtil.getPlayerAngle(), AngleUtil.getRotation(pos)).lengthSqrt();
 
                     // Calculate final cost and add to heap
-                    final float miningCost = (float) ((hardness * miningCoefficient) + (angleChange * angleCoefficient)) / blockPriority;
+                    double miningCost = hardness / (miningSpeed * 1.0d) * MightyMinerConfig.miningCoefficient
+                                        + angleChange * MightyMinerConfig.angleCoefficient
+                                        + distSq * MightyMinerConfig.distanceCoefficient;
+                    miningCost /= (blockPriority * 1.0d);
 
                     blocks.add(pos, miningCost);
                 }

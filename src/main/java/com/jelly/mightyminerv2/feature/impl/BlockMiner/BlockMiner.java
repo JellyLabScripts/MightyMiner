@@ -2,7 +2,7 @@ package com.jelly.mightyminerv2.feature.impl.BlockMiner;
 
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.BlockMinerState;
-import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.SpeedBoostState;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.ApplyAbilityState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.StartingState;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
@@ -41,17 +41,16 @@ public class BlockMiner extends AbstractFeature {
     private BlockMinerState currentState;
 
     /**
-     * Possible states for speed boost ability.
-     * AVAILABLE: Boost can be activated
-     * ACTIVE: Boost is currently in effect
-     * INACTIVE: Boost is on cooldown
+     * Possible states for pickaxe ability.
+     * AVAILABLE: Pickaxe ability can be activated
+     * UNAVAILABLE: Pickaxe ability is on cooldown or is currently in effect
      */
-    public enum BoostState {
-        AVAILABLE, ACTIVE, INACTIVE,
+    public enum PickaxeAbilityState {
+        AVAILABLE, UNAVAILABLE,
     }
     @Getter
     @Setter
-    private BoostState boostState;
+    private PickaxeAbilityState pickaxeAbilityState;
     
     @Getter
     @Setter
@@ -62,10 +61,10 @@ public class BlockMiner extends AbstractFeature {
         NO_TOOLS_AVAILABLE, // Required mining tool not found in inventory
         NO_POINTS_FOUND,    // Cannot find valid points to target on block
         NO_TARGET_BLOCKS,   // The user did not set any blocks for the miner to mine
-        NO_SPEED_BOOST,     // The user cannot speed boost
+        NO_PICKAXE_ABILITY,    // The user cannot use the pickaxe ability
     }
 
-    // For every pattern (Starting -> Speed) OR (Speed -> Starting), ++noSpeedBoostFlag
+    // For every pattern (Starting -> Speed) OR (Speed -> Starting), noSpeedBoostFlag adds 1
     // If it detects the pattern Starting -> Speed -> Starting -> Speed (i.e. noSpeedBoostFlag == 4)
     // then NO_SPEED_BOOST is thrown
     private int noSpeedBoostFlag;
@@ -84,10 +83,6 @@ public class BlockMiner extends AbstractFeature {
     @Getter
     @Setter
     private int miningSpeed;  // Mining speed modifier (affects block breaking time)
-    
-    @Getter
-    @Setter
-    private int speedBoost;   // Speed multiplier when boost is active
 
     @Getter
     @Setter
@@ -103,11 +98,10 @@ public class BlockMiner extends AbstractFeature {
      * 
      * @param blocksToMine Array of mineable block types to target
      * @param miningSpeed Base mining speed (higher = faster)
-     * @param speedBoost Multiplier to apply when speed boost is active
      * @param priority Array of priority values for block selection
      * @param miningTool Item name of the tool to use for mining
      */
-    public void start(MineableBlock[] blocksToMine, final int miningSpeed, final int speedBoost, final int[] priority, String miningTool) {
+    public void start(MineableBlock[] blocksToMine, final int miningSpeed, final int[] priority, String miningTool) {
         // Try to hold the specified mining tool if provided
         if (!miningTool.isEmpty() && !InventoryUtil.holdItem(miningTool)) {
             logError(miningTool + " not found in inventory!");
@@ -132,10 +126,9 @@ public class BlockMiner extends AbstractFeature {
         
         // Initialize parameters
         this.miningSpeed = miningSpeed - 200;  // Base adjustment to mining speed
-        this.speedBoost = speedBoost;
         this.enabled = true;
         this.error = BlockMinerError.NONE;
-        this.boostState = BoostState.AVAILABLE;
+        this.pickaxeAbilityState = PickaxeAbilityState.AVAILABLE;
         this.noSpeedBoostFlag = 0;
         
         // Initialize with starting state
@@ -165,7 +158,7 @@ public class BlockMiner extends AbstractFeature {
         transitionTo(nextState);
 
         if (noSpeedBoostFlag >= 4) {
-            setError(BlockMinerError.NO_SPEED_BOOST);
+            setError(BlockMinerError.NO_PICKAXE_ABILITY);
             stop();
         }
 
@@ -177,8 +170,8 @@ public class BlockMiner extends AbstractFeature {
         if (currentState == nextState)
             return;
 
-        if ((currentState instanceof StartingState && nextState instanceof SpeedBoostState)
-                || (currentState instanceof SpeedBoostState && nextState instanceof StartingState)) {
+        if ((currentState instanceof StartingState && nextState instanceof ApplyAbilityState)
+                || (currentState instanceof ApplyAbilityState && nextState instanceof StartingState)) {
             noSpeedBoostFlag++;
         }
         else {
@@ -204,17 +197,11 @@ public class BlockMiner extends AbstractFeature {
         }
         String message = event.message.getUnformattedText();
 
-        if (message.equals("Mining Speed Boost is now available!")
-                || message.equals("Pickobulus is now available!")) {
-            boostState = BoostState.AVAILABLE;
+        if (message.contains("is now available!")) {
+            pickaxeAbilityState = PickaxeAbilityState.AVAILABLE;
         }
-        if (message.contains("You used your Mining Speed Boost Pickaxe Ability!")
-                || message.contains("You used your Pickobulus Pickaxe Ability!")) {
-            boostState = BoostState.ACTIVE;
-        }
-        if (message.equals("Your Mining Speed Boost has expired!") || message.contains("Your Pickobulus destroyed")
-                || (boostState != BoostState.ACTIVE && message.startsWith("Your pickaxe ability is on cooldown for"))) {
-            boostState = BoostState.INACTIVE;
+        if (message.contains("You used your") || message.contains("Your pickaxe ability is on cooldown for")) {
+            pickaxeAbilityState = PickaxeAbilityState.UNAVAILABLE;
         }
     }
 }

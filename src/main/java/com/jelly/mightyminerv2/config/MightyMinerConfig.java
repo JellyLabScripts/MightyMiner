@@ -108,19 +108,13 @@ public class MightyMinerConfig extends Config {
     public static boolean miscFullBlock = false;
 
     @Switch(
-            name = "Strafe While Mining", description = "Walk Around The Vein While Mining",
-            category = GENERAL
-    )
-    public static boolean strafe = false;
-
-    @Switch(
             name = "Sneak While Mining",
             category = GENERAL
     )
     public static boolean sneakWhileMining = false;
 
     @Switch(
-            name = "Precision Miner", description = "Looks at particles spawned by precision miner perk (Might/Will Mess Up TickGLide)",
+            name = "Precision Miner (to be implemented)", description = "Looks at particles spawned by precision miner perk (Might/Will Mess Up TickGLide)",
             category = GENERAL
     )
     public static boolean precisionMiner = false;
@@ -176,7 +170,7 @@ public class MightyMinerConfig extends Config {
     };
 
     @Switch(
-            name = "Refuel Drill",
+            name = "Refuel Drill (Requires abiphone!)",
             category = GENERAL,
             subcategory = "Refuel"
     )
@@ -573,12 +567,28 @@ public class MightyMinerConfig extends Config {
     public static DebugHUD debugHUD = DebugHUD.getInstance();
 
     @Slider(
-            name = "Rotation",
+            name = "Mining Coefficient",
             category = DEBUG,
-            subcategory = "MithrilMiner",
-            min = 0, max = 10
+            subcategory = "Block Miner",
+            min = 0, max = 1000
     )
-    public static int devMithRot = 3;
+    public static int miningCoefficient = 200;
+
+    @Slider(
+            name = "Angle Coefficient",
+            category = DEBUG,
+            subcategory = "Block Miner",
+            min = 0, max = 20
+    )
+    public static int angleCoefficient = 10;
+
+    @Slider(
+            name = "Distance Coefficient",
+            category = DEBUG,
+            subcategory = "Block Miner",
+            min = 0, max = 20
+    )
+    public static int distanceCoefficient = 10;
 
     @Slider(
             name = "MobKiller Dist Cost",

@@ -43,8 +43,6 @@ public class MiningMacro extends AbstractMacro {
 
     private final List<String> necessaryItems = new ArrayList<>();
     private int miningSpeed = 0;
-    private int miningSpeedBoost = 0;
-    private boolean usingSpeedBoost = true;
 
     private MineableBlock[] blocksToMine = {};
     private int macroRetries = 0;
@@ -113,7 +111,7 @@ public class MiningMacro extends AbstractMacro {
         log("Handling initialization state");
         resetVariables();
         setBlocksToMineBasedOnOreType();
-        if (miningSpeed == 0 && miningSpeedBoost == 0) {
+        if (miningSpeed == 0) {
             AutoInventory.getInstance().retrieveSpeedBoost();
             changeState(State.GETTING_STATS);
         } else {
@@ -124,7 +122,6 @@ public class MiningMacro extends AbstractMacro {
     private void resetVariables() {
         macroRetries = 0;
         miningSpeed = 0;
-        miningSpeedBoost = 0;
         necessaryItems.clear();
         isMining = false;
     }
@@ -135,9 +132,8 @@ public class MiningMacro extends AbstractMacro {
         if (AutoInventory.getInstance().sbSucceeded()) {
             int[] sb = AutoInventory.getInstance().getSpeedBoostValues();
             miningSpeed = sb[0];
-            miningSpeedBoost = sb[1];
             macroRetries = 0;
-            log("Retrieved stats - Speed: " + miningSpeed + ", Boost: " + miningSpeedBoost);
+            log("Retrieved stats - Speed: " + miningSpeed);
             changeState(State.MINING);
         } else {
             handleFailingToGetStats();
@@ -178,9 +174,9 @@ public class MiningMacro extends AbstractMacro {
             case NO_TOOLS_AVAILABLE:
                 disable("Cannot find tools in hotbar! Please set it in configs");
                 break;
-            case NO_SPEED_BOOST:
-                disable("Cannot find speed boost messages! " +
-                        "Either enable the speed boost skill in HOTM or enable speed boost chat messages");
+            case NO_PICKAXE_ABILITY:
+                disable("Cannot find messages for pickaxe ability! " +
+                        "Either enable any pickaxe ability in HOTM or enable chat messages");
                 break;
         }
 
@@ -193,13 +189,12 @@ public class MiningMacro extends AbstractMacro {
         miner.start(
                 blocksToMine,
                 miningSpeed,
-                miningSpeedBoost,
                 determinePriority(),
                 MightyMinerConfig.miningTool
         );
 
         isMining = true;
-        log("Started mining with speed: " + miningSpeed + ", boost: " + miningSpeedBoost);
+        log("Started mining with speed: " + miningSpeed);
     }
 
     private void changeState(State newState) {

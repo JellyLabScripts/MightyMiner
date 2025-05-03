@@ -6,24 +6,24 @@ import com.jelly.mightyminerv2.util.helper.Clock;
 import net.minecraft.client.Minecraft;
 
 /**
- * SpeedBoostState
+ * ApplyAbilityState
  * 
- * State responsible for activating the mining speed boost ability.
+ * State responsible for activating the mining ability.
  * Waits for 1 second and then right clicks
  * Then waits for 1 more second to transition into the next state
  *
  * Automatically throws error if it presses 2 times consecutively
  */
-public class SpeedBoostState implements BlockMinerState {
+public class ApplyAbilityState implements BlockMinerState {
 
     private final Clock timer = new Clock();
     private final Clock timer2 = new Clock();
 
-    private final long COOLDOWN = 1000; // 1-second cooldown for activating boost
+    private final long COOLDOWN = 1000; // 1-second cooldown for activating ability
 
     @Override
     public void onStart(BlockMiner blockMiner) {
-        log("Entering Speed Boost State");
+        log("Entering Apply Ability State");
 
         // Start the cooldown timer
         timer2.reset();
@@ -58,6 +58,6 @@ public class SpeedBoostState implements BlockMinerState {
 
     @Override
     public void onEnd(BlockMiner blockMiner) {
-        log("Exiting Speed Boost State");
+        log("Exiting Apply Ability State");
     }
 }

@@ -174,9 +174,6 @@ public class AutoInventory extends AbstractFeature {
                 final Matcher matcher = Pattern.compile("\\+(\\d+)%").matcher(speedBoostLore);
                 if (matcher.find()) {
                     this.speedBoostValues[1] = Integer.parseInt(matcher.group(1));
-                    if (BlockMiner.getInstance().getBoostState() == BlockMiner.BoostState.ACTIVE) {
-                        this.speedBoostValues[0] /= this.speedBoostValues[1] / 100.0;
-                    }
                     this.swapSbState(SB.END, 500);
                     break;
                 }

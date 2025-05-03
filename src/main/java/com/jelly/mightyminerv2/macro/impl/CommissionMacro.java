@@ -43,7 +43,6 @@ public class CommissionMacro extends AbstractMacro {
     private MacroState macroState = MacroState.STARTING;
     private boolean checkForCommissionChange = false;
     private int miningSpeed = 0;
-    private int miningSpeedBoost = 0;
     private int macroRetries = 0;
     //  private Commission last;
     private List<Commission> curr = new ArrayList<>();
@@ -86,7 +85,7 @@ public class CommissionMacro extends AbstractMacro {
         this.itemRetries = 0;
         this.macroRetries = 0;
 
-        this.miningSpeed = this.miningSpeedBoost = 0;
+        this.miningSpeed = 0;
         this.curr = new ArrayList<>();
         this.necessaryItems = new ArrayList<>();
 
@@ -116,12 +115,12 @@ public class CommissionMacro extends AbstractMacro {
             items.add(MightyMinerConfig.miningTool);
             items.add(MightyMinerConfig.slayerWeapon);
 
-            if (MightyMinerConfig.commDrillRefuel) {
-                items.add("Abiphone");
-            }
-
             if (MightyMinerConfig.commClaimMethod == 1) {
                 items.add("Royal Pigeon");
+            }
+
+            if (MightyMinerConfig.commDrillRefuel) {
+                items.add("Abiphone");
             }
 
             this.necessaryItems = items;
@@ -165,7 +164,7 @@ public class CommissionMacro extends AbstractMacro {
                 this.changeMainState(MainState.WARP, 0);
             } else if (!InventoryUtil.areItemsInInventory(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY
                     && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
-                error("Items Arent In Inventory And Failsafe Isnt Active");
+                error("Abiphone not found in inventory! It is required for Auto Refuel");
                 this.changeMainState(MainState.NONE);
             } else if (!InventoryUtil.areItemsInHotbar(this.getNecessaryItems()) && this.macroState != MacroState.REFUEL_VERIFY
                     && !FailsafeManager.getInstance().isFailsafeActive(Failsafe.ITEM_CHANGE)) {
@@ -258,7 +257,7 @@ public class CommissionMacro extends AbstractMacro {
         switch (this.macroState) {
             case STARTING:
                 this.changeMacroState(MacroState.CHECKING_COMMISSION);
-                if (this.miningSpeed == 0 && this.miningSpeedBoost == 0) {
+                if (this.miningSpeed == 0) {
                     if (!InventoryUtil.holdItem(MightyMinerConfig.miningTool)) {
                         error("Something went wrong. Cannot hold mining tool");
                         this.changeMainState(MainState.NONE);
@@ -279,10 +278,9 @@ public class CommissionMacro extends AbstractMacro {
                 if (AutoInventory.getInstance().sbSucceeded()) {
                     int[] sb = AutoInventory.getInstance().getSpeedBoostValues();
                     this.miningSpeed = sb[0];
-                    this.miningSpeedBoost = sb[1];
                     this.macroRetries = 0;
                     this.changeMacroState(MacroState.STARTING);
-                    log("MiningSpeed: " + miningSpeed + ", MiningSpeedBoost: " + miningSpeedBoost);
+                    log("MiningSpeed: " + miningSpeed);
                     return;
                 }
                 switch (AutoInventory.getInstance().getSbError()) {
@@ -389,7 +387,6 @@ public class CommissionMacro extends AbstractMacro {
                 miner.start(
                         blocksToMine,
                         miningSpeed,
-                        miningSpeedBoost,
                         this.curr.stream().anyMatch(it -> it.getName().contains("Titanium")) || MightyMinerConfig.commMineTitanium ? titaniumPriority
                                 : mithrilPriority,
                         MightyMinerConfig.miningTool

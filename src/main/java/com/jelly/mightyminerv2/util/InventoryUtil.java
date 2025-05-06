@@ -78,25 +78,46 @@ public class InventoryUtil {
         return -1;
     }
 
-    public static boolean areItemsInInventory(Collection<String> items) {
-        List<String> itemsToFind = new ArrayList<>(items);
+    /**
+     * Returns a list of required items that are not present in the player's inventory
+     * @param requiredItems Collection of item names to check for
+     * @return List of missing item names (empty if all items are present)
+     */
+    public static List<String> getMissingItemsInInventory(Collection<String> requiredItems) {
+        List<String> missingItems = new ArrayList<>(requiredItems);
+
         for (ItemStack stack : mc.thePlayer.inventory.mainInventory) {
             if (stack != null && stack.hasDisplayName()) {
-                itemsToFind.removeIf(it -> stack.getDisplayName().contains(it));
+                String displayName = stack.getDisplayName();
+                missingItems.removeIf(displayName::contains);
             }
         }
-        return itemsToFind.isEmpty();
+
+        return missingItems;
     }
 
-    public static boolean areItemsInHotbar(Collection<String> items) {
-        List<String> itemsToFind = new ArrayList<>(items);
+    public static boolean areItemsInInventory(Collection<String> items) {
+        return getMissingItemsInInventory(items).isEmpty();
+    }
+
+    /**
+     * Returns a list of required items that are not present in the player's hotbar
+     * @param requiredItems Collection of item names to check for
+     * @return List of missing item names (empty if all items are present)
+     */
+    public static List<String> getMissingItemsInHotbar(Collection<String> requiredItems) {
+        List<String> missingItems = new ArrayList<>(requiredItems);
         for (int i = 0; i < 8; i++) {
             ItemStack stack = mc.thePlayer.inventory.getStackInSlot(i);
             if (stack != null && stack.hasDisplayName()) {
-                itemsToFind.removeIf(it -> stack.getDisplayName().contains(it));
+                missingItems.removeIf(item -> stack.getDisplayName().contains(item));
             }
         }
-        return itemsToFind.isEmpty();
+        return missingItems;
+    }
+
+    public static boolean areItemsInHotbar(Collection<String> items) {
+        return getMissingItemsInHotbar(items).isEmpty();
     }
 
     // returns the items that arent in hotbar and slots that items can be moved into

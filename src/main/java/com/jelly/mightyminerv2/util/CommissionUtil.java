@@ -3,7 +3,7 @@ package com.jelly.mightyminerv2.util;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
-import com.jelly.mightyminerv2.macro.impl.helper.Commission;
+import com.jelly.mightyminerv2.macro.impl.CommissionMacro.Commission;
 import kotlin.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;

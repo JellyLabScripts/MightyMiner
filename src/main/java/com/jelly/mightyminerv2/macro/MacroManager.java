@@ -6,6 +6,7 @@ import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
 import com.jelly.mightyminerv2.macro.impl.*;
+import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 import com.jelly.mightyminerv2.util.Logger;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -53,8 +54,8 @@ public class MacroManager {
         log("Macro::enable");
         FeatureManager.getInstance().enableAll();
         this.currentMacro = this.getCurrentMacro();
-        this.currentMacro.enable();
         send(this.currentMacro.getName() + " Enabled");
+        this.currentMacro.enable();
     }
 
     public void disable() {

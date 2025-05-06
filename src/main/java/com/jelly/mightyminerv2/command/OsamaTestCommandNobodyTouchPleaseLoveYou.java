@@ -12,7 +12,7 @@ import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.handler.GraphHandler;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
-import com.jelly.mightyminerv2.macro.impl.CommissionMacro;
+import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import com.jelly.mightyminerv2.pathfinder.calculate.PathNode;
 import com.jelly.mightyminerv2.pathfinder.calculate.path.AStarPathFinder;

@@ -3,7 +3,7 @@ package com.jelly.mightyminerv2.hud;
 import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.hud.TextHud;
-import com.jelly.mightyminerv2.macro.impl.CommissionMacro;
+import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class CommissionHUD extends TextHud {
     @Override
     protected void getLines(List<String> lines, boolean example) {
         long uptime = macro.uptime.getTimePassed() / 1000;
-        int totalComms = macro.getCompletedCommissions();
+        int totalComms = macro.getCommissionCounter();
         int commsPerHour = 0;
         if (uptime > 0) {
             commsPerHour = (int) ((float) totalComms / uptime * 3600);
@@ -41,9 +41,7 @@ public class CommissionHUD extends TextHud {
         lines.add("§7HOTM Exp/H: §f" + commsPerHour * 400);
         if (macro.isEnabled()) {
             lines.add("§7Active Commissions:");
-            macro.getActiveCommissions().forEach(it -> {
-                lines.add("  §f" + it.getName());
-            });
+            lines.add("  §f" + macro.getCurrentCommission());
         }
     }
 

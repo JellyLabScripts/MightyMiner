@@ -59,7 +59,7 @@ public class ApplyAbilityState implements BlockMinerState {
     @Override
     public void onEnd(BlockMiner blockMiner) {
         if (Minecraft.getMinecraft().currentScreen != null && Minecraft.getMinecraft().thePlayer != null) {
-            log("Clicked on player whilst activating ability");
+            log("Clicked on player whilst activating ability. Exiting menu");
             Minecraft.getMinecraft().addScheduledTask(() -> { Minecraft.getMinecraft().thePlayer.closeScreen();});
         }
         log("Exiting Apply Ability State");

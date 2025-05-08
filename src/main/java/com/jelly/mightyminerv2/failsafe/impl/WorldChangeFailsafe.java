@@ -11,7 +11,10 @@ public class WorldChangeFailsafe extends AbstractFailsafe {
 
     @Getter
     private static final WorldChangeFailsafe instance = new WorldChangeFailsafe();
-    private final Minecraft mc = Minecraft.getMinecraft();
+    private static final Failsafe failsafeType = Failsafe.TELEPORT;
+
+    // Then remove the getFailsafeType() method entirely
+    // Update any code to access the field directly
 
     @Override
     public String getName() {
@@ -20,7 +23,7 @@ public class WorldChangeFailsafe extends AbstractFailsafe {
 
     @Override
     public Failsafe getFailsafeType() {
-        return Failsafe.TELEPORT;
+        return failsafeType;
     }
 
     @Override

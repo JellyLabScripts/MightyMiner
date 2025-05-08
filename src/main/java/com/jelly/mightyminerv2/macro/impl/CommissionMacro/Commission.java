@@ -1,4 +1,4 @@
-package com.jelly.mightyminerv2.macro.impl.helper;
+package com.jelly.mightyminerv2.macro.impl.CommissionMacro;
 
 import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.Logger;
@@ -6,7 +6,6 @@ import com.jelly.mightyminerv2.util.helper.location.SubLocation;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.util.Vec3;
 
 import java.util.*;
@@ -73,6 +72,7 @@ public enum Commission {
         VEINS = Collections.unmodifiableMap(veinsMap);
     }
 
+    @Getter
     private final String name;
     private final SubLocation location;
     private final int priority;
@@ -125,10 +125,6 @@ public enum Commission {
 
         Logger.sendNote("overlap: " + commissions);
         return commissions;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public RouteWaypoint getWaypoint() {

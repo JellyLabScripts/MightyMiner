@@ -578,9 +578,9 @@ public class MightyMinerConfig extends Config {
             name = "Angle Coefficient",
             category = DEBUG,
             subcategory = "Block Miner",
-            min = 0, max = 20
+            min = 0, max = 10
     )
-    public static int angleCoefficient = 10;
+    public static int angleCoefficient = 1;
 
     @Slider(
             name = "Distance Coefficient",

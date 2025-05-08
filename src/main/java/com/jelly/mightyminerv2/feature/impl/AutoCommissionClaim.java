@@ -5,7 +5,7 @@ import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import com.jelly.mightyminerv2.macro.impl.GlacialMacro;
-import com.jelly.mightyminerv2.macro.impl.helper.Commission;
+import com.jelly.mightyminerv2.macro.impl.CommissionMacro.Commission;
 import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.EntityUtil;
 import com.jelly.mightyminerv2.util.InventoryUtil;
@@ -132,12 +132,14 @@ public class AutoCommissionClaim extends AbstractFeature {
                     this.emissary = CommissionUtil.getClosestEmissary();
                     if (!this.emissary.isPresent()) {
                         this.stop(ClaimError.INACCESSIBLE_NPC);
+                        log("Emissary: " + CommissionUtil.getClosestEmissary().get().getName());
                         sendError("Cannot Find Emissary. Stopping");
                         break;
                     }
 
                     if (mc.thePlayer.getDistanceSqToEntity(this.emissary.get()) > 16) {
                         this.stop(ClaimError.INACCESSIBLE_NPC);
+                        log("Emissary: " + CommissionUtil.getClosestEmissary().get().getName());
                         sendError("Emissary is too far away.");
                         break;
                     }

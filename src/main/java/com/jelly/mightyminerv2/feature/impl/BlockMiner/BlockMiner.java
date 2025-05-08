@@ -67,7 +67,7 @@ public class BlockMiner extends AbstractFeature {
     // For every pattern (Starting -> Speed) OR (Speed -> Starting), noSpeedBoostFlag adds 1
     // If it detects the pattern Starting -> Speed -> Starting -> Speed (i.e. noSpeedBoostFlag == 4)
     // then NO_SPEED_BOOST is thrown
-    private int noSpeedBoostFlag;
+    private int retryActivatePickaxeAbility;
 
     @Getter
     private Map<Integer, Integer> blockPriority = new HashMap<>(); // State ID of block -> priority
@@ -129,7 +129,7 @@ public class BlockMiner extends AbstractFeature {
         this.enabled = true;
         this.error = BlockMinerError.NONE;
         this.pickaxeAbilityState = PickaxeAbilityState.AVAILABLE;
-        this.noSpeedBoostFlag = 0;
+        this.retryActivatePickaxeAbility = 0;
         
         // Initialize with starting state
         this.currentState = new StartingState();
@@ -141,7 +141,6 @@ public class BlockMiner extends AbstractFeature {
     public void stop() {
         super.stop();
         KeyBindUtil.releaseAllExcept();  // Release all keybinds
-        StrafeUtil.enabled = false;      // Disable automatic movement
     }
 
     @SubscribeEvent
@@ -157,14 +156,13 @@ public class BlockMiner extends AbstractFeature {
         BlockMinerState nextState = currentState.onTick(this);
         transitionTo(nextState);
 
-        if (noSpeedBoostFlag >= 4) {
+        if (retryActivatePickaxeAbility >= 4) {
             setError(BlockMinerError.NO_PICKAXE_ABILITY);
             stop();
         }
 
     }
 
-    // Calls appropriate lifecycle methods on the states
     private void transitionTo(BlockMinerState nextState){
         // Skip if no state change
         if (currentState == nextState)
@@ -172,10 +170,10 @@ public class BlockMiner extends AbstractFeature {
 
         if ((currentState instanceof StartingState && nextState instanceof ApplyAbilityState)
                 || (currentState instanceof ApplyAbilityState && nextState instanceof StartingState)) {
-            noSpeedBoostFlag++;
+            retryActivatePickaxeAbility ++;
         }
         else {
-            noSpeedBoostFlag = 0;
+            retryActivatePickaxeAbility = 0;
         }
 
         currentState.onEnd(this);
@@ -189,7 +187,6 @@ public class BlockMiner extends AbstractFeature {
         currentState.onStart(this);
     }
 
-    // Updates boostState based on recognized messages.
     @SubscribeEvent
     protected void onChat(ClientChatReceivedEvent event) {
         if (event.type != 0) {

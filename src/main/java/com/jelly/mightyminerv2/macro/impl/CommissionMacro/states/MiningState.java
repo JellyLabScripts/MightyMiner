@@ -34,12 +34,13 @@ public class MiningState implements CommissionMacroState{
 
         String miningTool = MightyMinerConfig.miningTool;
         if (miningTool.toLowerCase().contains("drill") || InventoryUtil.getFullName(miningTool).contains("Drill")) {
-            if (InventoryUtil.getDrillRemainingFuel(miningTool) == 0) {
-                log("No fuel left in drill");
+            log("Fuel detected: " + InventoryUtil.getDrillRemainingFuel(miningTool));
+            if (InventoryUtil.getDrillRemainingFuel(miningTool) <= 10) {
+                log("Less than 10 fuel left in drill. Starting to refuel");
                 if(MightyMinerConfig.commDrillRefuel)
                     return new RefuelState();
                 else {
-                    macro.disable("No fuel left in drill");
+                    macro.disable("Very little fuel left in drill");
                     return null;
                 }
             }

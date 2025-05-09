@@ -16,13 +16,14 @@ public class PathingState implements CommissionMacroState{
 
     private final RouteNavigator routeNavigator = RouteNavigator.getInstance();
     private final String GRAPH_NAME = "Commission Macro";
+    private int attempts = 0;
 
     @Override
     public void onStart(CommissionMacro macro) {
         log("Starting pathing state");
         Commission commission = macro.getCurrentCommission();
 
-        // When using royal pigeon or refueling using Abiphone, no path finding is needed
+        // When using royal pigeon or refueling using abiphone, no path finding is needed
         if ((commission == Commission.COMMISSION_CLAIM && MightyMinerConfig.commClaimMethod == 1)
                 || commission == Commission.REFUEL) {
             return;
@@ -82,8 +83,15 @@ public class PathingState implements CommissionMacroState{
                 macro.disable("Route navigator failed, but no error is detected. Please contact the developer.");
                 break;
             case TIME_FAIL: case PATHFIND_FAILED:
-                logError("Failed to pathfind. Warping and restarting");
-                return new WarpingState();
+                attempts++;
+                if(attempts >= 3) {
+                    logError("Failed to pathfind. Warping and restarting");
+                    return new WarpingState();
+                } else {
+                    logError("Failed to pathfind. Retrying to pathfind");
+                    onStart(macro);
+                    return this;
+                }
         }
         return null;
     }

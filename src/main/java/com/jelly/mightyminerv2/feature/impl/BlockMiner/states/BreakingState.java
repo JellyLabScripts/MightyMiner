@@ -80,6 +80,7 @@ public class BreakingState implements BlockMinerState{
 
     @Override
     public void onEnd(BlockMiner miner) {
+        RotationHandler.getInstance().stop();
         log("Exiting Breaking State");
     }
 

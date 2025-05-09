@@ -31,16 +31,12 @@ public class FailsafeManager {
     public Set<Failsafe> failsafesToIgnore = new HashSet<>();
     private final Clock timer = new Clock();
 
+    // TODO: Implement all failsafe later!
     public FailsafeManager() {
         this.failsafes.addAll(Arrays.asList(
             DisconnectFailsafe.getInstance(),
-//            ItemChangeFailsafe.getInstance(),
             KnockbackFailsafe.getInstance(),
-//            TeleportFailsafe.getInstance(),
-//            RotationFailsafe.getInstance(),
-            BedrockCheckFailsafe.getInstance(),
             WorldChangeFailsafe.getInstance(),
-            PlayerFailsafe.getInstance(),
             ProfileFailsafe.getInstance()
         ));
     }

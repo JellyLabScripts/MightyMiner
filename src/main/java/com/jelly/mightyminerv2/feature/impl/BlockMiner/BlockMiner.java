@@ -143,6 +143,8 @@ public class BlockMiner extends AbstractFeature {
 
     @Override
     public void stop() {
+        if(currentState != null)
+            currentState.onEnd(this);
         super.stop();
         KeyBindUtil.releaseAllExcept();  // Release all keybinds
     }

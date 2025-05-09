@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+// TODO: Check if it causes excessive lag before re-implementing!
 public class PlayerFailsafe extends AbstractFailsafe {
 
     @Getter

@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.BlockMinerState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.ApplyAbilityState;
@@ -68,6 +69,9 @@ public class BlockMiner extends AbstractFeature {
     // If it detects the pattern Starting -> Speed -> Starting -> Speed (i.e. noSpeedBoostFlag == 4)
     // then NO_SPEED_BOOST is thrown
     private int retryActivatePickaxeAbility;
+
+    // Try using secondary pickaxe when primary fails to activate boost.
+    private boolean triedAlt = false;
 
     @Getter
     private Map<Integer, Integer> blockPriority = new HashMap<>(); // State ID of block -> priority
@@ -157,6 +161,13 @@ public class BlockMiner extends AbstractFeature {
         transitionTo(nextState);
 
         if (retryActivatePickaxeAbility >= 4) {
+            if (!triedAlt) {
+                InventoryUtil.holdItem(MightyMinerConfig.altMiningTool);
+                triedAlt = true;
+                retryActivatePickaxeAbility = 0;
+                return;
+            }
+
             setError(BlockMinerError.NO_PICKAXE_ABILITY);
             stop();
         }

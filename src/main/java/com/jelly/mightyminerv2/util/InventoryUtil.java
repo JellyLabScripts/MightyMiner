@@ -61,6 +61,21 @@ public class InventoryUtil {
         return null;
     }
 
+    public static int getFirstEmptySlotId() {
+        Slot slot = getFirstEmptySlot();
+        return slot != null ? slot.slotNumber : -1;
+    }
+
+    public static Slot getFirstEmptySlot() {
+        for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
+            if (!slot.getHasStack()) {
+                return slot;
+            }
+        }
+        return null;
+    }
+
+
     public static int getHotbarSlotOfItem(String items) {
         if (items.isEmpty()) {
             return -1;
@@ -107,10 +122,13 @@ public class InventoryUtil {
      */
     public static List<String> getMissingItemsInHotbar(Collection<String> requiredItems) {
         List<String> missingItems = new ArrayList<>(requiredItems);
+        missingItems.forEach(System.out::println);
         for (int i = 0; i < 8; i++) {
             ItemStack stack = mc.thePlayer.inventory.getStackInSlot(i);
             if (stack != null && stack.hasDisplayName()) {
-                missingItems.removeIf(item -> stack.getDisplayName().contains(item));
+                // Remove color codes (§6 etc.) from the display name
+                String cleanName = stack.getDisplayName().replaceAll("§[0-9a-fk-or]", "");
+                missingItems.removeIf(cleanName::contains);
             }
         }
         return missingItems;
@@ -344,6 +362,8 @@ public class InventoryUtil {
     }
 
     public enum ClickMode {
-        PICKUP, QUICK_MOVE, SWAP
+        PICKUP,      // Ordinary left click
+        QUICK_MOVE,  // Shift click
+        SWAP
     }
 }

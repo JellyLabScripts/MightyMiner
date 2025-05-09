@@ -49,7 +49,8 @@ public class PathingState implements CommissionMacroState{
     public CommissionMacroState onTick(CommissionMacro macro) {
 
         if(macro.getCurrentCommission() == null){
-            log("Commission is empty! Restarting macro to wait for tab-list updates");
+            send("Commission is empty! Restarting macro to wait for tab-list updates. " +
+                    "Note that this is usually temporary and caused by lags in the server.");
             return new StartingState();
         }
 

@@ -2,6 +2,7 @@ package com.jelly.mightyminerv2.feature;
 
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
 import com.jelly.mightyminerv2.feature.impl.*;
+import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 
 import java.util.Arrays;

@@ -59,7 +59,7 @@ public abstract class AbstractFeature {
     /**
      * Starts the feature. Should be overridden by subclasses
      * to initialize or enable feature-specific logic.
-     * NOTE: This does not automatically set 'enabled' to true.
+     * NOTE: This does NOT automatically set 'enabled' to true.
      */
     public void start() {
     }
@@ -102,7 +102,6 @@ public abstract class AbstractFeature {
      *
      * @return true if the feature should start automatically
      */
-    // Whether this feature auto-starts on launch
     public boolean shouldStartAtLaunch() {
         return false;
     }

@@ -5,6 +5,7 @@ import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.util.Logger;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
@@ -34,6 +35,8 @@ public abstract class AbstractFailsafe {
     public boolean onChat(ClientChatReceivedEvent event) {
         return false;
     }
+
+    public boolean onGuiOpen(GuiOpenEvent event) { return false; }
 
     public boolean onWorldUnload(WorldEvent.Unload event) {
         return false;
@@ -80,6 +83,7 @@ public abstract class AbstractFailsafe {
         ROTATION,
         TELEPORT,
         BEDROCK_CHECK,
-        SLOT_CHANGE
+        SLOT_CHANGE,
+        PLAYER_PROFILE_OPEN
     }
 }

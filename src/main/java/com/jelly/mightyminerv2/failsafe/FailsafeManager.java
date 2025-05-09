@@ -12,6 +12,7 @@ import com.jelly.mightyminerv2.util.helper.AudioManager;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -33,13 +34,14 @@ public class FailsafeManager {
     public FailsafeManager() {
         this.failsafes.addAll(Arrays.asList(
             DisconnectFailsafe.getInstance(),
-            ItemChangeFailsafe.getInstance(),
+//            ItemChangeFailsafe.getInstance(),
             KnockbackFailsafe.getInstance(),
 //            TeleportFailsafe.getInstance(),
 //            RotationFailsafe.getInstance(),
             BedrockCheckFailsafe.getInstance(),
             WorldChangeFailsafe.getInstance(),
-            PlayerFailsafe.getInstance()
+            PlayerFailsafe.getInstance(),
+            ProfileFailsafe.getInstance()
         ));
     }
 
@@ -139,6 +141,19 @@ public class FailsafeManager {
                 this.emergencyQueue.add(failsafe);
             }
         });
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onGuiOpen(GuiOpenEvent event) {
+        if (this.shouldNotCheckForFailsafe()) {
+            return;
+        }
+
+        for (AbstractFailsafe failsafe : this.failsafes) {
+            if (!this.failsafesToIgnore.contains(failsafe.getFailsafeType()) && failsafe.onGuiOpen(event)) {
+                this.emergencyQueue.add(failsafe);
+            }
+        }
     }
 
     public void removeFailsafeFromQueue(AbstractFailsafe failsafe) {

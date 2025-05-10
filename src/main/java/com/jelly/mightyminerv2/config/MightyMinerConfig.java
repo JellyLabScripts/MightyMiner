@@ -247,7 +247,7 @@ public class MightyMinerConfig extends Config {
             return;
         }
 
-        slayerWeapon = StringUtils.stripControlCodes(currentItem.getDisplayName());
+        slayerWeapon = StringUtils.stripControlCodes(currentItem.getDisplayName()).replaceAll("[^\\x20-\\x7E]", "");
         Logger.sendMessage("Slayer Weapon set to: " + currentItem.getDisplayName());
     };
 

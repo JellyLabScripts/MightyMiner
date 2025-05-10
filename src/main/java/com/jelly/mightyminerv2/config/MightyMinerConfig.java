@@ -119,6 +119,12 @@ public class MightyMinerConfig extends Config {
     )
     public static boolean precisionMiner = false;
 
+    @Switch(
+            name = "Disable mining speed boost", description = "Only disable this if you are < HOTM 3.",
+            category = GENERAL
+    )
+    public static boolean disableMiningSpeedBoost = false;
+
     @Text(
             name = "Mining Tool", description = "Mining tool that you use to mine blocks",
             category = GENERAL,

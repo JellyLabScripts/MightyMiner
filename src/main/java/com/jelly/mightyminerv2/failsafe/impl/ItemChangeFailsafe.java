@@ -128,7 +128,7 @@ public class ItemChangeFailsafe extends AbstractFailsafe {
                 log("Tracked necessary item '" + newDisplayName + "' (ID: " + newItemId + ") from original slot " + originalSlotOfThisItem + " now in slot " + slot + ".");
 
                 if (!originalSlotOfThisItem.equals(slot)) {
-                    log("Necessary item '" + newDisplayName + "' (ID: " + newItemId + ") was MOVED from slot " + originalSlotOfThisItem + " to slot " + slot + ". Triggering failsafe!");
+                    warn("Necessary item '" + newDisplayName + "' (ID: " + newItemId + ") was MOVED from slot " + originalSlotOfThisItem + " to slot " + slot + ". Triggering failsafe!");
                     return true;
                 }
             }

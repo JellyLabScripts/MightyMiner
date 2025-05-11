@@ -74,8 +74,8 @@ public class EntityUtil {
             .collect(Collectors.toList()).forEach((entity) -> {
                 Entity livingBase = getEntityCuttingOtherEntity(entity, null);
                 if (livingBase instanceof EntityLivingBase) {
-                    if (!entitiesToIgnore.contains((EntityLivingBase) livingBase)) {
-                    entities.add((EntityLivingBase) livingBase);
+                    if (!entitiesToIgnore.contains((EntityLivingBase) livingBase) && !livingBase.equals(mc.thePlayer)) {
+                        entities.add((EntityLivingBase) livingBase);
                     }
                 }
             });

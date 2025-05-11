@@ -9,13 +9,16 @@ import com.jelly.mightyminerv2.util.helper.Clock;
 import lombok.Getter;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ItemChangeFailsafe extends AbstractFailsafe {
 
@@ -41,6 +44,13 @@ public class ItemChangeFailsafe extends AbstractFailsafe {
 
     @Override
     public boolean onTick(ClientTickEvent event) {
+        if (mc.currentScreen instanceof GuiContainer) {
+            if (!this.removedItems.isEmpty() || this.timer.isScheduled()) {
+                resetStates();
+            }
+            return false;
+        }
+
         if (this.removedItems.isEmpty()) {
             if (this.timer.isScheduled()) {
                 this.timer.reset();
@@ -53,55 +63,76 @@ public class ItemChangeFailsafe extends AbstractFailsafe {
         }
 
         if (this.timer.passed()) {
-            log("timer passed");
+            for (Map.Entry<String, Integer> entry : removedItems.entrySet()) {
+                warn("Necessary item with ID '" + entry.getKey() + "' is confirmed missing from slot " + entry.getValue() + " after timeout.");
+            }
+            return true;
         }
 
-        return this.timer.passed();
+        return false;
     }
 
 
     @Override
     public boolean onPacketReceive(PacketEvent.Received event) {
-        if (mc.currentScreen instanceof GuiContainer || !(event.packet instanceof S2FPacketSetSlot)) {
+        if (mc.currentScreen instanceof GuiContainer) {
+            if (!this.removedItems.isEmpty() || this.timer.isScheduled()) {
+                resetStates();
+            }
+            return false;
+        }
+
+        if (!(event.packet instanceof S2FPacketSetSlot)) {
             return false;
         }
 
         S2FPacketSetSlot packet = (S2FPacketSetSlot) event.packet;
         int slot = packet.func_149173_d();
 
-        if (slot <= 0) {
+        // Slots 1-44 are main player inventory
+        if (slot <= 0 || slot >= 45) {
             return false;
         }
 
-        if (slot >= 45) {
-            return false;
-        }
-        Slot oldSlot = mc.thePlayer.inventoryContainer.getSlot(slot);
-        if (!oldSlot.getHasStack() || !oldSlot.getStack().hasDisplayName()) {
-            return false;
-        }
-        String oldItem = InventoryUtil.getItemId(oldSlot.getStack());
-        String newItem = InventoryUtil.getItemId(packet.func_149174_e());
+        Slot oldSlotObj = mc.thePlayer.inventoryContainer.getSlot(slot);
+        ItemStack oldStackInSlot = oldSlotObj.getHasStack() ? oldSlotObj.getStack() : null;
+        ItemStack newStackFromPacket = packet.func_149174_e();
 
-        if (!oldItem.isEmpty() && newItem.isEmpty()) {
-            String oldName = StringUtils.stripControlCodes(oldSlot.getStack().getDisplayName());
-            if (MacroManager.getInstance().getCurrentMacro().getNecessaryItems().stream().anyMatch(oldName::contains)) {
-                removedItems.put(oldItem, slot);
-                note("Item " + oldName + " with id " + oldItem + " was removed from slot " + slot);
-            }
-        }
+        String oldItemId = (oldStackInSlot != null) ? InventoryUtil.getItemId(oldStackInSlot) : "";
+        String newItemId = (newStackFromPacket != null) ? InventoryUtil.getItemId(newStackFromPacket) : "";
 
-        if (!newItem.isEmpty() && oldItem.isEmpty()) {
-            Integer oldSlotNumber = removedItems.remove(newItem);
-            if (oldSlotNumber != null) {
-                note("Item with id " + newItem + " was removed from " + oldSlotNumber + " and added back to slot " + slot);
-                if (oldSlotNumber != slot) {
-                    warn("Item was moved.");
-                    return true;
+        // Get and filter the list of necessary items
+        List<String> necessaryDisplayNames = MacroManager.getInstance().getCurrentMacro().getNecessaryItems()
+                .stream()
+                .filter(name -> name != null && !name.isEmpty())
+                .collect(Collectors.toList());
+
+        // Check if the removed/replaced item was necessary
+        if (oldStackInSlot != null && (newStackFromPacket == null || !oldItemId.equals(newItemId))) {
+            if (oldStackInSlot.hasDisplayName()) {
+                String oldDisplayName = StringUtils.stripControlCodes(oldStackInSlot.getDisplayName());
+                if (necessaryDisplayNames.stream().anyMatch(oldDisplayName::contains)) {
+                    removedItems.put(oldItemId, slot);
+                    log("Necessary item '" + oldDisplayName + "' (ID: " + oldItemId + ") was removed/replaced from slot " + slot);
                 }
             }
         }
 
+        if (newStackFromPacket != null && (oldStackInSlot == null || !newItemId.equals(oldItemId))) {
+            Integer originalSlotOfThisItem = removedItems.get(newItemId);
+
+            if (originalSlotOfThisItem != null) {
+                removedItems.remove(newItemId);
+
+                String newDisplayName = newStackFromPacket.hasDisplayName() ? StringUtils.stripControlCodes(newStackFromPacket.getDisplayName()) : newItemId;
+                log("Tracked necessary item '" + newDisplayName + "' (ID: " + newItemId + ") from original slot " + originalSlotOfThisItem + " now in slot " + slot + ".");
+
+                if (!originalSlotOfThisItem.equals(slot)) {
+                    warn("Necessary item '" + newDisplayName + "' (ID: " + newItemId + ") was MOVED from slot " + originalSlotOfThisItem + " to slot " + slot + ". Triggering failsafe!");
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

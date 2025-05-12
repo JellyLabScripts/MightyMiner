@@ -18,17 +18,8 @@ public class StartingState implements BlockMinerState {
 
     @Override
     public BlockMinerState onTick(BlockMiner miner) {
-        if (!MightyMinerConfig.disableMiningSpeedBoost && miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE) {
-            log("Mining speed boost ENABLED in config and ability AVAILABLE");
-            return new ApplyAbilityState();
-        } else {
-            if (MightyMinerConfig.disableMiningSpeedBoost) {
-                log("Mining speed boost DISABLED in config");
-            } else {
-                log("Mining speed boost ENABLED in config, but ability UNAVAILABLE");
-            }
-            return new ChoosingBlockState();
-        }
+        return MightyMinerConfig.usePickaxeAbility && miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE?
+                new ApplyAbilityState() : new ChoosingBlockState();
     }
 
     @Override

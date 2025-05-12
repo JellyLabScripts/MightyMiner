@@ -3,14 +3,12 @@ package com.jelly.mightyminerv2.macro.impl.CommissionMacro;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
-import com.jelly.mightyminerv2.feature.impl.*;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.CommissionMacroState;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.StartingState;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.WarpingState;
 import com.jelly.mightyminerv2.util.CommissionUtil;
-import com.jelly.mightyminerv2.util.InventoryUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -81,7 +79,7 @@ public class CommissionMacro extends AbstractMacro {
             items.add("Royal Pigeon");
         }
 
-        if (MightyMinerConfig.commDrillRefuel) {
+        if (MightyMinerConfig.drillRefuel) {
             items.add("Abiphone");
         }
         return items;

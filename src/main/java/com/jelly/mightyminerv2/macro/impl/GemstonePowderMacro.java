@@ -21,11 +21,7 @@ public class GemstonePowderMacro extends AbstractMacro {
     public List<String> getNecessaryItems() {
         List<String> items = new ArrayList<>();
 
-        if (MightyMinerConfig.drillSwap) {
-            items.add(MightyMinerConfig.altMiningTool);
-        }
-
-        if (MightyMinerConfig.commDrillRefuel) {
+        if (MightyMinerConfig.drillRefuel) {
             items.add("Abiphone");
         }
 

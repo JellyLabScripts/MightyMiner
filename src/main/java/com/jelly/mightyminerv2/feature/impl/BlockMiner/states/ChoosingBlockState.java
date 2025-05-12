@@ -1,6 +1,5 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner.states;
 
-import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.util.BlockUtil;
 import com.jelly.mightyminerv2.util.helper.Clock;
@@ -38,7 +37,7 @@ public class ChoosingBlockState implements BlockMinerState {
         if (blocks.isEmpty()) {
             if (!timer.isScheduled()) {
                 log("Scheduled a 2-second timer to see if blocks spawn or not");
-                timer.schedule(blockMiner.getWait_threshold());
+                timer.schedule(blockMiner.getWaitThreshold());
             }
 
             // If the timer has ended and still no blocks, stop mining

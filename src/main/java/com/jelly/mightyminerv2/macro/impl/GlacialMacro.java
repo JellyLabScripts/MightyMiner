@@ -43,7 +43,7 @@ public class GlacialMacro extends AbstractMacro {
     
     @Override
     public void onEnable() {
-        miner.setWait_threshold(500);
+        miner.setWaitThreshold(500);
         mainState = MainState.TELEPORTING;
         state = State.PATHFINDING;
         initializeState = InitializeState.STARTING;
@@ -396,10 +396,10 @@ public class GlacialMacro extends AbstractMacro {
     @Override
     public List<String> getNecessaryItems() {
         List<String> items = new ArrayList<>();
-        if (MightyMinerConfig.commDrillRefuel) {
+        if (MightyMinerConfig.drillRefuel) {
             items.add("Abiphone");
 
-            String fuel = MightyMinerConfig.commMachineFuel == 0 ? "Volta" : "Oil Barrel";
+            String fuel = MightyMinerConfig.refuelMachineFuel == 0 ? "Volta" : "Oil Barrel";
 
             if (InventoryUtil.getHotbarSlotOfItem(fuel) == -1) {
                 Logger.sendError("You need fuel to run this macro, implementation will be added soon for retrieving, ending macro.");

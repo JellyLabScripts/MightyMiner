@@ -37,7 +37,7 @@ public class RouteMinerMacro extends AbstractMacro {
     public void onEnable() {
         mainState = MainState.INITIALIZATION;
         state = State.STARTING;
-        miner.setWait_threshold(0);
+        miner.setWaitThreshold(0);
         RouteNavigator.getInstance().queueRoute(RouteHandler.getInstance().getSelectedRoute());
         super.onEnable();
     }
@@ -221,11 +221,7 @@ public class RouteMinerMacro extends AbstractMacro {
     public List<String> getNecessaryItems() {
         List<String> items = new ArrayList<>();
 
-        if (MightyMinerConfig.drillSwap) {
-            items.add(MightyMinerConfig.altMiningTool);
-        }
-
-        if (MightyMinerConfig.commDrillRefuel) {
+        if (MightyMinerConfig.drillRefuel) {
             items.add("Abiphone");
         }
 

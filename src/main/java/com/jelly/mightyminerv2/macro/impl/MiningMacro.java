@@ -176,11 +176,12 @@ public class MiningMacro extends AbstractMacro {
                 break;
             case NO_PICKAXE_ABILITY:
                 disable("Cannot find messages for pickaxe ability! " +
-                        "Either enable any pickaxe ability in HOTM or enable chat messages");
+                        "Either enable any pickaxe ability in HOTM or enable chat messages. You can also disable pickaxe ability in configs.");
                 break;
         }
 
         if (!isMining) {
+            miner.setWaitThreshold(MightyMinerConfig.oreRespawnWaitThreshold * 1000);
             startMining();
         }
     }

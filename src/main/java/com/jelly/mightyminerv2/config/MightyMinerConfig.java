@@ -64,86 +64,33 @@ public class MightyMinerConfig extends Config {
                     "Mining Macro",
                     "Route Miner",
                     "Gemstone Powder"
-            }
+            },
+            subcategory = "Macro"
     )
     public static int macroType = 0;
 
     @KeyBind(
             name = "Toggle Macro",
             category = GENERAL,
-            description = "The Button To Click To Toggle The Macro"
+            description = "The Button To Click To Toggle The Macro",
+            subcategory = "Macro"
     )
     public static OneKeyBind toggleMacro = new OneKeyBind(Keyboard.KEY_GRAVE);
-
-    @Switch(
-            name = "Ungrab Mouse", description = "Ungrabs Mouse; Duh",
-            category = GENERAL
-    )
-    public static boolean ungrabMouse = true;
-
-    @Switch(
-            name = "Mute Game", description = "Mute Game",
-            category = GENERAL
-    )
-    public static boolean muteGame = true;
-
-    @Switch(
-            name = "Drill Swap", description = "Drill Swap",
-            category = GENERAL
-    )
-    public static boolean drillSwap = false;
-
-    @Switch(
-            name = "Rod Swap",
-            category = GENERAL,
-            description = "Rod Swap"
-    )
-    public static boolean rodSwap = false;
-
-    @Switch(
-            name = "Full Blocks",
-            category = GENERAL,
-            description = "Gives a full block hitbox to blocks without a full block hitbox"
-    )
-    public static boolean miscFullBlock = false;
-
-    @Switch(
-            name = "Sneak While Mining",
-            category = GENERAL
-    )
-    public static boolean sneakWhileMining = false;
-
-    @Switch(
-            name = "Precision Miner (to be implemented)", description = "Looks at particles spawned by precision miner perk (Might/Will Mess Up TickGLide)",
-            category = GENERAL
-    )
-    public static boolean precisionMiner = false;
-
-    @Switch(
-            name = "Disable mining speed boost", description = "Only disable this if you are < HOTM 3.",
-            category = GENERAL
-    )
-    public static boolean disableMiningSpeedBoost = false;
 
     @Text(
             name = "Mining Tool", description = "Mining tool that you use to mine blocks",
             category = GENERAL,
-            placeholder = "Enter here..."
+            placeholder = "Enter here...",
+            subcategory = "Mining Tools"
     )
     public static String miningTool = "";
 
-    @Text(
-            name = "Alt Mining Tool", description = "Mining tool that you use to activate abilities and such",
-            category = GENERAL,
-            placeholder = "Enter here..."
-    )
-    public static String altMiningTool = "";
-
     @Button(
-            name = "Mining Tool Set",
+            name = "Set Mining Tool",
             text = "Set Mining tool",
             description = "Set the Mining Tool to the currently held item",
-            category = GENERAL
+            category = GENERAL,
+            subcategory = "Mining Tools"
     )
     Runnable _setMiningTool = () -> {
         ItemStack currentItem = mc.thePlayer.inventory.mainInventory[mc.thePlayer.inventory.currentItem];
@@ -157,11 +104,21 @@ public class MightyMinerConfig extends Config {
         Logger.sendMessage("Mining Tool set to: " + currentItem.getDisplayName());
     };
 
+
+    @Text(
+            name = "Alt. Mining Tool", description = "Mining tool that you use to activate abilities and such",
+            category = GENERAL,
+            placeholder = "Enter here...",
+            subcategory = "Mining Tools"
+    )
+    public static String altMiningTool = "";
+
     @Button(
-            name = "Mining Tool Set",
-            text = "Set Mining tool",
-            description = "Set the Mining Tool to the currently held item",
-            category = GENERAL
+            name = "Set Alt. Mining Tool",
+            text = "Set Alt. Mining tool",
+            description = "Set the Alternative Mining Tool to the currently held item",
+            category = GENERAL,
+            subcategory = "Mining Tools"
     )
     Runnable _setAltMiningTool = () -> {
         ItemStack currentItem = mc.thePlayer.inventory.mainInventory[mc.thePlayer.inventory.currentItem];
@@ -172,42 +129,95 @@ public class MightyMinerConfig extends Config {
         }
 
         altMiningTool = StringUtils.stripControlCodes(currentItem.getDisplayName());
-        Logger.sendMessage("Mining Tool set to: " + currentItem.getDisplayName());
+        Logger.sendMessage("Alternative Mining Tool set to: " + currentItem.getDisplayName());
     };
 
     @Switch(
-            name = "Refuel Drill (Requires abiphone!)",
+            name = "Drill Swap", description = "Drill Swap",
             category = GENERAL,
-            subcategory = "Refuel"
+            subcategory = "Mining Tools"
     )
-    public static boolean commDrillRefuel = false;
+    public static boolean drillSwap = false;
+
+    @Switch(
+            name = "Sneak While Mining",
+            category = GENERAL,
+            subcategory = "Mining Behaviour"
+    )
+    public static boolean sneakWhileMining = false;
+
+    @Switch(
+            name = "Use pickaxe ability", description = "Only disable this if you are below HOTM 3",
+            category = GENERAL,
+            subcategory = "Mining Behaviour"
+    )
+    public static boolean usePickaxeAbility = true;
+
+    @Switch(
+            name = "Precision Miner (to be implemented)", description = "Looks at particles spawned by precision miner perk",
+            category = GENERAL,
+            subcategory = "Mining Behaviour"
+    )
+    public static boolean precisionMiner = false;
+
+    @Slider(
+            name = "Ore Respawn Wait Threshold (seconds)",
+            category = GENERAL, subcategory = "Mining Behaviour",
+            description = "How long to wait (in seconds) when no ores are present before stopping",
+            min = 2, max = 10
+    )
+    public static int oreRespawnWaitThreshold = 5;
+
+    @Switch(
+            name = "Enabled (Requires abiphone!)",
+            category = GENERAL,
+            subcategory = "Auto Refuel"
+    )
+    public static boolean drillRefuel = false;
 
     @Dropdown(
             name = "Machine Fuel",
             category = GENERAL,
-            subcategory = "Refuel",
+            subcategory = "Auto Refuel",
             options = {"Volta", "Oil Barrel"}
     )
-    public static int commMachineFuel = 1;
+    public static int refuelMachineFuel = 1;
+
+    @Switch(
+            name = "Ungrab Mouse", description = "Does not work for some Mac players",
+            category = GENERAL,
+            subcategory = "Miscellaneous"
+    )
+    public static boolean ungrabMouse = false;
+
+    @Switch(
+            name = "Mute Game", description = "Mute Game",
+            category = GENERAL,
+            subcategory = "Miscellaneous"
+    )
+    public static boolean muteGame = true;
+
+    @Switch(
+            name = "Full Block Hitbox",
+            category = GENERAL,
+            description = "Gives a full block hitbox to blocks without a full block hitbox",
+            subcategory = "Miscellaneous"
+    )
+    public static boolean miscFullBlock = false;
+
+
     //</editor-fold>
 
 
     //<editor-fold desc="Commission">
 
     @Info(
-            text = "Using Royal Pigion for Glacial Commissions is FORCED",
-            type = InfoType.ERROR,
+            text = "You MUST use Royal Pigeon for Glacial Commissions!",
+            type = InfoType.WARNING,
             category = COMMISSION,
             subcategory = "General"
     )
     public static boolean ignored0 = true;
-
-    @Switch(
-            name = "Always Mine Titanium", description = "Mines titanium even if it isnt a titanium commission",
-            category = COMMISSION,
-            subcategory = "General"
-    )
-    public static boolean commMineTitanium = false;
 
     @Dropdown(
             name = "Claim Method", category = COMMISSION,
@@ -216,34 +226,20 @@ public class MightyMinerConfig extends Config {
     )
     public static int commClaimMethod = 0;
 
-    @Switch(
-            name = "Sprint During MobKiller", description = "Allow Sprinting while mobkiller is active (looks sussy with sprint)",
-            category = GENERAL,
-            subcategory = "MobKiller"
-    )
-    public static boolean mobKillerSprint = true;
-
-    @Switch(
-            name = "Interpolate During MobKiller", description = "Helps reduce sliding",
-            category = GENERAL,
-            subcategory = "MobKiller"
-    )
-    public static boolean mobKillerInterpolate = true;
-
     @Text(
             name = "Slayer Weapon", description = "Weapon used when killing goblins",
-            category = GENERAL,
-            subcategory = "MobKiller",
+            category = COMMISSION,
+            subcategory = "Mob Killer",
             placeholder = "Enter here..."
     )
     public static String slayerWeapon = "";
 
     @Button(
-            name = "Slayer Weapon Set",
+            name = "Set Slayer Weapon",
             text = "Set Slayer Weapon",
             description = "Set the Slayer Weapon to the currently held item",
-            category = GENERAL,
-            subcategory = "MobKiller"
+            category = COMMISSION,
+            subcategory = "Mob Killer"
     )
     Runnable _setSlayerWeapon = () -> {
         ItemStack currentItem = mc.thePlayer.inventory.mainInventory[mc.thePlayer.inventory.currentItem];
@@ -256,6 +252,20 @@ public class MightyMinerConfig extends Config {
         slayerWeapon = StringUtils.stripControlCodes(currentItem.getDisplayName()).replaceAll("[^\\x20-\\x7E]", "");
         Logger.sendMessage("Slayer Weapon set to: " + currentItem.getDisplayName());
     };
+
+    @Switch(
+            name = "Sprint During MobKiller", description = "Allow Sprinting while Mob Killer is active (looks sussy)",
+            category = COMMISSION,
+            subcategory = "Mob Killer"
+    )
+    public static boolean mobKillerSprint = true;
+
+    @Switch(
+            name = "Interpolate During MobKiller", description = "Allows more natural movement",
+            category = COMMISSION,
+            subcategory = "Mob Killer"
+    )
+    public static boolean mobKillerInterpolate = true;
 
     @Exclude
     @HUD(

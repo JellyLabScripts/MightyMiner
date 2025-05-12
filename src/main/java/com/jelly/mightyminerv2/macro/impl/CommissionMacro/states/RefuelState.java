@@ -12,7 +12,7 @@ public class RefuelState implements CommissionMacroState{
     @Override
     public void onStart(CommissionMacro macro) {
         log("Starting refuel state");
-        AutoDrillRefuel.getInstance().start(MightyMinerConfig.miningTool, fuelTypeMap[MightyMinerConfig.commMachineFuel]);
+        AutoDrillRefuel.getInstance().start(MightyMinerConfig.miningTool, fuelTypeMap[MightyMinerConfig.refuelMachineFuel]);
     }
 
     @Override

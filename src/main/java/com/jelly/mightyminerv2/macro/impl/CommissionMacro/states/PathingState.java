@@ -58,10 +58,6 @@ public class PathingState implements CommissionMacroState{
         if (macro.getCurrentCommission() == Commission.COMMISSION_CLAIM && MightyMinerConfig.commClaimMethod == 1)
             return new ClaimingCommissionState();
 
-        if (macro.getCurrentCommission() == Commission.REFUEL) {
-            return new RefuelState();
-        }
-
         if (routeNavigator.isRunning()) {
             return this;
         }

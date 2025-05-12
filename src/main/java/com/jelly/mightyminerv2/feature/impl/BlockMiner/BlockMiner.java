@@ -1,13 +1,11 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner;
 
-import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.BlockMinerState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.ApplyAbilityState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.StartingState;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
-import com.jelly.mightyminerv2.util.StrafeUtil;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import lombok.Getter;
 import lombok.Setter;
@@ -90,7 +88,7 @@ public class BlockMiner extends AbstractFeature {
 
     @Getter
     @Setter
-    private int wait_threshold;  // Stop the macro automatically if it cannot find blocks within the time limit (in ms)
+    private int waitThreshold;  // Stop the macro automatically if it cannot find blocks within the time limit (in ms)
 
     @Override
     public String getName() {
@@ -163,13 +161,6 @@ public class BlockMiner extends AbstractFeature {
         transitionTo(nextState);
 
         if (retryActivatePickaxeAbility >= 4) {
-            if (!triedAlt) {
-                InventoryUtil.holdItem(MightyMinerConfig.altMiningTool);
-                triedAlt = true;
-                retryActivatePickaxeAbility = 0;
-                return;
-            }
-
             setError(BlockMinerError.NO_PICKAXE_ABILITY);
             stop();
         }

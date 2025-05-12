@@ -149,11 +149,6 @@ public class AutoCommissionClaim extends AbstractFeature {
                 this.swapState(State.OPENING, 2000);
                 break;
             case OPENING:
-//                if (this.hasTimerEnded()) {
-//                    this.stop(ClaimError.TIMEOUT);
-//                    error("Could not finish rotation in time.");
-//                    break;
-//                }
                 final Optional<Entity> entityLookingAt = EntityUtil.getEntityLookingAt();
                 time = 5000;
                 switch (commClaimMethod) {

@@ -18,6 +18,10 @@ public class PathingState implements CommissionMacroState{
     private final String GRAPH_NAME = "Commission Macro";
     private int attempts = 0;
 
+    // Cooldown for "Commission is empty" message
+    private static long lastCommissionEmptyMessageTime = 0L;
+    private static final long COMMISSION_EMPTY_MESSAGE_COOLDOWN_MS = 5000; // 5 seconds
+
     @Override
     public void onStart(CommissionMacro macro) {
         log("Starting pathing state");
@@ -49,9 +53,13 @@ public class PathingState implements CommissionMacroState{
     @Override
     public CommissionMacroState onTick(CommissionMacro macro) {
 
-        if(macro.getCurrentCommission() == null){
-            send("Commission is empty! Restarting macro to wait for tab-list updates. " +
-                    "Note that this is usually temporary and caused by lags in the server.");
+        if (macro.getCurrentCommission() == null) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastCommissionEmptyMessageTime > COMMISSION_EMPTY_MESSAGE_COOLDOWN_MS) {
+                send("Commission is empty! Restarting macro to wait for tab-list updates. " +
+                        "Note that this is usually temporary and caused by lags in the server.");
+                lastCommissionEmptyMessageTime = currentTime;
+            }
             return new StartingState();
         }
 

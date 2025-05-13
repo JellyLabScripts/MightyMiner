@@ -37,6 +37,9 @@ public class ClaimingCommissionState implements CommissionMacroState{
             case NO_ITEMS:
                 macro.disable("No royal pigeons found, but this shouldn't happen. Please contact the developer.");
                 break;
+            case NPC_NOT_UNLOCKED:
+                macro.disable("You have not unlocked Emissaries at Commission Milestone 1. Please post mc logs in #bug-report if this is a mistake.");
+                break;
         }
         return null;
     }

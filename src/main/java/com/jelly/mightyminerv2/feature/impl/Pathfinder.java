@@ -11,6 +11,7 @@ import com.jelly.mightyminerv2.pathfinder.movement.CalculationContext;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
 import kotlin.Pair;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -26,6 +27,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Pathfinder extends AbstractFeature {
 
+    private static final Minecraft mc = Minecraft.getMinecraft();
     private static Pathfinder instance;
     private final Deque<Pair<BlockPos, BlockPos>> pathQueue = new ConcurrentLinkedDeque<>();
     private final PathExecutor pathExecutor = PathExecutor.getInstance();
@@ -125,6 +127,14 @@ public class Pathfinder extends AbstractFeature {
     @SubscribeEvent
     protected void onTick(ClientTickEvent event) {
         if (!this.enabled) {
+            return;
+        }
+
+        if (mc.thePlayer == null || mc.theWorld == null) {
+            log("Player or World is null, stopping Pathfinder.");
+            if (this.enabled) {
+                this.stop();
+            }
             return;
         }
 

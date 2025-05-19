@@ -40,6 +40,7 @@ public class MightyMinerConfig extends Config {
     private transient static final String FAILSAFE = "Failsafe";
     private transient static final String DEBUG = "Debug";
     private transient static final String DISCORD_INTEGRATION = "Discord Integration";
+    private transient static final String SILLIES = "Sillies";
 
 
     public MightyMinerConfig() {
@@ -204,6 +205,7 @@ public class MightyMinerConfig extends Config {
             subcategory = "Miscellaneous"
     )
     public static boolean miscFullBlock = false;
+
 
 
     //</editor-fold>
@@ -405,6 +407,48 @@ public class MightyMinerConfig extends Config {
     )
     public static float gemstoneOvalSpeed = 2;
 
+    //</editor-fold>
+
+    //<editor-fold desc="Sillies">
+
+    @Switch(
+            name = "Emotional Support",
+            category = SILLIES,
+            subcategory = "Hud",
+            description = "Renders image of girl on your screen for emotional support(or gooning purposes)"
+    )
+    public static boolean showTheWoman = false;
+
+    @Slider(
+            name = "X-Location",
+            category = SILLIES, subcategory = "Hud",
+            description = "x coord of the pic",
+            min = 0, max = 100
+    )
+    public static float mommyXCoord = 2;
+    @Slider(
+            name = "Y-Location",
+            category = SILLIES, subcategory = "Hud",
+            description = "y coord of the pic",
+            min = 0, max = 100
+    )
+    public static float mommyYCoord = 4;
+
+    @Slider(
+            name = "Opacity",
+            category = SILLIES, subcategory = "Hud",
+            description = "How transparent is the image?",
+            min = 0, max = 100
+    )
+    public static float mommyTrans = 0;
+
+    @Slider(
+            name = "Scale (default 100)",
+            category = SILLIES, subcategory = "Hud",
+            description = "How big is the image",
+            min = 1, max = 200
+    )
+    public static float mommyScale = 100;
     //</editor-fold>
 
     //<editor-fold desc="Route Builder">

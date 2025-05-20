@@ -46,7 +46,7 @@ public class CommissionHUD extends TextHud {
                 8,
                 new OneColor(0, 0, 0, 200),
                 true,
-                2,
+                1,
                 new OneColor(0, 255, 0, 255));
     }
 
@@ -79,7 +79,7 @@ public class CommissionHUD extends TextHud {
         if (commissionMacro.isEnabled()) {
             // Mining Info (Centered, bright green with brighter green solid line and added spaces)
             lines.add("§a§m---- §a  MINING INFO §a§m----"); // Brighter green separator
-            lines.add("  §f§a✰ §Target Commission:");
+            lines.add("  §f§a✰ §fTarget Commission:");
             lines.add("  §f" + commissionMacro.getCurrentCommission().getName());
             // Version (Bright green)
             lines.add(""); // Spacing

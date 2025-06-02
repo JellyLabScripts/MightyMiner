@@ -4,6 +4,8 @@ import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.hud.TextHud;
 import com.jelly.mightyminerv2.MightyMiner;
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.handler.GameStateHandler;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 import lombok.Getter;
 
@@ -107,5 +109,14 @@ public class CommissionHUD extends TextHud {
                 seconds,
                 (!commissionMacro.isEnabled() ? " §7(Paused)" : "")
         );
+    }
+
+    @Override
+    protected boolean shouldShow() {
+        if (!super.shouldShow()) return false;
+        boolean macroTypeCondition = (MightyMinerConfig.macroType == 0);
+        boolean locationCondition = GameStateHandler.getInstance().inDwarvenMines() || MightyMinerConfig.showDwarvenCommHUDOutside;
+
+        return macroTypeCondition && locationCondition;
     }
 }

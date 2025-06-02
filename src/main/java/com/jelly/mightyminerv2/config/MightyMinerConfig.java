@@ -30,7 +30,7 @@ public class MightyMinerConfig extends Config {
     private transient static final File WAYPOINTS_FILE = new File(mc.mcDataDir, "mm_waypoints.json");
     private transient static final String GENERAL = "General";
     private transient static final String SCHEDULER = "Scheduler";
-    private transient static final String COMMISSION = "Commission";
+    private transient static final String COMMISSION = "Dwarven Commission";
     private transient static final String MINING_MACRO = "Mining Macro";
     private transient static final String ROUTE_MINER = "Route Miner";
     private transient static final String POWDER = "Gemstone Powder";
@@ -59,11 +59,13 @@ public class MightyMinerConfig extends Config {
             category = GENERAL,
             description = "Select the macro type you want to use",
             options = {
-                    "Commission",
-                    "Glacial Commissions",
-                    "Mining Macro",
-                    "Route Miner",
-                    "Gemstone Powder"
+                    "Dwarven Commission",
+                    "Mining Macro"
+//                    "Dwarven Commission",
+//                    "Glacial Commissions",
+//                    "Mining Macro",
+//                    "Route Miner",
+//                    "Gemstone Powder"
             },
             subcategory = "Macro"
     )
@@ -270,7 +272,7 @@ public class MightyMinerConfig extends Config {
     @Switch(
             name = "Show Commission HUD outside mines", description = "Toggle HUD Visibility outside of dwarven mines",
             category = COMMISSION,
-            subcategory = "Mob Killer"
+            subcategory = "HUD"
     )
     public static boolean showDwarvenCommHUDOutside = true;
 
@@ -335,6 +337,14 @@ public class MightyMinerConfig extends Config {
 
     //<editor-fold desc="Route Miner">
 
+    @Info(
+            text = "This feature is currently in development and currently does not function.",
+            type = InfoType.ERROR,
+            category = ROUTE_MINER,
+            size = 2
+    )
+    public static boolean ignored1 = true;
+
     @Dropdown(
             name = "Route Target", category = ROUTE_MINER, subcategory = "Route",
             description = "What you want to mine.",
@@ -377,6 +387,13 @@ public class MightyMinerConfig extends Config {
     //</editor-fold>
 
     //<editor-fold desc="Powder Macro">
+    @Info(
+            text = "This feature is currently in development and currently does not function.",
+            type = InfoType.ERROR,
+            category = POWDER,
+            size = 2
+    )
+    public static boolean ignored2 = true;
 
     @Switch(
             name = "Great Explorer Maxed", category = POWDER, subcategory = "General",
@@ -415,6 +432,13 @@ public class MightyMinerConfig extends Config {
     //</editor-fold>
 
     //<editor-fold desc="Route Builder">
+    @Info(
+            text = "This feature is currently in development and currently does not function.",
+            type = InfoType.ERROR,
+            category = ROUTE_BUILDER,
+            size = 2
+    )
+    public static boolean ignored3 = true;
 
     @KeyBind(
             name = "Enable RouteBuilder",

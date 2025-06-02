@@ -267,6 +267,13 @@ public class MightyMinerConfig extends Config {
     )
     public static boolean mobKillerInterpolate = true;
 
+    @Switch(
+            name = "Show Commission HUD outside mines", description = "Toggle HUD Visibility outside of dwarven mines",
+            category = COMMISSION,
+            subcategory = "Mob Killer"
+    )
+    public static boolean showDwarvenCommHUDOutside = true;
+
     @Exclude
     @HUD(
             name = "CommissionHUD",

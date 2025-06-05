@@ -32,6 +32,11 @@ public class AutoMobKiller extends AbstractFeature {
     private final Set<String> mobToKill = new HashSet<>();
     int pathRetry = 0;
     private State state = State.STARTING;
+    private int getRandomRotationSpeed() {
+        return 250 + new Random().nextInt(150);  // 250–400 ms}
+    private final Clock attackCooldown = new Clock();
+    private final Random random = new Random();
+
     @Getter
     private MKError mkError = MKError.NONE;
     private Optional<EntityLivingBase> targetMob = Optional.empty();
@@ -111,7 +116,7 @@ public class AutoMobKiller extends AbstractFeature {
         }
 
         if (this.queueTimer.passed()) {
-            log("Queue celared");
+            log("Queue cleared");
             this.mobQueue.clear();
             this.queueTimer.schedule(MightyMinerConfig.devMKillTimer);
         }
@@ -152,7 +157,13 @@ public class AutoMobKiller extends AbstractFeature {
                     if (!this.targetMob.isPresent() || !this.targetMob.get().equals(best)) {
                         this.targetMob = Optional.of(best);
                         this.entityLastPosition = Optional.of(best.getPositionVector());
-                        Pathfinder.getInstance().stopAndRequeue(EntityUtil.nearbyBlock(this.targetMob.get()));
+                        //Small Random Offsets to Path Movement
+                        Vec3 targetPos = this.targetMob.get().getPositionVector();
+                        double offsetX = (random.nextDouble() - 0.5) * 0.5; // ±0.25 blocks offset
+                        double offsetZ = (random.nextDouble() - 0.5) * 0.5;
+                        Vec3 randomizedPos = targetPos.addVector(offsetX, 0, offsetZ);
+                        Pathfinder.getInstance().stopAndRequeue(randomizedPos);
+
                     }
                     this.recheckTimer.schedule(MightyMinerConfig.devMKillTimer);
                 }
@@ -203,11 +214,15 @@ public class AutoMobKiller extends AbstractFeature {
                 }
                 break;
             case LOOKING_AT_MOB:
-                if (!Pathfinder.getInstance().isRunning()) {
-                    RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.targetMob.get()), 400, null));
-                    this.changeState(State.KILLING_MOB, 0);
-
-                    log("Rotating");
+               if (!Pathfinder.getInstance().isRunning()) {
+                    int rotateTime = 300 + random.nextInt(400);  // 300-700 ms
+                    RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.targetMob.get()), rotateTime, null));
+                        if (!stateDelayTimer.isScheduled()){
+                            stateDelayTimer.schedule(200 + random.nextInt(300)); // 200-500 ms delay before attack} 
+                            else if (stateDelayTimer.passed()) {
+                                this.changeState(State.KILLING_MOB, 0);
+                                log("Rotating finished, now killing");}}
+                break;
                 }
             case KILLING_MOB:
                 if (!Objects.equals(mc.objectMouseOver.entityHit, this.targetMob.get())) {
@@ -222,11 +237,14 @@ public class AutoMobKiller extends AbstractFeature {
 
                     return;
                 }
-
-                KeyBindUtil.leftClick();
-                RotationHandler.getInstance().stop();
-                this.changeState(State.STARTING, 0);
-                break;
+                //Attack Cooldown
+                 if (!attackCooldown.isScheduled() || attackCooldown.passed()) {
+                        KeyBindUtil.leftClick();
+                        attackCooldown.schedule(100 + random.nextInt(200)); // 100-300 ms delay
+                        }
+                    RotationHandler.getInstance().stop();
+                    this.changeState(State.STARTING, 0);
+                    break;
         }
     }
 

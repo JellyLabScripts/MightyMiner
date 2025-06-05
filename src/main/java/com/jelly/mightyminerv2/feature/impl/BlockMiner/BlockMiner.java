@@ -111,6 +111,15 @@ public class BlockMiner extends AbstractFeature {
             this.stop();
             return;
         }
+        // If oreType is HARDSTONE (config value = 8), enable straight-line and human-like mining
+        if (com.jelly.mightyminerv2.config.MightyMinerConfig.oreType == 9) {
+            this.enableStraightLineMode(true);
+            this.enableHumanLikePathing(true);
+        } else {
+            this.enableStraightLineMode(false);
+            this.enableHumanLikePathing(false);
+        }
+
         
         // Validate blocks to mine
         if (blocksToMine == null || Arrays.stream(priority).allMatch(i -> i == 0)) {
@@ -149,6 +158,14 @@ public class BlockMiner extends AbstractFeature {
 
     @SubscribeEvent
     protected void onTick(TickEvent.ClientTickEvent event) {
+        if (targetBlock == MineableBlock.HARDSTONE) {
+            
+        // Move in a straight line toward the target block with minimal randomness
+            moveStraightLineToBlock(targetBlockPos);
+        } else {
+            // Use existing movement logic with human-like randomness
+            moveWithHumanLikeRandomness(targetBlockPos);
+        }
         // Skip if not enabled, GUI is open, or not in the correct phase
         if (!this.enabled || mc.currentScreen != null || event.phase == TickEvent.Phase.END) {
             return;
@@ -204,5 +221,18 @@ public class BlockMiner extends AbstractFeature {
         if (message.contains("You used your") || message.contains("Your pickaxe ability is on cooldown for")) {
             pickaxeAbilityState = PickaxeAbilityState.UNAVAILABLE;
         }
+    }
+    @Getter @Setter
+    private boolean straightLineMode = false;
+
+    @Getter @Setter
+    private boolean humanLikePathing = false;
+
+        public void enableStraightLineMode(boolean enabled) {
+            this.straightLineMode = enabled;
+    }
+
+        public void enableHumanLikePathing(boolean enabled) {
+            this.humanLikePathing = enabled;
     }
 }

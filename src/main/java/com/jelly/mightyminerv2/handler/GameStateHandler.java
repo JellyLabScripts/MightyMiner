@@ -37,6 +37,10 @@ public class GameStateHandler {
         return this.currentLocation.ordinal() < Location.values().length - 3;
     }
 
+    public boolean inDwarvenMines() {
+        return currentLocation == Location.DWARVEN_MINES;
+    }
+
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload event) {
         currentLocation = Location.KNOWHERE;

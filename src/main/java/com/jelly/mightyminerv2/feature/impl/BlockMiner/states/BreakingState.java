@@ -28,6 +28,9 @@ public class BreakingState implements BlockMinerState{
     private static final double MIN_WALK_DISTANCE = 0.2;  // Minimum distance to trigger walking
     private static final double MAX_MINE_DISTANCE = 4;    // Maximum mining distance for player
     private static final int FAILSAFE_TICKS = 40;         // Safety mechanism if we've been trying to break for too long
+    private static final int LOOK_AWAY_THRESHOLD_MS = 500;  // Time in milliseconds before switching blocks
+    private Clock lookAwayTimer;  // Timer to track how long we've been looking away
+    private boolean wasLookingAway = false;  // Track if we're looking away last tick
 
     private final Minecraft mc = Minecraft.getMinecraft();
     private final Random random = new Random();
@@ -43,6 +46,9 @@ public class BreakingState implements BlockMinerState{
         log("Entering Breaking State");
         breakAttemptTime = 0;
         isWalking = false;
+
+        lookAwayTimer = new Clock();
+        wasLookingAway = false;
 
         miningTime = BlockUtil.getMiningTime(
             Block.getStateId(Minecraft.getMinecraft().theWorld.getBlockState(miner.getTargetBlockPos())),
@@ -67,6 +73,21 @@ public class BreakingState implements BlockMinerState{
         if (++this.breakAttemptTime > this.miningTime + FAILSAFE_TICKS) {
             logError("Stuck while mining, return to starting state");
             return new StartingState();
+        }
+
+        // Safety mechanism: if we're looking away from target block, reset
+        BlockPos currentLookingAt = BlockUtil.getBlockLookingAt();
+        boolean isLookingAtTarget = miner.getTargetBlockPos().equals(currentLookingAt);
+        if (!isLookingAtTarget) {
+            if (!wasLookingAway) {
+                lookAwayTimer.schedule(LOOK_AWAY_THRESHOLD_MS);
+                wasLookingAway = true;
+            } else if (lookAwayTimer.passed()) {
+                log("Player looked away from target block for too long, choosing new block");
+                return new StartingState();
+            }
+        } else {
+            wasLookingAway = false;
         }
 
         // After breaking a block, restart the whole cycle again

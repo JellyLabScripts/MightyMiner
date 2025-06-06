@@ -33,7 +33,7 @@ public class MiningState implements CommissionMacroState{
 
         String miningTool = MightyMinerConfig.miningTool;
         if (miningTool.toLowerCase().contains("drill") || InventoryUtil.getFullName(miningTool).contains("Drill")) {
-            log("Fuel detected: " + InventoryUtil.getDrillRemainingFuel(miningTool));
+            //log("Fuel detected: " + InventoryUtil.getDrillRemainingFuel(miningTool));
             if (InventoryUtil.getDrillRemainingFuel(miningTool) <= 100) {
                 log("Less than 100 fuel left in drill. Starting to refuel");
                 if(MightyMinerConfig.drillRefuel)

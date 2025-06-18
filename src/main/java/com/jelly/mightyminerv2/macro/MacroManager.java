@@ -25,18 +25,25 @@ public class MacroManager {
     private Minecraft mc = Minecraft.getMinecraft();
 
     public AbstractMacro getCurrentMacro() {
-        switch (MightyMinerConfig.macroType) {
-            case 1:
-                return GlacialMacro.getInstance();
-            case 2:
-                return MiningMacro.getInstance();
-            case 3:
-                return RouteMinerMacro.getInstance();
-            case 4:
-                return GemstonePowderMacro.getInstance();
-            default:
-                return CommissionMacro.getInstance();
+        if (MightyMinerConfig.macroType == 0) {
+            return CommissionMacro.getInstance();
+        } else if (MightyMinerConfig.macroType == 1) {
+            return MiningMacro.getInstance();
+        } else {
+            return CommissionMacro.getInstance();
         }
+//        switch (MightyMinerConfig.macroType) {
+//            case 1:
+//                return GlacialMacro.getInstance();
+//            case 2:
+//                return MiningMacro.getInstance();
+//            case 3:
+//                return RouteMinerMacro.getInstance();
+//            case 4:
+//                return GemstonePowderMacro.getInstance();
+//            default:
+//                return CommissionMacro.getInstance();
+//        }
     }
 
     public void toggle() {

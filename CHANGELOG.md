@@ -1,5 +1,25 @@
 # MightyMiner V2 Changelog
 
+## v2.7.0 (2025-18-6)
+
+This update marks the first stable update of MightyMiner v2.7.0 
+
+## Current Macros Included
+- Commission Macro
+- Powder Macro
+
+## Changes
+- Auto Refuel is now usable
+- Fixed lag issues
+- Fixed personal compactors not working
+- Fixed accidentally clicking on players
+- Fixed calling royal pigeons twice
+- Detecting item names properly
+- Added support for all pickaxe abilities
+- Added options to disable using pickaxe ability
+- New commission HUD and configs
+- Enhanced mining algorithm
+
 ## v2.7.0-alpha (2025-5-1)
 
 This update marks the official resumption of development on Mighty Miner.

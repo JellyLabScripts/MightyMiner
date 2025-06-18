@@ -4,7 +4,6 @@ import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.jelly.mightyminerv2.command.OsamaTestCommandNobodyTouchPleaseLoveYou;
 import com.jelly.mightyminerv2.command.RouteBuilderCommand;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.failsafe.FailsafeManager;
@@ -37,7 +36,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -160,13 +158,11 @@ public class MightyMiner {
         MinecraftForge.EVENT_BUS.register(FailsafeManager.getInstance());
         MinecraftForge.EVENT_BUS.register(AudioManager.getInstance());
         FeatureManager.getInstance().allFeatures.forEach(MinecraftForge.EVENT_BUS::register);
-        MinecraftForge.EVENT_BUS.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
         MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
         MinecraftForge.EVENT_BUS.register(new TablistUtil());
     }
 
     private void initializeCommands() {
-        CommandManager.register(OsamaTestCommandNobodyTouchPleaseLoveYou.getInstance());
         CommandManager.register(new RouteBuilderCommand());
     }
 }

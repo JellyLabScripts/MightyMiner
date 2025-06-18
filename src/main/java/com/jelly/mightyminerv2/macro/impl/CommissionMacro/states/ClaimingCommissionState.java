@@ -21,7 +21,17 @@ public class ClaimingCommissionState implements CommissionMacroState{
         }
 
         if (AutoCommissionClaim.getInstance().succeeded()) {
-            return new StartingState();
+            List<Commission> newCommissions = AutoCommissionClaim.getInstance().getNextComm();
+
+            if (newCommissions != null && !newCommissions.isEmpty()) {
+                macro.setCurrentCommission(newCommissions.get(0));
+                log("Claiming successful. Next commission: " + newCommissions.get(0).getName());
+            } else {
+                log("Claiming successful, but no new commissions were read. Restarting cycle.");
+                return new StartingState();
+            }
+
+            return new PathingState();
         }
 
         switch (AutoCommissionClaim.getInstance().claimError()) {

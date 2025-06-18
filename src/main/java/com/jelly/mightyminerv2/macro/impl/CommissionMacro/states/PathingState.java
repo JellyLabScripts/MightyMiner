@@ -63,30 +63,47 @@ public class PathingState implements CommissionMacroState{
             return new StartingState();
         }
 
-        if (macro.getCurrentCommission() == Commission.COMMISSION_CLAIM && MightyMinerConfig.commClaimMethod == 1)
+        if (macro.getCurrentCommission() == Commission.COMMISSION_CLAIM && MightyMinerConfig.commClaimMethod == 1) {
             return new ClaimingCommissionState();
+        }
 
         if (routeNavigator.isRunning()) {
             return this;
         }
 
         if (routeNavigator.succeeded()) {
-            String commName = macro.getCurrentCommission().getName();
+            log("Pathing succeeded. Deciding next state for commission: " + macro.getCurrentCommission().getName());
 
-            if (commName.contains("Claim")) {
-                return new ClaimingCommissionState();
-            } else if (commName.contains("Titanium") || commName.contains("Mithril")) {
-                return new MiningState();
-            } else {
-                return new MobKillingState();
+            switch (macro.getCurrentCommission().getName()) {
+                case "Mithril": case "Titanium":
+                    return new MiningState();
+                case "Glacite Walker Slayer": case "Goblin Slayer":
+                    return new MobKillingState();
+                case "Claim":
+                    return new ClaimingCommissionState();
+                default:
+                    if (macro.getCurrentCommission().getName().contains("Titanium") || macro.getCurrentCommission().getName().contains("Mithril")) {
+                        return new MiningState();
+                    } else if (macro.getCurrentCommission().getName().contains("Claim")) {
+                        return new ClaimingCommissionState();
+                    } else {
+                        return new MobKillingState();
+                    }
             }
         }
 
         switch (routeNavigator.getNavError()) {
             case NONE :
+                if(attempts < 1) {
+                    attempts++;
+                    logError("Navigator stopped unexpectedly. Retrying path...");
+                    onStart(macro);
+                    return this;
+                }
                 macro.disable("Route navigator failed, but no error is detected. Please contact the developer.");
                 break;
-            case TIME_FAIL: case PATHFIND_FAILED:
+            case TIME_FAIL:
+            case PATHFIND_FAILED:
                 attempts++;
                 if(attempts >= 3) {
                     logError("Failed to pathfind. Warping and restarting");

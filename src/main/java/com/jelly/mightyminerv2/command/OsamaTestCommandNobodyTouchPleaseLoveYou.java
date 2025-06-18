@@ -117,8 +117,8 @@ public class OsamaTestCommandNobodyTouchPleaseLoveYou {
     @Main
     public void main() {
 //    b = EntityUtil.getEntities(new HashSet<>(Arrays.asList("Goblin", "Knifethrower", "Fireslinger")), Collections.emptySet());
-        allowed = !allowed;
-//    AutoChestUnlocker.getInstance().start("Jasper Drill", true);
+//      allowed = !allowed;
+      AutoChestUnlocker.getInstance().start("Jasper Drill", true);
 //    String miningTool = MightyMinerConfig.commMiningTool;
 //    System.out.println("Fullname: " + InventoryUtil.getFullName(miningTool));
 //    if (miningTool.toLowerCase().contains("drill")) {

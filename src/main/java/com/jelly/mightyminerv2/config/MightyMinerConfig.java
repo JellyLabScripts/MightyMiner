@@ -508,7 +508,7 @@ public class MightyMinerConfig extends Config {
     public static OneKeyBind routeBuilderMove = new OneKeyBind(Keyboard.KEY_NUMPAD5);
 
     @KeyBind(
-            name = "RouteBuilder Move",
+            name = "RouteBuilder Delete",
             category = ROUTE_BUILDER, subcategory = "Graph"
     )
     public static OneKeyBind routeBuilderDelete = new OneKeyBind(Keyboard.KEY_NUMPAD6);

@@ -64,13 +64,13 @@ public class MiningMacro extends AbstractMacro {
 
     @Override
     public void onEnable() {
-        log("Enabling Mithril Macro");
+        log("Enabling Mining Macro");
         this.currentState = State.INITIALIZATION;
     }
 
     @Override
     public void onDisable() {
-        log("Disabling Mithril Macro");
+        log("Disabling Mining Macro");
         if (isMining) {
             miner.stop();
             isMining = false;
@@ -81,13 +81,13 @@ public class MiningMacro extends AbstractMacro {
     @Override
     public void onPause() {
         FeatureManager.getInstance().pauseAll();
-        log("Mithril Macro paused");
+        log("Mining Macro paused");
     }
 
     @Override
     public void onResume() {
         FeatureManager.getInstance().resumeAll();
-        log("Mithril Macro resumed");
+        log("Mining Macro resumed");
     }
 
     public void onTick(TickEvent.ClientTickEvent event) {

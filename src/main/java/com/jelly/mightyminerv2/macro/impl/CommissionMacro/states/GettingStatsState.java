@@ -33,7 +33,7 @@ public class GettingStatsState implements CommissionMacroState{
                 macro.disable("Cannot open player's inventory to get statistics!");
                 break;
             case CANNOT_GET_VALUE:
-                macro.disable("Cannot get the value of statistics! Please contact the developer");
+                macro.disable("Cannot get the value of statistics!");
                 break;
         }
         return null;

@@ -180,7 +180,7 @@ public class AutoInventory extends AbstractFeature {
 
                 this.stop();
                 this.sbError = SBError.CANNOT_GET_VALUE;
-                sendError("Could Not Get Speed Boost Value.");
+                sendError("Could Not Get Speed Boost Value. You may have scrolled up in your HOTM gui");
                 break;
             case END:
                 if (this.isTimerRunning()) {

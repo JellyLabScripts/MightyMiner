@@ -17,6 +17,7 @@ public class PathingState implements CommissionMacroState{
     private final RouteNavigator routeNavigator = RouteNavigator.getInstance();
     private final String GRAPH_NAME = "Commission Macro";
     private int attempts = 0;
+    private boolean changeLobbyAttempted = false;
 
     // Cooldown for "Commission is empty" message
     private static long lastCommissionEmptyMessageTime = 0L;
@@ -73,6 +74,8 @@ public class PathingState implements CommissionMacroState{
 
         if (routeNavigator.succeeded()) {
             log("Pathing succeeded. Deciding next state for commission: " + macro.getCurrentCommission().getName());
+            this.attempts = 0;
+            this.changeLobbyAttempted = false;
 
             switch (macro.getCurrentCommission().getName()) {
                 case "Mithril": case "Titanium":
@@ -104,12 +107,18 @@ public class PathingState implements CommissionMacroState{
                 break;
             case TIME_FAIL:
             case PATHFIND_FAILED:
+                if (changeLobbyAttempted) {
+                    macro.disable("Failed to pathfind after multiple attempts. Please check your setup or contact the developer.");
+                    break;
+                }
                 attempts++;
                 if(attempts >= 3) {
-                    logError("Failed to pathfind. Warping and restarting");
-                    return new WarpingState();
+                    logError("Failed to pathfind after multiple retries. Warping to a new lobby.");
+                    this.attempts = 0;
+                    this.changeLobbyAttempted = true;
+                    return new NewLobbyState();
                 } else {
-                    logError("Failed to pathfind. Retrying to pathfind");
+                    logError("Failed to pathfind. Retrying to pathfind. Attempt " + attempts);
                     onStart(macro);
                     return this;
                 }

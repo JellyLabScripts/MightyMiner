@@ -79,7 +79,6 @@ public class NewLobbyState implements CommissionMacroState {
 
     @Override
     public void onEnd(CommissionMacro macro) {
-        autoWarp.stop();
         delayClock.reset();
         log("Ending NewLobbyState");
     }

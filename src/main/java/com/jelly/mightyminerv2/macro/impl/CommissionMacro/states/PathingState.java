@@ -61,7 +61,7 @@ public class PathingState implements CommissionMacroState{
                         "Note that this is usually temporary and caused by lags in the server.");
                 lastCommissionEmptyMessageTime = currentTime;
             }
-            return new StartingState();
+            return new WarpingState();
         }
 
         if (macro.getCurrentCommission() == Commission.COMMISSION_CLAIM && MightyMinerConfig.commClaimMethod == 1) {

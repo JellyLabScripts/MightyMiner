@@ -6,6 +6,7 @@ import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.CommissionMacroState;
+import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.NewLobbyState;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.StartingState;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.WarpingState;
 import com.jelly.mightyminerv2.util.CommissionUtil;
@@ -132,13 +133,14 @@ public class CommissionMacro extends AbstractMacro {
 
     @Override
     public void onTablistUpdate(UpdateTablistEvent event) {
-        if (!this.isEnabled() || currentState instanceof WarpingState) {
+        if (!this.isEnabled() || currentState instanceof WarpingState || currentState instanceof NewLobbyState) {
             return;
         }
 
         List<Commission> comms = CommissionUtil.getCurrentCommissionsFromTablist();
         if (comms.isEmpty()) {
             log("Cannot find commissions!");
+            return;
         }
         setCurrentCommission(comms.get(0));
     }

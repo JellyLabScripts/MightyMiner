@@ -122,14 +122,27 @@ public class ItemChangeFailsafe extends AbstractFailsafe {
             Integer originalSlotOfThisItem = removedItems.get(newItemId);
 
             if (originalSlotOfThisItem != null) {
-                removedItems.remove(newItemId);
-
                 String newDisplayName = newStackFromPacket.hasDisplayName() ? StringUtils.stripControlCodes(newStackFromPacket.getDisplayName()) : newItemId;
-                log("Tracked necessary item '" + newDisplayName + "' (ID: " + newItemId + ") from original slot " + originalSlotOfThisItem + " now in slot " + slot + ".");
 
                 if (!originalSlotOfThisItem.equals(slot)) {
+                    // check if the original slot still contains item
+                    Slot originalSlotObject = mc.thePlayer.inventoryContainer.getSlot(originalSlotOfThisItem);
+                    if (originalSlotObject != null && originalSlotObject.getHasStack()) {
+                        String idInOriginalSlot = InventoryUtil.getItemId(originalSlotObject.getStack());
+
+                        if (newItemId.equals(idInOriginalSlot)) {
+                            log("An item with ID " + newItemId + " was detected in slot " + slot + ", but an identical item remains in the originally tracked slot " + originalSlotOfThisItem + ". This is not a move. Ignoring.");
+                            removedItems.remove(newItemId);
+                            return false;
+                        }
+                    }
+
+                    log("Tracked necessary item '" + newDisplayName + "' (ID: " + newItemId + ") from original slot " + originalSlotOfThisItem + " now in slot " + slot + ".");
                     warn("Necessary item '" + newDisplayName + "' (ID: " + newItemId + ") was MOVED from slot " + originalSlotOfThisItem + " to slot " + slot + ". Triggering failsafe!");
                     return true;
+                } else {
+                    log("Tracked necessary item '" + newDisplayName + "' (ID: " + newItemId + ") has reappeared in its original slot " + originalSlotOfThisItem + ".");
+                    removedItems.remove(newItemId);
                 }
             }
         }

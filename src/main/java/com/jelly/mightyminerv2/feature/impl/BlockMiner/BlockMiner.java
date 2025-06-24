@@ -1,27 +1,38 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.event.SpawnParticleEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.BlockMinerState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.ApplyAbilityState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.StartingState;
+import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
+import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
+import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
+import com.jelly.mightyminerv2.util.helper.Target;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * BlockMiner
- * 
+ *
  * Main controller class for automatic block mining feature.
  * Implements a state machine pattern to manage different phases of the mining process.
  * Handles mining block selection, breaking, and speed boost management.
@@ -50,7 +61,7 @@ public class BlockMiner extends AbstractFeature {
     @Getter
     @Setter
     private PickaxeAbilityState pickaxeAbilityState;
-    
+
     @Getter
     @Setter
     private BlockMinerError error = BlockMinerError.NONE;
@@ -73,7 +84,7 @@ public class BlockMiner extends AbstractFeature {
 
     @Getter
     private Map<Integer, Integer> blockPriority = new HashMap<>(); // State ID of block -> priority
-    
+
     @Getter
     @Setter
     private BlockPos targetBlockPos; // BlockPos of current block being mined
@@ -81,7 +92,7 @@ public class BlockMiner extends AbstractFeature {
     @Getter
     @Setter
     private Block targetBlockType; // Type of current block being mined
-    
+
     @Getter
     @Setter
     private int miningSpeed;  // Mining speed modifier (affects block breaking time)
@@ -90,6 +101,9 @@ public class BlockMiner extends AbstractFeature {
     @Setter
     private int waitThreshold;  // Stop the macro automatically if it cannot find blocks within the time limit (in ms)
 
+    private boolean particleSpawned = true;
+    private Vec3 particleTarget = null;
+
     @Override
     public String getName() {
         return "BlockMiner";
@@ -97,7 +111,7 @@ public class BlockMiner extends AbstractFeature {
 
     /**
      * Starts the BlockMiner with specified parameters.
-     * 
+     *
      * @param blocksToMine Array of mineable block types to target
      * @param miningSpeed Base mining speed (higher = faster)
      * @param priority Array of priority values for block selection
@@ -111,28 +125,28 @@ public class BlockMiner extends AbstractFeature {
             this.stop();
             return;
         }
-        
+
         // Validate blocks to mine
         if (blocksToMine == null || Arrays.stream(priority).allMatch(i -> i == 0)) {
             logError("Target blocks not set!");
             error = BlockMinerError.NO_TARGET_BLOCKS;
             return;
         }
-        
+
         // Build priority mapping for block selection
         for (int i = 0; i < blocksToMine.length; i++) {
             for (int j : blocksToMine[i].stateIds) {
                 blockPriority.put(j, priority[i]);
             }
         }
-        
+
         // Initialize parameters
         this.miningSpeed = miningSpeed - 200;  // Base adjustment to mining speed
         this.enabled = true;
         this.error = BlockMinerError.NONE;
         this.pickaxeAbilityState = PickaxeAbilityState.AVAILABLE;
         this.retryActivatePickaxeAbility = 0;
-        
+
         // Initialize with starting state
         this.currentState = new StartingState();
         this.start();
@@ -159,6 +173,13 @@ public class BlockMiner extends AbstractFeature {
 
         BlockMinerState nextState = currentState.onTick(this);
         transitionTo(nextState);
+
+        if (this.particleSpawned && this.particleTarget != null) {
+            RotationHandler.getInstance().stopFollowingTarget();
+            RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.particleTarget), 400, null).followTarget(true));
+            this.timer.schedule(5000);
+            this.particleSpawned = false;
+        }
 
         if (retryActivatePickaxeAbility >= 4) {
             setError(BlockMinerError.NO_PICKAXE_ABILITY);
@@ -205,4 +226,35 @@ public class BlockMiner extends AbstractFeature {
             pickaxeAbilityState = PickaxeAbilityState.UNAVAILABLE;
         }
     }
+
+
+    @SubscribeEvent
+    public void onParticleSpawned(SpawnParticleEvent event) {
+        if (MightyMinerConfig.precisionMiner){
+            if (event.getParticleTypes() == EnumParticleTypes.CRIT && mc.thePlayer.getPositionVector().squareDistanceTo(event.getPos()) < 64) {
+                this.particleSpawned = true;
+                this.particleTarget = event.getPos();
+                RotationHandler.getInstance().queueRotation(
+                        new RotationConfiguration(
+                                new Target(particleTarget),
+                                MightyMinerConfig.getRandomRotationTime() - 3L,
+                                null
+                        )
+                );
+            }
+        }
+    }
+
+    @SubscribeEvent
+    protected void onRender(RenderWorldLastEvent event) {
+        if (targetBlockPos == null) {
+            return; // No target block to render
+        }
+        RenderUtil.drawBlock(targetBlockPos, new Color(0, 255, 0, 100));
+
+        if (this.particleTarget != null) {
+            RenderUtil.drawPoint(this.particleTarget, new Color(255, 0, 0, 100));
+        }
+    }
+
 }

@@ -68,9 +68,6 @@ public class BlockMiner extends AbstractFeature {
     // then NO_SPEED_BOOST is thrown
     private int retryActivatePickaxeAbility;
 
-    // Try using secondary pickaxe when primary fails to activate boost.
-    private boolean triedAlt = false;
-
     @Getter
     private Map<Integer, Integer> blockPriority = new HashMap<>(); // State ID of block -> priority
     
@@ -196,12 +193,12 @@ public class BlockMiner extends AbstractFeature {
         if (event.type != 0) {
             return;
         }
-        String message = event.message.getUnformattedText();
+        String message = event.message.getUnformattedText().toLowerCase();
 
         if (message.contains("is now available!")) {
             pickaxeAbilityState = PickaxeAbilityState.AVAILABLE;
         }
-        if (message.contains("You used your") || message.contains("Your pickaxe ability is on cooldown for")) {
+        if (message.contains("you used your") || message.contains("your pickaxe ability is on cooldown for")) {
             pickaxeAbilityState = PickaxeAbilityState.UNAVAILABLE;
         }
     }

@@ -1,6 +1,8 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner.states;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.event.SpawnParticleEvent;
+import com.jelly.mightyminerv2.feature.impl.AutoChestUnlocker;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.*;
@@ -8,10 +10,16 @@ import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.Target;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockChest;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -30,7 +38,10 @@ public class BreakingState implements BlockMinerState{
     private static final int FAILSAFE_TICKS = 40;         // Safety mechanism if we've been trying to break for too long
     private static final int LOOK_AWAY_THRESHOLD_MS = 500;  // Time in milliseconds before switching blocks
     private Clock lookAwayTimer;  // Timer to track how long we've been looking away
+    protected final Clock timer = new Clock();
     private boolean wasLookingAway = false;  // Track if we're looking away last tick
+    private boolean particleSpawned = true;
+    private Vec3 particleTarget = null;
 
     private final Minecraft mc = Minecraft.getMinecraft();
     private final Random random = new Random();
@@ -69,6 +80,13 @@ public class BreakingState implements BlockMinerState{
             handleWalking();
         }
 
+        if (this.particleSpawned && this.particleTarget != null) {
+            RotationHandler.getInstance().stopFollowingTarget();
+            RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.particleTarget), 400, null).followTarget(true));
+            this.timer.schedule(5000);
+            this.particleSpawned = false;
+        }
+
         // Safety mechanism: if we've been trying to break for too long, reset
         if (++this.breakAttemptTime > this.miningTime + FAILSAFE_TICKS) {
             logError("Stuck while mining, return to starting state");
@@ -97,6 +115,30 @@ public class BreakingState implements BlockMinerState{
         }
 
         return this;
+    }
+
+    @SubscribeEvent
+    public void onParticleSpawned(SpawnParticleEvent event) {
+        if (MightyMinerConfig.precisionMiner){
+            if (event.getParticleTypes() == EnumParticleTypes.CRIT && mc.thePlayer.getPositionVector().squareDistanceTo(event.getPos()) < 64) {
+                this.particleSpawned = true;
+                this.particleTarget = event.getPos();
+                RotationHandler.getInstance().queueRotation(
+                        new RotationConfiguration(
+                                new Target(particleTarget),
+                                MightyMinerConfig.getRandomRotationTime() - 3L,
+                                null
+                        )
+                );
+            }
+        }
+    }
+
+    @SubscribeEvent
+    protected void onRender(RenderWorldLastEvent event) {
+        if (this.particleTarget != null) {
+            RenderUtil.drawPoint(this.particleTarget, new Color(255, 0, 0, 100));
+        }
     }
 
     @Override

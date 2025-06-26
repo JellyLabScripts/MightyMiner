@@ -1,20 +1,31 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.event.SpawnParticleEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.BlockMinerState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.ApplyAbilityState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.StartingState;
+import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
+import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
+import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
+import com.jelly.mightyminerv2.util.helper.Target;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,6 +98,7 @@ public class BlockMiner extends AbstractFeature {
     @Setter
     private int waitThreshold;  // Stop the macro automatically if it cannot find blocks within the time limit (in ms)
 
+
     @Override
     public String getName() {
         return "BlockMiner";
@@ -115,7 +127,7 @@ public class BlockMiner extends AbstractFeature {
             error = BlockMinerError.NO_TARGET_BLOCKS;
             return;
         }
-        
+
         // Build priority mapping for block selection
         for (int i = 0; i < blocksToMine.length; i++) {
             for (int j : blocksToMine[i].stateIds) {
@@ -202,4 +214,6 @@ public class BlockMiner extends AbstractFeature {
             pickaxeAbilityState = PickaxeAbilityState.UNAVAILABLE;
         }
     }
+
+
 }

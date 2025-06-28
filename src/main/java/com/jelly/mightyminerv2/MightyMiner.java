@@ -75,7 +75,7 @@ public class MightyMiner {
         }
 
         File[] files = routesDir.listFiles();
-        if (files == null || files.length != expectedRoutes.size()) {
+        if (files == null) {
             Arrays.stream(files).forEach(it -> {
                 try {
                     Files.deleteIfExists(it.toPath());

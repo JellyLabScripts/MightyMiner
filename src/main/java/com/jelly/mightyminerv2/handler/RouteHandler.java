@@ -15,6 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 @Getter
@@ -83,7 +84,8 @@ public class RouteHandler {
             try {
                 if (!this.dirty) continue;
                 String data = MightyMiner.gson.toJson(instance);
-                Files.write(MightyMiner.routesDirectory, data.getBytes(StandardCharsets.UTF_8));
+                Path filePath = MightyMiner.routesDirectory.resolve("routes.json");
+                Files.write(filePath, data.getBytes(StandardCharsets.UTF_8));
                 this.dirty = false;
             } catch (IOException e) {
                 System.out.println("Save Loop Crashed.");

@@ -83,7 +83,7 @@ public class RouteHandler {
             try {
                 if (!this.dirty) continue;
                 String data = MightyMiner.gson.toJson(instance);
-                Files.write(MightyMiner.routesDirectory, data.getBytes(StandardCharsets.UTF_8));
+                Files.write(MightyMiner.routesDirectory.resolve("routes.json"), data.getBytes(StandardCharsets.UTF_8));
                 this.dirty = false;
             } catch (IOException e) {
                 System.out.println("Save Loop Crashed.");

@@ -176,15 +176,18 @@ public class BreakingState implements BlockMinerState{
         // Sometimes randomly choose a different point on the block (for variety)
         if (random.nextBoolean()) {
             int halfwayMark = points.size() / 2;
-            this.targetPoint = points.get(random.nextInt(halfwayMark) + halfwayMark - 1);
 
-            RotationHandler.getInstance().queueRotation(
-                    new RotationConfiguration(
-                            new Target(targetPoint),
-                            MightyMinerConfig.getRandomRotationTime() * 2L,
-                            null
-                    )
-            );
+            // In extremely rare cases, only 1 point is available
+            if (halfwayMark != 0) {
+                this.targetPoint = points.get(random.nextInt(halfwayMark) + halfwayMark - 1);
+                RotationHandler.getInstance().queueRotation(
+                        new RotationConfiguration(
+                                new Target(targetPoint),
+                                MightyMinerConfig.getRandomRotationTime() * 2L,
+                                null
+                        )
+                );
+            }
         }
 
         RotationHandler.getInstance().start();

@@ -9,6 +9,7 @@ import com.jelly.mightyminerv2.macro.impl.CommissionMacro.Commission;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
+import net.minecraft.util.BlockPos;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ public class PathingState implements CommissionMacroState{
     private final RouteNavigator routeNavigator = RouteNavigator.getInstance();
     private final String GRAPH_NAME = "Commission Macro";
     private int attempts = 0;
+    private boolean changeLobbyAttempted = false;
+    private boolean warpingToForge = false;
 
     // Cooldown for "Commission is empty" message
     private static long lastCommissionEmptyMessageTime = 0L;
@@ -39,6 +42,20 @@ public class PathingState implements CommissionMacroState{
         }
 
         RouteWaypoint end = commission.getWaypoint();
+        BlockPos endPos = end.toBlockPos();
+        BlockPos playerPos = PlayerUtil.getBlockStandingOn();
+        BlockPos forgePos = new BlockPos(0, 149, -69);
+
+        double distFromPlayer = Math.sqrt(playerPos.distanceSq(endPos));
+        double distFromForge = Math.sqrt(forgePos.distanceSq(endPos));
+
+        if (distFromForge + 10 < distFromPlayer && MightyMinerConfig.forgePathing) {
+            log("The distance from the forge is: " + distFromForge + ". The distance from the player is: " + distFromPlayer);
+            send("Warping to the forge for faster pathing.");
+            warpingToForge = true;
+            return;
+        }
+
         List<RouteWaypoint> nodes = GraphHandler.instance.findPathFrom(GRAPH_NAME, PlayerUtil.getBlockStandingOn(), end);
 
         if (nodes.isEmpty()) {
@@ -52,7 +69,10 @@ public class PathingState implements CommissionMacroState{
 
     @Override
     public CommissionMacroState onTick(CommissionMacro macro) {
-
+        if (warpingToForge) {
+            warpingToForge = false;
+            return new WarpingState();
+        }
         if (macro.getCurrentCommission() == null) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastCommissionEmptyMessageTime > COMMISSION_EMPTY_MESSAGE_COOLDOWN_MS) {
@@ -60,7 +80,7 @@ public class PathingState implements CommissionMacroState{
                         "Note that this is usually temporary and caused by lags in the server.");
                 lastCommissionEmptyMessageTime = currentTime;
             }
-            return new StartingState();
+            return new WarpingState();
         }
 
         if (macro.getCurrentCommission() == Commission.COMMISSION_CLAIM && MightyMinerConfig.commClaimMethod == 1) {
@@ -73,6 +93,8 @@ public class PathingState implements CommissionMacroState{
 
         if (routeNavigator.succeeded()) {
             log("Pathing succeeded. Deciding next state for commission: " + macro.getCurrentCommission().getName());
+            this.attempts = 0;
+            this.changeLobbyAttempted = false;
 
             switch (macro.getCurrentCommission().getName()) {
                 case "Mithril": case "Titanium":
@@ -104,12 +126,18 @@ public class PathingState implements CommissionMacroState{
                 break;
             case TIME_FAIL:
             case PATHFIND_FAILED:
+                if (changeLobbyAttempted) {
+                    macro.disable("Failed to pathfind after multiple attempts. Please check your setup or contact the developer.");
+                    break;
+                }
                 attempts++;
                 if(attempts >= 3) {
-                    logError("Failed to pathfind. Warping and restarting");
-                    return new WarpingState();
+                    logError("Failed to pathfind after multiple retries. Warping to a new lobby.");
+                    this.attempts = 0;
+                    this.changeLobbyAttempted = true;
+                    return new NewLobbyState();
                 } else {
-                    logError("Failed to pathfind. Retrying to pathfind");
+                    logError("Failed to pathfind. Retrying to pathfind. Attempt " + attempts);
                     onStart(macro);
                     return this;
                 }

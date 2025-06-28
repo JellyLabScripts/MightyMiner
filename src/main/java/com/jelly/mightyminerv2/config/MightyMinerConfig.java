@@ -270,6 +270,13 @@ public class MightyMinerConfig extends Config {
     public static boolean mobKillerInterpolate = true;
 
     @Switch(
+            name = "Warp to forge during pathing", description = "If next commission is closer from the forge, it will warp and path from there",
+            category = COMMISSION,
+            subcategory = "Pathing"
+    )
+    public static boolean forgePathing = true;
+
+    @Switch(
             name = "Show Commission HUD outside mines", description = "Toggle HUD Visibility outside of dwarven mines",
             category = COMMISSION,
             subcategory = "HUD"

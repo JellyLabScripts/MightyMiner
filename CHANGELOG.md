@@ -1,5 +1,19 @@
 # MightyMiner V2 Changelog
 
+## v2.7.1 (2025-1-7)
+
+## Changes
+- New name-mention failsafe
+- New option to auto warp to forge in Commission Macro
+- Will no longer start Dwarven Commissions if the slayer weapon has not been set in the config
+- Will warp to a new mining lobby if the pathfinding fails
+- Changed the error message getMiningStats throws
+
+## Fixes
+- Duplicate mining tools causing ItemChangeFailsafe to trigger
+- Pickaxe ability issue
+- Issues with macro not mining after tabbing out
+
 ## v2.7.0 (2025-18-6)
 
 This update marks the first stable update of MightyMiner v2.7.0 

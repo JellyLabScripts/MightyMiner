@@ -160,6 +160,7 @@ public class MightyMiner {
         FeatureManager.getInstance().allFeatures.forEach(MinecraftForge.EVENT_BUS::register);
         MinecraftForge.EVENT_BUS.register(new ScoreboardUtil());
         MinecraftForge.EVENT_BUS.register(new TablistUtil());
+        MinecraftForge.EVENT_BUS.register(new CommandHandler());
     }
 
     private void initializeCommands() {

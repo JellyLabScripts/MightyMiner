@@ -21,7 +21,7 @@ public class MixinMinecraft {
         return instance.isKeyDown() && !MacroManager.getInstance().isRunning();
     }
 
-    @Redirect(method = "setIngameFocus", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/Display;isActive()Z"))
+    @Redirect(method = "setIngameFocus", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/Display;isActive()Z", remap = false))
     public boolean isActive() {
         if (MacroManager.getInstance().isRunning()) {
             return true;

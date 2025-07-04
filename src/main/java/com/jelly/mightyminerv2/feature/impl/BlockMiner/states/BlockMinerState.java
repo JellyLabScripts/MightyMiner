@@ -4,7 +4,7 @@ import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 
 /**
  * BlockMinerState
- * 
+ * <p>
  * Interface for all states in the BlockMiner state machine.
  * Implements the State design pattern to encapsulate different behaviors
  * for each phase of the mining process.

@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * ChoosingBlockState
- * 
+ * <p>
  * State responsible for finding the next block to mine.
  * Uses priority settings to determine the best block to target.
  * Includes wait logic if no blocks are immediately available.

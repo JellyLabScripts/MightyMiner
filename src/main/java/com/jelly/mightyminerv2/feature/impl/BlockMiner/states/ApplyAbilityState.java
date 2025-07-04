@@ -7,11 +7,11 @@ import net.minecraft.client.Minecraft;
 
 /**
  * ApplyAbilityState
- * 
+ * <p>
  * State responsible for activating the mining ability.
  * Waits for 1 second and then right clicks
  * Then waits for 1 more second to transition into the next state
- *
+ * <p>
  * Automatically throws error if it presses 2 times consecutively
  */
 public class ApplyAbilityState implements BlockMinerState {

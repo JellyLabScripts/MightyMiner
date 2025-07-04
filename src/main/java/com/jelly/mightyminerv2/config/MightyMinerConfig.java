@@ -155,12 +155,28 @@ public class MightyMinerConfig extends Config {
     )
     public static boolean usePickaxeAbility = true;
 
+    @Info(
+            text = "You may turn off randomized rotations if you want to maximize the efficiency of precision miner",
+            type = InfoType.INFO,
+            category = GENERAL,
+            subcategory = "Mining Behaviour",
+            size = 2
+    )
+    public static boolean precisionMinerInfo;
+
     @Switch(
-            name = "Precision Miner (to be implemented)", description = "Looks at particles spawned by precision miner perk",
+            name = "Precision Miner", description = "Looks at particles spawned by precision miner perk",
             category = GENERAL,
             subcategory = "Mining Behaviour"
     )
     public static boolean precisionMiner = false;
+
+    @Switch(
+            name = "Randomized rotations", description = "Randomize rotations to make them look more human",
+            category = GENERAL,
+            subcategory = "Mining Behaviour"
+    )
+    public static boolean randomizedRotations = true;
 
     @Slider(
             name = "Ore Respawn Wait Threshold (seconds)",

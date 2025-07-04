@@ -5,7 +5,7 @@ import com.jelly.mightyminerv2.config.MightyMinerConfig;
 
 /**
  * StartingState
- * 
+ * <p>
  * Initial state in the BlockMiner state machine.
  * Acts as an entry point and determines the next appropriate state.
  */

@@ -1,27 +1,35 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.event.SpawnParticleEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.BlockMinerState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.ApplyAbilityState;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.states.StartingState;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
+import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.block.Block;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * BlockMiner
- * 
+ * <p>
  * Main controller class for automatic block mining feature.
  * Implements a state machine pattern to manage different phases of the mining process.
  * Handles mining block selection, breaking, and speed boost management.
@@ -54,6 +62,7 @@ public class BlockMiner extends AbstractFeature {
     @Getter
     @Setter
     private BlockMinerError error = BlockMinerError.NONE;
+
     public enum BlockMinerError {
         NONE,              // No error
         NOT_ENOUGH_BLOCKS, // Cannot find blocks to mine
@@ -63,29 +72,40 @@ public class BlockMiner extends AbstractFeature {
         NO_PICKAXE_ABILITY,    // The user cannot use the pickaxe ability
     }
 
-    // For every pattern (Starting -> Speed) OR (Speed -> Starting), noSpeedBoostFlag adds 1
-    // If it detects the pattern Starting -> Speed -> Starting -> Speed (i.e. noSpeedBoostFlag == 4)
-    // then NO_SPEED_BOOST is thrown
+    /** For every pattern (Starting -> Speed) OR (Speed -> Starting), noSpeedBoostFlag adds 1
+    * <p> If it detects the pattern Starting -> Speed -> Starting -> Speed (i.e., noSpeedBoostFlag == 4)
+    * then NO_SPEED_BOOST is thrown
+     */
     private int retryActivatePickaxeAbility;
 
+    /** The map of the state ID of the block -> its priority */
     @Getter
-    private Map<Integer, Integer> blockPriority = new HashMap<>(); // State ID of block -> priority
-    
-    @Getter
-    @Setter
-    private BlockPos targetBlockPos; // BlockPos of current block being mined
+    private Map<Integer, Integer> blockPriority = new HashMap<>();
 
+    /** The BlockPos of current block being mined */
     @Getter
     @Setter
-    private Block targetBlockType; // Type of current block being mined
-    
-    @Getter
-    @Setter
-    private int miningSpeed;  // Mining speed modifier (affects block breaking time)
+    private BlockPos targetBlockPos;
 
+    /** Type of current block being mined */
     @Getter
     @Setter
-    private int waitThreshold;  // Stop the macro automatically if it cannot find blocks within the time limit (in ms)
+    private Block targetBlockType;
+
+    /** Target particle position (for precision miner) */
+    @Getter
+    @Setter
+    private Vec3 targetParticlePos;
+
+    /**  Mining speed modifier (affects block breaking time) */
+    @Getter
+    @Setter
+    private int miningSpeed;
+
+    /**  Stop the macro automatically if it cannot find blocks within the time limit (in ms) */
+    @Getter
+    @Setter
+    private int waitThreshold;
 
     @Override
     public String getName() {
@@ -95,7 +115,7 @@ public class BlockMiner extends AbstractFeature {
     /**
      * Starts the BlockMiner with specified parameters.
      * 
-     * @param blocksToMine Array of mineable block types to target
+     * @param blocksToMine Array of mine-able block types to target
      * @param miningSpeed Base mining speed (higher = faster)
      * @param priority Array of priority values for block selection
      * @param miningTool Item name of the tool to use for mining
@@ -129,6 +149,7 @@ public class BlockMiner extends AbstractFeature {
         this.error = BlockMinerError.NONE;
         this.pickaxeAbilityState = PickaxeAbilityState.AVAILABLE;
         this.retryActivatePickaxeAbility = 0;
+        targetParticlePos = null;
         
         // Initialize with starting state
         this.currentState = new StartingState();
@@ -141,7 +162,8 @@ public class BlockMiner extends AbstractFeature {
         if(currentState != null)
             currentState.onEnd(this);
         super.stop();
-        KeyBindUtil.releaseAllExcept();  // Release all keybinds
+        KeyBindUtil.releaseAllExcept();
+
     }
 
     @SubscribeEvent
@@ -200,6 +222,38 @@ public class BlockMiner extends AbstractFeature {
         }
         if (message.contains("you used your") || message.contains("your pickaxe ability is on cooldown for")) {
             pickaxeAbilityState = PickaxeAbilityState.UNAVAILABLE;
+        }
+    }
+
+
+    @SubscribeEvent
+    public void onParticleSpawned(SpawnParticleEvent event) {
+        if (!MightyMinerConfig.precisionMiner
+                || event.getParticleTypes() != EnumParticleTypes.CRIT
+                || targetBlockPos == null
+                || mc.thePlayer.getPositionVector().squareDistanceTo(event.getPos()) >= 64) {
+
+            targetParticlePos = null;
+            return;
+        }
+
+        Vec3 particlePos = event.getPos();
+        double expansion = 0.2;
+        AxisAlignedBB expandedBox = new AxisAlignedBB(
+                targetBlockPos.getX() - expansion, targetBlockPos.getY() - expansion, targetBlockPos.getZ() - expansion,
+                targetBlockPos.getX() + 1 + expansion, targetBlockPos.getY() + 1 + expansion, targetBlockPos.getZ() + 1 + expansion
+        );
+
+        if (!expandedBox.isVecInside(particlePos)) return;
+
+        targetParticlePos = particlePos;
+    }
+
+
+    @SubscribeEvent
+    protected void onRender(RenderWorldLastEvent event) {
+        if (this.targetParticlePos != null) {
+            RenderUtil.drawPoint(this.targetParticlePos, new Color(255, 0, 0, 100));
         }
     }
 }

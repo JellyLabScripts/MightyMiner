@@ -2,8 +2,6 @@ package com.jelly.mightyminerv2.feature.impl;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.handler.RotationHandler;
-import com.jelly.mightyminerv2.macro.MacroManager;
-import com.jelly.mightyminerv2.macro.impl.RouteMinerMacro;
 import com.jelly.mightyminerv2.pathfinder.calculate.Path;
 import com.jelly.mightyminerv2.util.*;
 import com.jelly.mightyminerv2.util.helper.Angle;
@@ -251,9 +249,10 @@ public class PathExecutor {
                 dynamicPitch.schedule(1000);
             }
 
+            // TODO: Implement back route miner
             RotationHandler.getInstance().easeTo(
                     new RotationConfiguration(
-                            new Angle(rotYaw, MightyMinerConfig.routeType && MacroManager.getInstance().isRunning() && MacroManager.getInstance().getCurrentMacro() instanceof RouteMinerMacro ? 90F : (float) lastPitch),
+                            new Angle(rotYaw, (float) lastPitch),
                             (long) time, null
                     )
             );

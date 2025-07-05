@@ -51,7 +51,6 @@ public abstract class AbstractFeature {
      *
      * @return true if the feature is considered enabled
      */
-    // Checks if the feature is conceptually enabled (not necessarily running)
     public boolean isEnabled() {
         return true;
     }

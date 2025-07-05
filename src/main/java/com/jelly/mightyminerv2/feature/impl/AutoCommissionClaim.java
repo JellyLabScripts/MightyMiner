@@ -3,8 +3,6 @@ package com.jelly.mightyminerv2.feature.impl;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
-import com.jelly.mightyminerv2.macro.MacroManager;
-import com.jelly.mightyminerv2.macro.impl.GlacialMacro;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.Commission;
 import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.EntityUtil;
@@ -53,7 +51,7 @@ public class AutoCommissionClaim extends AbstractFeature {
 
     @Override
     public void start() {
-        commClaimMethod = MacroManager.getInstance().getCurrentMacro() instanceof GlacialMacro ? 1 : MightyMinerConfig.commClaimMethod;
+        commClaimMethod = MightyMinerConfig.commClaimMethod;
         this.enabled = true;
         this.nextComm = null;
         this.claimError = ClaimError.NONE;

@@ -113,7 +113,7 @@ public class BlockMiner extends AbstractFeature {
     }
 
     /**
-     * Starts the BlockMiner with specified parameters.
+     * Starts the BlockMiner with specified parameters. Will continue to mine {@code blocksToMine} until stop() is called
      * 
      * @param blocksToMine Array of mine-able block types to target
      * @param miningSpeed Base mining speed (higher = faster)
@@ -168,7 +168,6 @@ public class BlockMiner extends AbstractFeature {
 
     @SubscribeEvent
     protected void onTick(TickEvent.ClientTickEvent event) {
-        // Skip if not enabled, GUI is open, or not in the correct phase
         if (!this.enabled || mc.currentScreen != null || event.phase == TickEvent.Phase.END) {
             return;
         }

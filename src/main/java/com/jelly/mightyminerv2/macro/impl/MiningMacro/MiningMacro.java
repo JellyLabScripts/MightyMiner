@@ -1,25 +1,9 @@
-/**
- * State machine:
- * 1. INITIALIZATION:
- *    - Presets variables.
- *    - If mining stats are available, then transition to MINING
- *    - If mining stats are NOT available, then transition to GETTING_STATS, and initialize it
- * <p>
- * 2. GETTING_STATS:
- *    - Waits for AutoInventory to finish retrieving stats.
- *    - If successful, stores stats and moves on to MINING.
- *    - If NOT successful, retries or disables the macro with error.
- * <p>
- * 3. MINING:
- *    - Starts the mining process using BlockMiner if not already started.
- *    - Verifies mining preconditions (tools, blocks, errors) and handles errors
- *
- */
-package com.jelly.mightyminerv2.macro.impl;
+package com.jelly.mightyminerv2.macro.impl.MiningMacro;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.FeatureManager;
-import com.jelly.mightyminerv2.feature.impl.AutoInventory;
+import com.jelly.mightyminerv2.feature.impl.AutoGetStats.AutoGetStats;
+import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.impl.MiningSpeedRetrievalTask;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
@@ -30,22 +14,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * <p>This macro retrieves the player's mining speed before starting the mining loop.
+ * It determines which blocks to mine based on MightyMiner configs, and coordinates
+ * with the {@link BlockMiner} to perform mining actions.</p>
+ */
 public class MiningMacro extends AbstractMacro {
     @Getter
     private static final MiningMacro instance = new MiningMacro();
 
+
     private final BlockMiner miner = BlockMiner.getInstance();
-
-    private enum State {
-        INITIALIZATION, GETTING_STATS, MINING
-    }
-    private State currentState = State.INITIALIZATION;
-
     private final List<String> necessaryItems = new ArrayList<>();
+
+    private MiningSpeedRetrievalTask miningSpeedRetrievalTask;
     private int miningSpeed = 0;
 
     private MineableBlock[] blocksToMine = {};
-    private int macroRetries = 0;
     private boolean isMining = false;
 
     @Override
@@ -65,17 +50,27 @@ public class MiningMacro extends AbstractMacro {
     @Override
     public void onEnable() {
         log("Enabling Mining Macro");
-        this.currentState = State.INITIALIZATION;
+        resetVariables();
+        setBlocksToMineBasedOnOreType();
+
+        if (miningSpeed == 0) {
+            miningSpeedRetrievalTask = new MiningSpeedRetrievalTask();
+            AutoGetStats.getInstance().startTask(miningSpeedRetrievalTask);
+        }
     }
 
     @Override
     public void onDisable() {
         log("Disabling Mining Macro");
-        if (isMining) {
-            miner.stop();
-            isMining = false;
-        }
+        miner.stop();
+        isMining = false;
         resetVariables();
+    }
+
+    private void resetVariables() {
+        miningSpeed = 0;
+        necessaryItems.clear();
+        isMining = false;
     }
 
     @Override
@@ -91,79 +86,45 @@ public class MiningMacro extends AbstractMacro {
     }
 
     public void onTick(TickEvent.ClientTickEvent event) {
-        if (timer.isScheduled() && !timer.passed()) return;
-
-        log("Current state: " + currentState);
-        switch (currentState) {
-            case INITIALIZATION:
-                handleInitializationState();
-                break;
-            case GETTING_STATS:
-                handleGettingStatsState();
-                break;
-            case MINING:
-                handleMiningState();
-                break;
-        }
-    }
-
-    private void handleInitializationState() {
-        log("Handling initialization state");
-        resetVariables();
-        setBlocksToMineBasedOnOreType();
         if (miningSpeed == 0) {
-            AutoInventory.getInstance().retrieveSpeedBoost();
-            changeState(State.GETTING_STATS);
-        } else {
-            changeState(State.MINING);
+            handleGettingStats();
+            return;
         }
-    }
 
-    private void resetVariables() {
-        macroRetries = 0;
-        miningSpeed = 0;
-        necessaryItems.clear();
-        isMining = false;
-    }
+        if (!isMining) {
+            miner.setWaitThreshold(MightyMinerConfig.oreRespawnWaitThreshold * 1000);
+            miner.start(
+                    blocksToMine,
+                    miningSpeed,
+                    determinePriority(),
+                    MightyMinerConfig.miningTool
+            );
 
-    private void handleGettingStatsState() {
-        if (AutoInventory.getInstance().isRunning()) return;
-
-        if (AutoInventory.getInstance().sbSucceeded()) {
-            int[] sb = AutoInventory.getInstance().getSpeedBoostValues();
-            miningSpeed = sb[0];
-            macroRetries = 0;
-            log("Retrieved stats - Speed: " + miningSpeed);
-            changeState(State.MINING);
-        } else {
-            handleFailingToGetStats();
+            isMining = true;
+            log("Started mining with speed: " + miningSpeed);
         }
+
+        handleMining();
     }
 
-    private void handleFailingToGetStats() {
-        log("Cannot get stats! (stats for speed boost)");
-        switch (AutoInventory.getInstance().getSbError()) {
-            case NONE:
-                throw new IllegalStateException("AutoInventory#getSbError failed but returned NONE");
-            case CANNOT_OPEN_INV:
-                if (++macroRetries > 3) {
-                    super.disable("Failed to open inventory after 3 attempts");
-                } else {
-                    changeState(State.INITIALIZATION);
-                }
-                break;
-            case CANNOT_GET_VALUE:
-                super.disable("Failed to get value. Contact the developer.");
-                break;
+    private void handleGettingStats() {
+        if (!AutoGetStats.getInstance().hasFinishedAllTasks())
+            return;
+
+        if (miningSpeedRetrievalTask.getError() != null) {
+            super.disable("Failed to get stats with the following error: "
+                    + miningSpeedRetrievalTask.getError());
+            return;
         }
+
+        miningSpeed = miningSpeedRetrievalTask.getResult();
     }
 
-    private void handleMiningState() {
-
+    private void handleMining() {
         switch(miner.getError()) {
             case NO_POINTS_FOUND:
                 log ("Restarting because the block chosen cannot be mined");
-                changeState(State.INITIALIZATION);
+                isMining = false;
                 break;
             case NO_TARGET_BLOCKS:
                 disable("Please set at least one type of target block in configs!");
@@ -179,28 +140,6 @@ public class MiningMacro extends AbstractMacro {
                         "Either enable any pickaxe ability in HOTM or enable chat messages. You can also disable pickaxe ability in configs.");
                 break;
         }
-
-        if (!isMining) {
-            miner.setWaitThreshold(MightyMinerConfig.oreRespawnWaitThreshold * 1000);
-            startMining();
-        }
-    }
-
-    private void startMining() {
-        miner.start(
-                blocksToMine,
-                miningSpeed,
-                determinePriority(),
-                MightyMinerConfig.miningTool
-        );
-
-        isMining = true;
-        log("Started mining with speed: " + miningSpeed);
-    }
-
-    private void changeState(State newState) {
-        log("Changing state from " + currentState + " to " + newState);
-        currentState = newState;
     }
 
     private void setBlocksToMineBasedOnOreType() {

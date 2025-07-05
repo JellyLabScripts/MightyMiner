@@ -4,6 +4,7 @@ import com.jelly.mightyminerv2.failsafe.AbstractFailsafe.Failsafe;
 import com.jelly.mightyminerv2.feature.impl.*;
 import com.jelly.mightyminerv2.feature.impl.AutoDrillRefuel.AutoDrillRefuel;
 import com.jelly.mightyminerv2.feature.impl.AutoGetStats.AutoGetStats;
+import com.jelly.mightyminerv2.feature.impl.AutoMobKiller.AutoMobKiller;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 
 import java.util.Arrays;

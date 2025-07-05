@@ -73,8 +73,14 @@ public class EntityUtil {
                     ((EntityLivingBase) v).getHealth() > 0)
             .collect(Collectors.toList()).forEach((entity) -> {
                 Entity livingBase = getEntityCuttingOtherEntity(entity, null);
+
                 if (livingBase instanceof EntityLivingBase) {
-                    if (!entitiesToIgnore.contains((EntityLivingBase) livingBase) && !livingBase.equals(mc.thePlayer)) {
+                    if (
+                        !entitiesToIgnore.contains((EntityLivingBase) livingBase)
+                        && !livingBase.equals(mc.thePlayer)
+                        // Temporary fix to avoid mobs being hunted
+                        && getHealthFromStandName(entity.getCustomNameTag()) != 1
+                    ) {
                         entities.add((EntityLivingBase) livingBase);
                     }
                 }
@@ -96,7 +102,6 @@ public class EntityUtil {
     private static long pack(int x, int z) {
         return ((long) x << 32) | (z & 0xFFFFFFFFL);
     }
-
 
     public static BlockPos nearbyBlock(EntityLivingBase entityLivingBase) {
         BlockPos closestBlock = null;

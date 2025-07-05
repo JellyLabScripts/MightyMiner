@@ -1,14 +1,15 @@
 package com.jelly.mightyminerv2.macro.impl.CommissionMacro.states;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
-import com.jelly.mightyminerv2.feature.impl.AutoMobKiller;
+import com.jelly.mightyminerv2.feature.impl.AutoMobKiller.AutoMobKiller;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.Commission;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 import com.jelly.mightyminerv2.util.CommissionUtil;
 
 import java.util.Set;
 
-public class MobKillingState implements CommissionMacroState{
+public class MobKillingState implements CommissionMacroState {
+
     @Override
     public void onStart(CommissionMacro macro) {
         log("Starting mob killing state");
@@ -26,7 +27,6 @@ public class MobKillingState implements CommissionMacroState{
 
     @Override
     public CommissionMacroState onTick(CommissionMacro macro) {
-
         if (macro.getCurrentCommission() == Commission.COMMISSION_CLAIM){
             return new PathingState();
         }
@@ -35,7 +35,7 @@ public class MobKillingState implements CommissionMacroState{
             return this;
         }
 
-        switch (AutoMobKiller.getInstance().getMkError()) {
+        switch (AutoMobKiller.getInstance().getError()) {
             case NONE:
                 macro.disable("Mob killer failed, but no error is detected. Please contact the developer.");
                 break;

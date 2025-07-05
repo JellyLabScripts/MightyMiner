@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.failsafe.impl;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
@@ -31,7 +32,7 @@ public class KnockbackFailsafe extends AbstractFailsafe {
     public boolean onPacketReceive(PacketEvent.Received event) {
         if (!(event.packet instanceof S12PacketEntityVelocity)) return false;
         if (((S12PacketEntityVelocity) event.packet).getEntityID() != mc.thePlayer.getEntityId()) return false;
-        return ((S12PacketEntityVelocity) event.packet).getMotionY() >= 4000;
+        return ((S12PacketEntityVelocity) event.packet).getMotionY() >= MightyMinerConfig.verticalKnockbackThreshold;
     }
 
     @Override

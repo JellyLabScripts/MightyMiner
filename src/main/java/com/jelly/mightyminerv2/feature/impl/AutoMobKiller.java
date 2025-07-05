@@ -12,6 +12,7 @@ import lombok.Getter;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -19,6 +20,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // Todo: Make it a universal mob killer perhaps?
 //  idk its not a combat macro
@@ -37,6 +40,10 @@ public class AutoMobKiller extends AbstractFeature {
     private Optional<EntityLivingBase> targetMob = Optional.empty();
     private Optional<Vec3> entityLastPosition = Optional.empty();
     private final Map<EntityLivingBase, Pair<String, BlockPos>> debug = new HashMap<>();
+
+    // Blacklist mobs that are being hunted for their shard (Foraging Update)
+    private final Set<EntityLivingBase> blacklistedMobs = new HashSet<>();
+    private EntityLivingBase lastTarget = null;
 
     public static AutoMobKiller getInstance() {
         if (instance == null) {
@@ -139,7 +146,8 @@ public class AutoMobKiller extends AbstractFeature {
                     EntityLivingBase best = null;
                     for (EntityLivingBase mob : mobs) {
                         BlockPos mobPos = EntityUtil.getBlockStandingOn(mob);
-                        if (BlockUtil.canStandOn(mobPos)) {
+
+                        if (!blacklistedMobs.contains(mob) && BlockUtil.canStandOn(mobPos)) {
                             best = mob;
                             break;
                         }
@@ -223,10 +231,18 @@ public class AutoMobKiller extends AbstractFeature {
                     return;
                 }
 
+                lastTarget = this.targetMob.get();
                 KeyBindUtil.leftClick();
                 RotationHandler.getInstance().stop();
                 this.changeState(State.STARTING, 0);
                 break;
+        }
+    }
+
+    @SubscribeEvent
+    private void onChat(ClientChatReceivedEvent event) {
+        if (event.message.getUnformattedText().contains("is currently hunting this monster with a") && lastTarget != null) {
+            this.blacklistedMobs.add(lastTarget);
         }
     }
 

@@ -49,6 +49,7 @@ public class AutoMobKiller extends AbstractFeature {
         if (instance == null) {
             instance = new AutoMobKiller();
         }
+
         return instance;
     }
 
@@ -240,7 +241,7 @@ public class AutoMobKiller extends AbstractFeature {
     }
 
     @SubscribeEvent
-    private void onChat(ClientChatReceivedEvent event) {
+    public void onChat(ClientChatReceivedEvent event) {
         if (event.message.getUnformattedText().contains("is currently hunting this monster with a") && lastTarget != null) {
             this.blacklistedMobs.add(lastTarget);
         }

@@ -102,6 +102,11 @@ public class BlockMiner extends AbstractFeature {
     @Setter
     private int miningSpeed;
 
+    /**  Pickaxe ability to be used */
+    @Getter
+    @Setter
+    private PickaxeAbility pickaxeAbility;
+
     /**  Stop the macro automatically if it cannot find blocks within the time limit (in ms) */
     @Getter
     @Setter
@@ -117,10 +122,11 @@ public class BlockMiner extends AbstractFeature {
      * 
      * @param blocksToMine Array of mine-able block types to target
      * @param miningSpeed Base mining speed (higher = faster)
+     * @param pickaxeAbility Users selected pickaxe ability
      * @param priority Array of priority values for block selection
      * @param miningTool Item name of the tool to use for mining
      */
-    public void start(MineableBlock[] blocksToMine, final int miningSpeed, final int[] priority, String miningTool) {
+    public void start(MineableBlock[] blocksToMine, final int miningSpeed, final PickaxeAbility pickaxeAbility, final int[] priority, String miningTool) {
         // Try to hold the specified mining tool if provided
         if (!miningTool.isEmpty() && !InventoryUtil.holdItem(miningTool)) {
             logError(miningTool + " not found in inventory!");
@@ -145,6 +151,7 @@ public class BlockMiner extends AbstractFeature {
         
         // Initialize parameters
         this.miningSpeed = miningSpeed - 200;  // Base adjustment to mining speed
+        this.pickaxeAbility = pickaxeAbility;
         this.enabled = true;
         this.error = BlockMinerError.NONE;
         this.pickaxeAbilityState = PickaxeAbilityState.AVAILABLE;
@@ -254,5 +261,11 @@ public class BlockMiner extends AbstractFeature {
         if (this.targetParticlePos != null) {
             RenderUtil.drawPoint(this.targetParticlePos, new Color(255, 0, 0, 100));
         }
+    }
+
+    public enum PickaxeAbility {
+        NONE,
+        PICKOBULUS,
+        MINING_SPEED_BOOST
     }
 }

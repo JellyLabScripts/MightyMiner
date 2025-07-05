@@ -3,6 +3,7 @@ package com.jelly.mightyminerv2.macro.impl.CommissionMacro;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.CommissionMacroState;
@@ -30,6 +31,10 @@ public class CommissionMacro extends AbstractMacro {
     @Getter
     @Setter
     private int miningSpeed = 0;
+
+    @Getter
+    @Setter
+    private BlockMiner.PickaxeAbility pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
 
     @Getter
     @Setter

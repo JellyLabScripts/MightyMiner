@@ -23,6 +23,7 @@ public class MiningState implements CommissionMacroState{
         miner.start(
                 blocksToMine,
                 macro.getMiningSpeed(),
+                CommissionMacro.getInstance().getPickaxeAbility(),
                 macro.getCurrentCommission().getName().contains("Titanium") ? titaniumPriority : mithrilPriority,
                 MightyMinerConfig.miningTool
         );

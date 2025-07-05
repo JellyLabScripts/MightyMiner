@@ -245,7 +245,7 @@ public class AutoMobKiller extends AbstractFeature {
     }
 
     enum State {
-        STARTING, FINDING_MOB, WALKING_TO_MOB, WAITING_FOR_MOB, LOOKING_AT_MOB, KILLING_MOB,
+        STARTING, WALKING_TO_MOB, FINDING_MOB, WAITING_FOR_MOB, LOOKING_AT_MOB, KILLING_MOB,
     }
 
     public enum MKError {

@@ -84,6 +84,7 @@ public abstract class AbstractFailsafe {
         TELEPORT,
         BEDROCK_CHECK,
         SLOT_CHANGE,
-        PLAYER_PROFILE_OPEN
+        PLAYER_PROFILE_OPEN,
+        NAME_MENTION
     }
 }

@@ -3,14 +3,14 @@ package com.jelly.mightyminerv2.macro.impl.CommissionMacro;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
-import com.jelly.mightyminerv2.feature.impl.*;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.CommissionMacroState;
+import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.NewLobbyState;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.StartingState;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.states.WarpingState;
 import com.jelly.mightyminerv2.util.CommissionUtil;
-import com.jelly.mightyminerv2.util.InventoryUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -31,6 +31,10 @@ public class CommissionMacro extends AbstractMacro {
     @Getter
     @Setter
     private int miningSpeed = 0;
+
+    @Getter
+    @Setter
+    private BlockMiner.PickaxeAbility pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
 
     @Getter
     @Setter
@@ -81,7 +85,7 @@ public class CommissionMacro extends AbstractMacro {
             items.add("Royal Pigeon");
         }
 
-        if (MightyMinerConfig.commDrillRefuel) {
+        if (MightyMinerConfig.drillRefuel) {
             items.add("Abiphone");
         }
         return items;
@@ -134,13 +138,14 @@ public class CommissionMacro extends AbstractMacro {
 
     @Override
     public void onTablistUpdate(UpdateTablistEvent event) {
-        if (!this.isEnabled() || currentState instanceof WarpingState) {
+        if (!this.isEnabled() || currentState instanceof WarpingState || currentState instanceof NewLobbyState) {
             return;
         }
 
         List<Commission> comms = CommissionUtil.getCurrentCommissionsFromTablist();
         if (comms.isEmpty()) {
             log("Cannot find commissions!");
+            return;
         }
         setCurrentCommission(comms.get(0));
     }

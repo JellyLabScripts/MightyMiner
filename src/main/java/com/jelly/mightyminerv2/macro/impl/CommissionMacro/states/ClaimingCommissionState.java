@@ -21,7 +21,17 @@ public class ClaimingCommissionState implements CommissionMacroState{
         }
 
         if (AutoCommissionClaim.getInstance().succeeded()) {
-            return new StartingState();
+            List<Commission> newCommissions = AutoCommissionClaim.getInstance().getNextComm();
+
+            if (newCommissions != null && !newCommissions.isEmpty()) {
+                macro.setCurrentCommission(newCommissions.get(0));
+                log("Claiming successful. Next commission: " + newCommissions.get(0).getName());
+            } else {
+                log("Claiming successful, but no new commissions were read. Restarting cycle.");
+                return new StartingState();
+            }
+
+            return new PathingState();
         }
 
         switch (AutoCommissionClaim.getInstance().claimError()) {
@@ -36,6 +46,9 @@ public class ClaimingCommissionState implements CommissionMacroState{
                 return new StartingState();
             case NO_ITEMS:
                 macro.disable("No royal pigeons found, but this shouldn't happen. Please contact the developer.");
+                break;
+            case NPC_NOT_UNLOCKED:
+                macro.disable("You have not unlocked Emissaries at Commission Milestone 1. Please post mc logs in #bug-report if this is a mistake.");
                 break;
         }
         return null;

@@ -101,7 +101,9 @@ object MovementHelper {
     fun canStandOn(bsa: BlockStateAccessor, x: Int, y: Int, z: Int, state: IBlockState = bsa.get(x, y, z)): Boolean {
         val block = state.block
         return when {
+            // blocks which are opaque but provide redstone power are NOT normal cubes by Minecraft's definition
             block.isNormalCube -> true
+            block == Blocks.redstone_block -> true
             block == Blocks.ladder -> true
             block == Blocks.farmland || block == Blocks.grass -> true
             block == Blocks.ender_chest || block == Blocks.chest || block == Blocks.trapped_chest -> true

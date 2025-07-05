@@ -1,6 +1,5 @@
-package com.jelly.mightyminerv2.macro.impl.helper;
+package com.jelly.mightyminerv2.macro.impl.GlacialMacro.helper;
 
-import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import com.jelly.mightyminerv2.util.helper.route.TransportMethod;

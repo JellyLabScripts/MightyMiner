@@ -18,25 +18,52 @@ import java.util.Random;
 
 /**
  * BreakingState
- * 
+ * <p>
  * State responsible for breaking the selected target block.
  * Handles player rotation, movement, and mining mechanics.
  * Will attempt to move towards the block if too far away.
  */
 public class BreakingState implements BlockMinerState{
 
-    private static final double MIN_WALK_DISTANCE = 0.2;  // Minimum distance to trigger walking
-    private static final double MAX_MINE_DISTANCE = 4;    // Maximum mining distance for player
-    private static final int FAILSAFE_TICKS = 40;         // Safety mechanism if we've been trying to break for too long
-
+    /** Reference to the Minecraft client instance. */
     private final Minecraft mc = Minecraft.getMinecraft();
+
+    /** Random number generator for introducing slight variability (e.g., in targeting or movement). */
     private final Random random = new Random();
 
-    private int breakAttemptTime;  // Tracks how long we've been trying to break the block (in ticks)
-    private int miningTime;        // Expected time to break the block (in ticks)
-    private Vec3 targetPoint;      // The specific point on the block to target for mining
-    private Vec3 walkingDestinationBlock;  // Target position for walking if needed
-    private boolean isWalking;     // Whether the player is currently walking toward the block
+    /** Minimum distance required between the player and block to trigger walking behavior. */
+    private static final double MIN_WALK_DISTANCE = 0.2;
+
+    /** The maximum allowed distance for the player to attempt to mine a block. */
+    private static final double MAX_MINE_DISTANCE = 4;
+
+    /** Number of ticks after which a failsafe is triggered if mining takes too long. */
+    private static final int FAILSAFE_TICKS = 40;
+
+    /** Time in milliseconds the player can look away from the block before switching targets. */
+    private static final int LOOK_AWAY_THRESHOLD_MS = 500;
+
+    /** Timer used to track how long the player has been looking away from the target block. */
+    private Clock lookAwayTimer;
+
+    /** Flag indicating whether the player was looking away from the block in the previous tick. */
+    private boolean wasLookingAway = false;
+
+    /** Number of ticks the player has been attempting to break the current block. */
+    private int breakAttemptTime;
+
+    /** Estimated number of ticks required to break the current block. */
+    private int miningTime;
+
+    /** The exact point on the block being targeted for mining. */
+    private Vec3 targetPoint;
+
+    /** The block position that the player is walking toward if not in range to mine. */
+    private Vec3 walkingDestinationBlock;
+
+    /** Indicates whether the player is currently walking toward the target block. */
+    private boolean isWalking;
+
 
     @Override
     public void onStart(BlockMiner miner) {
@@ -44,12 +71,16 @@ public class BreakingState implements BlockMinerState{
         breakAttemptTime = 0;
         isWalking = false;
 
+        lookAwayTimer = new Clock();
+        wasLookingAway = false;
+
         miningTime = BlockUtil.getMiningTime(
-            Block.getStateId(Minecraft.getMinecraft().theWorld.getBlockState(miner.getTargetBlockPos())),
-            miner.getMiningSpeed()
+                Block.getStateId(Minecraft.getMinecraft().theWorld.getBlockState(miner.getTargetBlockPos())),
+                miner.getMiningSpeed()
         );
 
         // Setup rotation to look at the block
+        RotationHandler.getInstance().stop();
         initializeRotation(miner);
     }
 
@@ -63,10 +94,31 @@ public class BreakingState implements BlockMinerState{
             handleWalking();
         }
 
+        // Handle precision mining
+        if (miner.getTargetParticlePos() != null) {
+            RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(miner.getTargetParticlePos()), 400, null).followTarget(true));
+            miner.setTargetParticlePos(null);
+        }
+
         // Safety mechanism: if we've been trying to break for too long, reset
         if (++this.breakAttemptTime > this.miningTime + FAILSAFE_TICKS) {
             logError("Stuck while mining, return to starting state");
             return new StartingState();
+        }
+
+        // Safety mechanism: if we're looking away from target block, reset
+        BlockPos currentLookingAt = BlockUtil.getBlockLookingAt();
+        boolean isLookingAtTarget = miner.getTargetBlockPos().equals(currentLookingAt);
+        if (!isLookingAtTarget) {
+            if (!wasLookingAway) {
+                lookAwayTimer.schedule(LOOK_AWAY_THRESHOLD_MS);
+                wasLookingAway = true;
+            } else if (lookAwayTimer.passed()) {
+                log("Player looked away from target block for too long, choosing new block");
+                return new StartingState();
+            }
+        } else {
+            wasLookingAway = false;
         }
 
         // After breaking a block, restart the whole cycle again
@@ -99,7 +151,7 @@ public class BreakingState implements BlockMinerState{
     }
 
     /**
-     * Handles walking mechanics when player needs to move toward target block.
+     * Handles walking mechanics when the player needs to move toward target block.
      * Uses strafing utility to navigate toward the block.
      */
     private void handleWalking() {
@@ -124,7 +176,7 @@ public class BreakingState implements BlockMinerState{
     /**
      * Sets up rotation to look at the target block.
      * Also determines if the player needs to walk toward the block.
-     * 
+     *
      * @param miner The BlockMiner instance
      */
     private void initializeRotation(BlockMiner miner) {
@@ -153,7 +205,7 @@ public class BreakingState implements BlockMinerState{
         );
 
         // Sometimes randomly choose a different point on the block (for variety)
-        if (random.nextBoolean()) {
+        if (random.nextBoolean() && MightyMinerConfig.randomizedRotations) {
             int halfwayMark = points.size() / 2;
             this.targetPoint = points.get(random.nextInt(halfwayMark) + halfwayMark - 1);
 
@@ -168,11 +220,11 @@ public class BreakingState implements BlockMinerState{
 
         RotationHandler.getInstance().start();
 
-        // Determine if player needs to walk toward block (too far away)
+        // Determine if the player needs to walk toward block (too far away)
         if (this.targetPoint != null && PlayerUtil.getPlayerEyePos().distanceTo(this.targetPoint) > MAX_MINE_DISTANCE) {
             isWalking = true;
             Vec3 vec = AngleUtil.getVectorForRotation(AngleUtil.getRotationYaw(this.targetPoint));
-            
+
             // Find walkable block closest to target
             if (mc.theWorld.isAirBlock(new BlockPos(mc.thePlayer.getPositionVector().add(vec)))) {
                 this.walkingDestinationBlock = BlockUtil.getWalkableBlocksAround(PlayerUtil.getBlockStandingOn())

@@ -3,8 +3,6 @@ package com.jelly.mightyminerv2.feature.impl;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
-import com.jelly.mightyminerv2.macro.MacroManager;
-import com.jelly.mightyminerv2.macro.impl.GlacialMacro;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.Commission;
 import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.EntityUtil;
@@ -53,7 +51,7 @@ public class AutoCommissionClaim extends AbstractFeature {
 
     @Override
     public void start() {
-        commClaimMethod = MacroManager.getInstance().getCurrentMacro() instanceof GlacialMacro ? 1 : MightyMinerConfig.commClaimMethod;
+        commClaimMethod = MightyMinerConfig.commClaimMethod;
         this.enabled = true;
         this.nextComm = null;
         this.claimError = ClaimError.NONE;
@@ -130,21 +128,25 @@ public class AutoCommissionClaim extends AbstractFeature {
                 }
                 if (commClaimMethod == 0) {
                     this.emissary = CommissionUtil.getClosestEmissary();
-                    if (!this.emissary.isPresent()) {
-                        this.stop(ClaimError.INACCESSIBLE_NPC);
-                        log("Emissary: " + CommissionUtil.getClosestEmissary().get().getName());
-                        sendError("Cannot Find Emissary. Stopping");
-                        break;
-                    }
 
-                    if (mc.thePlayer.getDistanceSqToEntity(this.emissary.get()) > 16) {
-                        this.stop(ClaimError.INACCESSIBLE_NPC);
-                        log("Emissary: " + CommissionUtil.getClosestEmissary().get().getName());
-                        sendError("Emissary is too far away.");
-                        break;
-                    }
+                    if (this.emissary.isPresent()) {
+                        EntityPlayer emissaryEntity = this.emissary.get();
+                        log("Found Emissary: " + emissaryEntity.getName());
 
-                    RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.emissary.get()), 500, RotationType.CLIENT, null));
+                        if (mc.thePlayer.getDistanceSqToEntity(emissaryEntity) > 16) {
+                            log("Emissary " + emissaryEntity.getName() + " is too far away.");
+                            sendError("Emissary is too far away.");
+                            this.stop(ClaimError.INACCESSIBLE_NPC);
+                            return;
+                        } else {
+                            log("Rotating to Emissary: " + emissaryEntity.getName());
+                            RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(emissaryEntity), 500, RotationType.CLIENT, null));
+                        }
+                    } else {
+                        log("Could not find nearby Emissary. Current position: " + mc.thePlayer.getPositionVector());
+                        this.stop(ClaimError.NPC_NOT_UNLOCKED);
+                        return;
+                    }
                 }
                 this.swapState(State.SWAPPING_TO_ALT, 1000);
                 break;
@@ -168,11 +170,6 @@ public class AutoCommissionClaim extends AbstractFeature {
 
                 break;
             case OPENING:
-//                if (this.hasTimerEnded()) {
-//                    this.stop(ClaimError.TIMEOUT);
-//                    error("Could not finish rotation in time.");
-//                    break;
-//                }
                 final Optional<Entity> entityLookingAt = EntityUtil.getEntityLookingAt();
                 time = 5000;
                 switch (commClaimMethod) {
@@ -295,6 +292,6 @@ public class AutoCommissionClaim extends AbstractFeature {
     }
 
     public enum ClaimError {
-        NONE, INACCESSIBLE_NPC, NO_ITEMS, TIMEOUT
+        NONE, INACCESSIBLE_NPC, NO_ITEMS, TIMEOUT, NPC_NOT_UNLOCKED
     }
 }

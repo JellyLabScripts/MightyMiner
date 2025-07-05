@@ -5,7 +5,7 @@ import com.jelly.mightyminerv2.config.MightyMinerConfig;
 
 /**
  * StartingState
- * 
+ * <p>
  * Initial state in the BlockMiner state machine.
  * Acts as an entry point and determines the next appropriate state.
  */
@@ -18,17 +18,11 @@ public class StartingState implements BlockMinerState {
 
     @Override
     public BlockMinerState onTick(BlockMiner miner) {
-        if (!MightyMinerConfig.disableMiningSpeedBoost && miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE) {
-            log("Mining speed boost ENABLED in config and ability AVAILABLE");
+        if (BlockMiner.getInstance().getPickaxeAbility() != BlockMiner.PickaxeAbility.NONE
+                && miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE) {
             return new ApplyAbilityState();
-        } else {
-            if (MightyMinerConfig.disableMiningSpeedBoost) {
-                log("Mining speed boost DISABLED in config");
-            } else {
-                log("Mining speed boost ENABLED in config, but ability UNAVAILABLE");
-            }
+        } else
             return new ChoosingBlockState();
-        }
     }
 
     @Override

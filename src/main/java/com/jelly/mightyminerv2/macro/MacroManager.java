@@ -5,8 +5,8 @@ import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
-import com.jelly.mightyminerv2.macro.impl.*;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
+import com.jelly.mightyminerv2.macro.impl.MiningMacro.MiningMacro;
 import com.jelly.mightyminerv2.util.Logger;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -25,17 +25,12 @@ public class MacroManager {
     private Minecraft mc = Minecraft.getMinecraft();
 
     public AbstractMacro getCurrentMacro() {
-        switch (MightyMinerConfig.macroType) {
-            case 1:
-                return GlacialMacro.getInstance();
-            case 2:
-                return MiningMacro.getInstance();
-            case 3:
-                return RouteMinerMacro.getInstance();
-            case 4:
-                return GemstonePowderMacro.getInstance();
-            default:
-                return CommissionMacro.getInstance();
+        if (MightyMinerConfig.macroType == 0) {
+            return CommissionMacro.getInstance();
+        } else if (MightyMinerConfig.macroType == 1) {
+            return MiningMacro.getInstance();
+        } else {
+            return CommissionMacro.getInstance();
         }
     }
 

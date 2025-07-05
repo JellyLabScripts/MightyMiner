@@ -49,8 +49,6 @@ public class Clock {
         return Math.max(0, endTime - System.currentTimeMillis());
     }
 
-    // timer
-
     public void start(boolean reset) {
         if (!this.scheduled || reset) {
             this.startTime = System.currentTimeMillis();

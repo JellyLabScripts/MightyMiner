@@ -4,7 +4,6 @@ import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.Commission;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
-import com.jelly.mightyminerv2.macro.impl.MiningMacro;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
 
@@ -24,6 +23,7 @@ public class MiningState implements CommissionMacroState{
         miner.start(
                 blocksToMine,
                 macro.getMiningSpeed(),
+                CommissionMacro.getInstance().getPickaxeAbility(),
                 macro.getCurrentCommission().getName().contains("Titanium") ? titaniumPriority : mithrilPriority,
                 MightyMinerConfig.miningTool
         );
@@ -34,10 +34,10 @@ public class MiningState implements CommissionMacroState{
 
         String miningTool = MightyMinerConfig.miningTool;
         if (miningTool.toLowerCase().contains("drill") || InventoryUtil.getFullName(miningTool).contains("Drill")) {
-            log("Fuel detected: " + InventoryUtil.getDrillRemainingFuel(miningTool));
-            if (InventoryUtil.getDrillRemainingFuel(miningTool) <= 10) {
-                log("Less than 10 fuel left in drill. Starting to refuel");
-                if(MightyMinerConfig.commDrillRefuel)
+            //log("Fuel detected: " + InventoryUtil.getDrillRemainingFuel(miningTool));
+            if (InventoryUtil.getDrillRemainingFuel(miningTool) <= 100) {
+                log("Less than 100 fuel left in drill. Starting to refuel");
+                if(MightyMinerConfig.drillRefuel)
                     return new RefuelState();
                 else {
                     macro.disable("Very little fuel left in drill");
@@ -66,7 +66,7 @@ public class MiningState implements CommissionMacroState{
                 return new StartingState();
             case NO_PICKAXE_ABILITY:
                 macro.disable("Cannot find messages for pickaxe ability! " +
-                        "Either enable any pickaxe ability in HOTM or enable chat messages");
+                        "Either enable any pickaxe ability in HOTM or enable chat messages. You can also disable pickaxe ability in configs.");
                 break;
             default:
                 logError("Block miner error: " + miner.getError().name());

@@ -176,6 +176,12 @@ public class RouteNavigator extends AbstractFeature {
             return;
         }
 
+        if (mc.thePlayer == null || mc.theWorld == null) {
+            log("Player or World is null, stopping RouteNavigator.");
+            this.stop(NavError.NONE);
+            return;
+        }
+
         switch (this.state) {
             case STARTING: {
                 this.swapState(State.DETECT_ROUTE, 0);

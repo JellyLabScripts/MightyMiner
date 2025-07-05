@@ -1,42 +1,48 @@
 package com.jelly.mightyminerv2.macro.impl.CommissionMacro.states;
 
-import com.jelly.mightyminerv2.feature.impl.AutoCommissionClaim;
-import com.jelly.mightyminerv2.feature.impl.AutoInventory;
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.feature.impl.AutoGetStats.AutoGetStats;
+import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.impl.MiningSpeedRetrievalTask;
+import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.impl.PickaxeAbilityRetrievalTask;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 
 public class GettingStatsState implements CommissionMacroState{
 
-    private final AutoInventory autoInventory = AutoInventory.getInstance();
+    private final AutoGetStats autoInventory = AutoGetStats.getInstance();
+    private MiningSpeedRetrievalTask miningSpeedRetrievalTask;
+    private PickaxeAbilityRetrievalTask pickaxeAbilityRetrievalTask;
 
     @Override
     public void onStart(CommissionMacro macro) {
         log("Entering getting stats state");
-        autoInventory.retrieveSpeedBoost();
+        miningSpeedRetrievalTask = new MiningSpeedRetrievalTask();
+        pickaxeAbilityRetrievalTask = new PickaxeAbilityRetrievalTask();
+        AutoGetStats.getInstance().startTask(miningSpeedRetrievalTask);
+        AutoGetStats.getInstance().startTask(pickaxeAbilityRetrievalTask);
     }
 
     @Override
     public CommissionMacroState onTick(CommissionMacro macro) {
-        if (autoInventory.isRunning()) {
-            return this;
+        if (!AutoGetStats.getInstance().hasFinishedAllTasks())
+            return this ;
+
+        if (miningSpeedRetrievalTask.getError() != null) {
+            macro.disable("Failed to get stats with the following error: "
+                    + miningSpeedRetrievalTask.getError());
+            return null;
         }
 
-        if (autoInventory.sbSucceeded()) {
-            int[] sb = autoInventory.getSpeedBoostValues();
-            macro.setMiningSpeed(sb[0]);
-            return new StartingState();
+        if (pickaxeAbilityRetrievalTask.getError() != null) {
+            macro.disable("Failed to get pickaxe ability with the following error: "
+                    + pickaxeAbilityRetrievalTask.getError());
+            return null;
         }
 
-        switch (autoInventory.getSbError()) {
-            case NONE:
-                throw new IllegalStateException("AutoInventory failed but no error is detected! Please contact the developer");
-            case CANNOT_OPEN_INV:
-                macro.disable("Cannot open player's inventory to get statistics!");
-                break;
-            case CANNOT_GET_VALUE:
-                macro.disable("Cannot get the value of statistics! Please contact the developer");
-                break;
-        }
-        return null;
+        macro.setMiningSpeed(miningSpeedRetrievalTask.getResult());
+        macro.setPickaxeAbility(MightyMinerConfig.usePickaxeAbility ?
+                pickaxeAbilityRetrievalTask.getResult() : BlockMiner.PickaxeAbility.NONE);
+        return new StartingState();
     }
 
     @Override

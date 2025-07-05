@@ -146,7 +146,26 @@ public class AutoCommissionClaim extends AbstractFeature {
 
                     RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(this.emissary.get()), 500, RotationType.CLIENT, null));
                 }
-                this.swapState(State.OPENING, 2000);
+                this.swapState(State.SWAPPING_TO_ALT, 1000);
+                break;
+
+            case SWAPPING_TO_ALT:
+                if (this.isTimerRunning()) {
+                    return;
+                }
+
+                if(MightyMinerConfig.commSwapBeforeClaiming) {
+                    if (!InventoryUtil.holdItem(MightyMinerConfig.altMiningTool)) {
+                        this.stop(ClaimError.NO_ITEMS);
+                        sendError("Cannot hold Alt Mining Tool: " + MightyMinerConfig.altMiningTool);
+                        break;
+                    }
+                } else {
+                    this.swapState(State.OPENING, 1000);
+
+                }
+                this.swapState(State.OPENING, 0);
+
                 break;
             case OPENING:
 //                if (this.hasTimerEnded()) {
@@ -211,16 +230,38 @@ public class AutoCommissionClaim extends AbstractFeature {
                 if (this.isTimerRunning()) {
                     break;
                 }
+
+
+
                 if (mc.thePlayer.openContainer instanceof ContainerChest) {
                     this.nextComm = CommissionUtil.getCommissionFromContainer((ContainerChest) mc.thePlayer.openContainer);
                 }
-                this.swapState(State.ENDING, 0);
+                this.swapState(State.ENDING, 1000);
                 break;
+
             case ENDING:
                 if (this.isTimerRunning()) {
                     return;
                 }
                 InventoryUtil.closeScreen();
+
+                if(MightyMinerConfig.commSwapBeforeClaiming) {
+                    this.swapState(State.SWAPPING_BACK, 1000);
+                    break;
+                }
+                this.stop();
+                break;
+            case SWAPPING_BACK:
+                if (this.isTimerRunning()) {
+                    return;
+                }
+                if(MightyMinerConfig.commSwapBeforeClaiming) {
+                    if (!InventoryUtil.holdItem(MightyMinerConfig.miningTool)) {
+                        this.stop(ClaimError.NO_ITEMS);
+                        sendError("Cannot hold Mining Tool: " + MightyMinerConfig.miningTool);
+                        break;
+                    }
+                }
                 this.stop();
                 break;
         }
@@ -250,7 +291,7 @@ public class AutoCommissionClaim extends AbstractFeature {
     }
 
     enum State {
-        STARTING, ROTATING, OPENING, VERIFYING_GUI, CLAIMING, NEXT_COMM, ENDING
+        STARTING, ROTATING, SWAPPING_TO_ALT, OPENING, VERIFYING_GUI, CLAIMING, NEXT_COMM, SWAPPING_BACK, ENDING
     }
 
     public enum ClaimError {

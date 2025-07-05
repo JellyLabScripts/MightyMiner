@@ -6,7 +6,6 @@ import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.util.AngleUtil;
 import com.jelly.mightyminerv2.util.BlockUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
-import com.jelly.mightyminerv2.util.helper.Angle;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import net.minecraft.block.Block;
@@ -17,22 +16,23 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
  * ApplyAbilityState
  * <p>
  * State responsible for activating the mining ability.
- * Waits for 1 second and then right clicks
- * Then waits for 1 more second to transition into the next state
+ * Waits for 1 second ({@code timer1}) and then right-clicks.
+ * Then waits for 1 more second ({{@code timer2}}) to transition into the next state
+ * <p>
+ * If the player uses pickobulus, rotate to the farthest blue wool before right-clicking
  * <p>
  * Automatically throws error if it presses 2 times consecutively
  */
 public class ApplyAbilityState implements BlockMinerState {
 
     private final Minecraft mc = Minecraft.getMinecraft();
-    private final Clock timer = new Clock();
+    private final Clock timer1 = new Clock();
     private final Clock timer2 = new Clock();
 
     private final long COOLDOWN = 1000; // 1-second cooldown for activating ability
@@ -43,16 +43,16 @@ public class ApplyAbilityState implements BlockMinerState {
 
         // Start the cooldown timer
         timer2.reset();
-        timer.reset();
-        timer.schedule(COOLDOWN);
+        timer1.reset();
+        timer1.schedule(COOLDOWN);
 
         // Check if the pickaxe ability is pickobulus
         if (BlockMiner.getInstance().getPickaxeAbility() == BlockMiner.PickaxeAbility.PICKOBULUS) {
             final BlockPos blueWool = getFarthestBlueWool();
 
             if(blueWool == null) {
-                log("Cannot find blue wool");
-                return; // Just don't rotate if you cant find
+                log("Cannot find blue wool. Skipping the rotation.");
+                return;
             }
 
             final List<Vec3> points = BlockUtil.bestPointsOnBestSide(blueWool);
@@ -67,7 +67,6 @@ public class ApplyAbilityState implements BlockMinerState {
             }
 
             if(targetPoint != null) {
-                // Begin rotating towards the farthest blue mithril
                 log("Rotating to blue wool");
                 RotationHandler.getInstance().easeTo(new RotationConfiguration(
                         AngleUtil.getRotation(targetPoint),
@@ -86,9 +85,9 @@ public class ApplyAbilityState implements BlockMinerState {
     @Override
     public BlockMinerState onTick(BlockMiner blockMiner) {
 
-        // If the first timer has ended and if I am not rotating, press right click
-        if (timer.isScheduled() && timer.passed() && !RotationHandler.getInstance().isEnabled()) {
-            timer.reset();
+        // If the first timer has ended and the player is not rotating, press right-click
+        if (timer1.isScheduled() && timer1.passed() && !RotationHandler.getInstance().isEnabled()) {
+            timer1.reset();
             timer2.reset();
             timer2.schedule(COOLDOWN);
             KeyBindUtil.rightClick();
@@ -109,7 +108,6 @@ public class ApplyAbilityState implements BlockMinerState {
         BlockPos farthestBlueWool = null;
         double maxDistance = 0;
 
-        // I check for light blue blocks around me looking for the farthest away from me
         for (int x = -5; x <= 5; x++) {
             for (int y = -5; y <= 5; y++) {
                 for (int z = -5; z <= 5; z++) {

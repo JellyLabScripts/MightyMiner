@@ -12,7 +12,6 @@ import net.minecraft.inventory.Slot;
 
 /**
  * A task that retrieves the players pickaxe ability from the HOTM GUI.
- * TODO: Maybe port MiningBoostRetrievalTask here?
  */
 public class PickaxeAbilityRetrievalTask extends AbstractInventoryTask<BlockMiner.PickaxeAbility> {
 
@@ -25,7 +24,7 @@ public class PickaxeAbilityRetrievalTask extends AbstractInventoryTask<BlockMine
         pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
         taskStatus = TaskStatus.RUNNING;
 
-        // In case the menu for HOTM is already open this works
+        // The case that the HOTM menu is already open
         if (!InventoryUtil.getInventoryName().equals("Heart of the Mountain")) {
             if (mc.currentScreen != null) {
                 InventoryUtil.closeScreen();
@@ -43,12 +42,11 @@ public class PickaxeAbilityRetrievalTask extends AbstractInventoryTask<BlockMine
             return;
         }
 
-        if (isSelected("Mining Speed Boost")) {
-            pickaxeAbility = BlockMiner.PickaxeAbility.MINING_SPEED_BOOST;
-        } else if (isSelected("Pickobulus")) {
+        if (isSelected("Pickobulus")) {
             pickaxeAbility = BlockMiner.PickaxeAbility.PICKOBULUS;
+        } else {
+            pickaxeAbility = BlockMiner.PickaxeAbility.MINING_SPEED_BOOST;
         }
-
         taskStatus = TaskStatus.SUCCESS;
     }
 

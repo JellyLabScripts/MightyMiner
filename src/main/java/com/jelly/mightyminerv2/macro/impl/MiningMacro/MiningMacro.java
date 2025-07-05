@@ -124,8 +124,15 @@ public class MiningMacro extends AbstractMacro {
             return;
         }
 
+        if (pickaxeAbilityRetrievalTask.getError() != null) {
+            super.disable("Failed to get pickaxe ability with the following error: "
+                    + pickaxeAbilityRetrievalTask.getError());
+            return;
+        }
+
         miningSpeed = miningSpeedRetrievalTask.getResult();
-        pickaxeAbility = pickaxeAbilityRetrievalTask.getResult();
+        pickaxeAbility = MightyMinerConfig.usePickaxeAbility ?
+                pickaxeAbilityRetrievalTask.getResult() : BlockMiner.PickaxeAbility.NONE;
     }
 
     private void handleMining() {

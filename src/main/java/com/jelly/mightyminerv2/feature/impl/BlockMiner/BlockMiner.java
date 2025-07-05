@@ -102,6 +102,16 @@ public class BlockMiner extends AbstractFeature {
     @Setter
     private int miningSpeed;
 
+    /**
+     * The type of pickaxe ability to be used. At the moment, {@code MINING_SPEED_BOOST} represents all pickaxe abilities
+     * other than pickobulus
+     */
+    public enum PickaxeAbility {
+        NONE,
+        PICKOBULUS,
+        MINING_SPEED_BOOST
+    }
+
     /**  Pickaxe ability to be used */
     @Getter
     @Setter
@@ -261,11 +271,5 @@ public class BlockMiner extends AbstractFeature {
         if (this.targetParticlePos != null) {
             RenderUtil.drawPoint(this.targetParticlePos, new Color(255, 0, 0, 100));
         }
-    }
-
-    public enum PickaxeAbility {
-        NONE,
-        PICKOBULUS,
-        MINING_SPEED_BOOST
     }
 }

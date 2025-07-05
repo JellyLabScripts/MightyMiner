@@ -1,8 +1,10 @@
 package com.jelly.mightyminerv2.macro.impl.CommissionMacro.states;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.AutoGetStats.AutoGetStats;
 import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.impl.MiningSpeedRetrievalTask;
 import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.impl.PickaxeAbilityRetrievalTask;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 
 public class GettingStatsState implements CommissionMacroState{
@@ -31,8 +33,15 @@ public class GettingStatsState implements CommissionMacroState{
             return null;
         }
 
+        if (pickaxeAbilityRetrievalTask.getError() != null) {
+            macro.disable("Failed to get pickaxe ability with the following error: "
+                    + pickaxeAbilityRetrievalTask.getError());
+            return null;
+        }
+
         macro.setMiningSpeed(miningSpeedRetrievalTask.getResult());
-        macro.setPickaxeAbility(pickaxeAbilityRetrievalTask.getResult());
+        macro.setPickaxeAbility(MightyMinerConfig.usePickaxeAbility ?
+                pickaxeAbilityRetrievalTask.getResult() : BlockMiner.PickaxeAbility.NONE);
         return new StartingState();
     }
 

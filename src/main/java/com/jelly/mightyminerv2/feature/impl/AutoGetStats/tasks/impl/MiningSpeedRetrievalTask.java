@@ -21,11 +21,10 @@ public class MiningSpeedRetrievalTask extends AbstractInventoryTask<Integer> {
     public void init() {
         taskStatus = TaskStatus.RUNNING;
 
-        if (mc.currentScreen != null) {
-            InventoryUtil.closeScreen();
-        }
-
-        if (!InventoryUtil.getInventoryName().equals("SkyBlock Menu")) {
+        if(!InventoryUtil.getInventoryName().equals("SkyBlock Menu")) {
+            if (mc.currentScreen != null) {
+                InventoryUtil.closeScreen();
+            }
             mc.thePlayer.sendChatMessage("/sbmenu");
         }
 

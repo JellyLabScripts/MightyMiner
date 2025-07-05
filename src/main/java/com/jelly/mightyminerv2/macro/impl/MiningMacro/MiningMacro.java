@@ -4,6 +4,7 @@ import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.feature.impl.AutoGetStats.AutoGetStats;
 import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.impl.MiningSpeedRetrievalTask;
+import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.impl.PickaxeAbilityRetrievalTask;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
@@ -28,7 +29,9 @@ public class MiningMacro extends AbstractMacro {
     private final List<String> necessaryItems = new ArrayList<>();
 
     private MiningSpeedRetrievalTask miningSpeedRetrievalTask;
+    private PickaxeAbilityRetrievalTask pickaxeAbilityRetrievalTask;
     private int miningSpeed = 0;
+    private BlockMiner.PickaxeAbility pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
 
     private MineableBlock[] blocksToMine = {};
     private boolean isMining = false;
@@ -55,7 +58,9 @@ public class MiningMacro extends AbstractMacro {
 
         if (miningSpeed == 0) {
             miningSpeedRetrievalTask = new MiningSpeedRetrievalTask();
+            pickaxeAbilityRetrievalTask = new PickaxeAbilityRetrievalTask();
             AutoGetStats.getInstance().startTask(miningSpeedRetrievalTask);
+            AutoGetStats.getInstance().startTask(pickaxeAbilityRetrievalTask);
         }
     }
 
@@ -96,12 +101,14 @@ public class MiningMacro extends AbstractMacro {
             miner.start(
                     blocksToMine,
                     miningSpeed,
+                    pickaxeAbility,
                     determinePriority(),
                     MightyMinerConfig.miningTool
             );
 
             isMining = true;
             log("Started mining with speed: " + miningSpeed);
+            log("Started mining with pickaxe ability: " + pickaxeAbility.name());
         }
 
         handleMining();
@@ -118,12 +125,13 @@ public class MiningMacro extends AbstractMacro {
         }
 
         miningSpeed = miningSpeedRetrievalTask.getResult();
+        pickaxeAbility = pickaxeAbilityRetrievalTask.getResult();
     }
 
     private void handleMining() {
         switch(miner.getError()) {
             case NO_POINTS_FOUND:
-                log ("Restarting because the block chosen cannot be mined");
+                log("Restarting because the block chosen cannot be mined");
                 isMining = false;
                 break;
             case NO_TARGET_BLOCKS:

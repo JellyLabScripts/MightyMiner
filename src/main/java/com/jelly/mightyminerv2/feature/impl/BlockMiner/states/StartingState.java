@@ -18,7 +18,7 @@ public class StartingState implements BlockMinerState {
 
     @Override
     public BlockMinerState onTick(BlockMiner miner) {
-        return MightyMinerConfig.usePickaxeAbility && miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE?
+        return MightyMinerConfig.usePickaxeAbility && BlockMiner.getInstance().getPickaxeAbility() != BlockMiner.PickaxeAbility.NONE && miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE?
                 new ApplyAbilityState() : new ChoosingBlockState();
     }
 

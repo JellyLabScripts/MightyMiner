@@ -106,41 +106,6 @@ public class MightyMinerConfig extends Config {
         Logger.sendMessage("Mining Tool set to: " + currentItem.getDisplayName());
     };
 
-
-    @Text(
-            name = "Alt. Mining Tool", description = "Mining tool that you use to activate abilities and such",
-            category = GENERAL,
-            placeholder = "Enter here...",
-            subcategory = "Mining Tools"
-    )
-    public static String altMiningTool = "";
-
-    @Button(
-            name = "Set Alt. Mining Tool",
-            text = "Set Alt. Mining tool",
-            description = "Set the Alternative Mining Tool to the currently held item",
-            category = GENERAL,
-            subcategory = "Mining Tools"
-    )
-    Runnable _setAltMiningTool = () -> {
-        ItemStack currentItem = mc.thePlayer.inventory.mainInventory[mc.thePlayer.inventory.currentItem];
-
-        if (currentItem == null) {
-            Logger.sendMessage("Don't hold an empty hand.");
-            return;
-        }
-
-        altMiningTool = StringUtils.stripControlCodes(currentItem.getDisplayName());
-        Logger.sendMessage("Alternative Mining Tool set to: " + currentItem.getDisplayName());
-    };
-
-    @Switch(
-            name = "Drill Swap", description = "Drill Swap",
-            category = GENERAL,
-            subcategory = "Mining Tools"
-    )
-    public static boolean drillSwap = false;
-
     @Switch(
             name = "Sneak While Mining",
             category = GENERAL,
@@ -244,15 +209,41 @@ public class MightyMinerConfig extends Config {
     )
     public static int commClaimMethod = 0;
 
+    @Text(
+            name = "Alt. Mining Tool",
+            category = COMMISSION,
+            placeholder = "Enter here...",
+            subcategory = "Commission claiming"
+    )
+    public static String altMiningTool = "";
+
+    @Button(
+            name = "Set Alt. Mining Tool",
+            text = "Set Alt. Mining tool",
+            description = "Set the Alternative Mining Tool to the currently held item",
+            category = COMMISSION,
+            subcategory = "Commission claiming"
+    )
+    Runnable _setAltMiningTool = () -> {
+        ItemStack currentItem = mc.thePlayer.inventory.mainInventory[mc.thePlayer.inventory.currentItem];
+
+        if (currentItem == null) {
+            Logger.sendMessage("Don't hold an empty hand.");
+            return;
+        }
+
+        altMiningTool = StringUtils.stripControlCodes(currentItem.getDisplayName());
+        Logger.sendMessage("Alternative Mining Tool set to: " + currentItem.getDisplayName());
+    };
 
     @Switch(
             name = "Swap before claiming commission",
             description = "Swaps to the alternative mining tool before claiming the commission",
             category = COMMISSION,
-            subcategory = "General"
+            subcategory = "Commission claiming"
 
     )
-    public static boolean commSwapBeforeClaiming = true;
+    public static boolean commSwapBeforeClaiming = false;
 
     @Text(
             name = "Slayer Weapon", description = "Weapon used when killing goblins",

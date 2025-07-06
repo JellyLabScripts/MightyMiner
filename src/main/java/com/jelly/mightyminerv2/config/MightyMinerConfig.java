@@ -737,6 +737,7 @@ public class MightyMinerConfig extends Config {
 
     @Switch(
             name = "Enable Failsafe Trigger Sound", category = FAILSAFE, size = OptionSize.DUAL,
+            subcategory = "General",
             description = "Makes a sound when a failsafe has been triggered"
     )
     public static boolean enableFailsafeSound = true;
@@ -744,9 +745,18 @@ public class MightyMinerConfig extends Config {
     @Slider(
             name = "Time to wait before toggling failsafe(in ms)",
             category = FAILSAFE,
+            subcategory = "General",
             min = 0, max = 15000
     )
     public static int failsafeToggleDelay = 3000;
+
+    @Slider(
+            name = "Vertical Knockback Threshold",
+            category = FAILSAFE,
+            subcategory = "General",
+            min = 3000, max = 10000
+    )
+    public static int verticalKnockbackThreshold = 4000;
 
     @DualOption(
             name = "Failsafe Sound Type", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",

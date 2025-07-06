@@ -193,9 +193,4 @@ public class AutoMobKiller extends AbstractFeature {
 
         currentState.onStart(this);
     }
-
-    public boolean succeeded() {
-        return !this.enabled && this.error == MKError.NONE;
-    }
-
 }

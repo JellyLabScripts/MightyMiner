@@ -31,14 +31,13 @@ public class MobKillingState implements CommissionMacroState {
             return new PathingState();
         }
 
-        if (AutoMobKiller.getInstance().isRunning() || AutoMobKiller.getInstance().succeeded()) {
+        if (AutoMobKiller.getInstance().isRunning()) {
             return this;
         }
 
         switch (AutoMobKiller.getInstance().getError()) {
             case NONE:
-                macro.disable("Mob killer failed, but no error is detected. Please contact the developer.");
-                break;
+                return this;
             case NO_ENTITIES:
                 log("No entities found in Mob Killer. Restarting");
                 return new StartingState();

@@ -20,8 +20,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 
 import java.awt.*;
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -220,17 +219,22 @@ public class Pathfinder extends AbstractFeature {
         if (pathExecutor.getCurrentPath() != null) {
             paths.add(pathExecutor.getCurrentPath());
         }
+
         if (!paths.isEmpty()) {
-            paths.forEach(path -> {
+            RenderUtil.drawBlock(paths.getFirst().getStart(), new Color(0, 255, 0, 150));
+
+            for (Path path : paths) {
                 List<BlockPos> bpath = path.getSmoothedPath();
-                for (int i = 0; i < bpath.size(); i++) {
+
+                for (int i = 1; i < bpath.size(); i++) {
                     RenderUtil.drawBlock(bpath.get(i), new Color(0, 255, 0, 150));
-                    if (i != 0) {
-                        RenderUtil.drawLine(new Vec3(bpath.get(i)).addVector(0.5, 1, 0.5), new Vec3(bpath.get(i - 1)).addVector(0.5, 1, 0.5),
-                                new Color(0, 255, 0, 150));
-                    }
+                    RenderUtil.drawLine(
+                            new Vec3(bpath.get(i)).addVector(0.5, 1, 0.5),
+                            new Vec3(bpath.get(i - 1)).addVector(0.5, 1, 0.5),
+                            new Color(0, 255, 0, 150)
+                    );
                 }
-            });
+            }
         }
     }
 

@@ -244,6 +244,16 @@ public class MightyMinerConfig extends Config {
     )
     public static int commClaimMethod = 0;
 
+
+    @Switch(
+            name = "Swap before claiming commission",
+            description = "Swaps to the alternative mining tool before claiming the commission",
+            category = COMMISSION,
+            subcategory = "General"
+
+    )
+    public static boolean commSwapBeforeClaiming = true;
+
     @Text(
             name = "Slayer Weapon", description = "Weapon used when killing goblins",
             category = COMMISSION,

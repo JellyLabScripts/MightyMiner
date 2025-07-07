@@ -2,7 +2,7 @@ package com.jelly.mightyminerv2.util;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
-import com.jelly.mightyminerv2.macro.impl.GlacialMacro.helper.GlaciteVeins;
+import com.jelly.mightyminerv2.macro.impl.GlacialMacro.GlaciteVeins;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;

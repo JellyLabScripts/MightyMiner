@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.impl;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.AbstractInventoryTask;
 import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.TaskStatus;
 import com.jelly.mightyminerv2.util.InventoryUtil;
@@ -21,6 +22,8 @@ public class MiningBoostRetrievalTask extends AbstractInventoryTask<Integer> {
     @Override
     public void init() {
         taskStatus = TaskStatus.RUNNING;
+
+        InventoryUtil.holdItem(MightyMinerConfig.miningTool);
 
         if (mc.currentScreen != null) {
             InventoryUtil.closeScreen();

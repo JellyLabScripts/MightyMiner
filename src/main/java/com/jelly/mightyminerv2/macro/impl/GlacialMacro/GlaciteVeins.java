@@ -1,4 +1,4 @@
-package com.jelly.mightyminerv2.macro.impl.GlacialMacro.helper;
+package com.jelly.mightyminerv2.macro.impl.GlacialMacro;
 
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
@@ -558,7 +558,7 @@ public enum GlaciteVeins {
                         new RouteWaypoint(118,125,383,TransportMethod.WALK),
                         new RouteWaypoint(121,125,386,TransportMethod.WALK),
                 });
-                put(AMBER, new RouteWaypoint[]{ 
+                put(AMBER, new RouteWaypoint[]{
                         new RouteWaypoint(53, 114, 278, TransportMethod.WALK),
                         new RouteWaypoint(109, 119, 296, TransportMethod.WALK),
                         new RouteWaypoint(106, 120, 316, TransportMethod.WALK),

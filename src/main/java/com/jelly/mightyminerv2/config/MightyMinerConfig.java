@@ -60,10 +60,8 @@ public class MightyMinerConfig extends Config {
             description = "Select the macro type you want to use",
             options = {
                     "Dwarven Commission",
+                    "Glacial Commissions",
                     "Mining Macro"
-//                    "Dwarven Commission",
-//                    "Glacial Commissions",
-//                    "Mining Macro",
 //                    "Route Miner",
 //                    "Gemstone Powder"
             },

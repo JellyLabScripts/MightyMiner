@@ -69,7 +69,13 @@ public class TablistUtil {
                     continue; // if the player name is too short (e.g. "§c[§f]"
                 }
 
-                s = s.substring(a + 2).replaceAll("§([0-9]|[a-z])", "").replace("♲", "").trim();
+                s = s.substring(a + 2);
+
+                // Remove Minecraft formatting codes and non-ASCII characters
+                s = s.replaceAll("§[0-9a-fk-or]", "");
+                s = s.replaceAll("[^\\x00-\\x7F]", "");
+                s = s.trim();
+
                 if (firstPlayer == null) {
                     firstPlayer = s;
                 } else if (s.equals(firstPlayer)) // it returns two copy of the player list for some reason

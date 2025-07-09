@@ -12,12 +12,6 @@ public class StartingState implements AutoMobKillerState {
 
     @Override
     public AutoMobKillerState onTick(AutoMobKiller mobKiller) {
-        EntityLivingBase targetMob = mobKiller.getTargetMob();
-
-        if (targetMob != null)
-            mobKiller.getMobQueue().add(targetMob);
-
-        mobKiller.getRecheckTimer().reset();
         return new FindMobState();
     }
 

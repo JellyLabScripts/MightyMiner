@@ -54,8 +54,9 @@ public class CommissionMacro extends AbstractMacro {
 
     @Override
     public void onDisable() {
-        if(currentState != null)
+        if (currentState != null) {
             currentState.onEnd(this);
+        }
         this.miningSpeed = 0;
         if (CommissionHUD.getInstance().commHudResetStats) {
             this.commissionCounter = 0;

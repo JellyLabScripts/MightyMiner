@@ -21,10 +21,6 @@ public class KillState implements AutoMobKillerState {
 
     @Override
     public AutoMobKillerState onTick(AutoMobKiller mobKiller) {
-        if (Pathfinder.getInstance().isRunning()) {
-            return this;
-        }
-
         // Initial rotation to mob
         if (!hasRotated) {
             RotationHandler.getInstance().easeTo(new RotationConfiguration(
@@ -46,7 +42,6 @@ public class KillState implements AutoMobKillerState {
             return this;
         }
 
-        mobKiller.setLastTarget(mobKiller.getTargetMob());
         KeyBindUtil.leftClick();
         RotationHandler.getInstance().stop();
         return new StartingState();

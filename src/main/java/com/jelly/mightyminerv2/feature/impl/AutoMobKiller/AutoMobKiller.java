@@ -14,9 +14,7 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * MobKiller
@@ -55,60 +53,32 @@ public class AutoMobKiller extends AbstractFeature {
     private final Set<String> mobsToKill = new HashSet<>();
 
     /**
-     * Queue of mobs being killed
-     */
-    @Getter
-    private final Set<EntityLivingBase> mobQueue = new HashSet<>();
-
-    /**
-     * Target mob (determines what mob to kill)
+     * Target mob to kill
      */
     @Getter
     @Setter
     private EntityLivingBase targetMob = null;
 
     /**
-     * Target mob's last recorded position (determines what mob to kill)
+     * Original position of the target mob (to check if it has moved away)
      */
     @Getter
     @Setter
-    private Vec3 entityLastPosition = null;
+    private Vec3 targetMobOriginalPos = null;
 
     /**
-     * Needed to stop AutoMobKiller because of no entities found
-     */
-    @Getter
-    private final Clock shutdownTimer = new Clock();
-
-    /**
-     * Clears mobQueue after a set time in config
-     */
-    @Getter
-    private final Clock queueTimer = new Clock();
-
-    /**
-     * Target mob (determines what mob to kill)
-     */
-    @Getter
-    private final Clock recheckTimer = new Clock();
-
-    /**
-     * List of mobs being hunted by a player (not possible to kill)
-     */
-    @Getter
-    private final Set<EntityLivingBase> blacklistedMobs = new HashSet<>();
-
-    /**
-     * Repathing attempts in FindMobState
-     */
-    public int pathRetry = 0;
-
-    /**
-     * Last entity attacked (needed so we can blacklist the correct mob)
+     * Number of Re-pathing attempts
      */
     @Getter
     @Setter
-    private EntityLivingBase lastTarget = null;
+    private int pathAttempts = 0;
+
+    /**
+     * Blacklisted mobs (from failed pathfinding attempts)
+     */
+    @Getter
+    @Setter
+    private Set<EntityLivingBase> blacklistedMobs = new HashSet<>();
 
     @Override
     public String getName() {
@@ -122,9 +92,8 @@ public class AutoMobKiller extends AbstractFeature {
      * @param weaponName Name of the melee weapon that will be used to kill mobs
      */
     public void start(Collection<String> mobsToKill, String weaponName) {
-        // Should never happen, but just in case
         if (!InventoryUtil.holdItem(weaponName)) {
-            sendError("Could not hold weapon!");
+            sendError("Weapon not found in inventory!");
             stop();
             return;
         }
@@ -144,10 +113,11 @@ public class AutoMobKiller extends AbstractFeature {
         }
 
         this.mobsToKill.clear();
+        this.blacklistedMobs.clear();
         this.targetMob = null;
+        this.targetMobOriginalPos = null;
         this.currentState = null;
-        this.timer.reset();
-        this.shutdownTimer.reset();
+
         Pathfinder.getInstance().stop();
         log("MobKiller stopped");
     }
@@ -156,19 +126,6 @@ public class AutoMobKiller extends AbstractFeature {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (!this.enabled || mc.currentScreen != null || event.phase == TickEvent.Phase.END) {
             return;
-        }
-
-        if (this.shutdownTimer.isScheduled() && this.shutdownTimer.passed()) {
-            this.error = MKError.NO_ENTITIES;
-            this.stop();
-            log("Entities did not spawn");
-            return;
-        }
-
-        if (this.queueTimer.passed()) {
-            log("Cleared mob queue");
-            this.mobQueue.clear();
-            this.queueTimer.schedule(MightyMinerConfig.devMKillTimer);
         }
 
         if (currentState == null)

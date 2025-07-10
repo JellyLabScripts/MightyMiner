@@ -3,6 +3,7 @@ package com.jelly.mightyminerv2.macro.impl.GlacialMacro.states;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.macro.impl.GlacialMacro.GlacialMacro;
+import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.TablistUtil;
 import com.jelly.mightyminerv2.util.helper.Clock;
@@ -22,14 +23,14 @@ public class MiningState implements GlacialMacroState {
     @Override
     public void onStart(GlacialMacro macro) {
         log("Starting to mine at vein: " + (macro.getCurrentVein() != null ? macro.getCurrentVein().first() : "Unknown"));
+        InventoryUtil.holdItem(MightyMinerConfig.miningTool);
         this.miningRetries = 0;
         startMining(macro);
     }
 
     @Override
     public GlacialMacroState onTick(GlacialMacro macro) {
-        // Failsafe: check for cold
-        if (ScoreboardUtil.cold >= 50) {
+        if (ScoreboardUtil.cold >= MightyMinerConfig.coldThreshold) {
             send("Player is too cold. Warping to base to reset.");
             return new TeleportingState(new PathfindingState());
         }
@@ -70,7 +71,7 @@ public class MiningState implements GlacialMacroState {
         miner.start(
                 blocksToMine,
                 macro.getMiningSpeed(),
-                BlockMiner.PickaxeAbility.NONE,
+                macro.getPickaxeAbility(),
                 blockPriorities,
                 MightyMinerConfig.miningTool
         );

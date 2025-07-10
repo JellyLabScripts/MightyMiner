@@ -33,8 +33,8 @@ public class PathfindingState implements GlacialMacroState {
 
     @Override
     public GlacialMacroState onTick(GlacialMacro macro) {
-        if (ScoreboardUtil.cold >= 50) {
-            log("Player is too cold. Warping to base to reset.");
+        if (ScoreboardUtil.cold >= MightyMinerConfig.coldThreshold) {
+            send("Player is too cold. Warping to base to reset.");
             return new TeleportingState(new PathfindingState());
         }
 

@@ -31,6 +31,7 @@ public class MightyMinerConfig extends Config {
     private transient static final String GENERAL = "General";
     private transient static final String SCHEDULER = "Scheduler";
     private transient static final String COMMISSION = "Dwarven Commission";
+    private transient static final String GLACIAL_COMMISSION = "Glacial Commission";
     private transient static final String MINING_MACRO = "Mining Macro";
     private transient static final String ROUTE_MINER = "Route Miner";
     private transient static final String POWDER = "Gemstone Powder";
@@ -305,6 +306,27 @@ public class MightyMinerConfig extends Config {
             subcategory = "HUD"
     )
     public static CommissionHUD commissionHUD = CommissionHUD.getInstance();
+
+    //</editor-fold>
+
+    //<editor-fold desc="Glacial Commission">
+    @Info(
+            text = "Set the threshold of coldness to where the macro will warp back to the base",
+            type = InfoType.INFO,
+            category = GLACIAL_COMMISSION,
+            subcategory = "General",
+            size = 2
+    )
+    public static boolean coldThresholdInfo;
+
+    @Slider(
+            name = "Cold Threshold",
+            category = GLACIAL_COMMISSION,
+            subcategory = "General",
+            description = "The threshold of coldness to where the macro will warp back to the base",
+            min = 1, max = 100
+    )
+    public static int coldThreshold = 50;
 
     //</editor-fold>
 

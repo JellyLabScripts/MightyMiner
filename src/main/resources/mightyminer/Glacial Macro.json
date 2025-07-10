@@ -6599,7 +6599,7 @@
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK" // Changed from ETHERWARP
       }
     ],
     "69,150,390,WALK": [
@@ -18916,13 +18916,13 @@
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK" // CHanged from ETHERWARP
       },
       {
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK" // CHanged from ETHERWARP
       }
     ],
     "70,132,367,WALK": [
@@ -27054,7 +27054,7 @@
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK" // Changed from ETHERWARP
       },
       {
         "x": 28,
@@ -34070,7 +34070,7 @@
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK" // Changed from  ETHERWARP
       }
     ],
     "76,131,373,WALK": [
@@ -39446,19 +39446,19 @@
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK" // Changed from ETHERWARP
       },
       {
         "x": 44,
         "y": 114,
         "z": 276,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK" // Changed from ETHERWARP
       },
       {
         "x": 44,
         "y": 114,
         "z": 276,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK" // Changed from ETHERWARP
       }
     ],
     "-45,123,310,WALK": [

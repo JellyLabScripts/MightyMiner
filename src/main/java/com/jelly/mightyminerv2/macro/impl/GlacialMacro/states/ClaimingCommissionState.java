@@ -43,7 +43,7 @@ public class ClaimingCommissionState implements GlacialMacroState {
 
     private GlacialMacroState handleFailure(GlacialMacro macro) {
         if (++retries > 3) {
-//            return new ErrorHandlingState("Failed to claim commission after 3 attempts.");
+            return new ErrorHandlingState("Failed to claim commission after 3 attempts.");
         }
         log("Retrying claim... (" + retries + "/3)");
         onStart(macro); // Restart the claim process

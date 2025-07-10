@@ -53,23 +53,30 @@ public class PathfindingState implements GlacialMacroState {
             }
 
             // Navigation has just finished, check the result
-            isNavigating = false; // Reset flag
+            isNavigating = false; // Reset flag for the next cycle
+
             if (RouteNavigator.getInstance().succeeded()) {
                 log("Successfully reached the destination vein.");
                 return new MiningState();
-            } else { // hasFailed() or just stopped
-                logError("RouteNavigator failed to reach the destination. Warping back to base.");
-                return new TeleportingState(new PathfindingState());
+            } else {
+                Pair<GlaciteVeins, RouteWaypoint> failedVein = macro.getCurrentVein();
+                logError("RouteNavigator failed to reach destination: " + (failedVein != null ? failedVein.first() : "Unknown"));
+
+                if (failedVein != null) {
+                    log("Blacklisting the unreachable vein for 5 minutes.");
+                    macro.getPreviousVeins().put(failedVein, System.currentTimeMillis());
+                }
+
+                // Reset the clock to immediately try finding a NEW vein on the next tick
+                findVeinClock.reset();
+
+                // Stay in this state to find a new target
+                return this;
             }
         }
 
         // If not navigating, find a new path
         if (findVeinClock.passed()) {
-            // Add the previous vein (if any) to the cooldown list
-            if (macro.getCurrentVein() != null) {
-                macro.getPreviousVeins().put(macro.getCurrentVein(), System.currentTimeMillis());
-            }
-
             Pair<GlaciteVeins, RouteWaypoint> bestVein = macro.findBestVein();
             if (bestVein == null) {
                 log("No suitable veins found. Retrying in 10 seconds...");

@@ -1,13 +1,16 @@
 package com.jelly.mightyminerv2.macro.impl.GlacialMacro.states;
 
+import akka.japi.Pair;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.macro.impl.GlacialMacro.GlacialMacro;
+import com.jelly.mightyminerv2.macro.impl.GlacialMacro.GlaciteVeins;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.ScoreboardUtil;
 import com.jelly.mightyminerv2.util.TablistUtil;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
+import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 
 /**
  * Represents the mining state of the Glacial Macro.
@@ -46,6 +49,13 @@ public class MiningState implements GlacialMacroState {
             miner.stop();
             if (++miningRetries > MAX_RETRIES) {
                 log("No more blocks to mine after " + MAX_RETRIES + " attempts. Finding new vein.");
+
+                Pair<GlaciteVeins, RouteWaypoint> failedVein = macro.getCurrentVein();
+                if (failedVein != null) {
+                    log("Blacklisting current vein: " + failedVein.first());
+                    macro.getPreviousVeins().put(failedVein, System.currentTimeMillis());
+                }
+
                 return new PathfindingState();
             }
             log("Not enough blocks. Retrying in 5 seconds... (" + miningRetries + "/" + MAX_RETRIES + ")");

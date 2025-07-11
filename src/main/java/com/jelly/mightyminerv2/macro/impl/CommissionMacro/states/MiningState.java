@@ -9,7 +9,6 @@ import com.jelly.mightyminerv2.util.helper.MineableBlock;
 
 public class MiningState implements CommissionMacroState{
 
-
     private final BlockMiner miner = BlockMiner.getInstance();
     private final MineableBlock[] blocksToMine = {MineableBlock.GRAY_MITHRIL, MineableBlock.GREEN_MITHRIL, MineableBlock.BLUE_MITHRIL,
             MineableBlock.TITANIUM};

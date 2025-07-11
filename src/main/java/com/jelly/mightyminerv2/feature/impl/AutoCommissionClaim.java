@@ -52,6 +52,9 @@ public class AutoCommissionClaim extends AbstractFeature {
     @Override
     public void start() {
         commClaimMethod = MightyMinerConfig.commClaimMethod;
+        if (MightyMinerConfig.macroType == 1) {
+            commClaimMethod = 1;        // Always use Royal Pigeon for Glacial Macro
+        }
         this.enabled = true;
         this.nextComm = null;
         this.claimError = ClaimError.NONE;

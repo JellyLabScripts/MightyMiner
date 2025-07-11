@@ -6599,7 +6599,7 @@
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       }
     ],
     "69,150,390,WALK": [
@@ -15260,18 +15260,18 @@
         "transportMethod": "WALK"
       }
     ],
-    "45,114,272,ETHERWARP": [
+    "45,114,272,WALK": [
       {
         "x": 34,
         "y": 115,
         "z": 271,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 49,
         "y": 114,
         "z": 272,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 41,
@@ -18887,42 +18887,42 @@
         "transportMethod": "WALK"
       }
     ],
-    "35,116,269,ETHERWARP": [
+    "35,116,269,WALK": [
       {
         "x": 29,
         "y": 117,
         "z": 266,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 44,
         "y": 114,
         "z": 276,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 28,
         "y": 116,
         "z": 268,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 41,
         "y": 115,
         "z": 271,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       }
     ],
     "70,132,367,WALK": [
@@ -27054,7 +27054,7 @@
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 28,
@@ -34070,7 +34070,7 @@
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       }
     ],
     "76,131,373,WALK": [
@@ -39446,19 +39446,19 @@
         "x": 35,
         "y": 116,
         "z": 269,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 44,
         "y": 114,
         "z": 276,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       },
       {
         "x": 44,
         "y": 114,
         "z": 276,
-        "transportMethod": "ETHERWARP"
+        "transportMethod": "WALK"
       }
     ],
     "-45,123,310,WALK": [

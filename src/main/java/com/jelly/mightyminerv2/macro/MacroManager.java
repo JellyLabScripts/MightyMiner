@@ -6,6 +6,7 @@ import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
+import com.jelly.mightyminerv2.macro.impl.GlacialMacro.GlacialMacro;
 import com.jelly.mightyminerv2.macro.impl.MiningMacro.MiningMacro;
 import com.jelly.mightyminerv2.util.Logger;
 import lombok.Getter;
@@ -28,6 +29,8 @@ public class MacroManager {
         if (MightyMinerConfig.macroType == 0) {
             return CommissionMacro.getInstance();
         } else if (MightyMinerConfig.macroType == 1) {
+            return GlacialMacro.getInstance();
+        } else if (MightyMinerConfig.macroType == 2) {
             return MiningMacro.getInstance();
         } else {
             return CommissionMacro.getInstance();

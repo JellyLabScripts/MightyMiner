@@ -96,7 +96,7 @@ public class BreakingState implements BlockMinerState{
 
         // Handle precision mining
         if (miner.getTargetParticlePos() != null) {
-            RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(miner.getTargetParticlePos()), 400, null).followTarget(true));
+            RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(miner.getTargetParticlePos()), 800, null).followTarget(true));
             miner.setTargetParticlePos(null);
         }
 

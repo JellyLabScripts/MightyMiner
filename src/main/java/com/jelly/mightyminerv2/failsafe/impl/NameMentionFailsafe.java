@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.failsafe.impl;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.failsafe.AbstractFailsafe;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import lombok.Getter;
@@ -15,6 +16,9 @@ public class NameMentionFailsafe extends AbstractFailsafe {
 
     private static final Pattern SENDER_NAME_PATTERN = Pattern.compile("^.*?(?<senderName>[a-zA-Z0-9_]+)§?f?:");
 
+    @Getter
+    private boolean lobbyChangeRequested = false;
+
     @Override
     public int getPriority() { return 10; }
 
@@ -23,6 +27,11 @@ public class NameMentionFailsafe extends AbstractFailsafe {
 
     @Override
     public Failsafe getFailsafeType() { return Failsafe.NAME_MENTION; }
+
+    @Override
+    public void resetStates() {
+        this.lobbyChangeRequested = false;
+    }
 
     @Override
     public boolean onChat(ClientChatReceivedEvent event) {
@@ -40,7 +49,18 @@ public class NameMentionFailsafe extends AbstractFailsafe {
         //if (unformattedMessage.toLowerCase().contains("has invited you to join their party!")) { notify() }
 
         Pattern mentionPattern = Pattern.compile("\\b" + Pattern.quote(playerName) + "\\b", Pattern.CASE_INSENSITIVE);
-        return mentionPattern.matcher(unformattedMessage).find();
+        boolean isMentioned = mentionPattern.matcher(unformattedMessage).find();
+
+        if (isMentioned) {
+            if (MightyMinerConfig.nameMentionFailsafeBehaviour) { // If true, the player wants to warp to a new lobby
+                warn("Your name was mentioned in chat. Changing lobbies.");
+                lobbyChangeRequested = true;
+                return false;
+            } else { // If false, the player wants to disable the macro
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

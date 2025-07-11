@@ -22,8 +22,8 @@ import java.util.List;
  * ApplyAbilityState
  * <p>
  * State responsible for activating the mining ability.
- * Waits for 1 second ({@code timer1}) and then right-clicks.
- * Then waits for 1 more second ({{@code timer2}}) to transition into the next state
+ * Waits for 0.5 seconds ({@code timer1}) and then right-clicks.
+ * Then waits for 0.5 more seconds ({{@code timer2}}) to transition into the next state
  * <p>
  * If the player uses pickobulus, rotate to the farthest blue wool before right-clicking
  * <p>
@@ -35,7 +35,7 @@ public class ApplyAbilityState implements BlockMinerState {
     private final Clock timer1 = new Clock();
     private final Clock timer2 = new Clock();
 
-    private final long COOLDOWN = 1000; // 1-second cooldown for activating ability
+    private final long COOLDOWN = 500; // 0.5-second cooldown for activating ability
 
     @Override
     public void onStart(BlockMiner blockMiner) {

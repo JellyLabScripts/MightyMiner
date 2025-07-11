@@ -1,4 +1,4 @@
-package com.jelly.mightyminerv2.macro.impl.GlacialMacro.helper;
+package com.jelly.mightyminerv2.macro.impl.GlacialMacro;
 
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
@@ -7,34 +7,39 @@ import com.jelly.mightyminerv2.util.BlockUtil;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import lombok.Getter;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
+/**
+ * Enum representing the different types of Glacite veins and their properties.
+ * Each vein has a display name and a drop name.
+ */
 public enum GlaciteVeins {
 
-    TOPAZ("Topaz Gemstone", "Rough Topaz Gemstone"),
-    AMBER("Amber Gemstone", "Rough Amber Gemstone"),
-    SAPPHIRE("Sapphire Gemstone", "Rough Sapphire Gemstone"),
-    JADE("Jade Gemstone", "Rough Jade Gemstone"),
-    AMETHYST("Amethyst Gemstone", "Rough Amethyst Gemstone"),
-    RUBY("Ruby Gemstone", "Rough Ruby Gemstone"),
-    AQUAMARINE("Aquamarine Gemstone", "Rough Aquamarine Gemstone"),
-    PERIDOT("Peridot Gemstone", "Rough Peridot Gemstone"),
-    ONYX("Onyx Gemstone", "Rough Onyx Gemstone"),
-    CITRINE("Citrine Gemstone", "Rough Citrine Gemstone"),
-    GLACITE("Glacite", "Glacite"),
-    UMBER("Umber", "Umber"),
-    TUNGSTEN("Tungsten", "Tungsten");
+    TOPAZ("Topaz Gemstone", "Rough Topaz Gemstone", MineableBlock.TOPAZ),
+    AMBER("Amber Gemstone", "Rough Amber Gemstone", MineableBlock.AMBER),
+    SAPPHIRE("Sapphire Gemstone", "Rough Sapphire Gemstone", MineableBlock.SAPPHIRE),
+    JADE("Jade Gemstone", "Rough Jade Gemstone", MineableBlock.JADE),
+    AMETHYST("Amethyst Gemstone", "Rough Amethyst Gemstone", MineableBlock.AMETHYST),
+    RUBY("Ruby Gemstone", "Rough Ruby Gemstone", MineableBlock.RUBY),
+    AQUAMARINE("Aquamarine Gemstone", "Rough Aquamarine Gemstone", MineableBlock.AQUAMARINE),
+    PERIDOT("Peridot Gemstone", "Rough Peridot Gemstone", MineableBlock.PERIDOT),
+    ONYX("Onyx Gemstone", "Rough Onyx Gemstone", MineableBlock.ONYX),
+    CITRINE("Citrine Gemstone", "Rough Citrine Gemstone", MineableBlock.CITRINE),
+    GLACITE("Glacite", "Glacite", MineableBlock.GLACITE),
+    UMBER("Umber", "Umber", MineableBlock.UMBER),
+    TUNGSTEN("Tungsten", "Tungsten", MineableBlock.TUNGSTEN);
 
     @Getter
     private final String dropName;
     @Getter
     private final String displayName;
+    @Getter
+    private final List<MineableBlock> mineableBlocks;
 
-    GlaciteVeins(String displayName, String dropName) {
+    GlaciteVeins(String displayName, String dropName, MineableBlock... blocks) {
         this.displayName = displayName;
         this.dropName = dropName;
+        this.mineableBlocks = Collections.unmodifiableList(Arrays.asList(blocks));
     }
 
     @Getter
@@ -558,7 +563,7 @@ public enum GlaciteVeins {
                         new RouteWaypoint(118,125,383,TransportMethod.WALK),
                         new RouteWaypoint(121,125,386,TransportMethod.WALK),
                 });
-                put(AMBER, new RouteWaypoint[]{ 
+                put(AMBER, new RouteWaypoint[]{
                         new RouteWaypoint(53, 114, 278, TransportMethod.WALK),
                         new RouteWaypoint(109, 119, 296, TransportMethod.WALK),
                         new RouteWaypoint(106, 120, 316, TransportMethod.WALK),

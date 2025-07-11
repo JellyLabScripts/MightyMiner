@@ -12,6 +12,7 @@ import cc.polyfrost.oneconfig.config.data.OptionSize;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
 import com.jelly.mightyminerv2.hud.DebugHUD;
+import com.jelly.mightyminerv2.hud.GlacialCommissionHUD;
 import com.jelly.mightyminerv2.macro.MacroManager;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.AudioManager;
@@ -327,6 +328,28 @@ public class MightyMinerConfig extends Config {
             min = 1, max = 100
     )
     public static int coldThreshold = 50;
+
+    @Switch(
+            name = "Reset Stats When Disabled",
+            category = GLACIAL_COMMISSION,
+            subcategory = "HUD"
+    )
+    public static boolean glacialHudResetStats = false;
+
+    @Switch(
+            name = "Show Glacial HUD Outside Glacial Mines",
+            category = GLACIAL_COMMISSION,
+            subcategory = "HUD"
+    )
+    public static boolean showGlacialHUDOutside = false;
+
+    @Exclude
+    @HUD(
+            name = "Glacial Commission HUD",
+            category = GLACIAL_COMMISSION,
+            subcategory = "HUD"
+    )
+    public static GlacialCommissionHUD glacialCommissionHUD = GlacialCommissionHUD.getInstance();
 
     //</editor-fold>
 

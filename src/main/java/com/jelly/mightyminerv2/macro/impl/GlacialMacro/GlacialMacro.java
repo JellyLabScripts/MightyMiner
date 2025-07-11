@@ -28,12 +28,14 @@ public class GlacialMacro extends AbstractMacro {
     private static final GlacialMacro instance = new GlacialMacro();
 
     @Setter
+    @Getter
     private GlacialMacroState currentState;
 
     // Shared data for states
     @Getter
     @Setter
     private int miningSpeed = 0;
+    @Getter
     private final ArrayList<GlaciteVeins> typeToMine = new ArrayList<>();
     @Setter
     @Getter
@@ -43,6 +45,8 @@ public class GlacialMacro extends AbstractMacro {
     @Getter
     @Setter
     private BlockMiner.PickaxeAbility pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
+    @Getter
+    private int commissionCounter = 0;
 
     @Override
     public String getName() {
@@ -81,6 +85,11 @@ public class GlacialMacro extends AbstractMacro {
         FeatureManager.getInstance().resumeAll();
         log("Glacial Macro Resumed");
     }
+
+    public void incrementCommissionCounter() {
+        this.commissionCounter++;
+    }
+
 
     @Override
     public void onTick(TickEvent.ClientTickEvent event) {

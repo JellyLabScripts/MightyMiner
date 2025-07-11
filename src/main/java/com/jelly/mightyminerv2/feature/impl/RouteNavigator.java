@@ -4,6 +4,8 @@ import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RotationHandler;
+import com.jelly.mightyminerv2.macro.MacroManager;
+import com.jelly.mightyminerv2.macro.impl.GlacialMacro.GlacialMacro;
 import com.jelly.mightyminerv2.util.AngleUtil;
 import com.jelly.mightyminerv2.util.BlockUtil;
 import com.jelly.mightyminerv2.util.KeyBindUtil;
@@ -264,8 +266,15 @@ public class RouteNavigator extends AbstractFeature {
             }
             case AOTV_VERIFY: {
                 if (this.timer.isScheduled() && this.timer.passed()) {
-                    sendError("Did not receive teleport packet in time. Disabling");
-                    this.stop(NavError.TIME_FAIL);
+                    // Check if the current macro is the GlacialMacro to see if we can walk to the target instead
+                    if (MacroManager.getInstance().getCurrentMacro() instanceof GlacialMacro) {
+                        sendError("Did not receive teleport packet in time. Attempting to walk to the target instead.");
+                        this.swapState(State.WALK, 0);
+                    } else {
+                        // Keep the original behavior for all other macros.
+                        sendError("Did not receive teleport packet in time. Disabling");
+                        this.stop(NavError.TIME_FAIL);
+                    }
                     return;
                 }
                 break;

@@ -2,6 +2,7 @@ package com.jelly.mightyminerv2.macro.impl.CommissionMacro;
 
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
+import com.jelly.mightyminerv2.failsafe.impl.NameMentionFailsafe;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.hud.CommissionHUD;
@@ -95,6 +96,12 @@ public class CommissionMacro extends AbstractMacro {
     public void onTick(ClientTickEvent event) {
         if (!this.isEnabled()) {
             return;
+        }
+
+        if (NameMentionFailsafe.getInstance().isLobbyChangeRequested()) {
+            log("Name mention detected inside CommissionMacro onTick, changing lobbies");
+            NameMentionFailsafe.getInstance().resetStates();
+            transitionTo(new NewLobbyState());
         }
 
         if (this.isTimerRunning()) {

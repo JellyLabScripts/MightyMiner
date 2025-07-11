@@ -33,8 +33,12 @@ public class GettingStatsState implements GlacialMacroState {
         }
 
         if (miningSpeedTask.getError() != null) {
-            macro.disable("Failed to get stats with the following error: "
-                    + miningSpeedTask.getError());
+            if (miningSpeedTask.getError().equals("Failed to parse mining speed in GUI")) {
+                macro.transitionTo(new NewLobbyState());
+            } else {
+                macro.disable("Failed to get stats with the following error: "
+                        + miningSpeedTask.getError());
+            }
             return null;
         }
 

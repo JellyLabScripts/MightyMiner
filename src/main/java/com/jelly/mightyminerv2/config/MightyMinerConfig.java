@@ -779,6 +779,15 @@ public class MightyMinerConfig extends Config {
     public static int verticalKnockbackThreshold = 4000;
 
     @DualOption(
+            name = "Name Mention Failsafe Behaviour", category = FAILSAFE, subcategory = "Failsafe Behaviour",
+            description = "The action Name Mention Failsafe will take when your name is mentioned in chat",
+            left = "Pause Macro",
+            right = "Change Lobby",
+            size = 1
+    )
+    public static boolean nameMentionFailsafeBehaviour = false;
+
+    @DualOption(
             name = "Failsafe Sound Type", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
             description = "The failsafe sound type to play when a failsafe has been triggered",
             left = "Minecraft",

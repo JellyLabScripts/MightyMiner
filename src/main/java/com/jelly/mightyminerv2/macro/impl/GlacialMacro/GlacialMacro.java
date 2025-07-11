@@ -2,14 +2,12 @@ package com.jelly.mightyminerv2.macro.impl.GlacialMacro;
 
 import akka.japi.Pair;
 import com.jelly.mightyminerv2.config.MightyMinerConfig;
+import com.jelly.mightyminerv2.failsafe.impl.NameMentionFailsafe;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.handler.GraphHandler;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
-import com.jelly.mightyminerv2.macro.impl.GlacialMacro.states.GlacialMacroState;
-import com.jelly.mightyminerv2.macro.impl.GlacialMacro.states.MiningState;
-import com.jelly.mightyminerv2.macro.impl.GlacialMacro.states.PathfindingState;
-import com.jelly.mightyminerv2.macro.impl.GlacialMacro.states.StartingState;
+import com.jelly.mightyminerv2.macro.impl.GlacialMacro.states.*;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.TablistUtil;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
@@ -85,7 +83,17 @@ public class GlacialMacro extends AbstractMacro {
 
     @Override
     public void onTick(TickEvent.ClientTickEvent event) {
-        if (!isEnabled() || isTimerRunning() || currentState == null) {
+        if (!this.isEnabled()) {
+            return;
+        }
+
+        if (NameMentionFailsafe.getInstance().isLobbyChangeRequested()) {
+            log("Name mention detected inside GlacialMacro onTick, changing lobbies");
+            NameMentionFailsafe.getInstance().resetStates();
+            transitionTo(new NewLobbyState());
+        }
+
+        if (isTimerRunning() || currentState == null) {
             return;
         }
 
@@ -108,8 +116,6 @@ public class GlacialMacro extends AbstractMacro {
     public void onChat(String message) {
         if (isEnabled() && message.contains("Commission Completed!") && !message.contains(":")) {
             log("Commission completion detected by chat message.");
-            // Transitioning directly can be risky, but let's replicate original behavior
-            // A better way is to set a flag that the current state can check.
             if (currentState instanceof MiningState || currentState instanceof PathfindingState) {
                 transitionTo(new com.jelly.mightyminerv2.macro.impl.GlacialMacro.states.ClaimingCommissionState());
             }

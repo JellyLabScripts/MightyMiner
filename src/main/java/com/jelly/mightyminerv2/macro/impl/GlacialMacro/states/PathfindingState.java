@@ -20,7 +20,6 @@ import java.util.List;
 public class PathfindingState implements GlacialMacroState {
 
     private boolean isNavigating = false;
-    private final Clock findVeinClock = new Clock();
     private final Clock commissionCheckClock = new Clock();
 
     @Override
@@ -29,6 +28,8 @@ public class PathfindingState implements GlacialMacroState {
         InventoryUtil.holdItem("Aspect of the Void");
         RouteNavigator.getInstance().stop(); // Ensure pathfinding is stopped
         macro.updateMiningTasks(); // Update tasks at the beginning of each pathfinding cycle
+
+        isNavigating = false;
     }
 
     @Override
@@ -49,11 +50,11 @@ public class PathfindingState implements GlacialMacroState {
 
         if (isNavigating) {
             if (RouteNavigator.getInstance().isRunning()) {
-                return this; // Stay in this state, we are on our way.
+                return this;
             }
 
-            // Navigation has just finished, check the result
-            isNavigating = false; // Reset flag for the next cycle
+            // Navigation finished
+            isNavigating = false;
 
             if (RouteNavigator.getInstance().succeeded()) {
                 log("Successfully reached the destination vein.");
@@ -63,12 +64,9 @@ public class PathfindingState implements GlacialMacroState {
                 logError("RouteNavigator failed to reach destination: " + (failedVein != null ? failedVein.first() : "Unknown"));
 
                 if (failedVein != null) {
-                    log("Blacklisting the unreachable vein for 5 minutes.");
+                    log("Blacklisting the unreachable vein.");
                     macro.getPreviousVeins().put(failedVein, System.currentTimeMillis());
                 }
-
-                // Reset the clock to immediately try finding a NEW vein on the next tick
-                findVeinClock.reset();
 
                 // Stay in this state to find a new target
                 return this;
@@ -76,35 +74,36 @@ public class PathfindingState implements GlacialMacroState {
         }
 
         // If not navigating, find a new path
-        if (findVeinClock.passed()) {
-            Pair<GlaciteVeins, RouteWaypoint> bestVein = macro.findBestVein();
-            if (bestVein == null) {
-                log("No suitable veins found. Retrying in 10 seconds...");
-                findVeinClock.schedule(10000);
-                return this;
-            }
-            macro.setCurrentVein(bestVein);
+        Pair<GlaciteVeins, RouteWaypoint> bestVein = macro.findBestVein();
 
-            // Check if we are already at the destination
-            if (bestVein.second().isWithinRange(PlayerUtil.getBlockStandingOn(), 2)) {
-                log("Already at the destination. Starting to mine.");
-                return new MiningState();
-            }
-
-            // Calculate the path
-            List<RouteWaypoint> path = GraphHandler.instance.findPathFrom(macro.getName(), PlayerUtil.getBlockStandingOn(), bestVein.second());
-
-            if (path == null || path.isEmpty()) {
-                logError("Could not find a path to " + bestVein.second().toBlockPos() + ". Blacklisting and retrying.");
-                macro.getPreviousVeins().put(bestVein, System.currentTimeMillis());
-                return this; // Try to find a new vein on the next tick
-            }
-
-            // Start navigation
-            log("Starting navigation to vein: " + bestVein.first());
-            RouteNavigator.getInstance().start(new Route(path));
-            isNavigating = true;
+        if (bestVein == null) {
+            logError("No suitable veins found. All are blacklisted. Switching lobbies");
+            return new NewLobbyState();
         }
+
+        // Set the current vein to the best found
+        macro.setCurrentVein(bestVein);
+
+        // Check if we are already at the destination
+        if (bestVein.second().isWithinRange(PlayerUtil.getBlockStandingOn(), 2)) {
+            log("Already at the destination. Starting to mine");
+            return new MiningState();
+        }
+
+        // Calculate the path to the best vein
+        List<RouteWaypoint> path = GraphHandler.instance.findPathFrom(macro.getName(), PlayerUtil.getBlockStandingOn(), bestVein.second());
+
+        // If we can't create a path, blacklist the destination and try again
+        if (path == null || path.isEmpty()) {
+            logError("Could not find a path to " + bestVein.second().toBlockPos() + ". Blacklisting and retrying.");
+            macro.getPreviousVeins().put(bestVein, System.currentTimeMillis());
+            return this; // Stay in this state to find a new vein
+        }
+
+        // Start navigation
+        log("Starting navigation to vein: " + bestVein.first());
+        RouteNavigator.getInstance().start(new Route(path));
+        isNavigating = true;
 
         return this; // Stay in this state while waiting for clocks or pathfinding
     }

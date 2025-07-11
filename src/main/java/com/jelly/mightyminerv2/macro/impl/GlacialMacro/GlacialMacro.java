@@ -67,6 +67,7 @@ public class GlacialMacro extends AbstractMacro {
         this.miningSpeed = 0;
         currentState = null;
         log("Glacial Macro disabled");
+        FeatureManager.getInstance().disableAll();
     }
 
     @Override

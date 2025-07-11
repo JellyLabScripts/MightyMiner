@@ -63,6 +63,7 @@ public class CommissionMacro extends AbstractMacro {
             this.commissionCounter = 0;
         }
         log("CommMacro::onDisable");
+        FeatureManager.getInstance().disableAll();
     }
 
     @Override

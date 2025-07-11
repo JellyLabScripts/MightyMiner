@@ -49,12 +49,11 @@ public class GlacialCommissionHUD extends TextHud {
         if (glacialMacro.isEnabled() && glacialMacro.getCurrentState() != null) {
             lines.add("§8» §7Status: §e" + glacialMacro.getCurrentState().getClass().getSimpleName());
 
-            lines.add("§8» §7Commission Info:");
-
             Map<GlaciteVeins, Double> commPercentages = TablistUtil.getGlaciteComs();
             List<GlaciteVeins> typesToMine = glacialMacro.getTypeToMine();
 
             if (!typesToMine.isEmpty()) {
+                lines.add("§8» §7Commission Info:");
                 for (GlaciteVeins veinType : typesToMine) {
                     double percentage = commPercentages.getOrDefault(veinType, 0.0);
 
@@ -70,7 +69,7 @@ public class GlacialCommissionHUD extends TextHud {
                 }
             }
         }
-        lines.add("§9MightyMiner v" + MightyMiner.instance.VERSION);
+        lines.add("§bMightyMiner v" + MightyMiner.instance.VERSION);
     }
 
     private String formatNumberWithK(long number) {

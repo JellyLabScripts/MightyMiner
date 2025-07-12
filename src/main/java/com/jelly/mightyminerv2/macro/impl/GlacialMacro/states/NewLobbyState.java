@@ -38,7 +38,7 @@ public class NewLobbyState implements GlacialMacroState {
             } else if (currentPhase == WarpPhase.TO_BASE) {
                 log("Successfully returned to Dwarven Base Camp. Resuming pathfinding.");
 
-                return new PathfindingState();
+                return new GettingStatsState();
             }
         } else {
             logError("AutoWarp failed during NewLobby sequence. Reason: " + autoWarp.getFailReason());

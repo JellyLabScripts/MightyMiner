@@ -209,6 +209,14 @@ public class MightyMinerConfig extends Config {
     )
     public static int commClaimMethod = 0;
 
+    @Switch(
+            name = "Prioritise Titanium",
+            description = "Always mine Titanium, even if it is not the commission",
+            category = COMMISSION,
+            subcategory = "General"
+    )
+    public static boolean prioritiseTitanium = false;
+
     @Text(
             name = "Alt. Mining Tool",
             category = COMMISSION,
@@ -341,7 +349,7 @@ public class MightyMinerConfig extends Config {
             category = GLACIAL_COMMISSION,
             subcategory = "HUD"
     )
-    public static boolean showGlacialHUDOutside = false;
+    public static boolean showGlacialHUDOutside = true;
 
     @Exclude
     @HUD(

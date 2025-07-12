@@ -14,16 +14,25 @@ public class MiningState implements CommissionMacroState{
             MineableBlock.TITANIUM};
 
     private final int[] mithrilPriority = {10, 6, 3, 1};
+    private final int[] prioritiseTitanium = {10, 6, 3, 20};
     private final int[] titaniumPriority = {3, 2, 1, 20};
 
     @Override
     public void onStart(CommissionMacro macro) {
         log("Starting mining state");
+
+        int[] priorityToUse;
+        if (macro.getCurrentCommission().getName().contains("Titanium")) {
+            priorityToUse = titaniumPriority;
+        } else {
+            priorityToUse = MightyMinerConfig.prioritiseTitanium ? prioritiseTitanium : mithrilPriority;
+        }
+
         miner.start(
                 blocksToMine,
                 macro.getMiningSpeed(),
                 CommissionMacro.getInstance().getPickaxeAbility(),
-                macro.getCurrentCommission().getName().contains("Titanium") ? titaniumPriority : mithrilPriority,
+                priorityToUse,
                 MightyMinerConfig.miningTool
         );
     }

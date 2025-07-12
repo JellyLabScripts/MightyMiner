@@ -33,6 +33,7 @@ public class ClaimingCommissionState implements GlacialMacroState {
 
         if (claimer.succeeded()) {
             log("Successfully claimed commission.");
+            macro.incrementCommissionCounter();
             macro.updateMiningTasks(); // Update tasks after claiming
             return new PathfindingState();
         } else {

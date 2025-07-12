@@ -349,7 +349,7 @@ public class MightyMinerConfig extends Config {
             category = GLACIAL_COMMISSION,
             subcategory = "HUD"
     )
-    public static boolean showGlacialHUDOutside = false;
+    public static boolean showGlacialHUDOutside = true;
 
     @Exclude
     @HUD(

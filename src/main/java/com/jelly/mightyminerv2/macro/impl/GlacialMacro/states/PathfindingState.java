@@ -13,6 +13,8 @@ import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 
 import java.util.List;
 
+import static com.jelly.mightyminerv2.util.Logger.sendError;
+
 /**
  * PathfindingState is responsible for navigating to the best available vein
  * and handling the pathfinding logic for the Glacial Macro.
@@ -22,13 +24,17 @@ public class PathfindingState implements GlacialMacroState {
     private boolean isNavigating = false;
     private final Clock commissionCheckClock = new Clock();
 
+    // Counter for consecutive pathfinding failures (would indicate player is stuck)
+    private int pathingFailures = 0;
+    private static final int MAX_PATHING_FAILURES = 5;
+
     @Override
     public void onStart(GlacialMacro macro) {
         log("Starting pathing state");
         InventoryUtil.holdItem("Aspect of the Void");
         RouteNavigator.getInstance().stop(); // Ensure pathfinding is stopped
         macro.updateMiningTasks(); // Update tasks at the beginning of each pathfinding cycle
-
+        pathingFailures = 0;
         isNavigating = false;
     }
 
@@ -58,10 +64,17 @@ public class PathfindingState implements GlacialMacroState {
 
             if (RouteNavigator.getInstance().succeeded()) {
                 log("Successfully reached the destination vein.");
+                pathingFailures = 0;
                 return new MiningState();
             } else {
                 Pair<GlaciteVeins, RouteWaypoint> failedVein = macro.getCurrentVein();
                 logError("RouteNavigator failed to reach destination: " + (failedVein != null ? failedVein.first() : "Unknown"));
+                pathingFailures++;
+                log("Pathing failure count: " + pathingFailures);
+                if (pathingFailures >= MAX_PATHING_FAILURES) {
+                    sendError("Failed to pathfind " + MAX_PATHING_FAILURES + " times. Assuming player is stuck. Changing lobbies.");
+                    return new NewLobbyState();
+                }
 
                 if (failedVein != null) {
                     log("Blacklisting the unreachable vein.");
@@ -87,6 +100,7 @@ public class PathfindingState implements GlacialMacroState {
         // Check if we are already at the destination
         if (bestVein.second().isWithinRange(PlayerUtil.getBlockStandingOn(), 2)) {
             log("Already at the destination. Starting to mine");
+            pathingFailures = 0;
             return new MiningState();
         }
 

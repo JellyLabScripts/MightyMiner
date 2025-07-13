@@ -29,8 +29,7 @@ public class StartingState implements GlacialMacroState {
         }
 
         SubLocation subLocation = GameStateHandler.getInstance().getCurrentSubLocation();
-        if (subLocation == SubLocation.GLACITE_TUNNELS || subLocation == SubLocation.DWARVEN_BASE_CAMP) {
-
+        if (subLocation == SubLocation.DWARVEN_BASE_CAMP) {
             if (!InventoryUtil.areItemsInHotbar(macro.getNecessaryItems())) {
                 macro.disable("Please put the following items in hotbar: " + InventoryUtil.getMissingItemsInHotbar(macro.getNecessaryItems()));
                 return null;
@@ -39,7 +38,7 @@ public class StartingState implements GlacialMacroState {
             log("Player is in a valid location. Initialising stats");
             return new GettingStatsState();
         } else {
-            log("Player is not in the Glacite Tunnels. Teleporting...");
+            log("Player is not at Dwarven Base Camp. Teleporting...");
             return new TeleportingState(new StartingState());
         }
     }

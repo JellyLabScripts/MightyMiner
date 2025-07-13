@@ -63,8 +63,8 @@ public class MightyMinerConfig extends Config {
             options = {
                     "Dwarven Commission",           // 0
                     "Glacial Commissions",          // 1
-                    "Mining Macro"                  // 2
-//                    "Route Miner",
+                    "Mining Macro",                 // 2
+                    "Route Miner",                  // 3
 //                    "Gemstone Powder"
             },
             subcategory = "Macro"
@@ -413,52 +413,42 @@ public class MightyMinerConfig extends Config {
     //<editor-fold desc="Route Miner">
 
     @Info(
-            text = "This feature is currently in development and currently does not function.",
+            text = "Make sure to report bugs in #bug-reports in the discord server.",
             type = InfoType.ERROR,
             category = ROUTE_MINER,
             size = 2
     )
     public static boolean ignored1 = true;
 
-    @Dropdown(
-            name = "Route Target", category = ROUTE_MINER, subcategory = "Route",
-            description = "What you want to mine.",
-            options = {
-                    // Ores
-                    "Iron",
-                    "Redstone",
-                    "Coal",
-                    "Gold",
-                    "Lapis",
-                    "Diamond",
-                    "Emerald",
-                    "Quartz",
-                    // Gemstones
-                    "Ruby",
-                    "Sapphire",
-                    "Jade",
-                    "Amethyst",
-                    "Topaz",
-                    "Onyx",
-                    "Aquamarine",
-                    "Citrine",
-                    "Peridot",
-                    "Jasper",
-                    // Gemstones
-                    "Glacite",
-                    "Umber",
-                    "Tungsten"
-            }
+    @Info(
+            text = "Run /rb for more information on route building.",
+            type = InfoType.INFO,
+            category = ROUTE_MINER,
+            size = 2
     )
-    public static int routeTarget = 0;
+    public static boolean ignored2 = true;
 
-    @DualOption(
-            name = "Route Type", category = ROUTE_MINER, subcategory = "General",
-            description = "The type of route this is.",
-            left = "Regular", right = "Snail"
-    )
-    public static boolean routeType = false;
+    //<editor-fold desc="Targets">
 
+    @Switch(name = "Mine Gemstone", category = ROUTE_MINER, subcategory = "Targets")
+    public static boolean routeMineGemstone = false;
+
+    @Switch(name = "Mine Topaz", category = ROUTE_MINER, subcategory = "Targets")
+    public static boolean routeMineTopaz = false;
+
+    @Switch(name = "Mine Ore", category = ROUTE_MINER, subcategory = "Targets")
+    public static boolean routeMineOre = false;
+
+    @Switch(name = "Mine Glacite", category = ROUTE_MINER, subcategory = "Targets")
+    public static boolean routeMineGlacite = false;
+
+    @Switch(name = "Mine Umber", category = ROUTE_MINER, subcategory = "Targets")
+    public static boolean routeMineUmber = false;
+
+    @Switch(name = "Mine Tungsten", category = ROUTE_MINER, subcategory = "Targets")
+    public static boolean routeMineTungsten = false;
+
+    //</editor-fold>
     //</editor-fold>
 
     //<editor-fold desc="Powder Macro">
@@ -468,7 +458,7 @@ public class MightyMinerConfig extends Config {
             category = POWDER,
             size = 2
     )
-    public static boolean ignored2 = true;
+    public static boolean ignored3 = true;
 
     @Switch(
             name = "Great Explorer Maxed", category = POWDER, subcategory = "General",
@@ -507,14 +497,6 @@ public class MightyMinerConfig extends Config {
     //</editor-fold>
 
     //<editor-fold desc="Route Builder">
-    @Info(
-            text = "This feature is currently in development and currently does not function.",
-            type = InfoType.ERROR,
-            category = ROUTE_BUILDER,
-            size = 2
-    )
-    public static boolean ignored3 = true;
-
     @KeyBind(
             name = "Enable RouteBuilder",
             description = "They key to click to enable RouteBuilder",
@@ -524,11 +506,11 @@ public class MightyMinerConfig extends Config {
     public static OneKeyBind routeBuilder = new OneKeyBind(Keyboard.KEY_LBRACKET);
 
     @KeyBind(
-            name = "Add Block To Route (Aotv)",
+            name = "Add Block To Route (Walk)",
             description = "The Key to click to add the block player is standing on block to the route",
             category = ROUTE_BUILDER
     )
-    public static OneKeyBind routeBuilderAotvAddKeybind = new OneKeyBind(Keyboard.KEY_P);
+    public static OneKeyBind routeBuilderWalkAddKeybind = new OneKeyBind(Keyboard.KEY_P);
 
     @KeyBind(
             name = "Add Block To Route (Etherwarp)",

@@ -55,9 +55,10 @@ public class RouteBuilder extends AbstractFeature {
         if (!this.enabled) {
             return;
         }
-        if (MightyMinerConfig.routeBuilderAotvAddKeybind.isActive()) {
-            this.addToRoute(TransportMethod.AOTV);
-            Logger.sendMessage("Added Aotv");
+
+        if (MightyMinerConfig.routeBuilderWalkAddKeybind.isActive()) {
+            this.addToRoute(TransportMethod.WALK);
+            Logger.sendMessage("Added Walk");
         }
 
         if (MightyMinerConfig.routeBuilderEtherwarpAddKeybind.isActive()) {

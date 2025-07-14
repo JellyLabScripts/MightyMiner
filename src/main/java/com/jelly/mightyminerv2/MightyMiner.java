@@ -20,6 +20,7 @@ import com.jelly.mightyminerv2.util.TablistUtil;
 import com.jelly.mightyminerv2.util.helper.AudioManager;
 import com.jelly.mightyminerv2.util.helper.graph.Graph;
 import com.jelly.mightyminerv2.util.helper.graph.GraphSerializer;
+import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,6 +37,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -54,6 +56,7 @@ public class MightyMiner {
             .setPrettyPrinting()
             .create();
     public static final Path routesDirectory = Paths.get("./config/mightyminerv2/graphs");
+    public static final Path routesFile = Paths.get("./config/mightyminerv2/routes.json");
     private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
     private static final Minecraft mc = Minecraft.getMinecraft();
     private static final List<String> expectedRoutes = Arrays.asList("Glacial Macro.json", "Commission Macro.json");
@@ -107,6 +110,8 @@ public class MightyMiner {
                 }
             }
         }
+
+        RouteHandler.getInstance().loadData();
     }
 
     private boolean loadGraph(Path path) {

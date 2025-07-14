@@ -1,6 +1,5 @@
 package com.jelly.mightyminerv2.macro.impl.RouteMiner.states;
 
-import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.macro.impl.RouteMiner.RouteMinerMacro;
@@ -28,7 +27,7 @@ public class MovingState implements RouteMinerMacroState {
             InventoryUtil.holdItem("Aspect of the Void");
         }
 
-        navigator.goTo(nextIndex);
+        RouteNavigator.getInstance().goTo(nextIndex);
     }
 
     @Override

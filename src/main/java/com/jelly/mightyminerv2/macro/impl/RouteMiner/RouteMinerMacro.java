@@ -12,6 +12,7 @@ import com.jelly.mightyminerv2.macro.impl.GlacialMacro.states.GlacialMacroState;
 import com.jelly.mightyminerv2.macro.impl.GlacialMacro.states.NewLobbyState;
 import com.jelly.mightyminerv2.macro.impl.RouteMiner.states.GettingStatsState;
 import com.jelly.mightyminerv2.macro.impl.RouteMiner.states.RouteMinerMacroState;
+import com.jelly.mightyminerv2.macro.impl.RouteMiner.states.StartingState;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import lombok.Getter;
@@ -53,7 +54,7 @@ public class RouteMinerMacro extends AbstractMacro {
 
         this.miningSpeed = 0;
         this.pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
-        this.currentState = new GettingStatsState();
+        this.currentState = new StartingState();
 
         log("Route Miner Macro enabled");
     }

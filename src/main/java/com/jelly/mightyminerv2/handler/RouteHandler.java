@@ -1,5 +1,7 @@
 package com.jelly.mightyminerv2.handler;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.jelly.mightyminerv2.MightyMiner;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
@@ -13,8 +15,11 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 @Getter
@@ -78,12 +83,29 @@ public class RouteHandler {
         this.dirty = true;
     }
 
+    public void loadData() {
+        if (!Files.exists(MightyMiner.routesFile)) {
+            return;
+        }
+
+        try (Reader reader = Files.newBufferedReader(MightyMiner.routesFile)) {
+            JsonObject jsonObject = MightyMiner.gson.fromJson(reader, JsonObject.class);
+            HashMap<String, Route> loadedRoutes = MightyMiner.gson.fromJson(jsonObject.get("routes"),
+                    new TypeToken<HashMap<String, Route>>() {}.getType());
+
+            routes.clear();
+            routes.putAll(loadedRoutes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public synchronized void saveData() {
         while (RouteBuilder.getInstance().isRunning()) {
             try {
                 if (!this.dirty) continue;
                 String data = MightyMiner.gson.toJson(instance);
-                Files.write(MightyMiner.routesDirectory, data.getBytes(StandardCharsets.UTF_8));
+                Files.write(MightyMiner.routesFile, data.getBytes(StandardCharsets.UTF_8));
                 this.dirty = false;
             } catch (IOException e) {
                 System.out.println("Save Loop Crashed.");

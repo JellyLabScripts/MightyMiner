@@ -27,7 +27,7 @@ public class RouteBuilderCommand {
         Logger.sendMessage("Use these commands to manage your routes.");
         success("   1. /rb list -> List all available routes.");
         success("   2. /rb select <route-name> -> Select the specified route name. A new route will be created if none exist.");
-        success("   3. /rb add <walk|etherwarp> -> Add the block player is standing on to selected route.");
+        success("   3. /rb add <walk|etherwarp|mine> -> Add the block player is standing on to selected route.");
         success("   4. /rb remove -> Remove the block player is standing on from selected route.");
         success("   5. /rb replace <index> -> Replaces Specified Index from the route with block player is standing on.");
         success("   6. /rb clear <route-name> -> Deletes the route.");
@@ -50,6 +50,7 @@ public class RouteBuilderCommand {
     @SubCommand
     public void select(final String routeName) {
         RouteHandler.getInstance().selectRoute(routeName);
+        Logger.sendMessage("Selected route: " + routeName);
     }
 
     @SubCommand
@@ -59,6 +60,8 @@ public class RouteBuilderCommand {
 
         if (name.equalsIgnoreCase("walk")) {
             type = TransportMethod.WALK;
+        } else if (name.equalsIgnoreCase("mine")) {
+            type = TransportMethod.MINE;
         } else if (!name.equalsIgnoreCase("etherwarp")) {
             Logger.sendError("You must specify a proper option. Run /rb for more information.");
             return;

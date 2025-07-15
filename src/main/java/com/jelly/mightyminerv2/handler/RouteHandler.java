@@ -4,11 +4,12 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.jelly.mightyminerv2.MightyMiner;
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
-import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
+import com.jelly.mightyminerv2.util.helper.route.WaypointType;
 import lombok.Getter;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -18,8 +19,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
 @Getter
@@ -51,19 +50,21 @@ public class RouteHandler {
         this.markDirty();
     }
 
-    public void addToCurrentRoute(final BlockPos block, final TransportMethod method) {
+    public void addToCurrentRoute(final BlockPos block, final WaypointType method) {
         if (this.selectedRoute == this.routes.get("Default")) {
             Logger.sendError("Cannot Edit Default Route.");
             return;
         }
+
         final RouteWaypoint waypoint = new RouteWaypoint(block, method);
         if (this.selectedRoute.indexOf(waypoint) != -1) return;
+
         this.selectedRoute.insert(waypoint);
         this.markDirty();
     }
 
-    public void removeFromCurrentRoute(final BlockPos block) {
-        this.selectedRoute.remove(new RouteWaypoint(block, TransportMethod.ETHERWARP));
+    public void removeFromCurrentRoute(final int index) {
+        this.selectedRoute.remove(index);
         this.markDirty();
     }
 
@@ -72,10 +73,12 @@ public class RouteHandler {
         this.markDirty();
     }
 
-    public void clearRoute(final String routeName) {
+    public void deleteRoute(final String routeName) {
         if (this.selectedRoute == this.routes.remove(routeName)) {
             this.selectedRoute = this.getRoutes().get("Default");
+            MightyMinerConfig.selectedRoute = "";
         }
+
         this.markDirty();
     }
 

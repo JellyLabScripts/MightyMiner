@@ -36,7 +36,6 @@ public class MightyMinerConfig extends Config {
     private transient static final String MINING_MACRO = "Mining Macro";
     private transient static final String ROUTE_MINER = "Route Miner";
     private transient static final String POWDER = "Gemstone Powder";
-    private transient static final String ROUTE_BUILDER = "Route Builder";
     private transient static final String DELAY = "Delays";
     private transient static final String AUTO_SELL = "Auto Sell";
     private transient static final String FAILSAFE = "Failsafe";
@@ -416,7 +415,8 @@ public class MightyMinerConfig extends Config {
             text = "Make sure to report bugs in #bug-reports in the discord server.",
             type = InfoType.ERROR,
             category = ROUTE_MINER,
-            size = 2
+            size = 2,
+            subcategory = "General"
     )
     public static boolean ignored1 = true;
 
@@ -424,10 +424,17 @@ public class MightyMinerConfig extends Config {
             text = "Run /rb for more information on route building.",
             type = InfoType.INFO,
             category = ROUTE_MINER,
-            size = 2
+            size = 2,
+            subcategory = "General"
     )
     public static boolean ignored2 = true;
 
+    //<editor-fold desc="General">
+
+    @Text(name = "Selected Route", category = ROUTE_MINER, subcategory = "General")
+    public static String selectedRoute = "";
+
+    //</editor-fold>
     //<editor-fold desc="Targets">
 
     @Switch(name = "Mine Gemstone", category = ROUTE_MINER, subcategory = "Targets")
@@ -447,6 +454,87 @@ public class MightyMinerConfig extends Config {
 
     @Switch(name = "Mine Tungsten", category = ROUTE_MINER, subcategory = "Targets")
     public static boolean routeMineTungsten = false;
+
+    //</editor-fold>
+    //<editor-fold desc="Route Builder">
+
+    @KeyBind(
+            name = "Enable RouteBuilder",
+            description = "They key to click to enable RouteBuilder",
+            category = ROUTE_MINER,
+            subcategory = "Route Builder"
+    )
+    public static OneKeyBind routeBuilder = new OneKeyBind(Keyboard.KEY_LBRACKET);
+
+    @KeyBind(
+            name = "Add Block To Route (Walk)",
+            description = "The Key to click to add the block player is standing on block to the route",
+            category = ROUTE_MINER,
+            subcategory = "Route Builder"
+    )
+    public static OneKeyBind routeBuilderWalkAddKeybind = new OneKeyBind(Keyboard.KEY_P);
+
+    @KeyBind(
+            name = "Add Block To Route (Etherwarp)",
+            description = "The Key to click to add the block player is standing on block to the route",
+            category = ROUTE_MINER,
+            subcategory = "Route Builder"
+    )
+    public static OneKeyBind routeBuilderEtherwarpAddKeybind = new OneKeyBind(Keyboard.KEY_I);
+
+    @KeyBind(
+            name = "Remove Block From Route",
+            description = "The Key To Remove the block player is standing on from the route",
+            category = ROUTE_MINER,
+            subcategory = "Route Builder"
+    )
+    public static OneKeyBind routeBuilderRemoveKeybind = new OneKeyBind(Keyboard.KEY_O);
+
+    @Color(
+            name = "Route Node Color",
+            description = "The Color of The Blocks On a Route",
+            category = ROUTE_MINER,
+            subcategory = "Route Builder"
+    )
+    public static OneColor routeBuilderNodeColor = new OneColor(0, 255, 255, 100);
+
+    @Color(
+            name = "Route Tracer Color",
+            description = "The Color of The Line Between Blocks On a Route",
+            category = ROUTE_MINER,
+            subcategory = "Route Builder"
+    )
+    public static OneColor routeBuilderTracerColor = new OneColor(0, 255, 255, 100);
+
+    @KeyBind(
+            name = "RouteBuilder Add UNIDI",
+            category = ROUTE_MINER, subcategory = "Graph"
+    )
+    public static OneKeyBind routeBuilderUnidi = new OneKeyBind(Keyboard.KEY_NUMPAD7);
+
+    @KeyBind(
+            name = "RouteBuilder Add BIDI",
+            category = ROUTE_MINER, subcategory = "Graph"
+    )
+    public static OneKeyBind routeBuilderBidi = new OneKeyBind(Keyboard.KEY_NUMPAD8);
+
+    @KeyBind(
+            name = "RouteBuilder Select",
+            category = ROUTE_MINER, subcategory = "Graph"
+    )
+    public static OneKeyBind routeBuilderSelect = new OneKeyBind(Keyboard.KEY_NUMPAD4);
+
+    @KeyBind(
+            name = "RouteBuilder Move",
+            category = ROUTE_MINER, subcategory = "Graph"
+    )
+    public static OneKeyBind routeBuilderMove = new OneKeyBind(Keyboard.KEY_NUMPAD5);
+
+    @KeyBind(
+            name = "RouteBuilder Delete",
+            category = ROUTE_MINER, subcategory = "Graph"
+    )
+    public static OneKeyBind routeBuilderDelete = new OneKeyBind(Keyboard.KEY_NUMPAD6);
 
     //</editor-fold>
     //</editor-fold>
@@ -493,82 +581,6 @@ public class MightyMinerConfig extends Config {
             min = 1f, max = 5f
     )
     public static float gemstoneOvalSpeed = 2;
-
-    //</editor-fold>
-
-    //<editor-fold desc="Route Builder">
-    @KeyBind(
-            name = "Enable RouteBuilder",
-            description = "They key to click to enable RouteBuilder",
-            category = ROUTE_BUILDER,
-            size = 2
-    )
-    public static OneKeyBind routeBuilder = new OneKeyBind(Keyboard.KEY_LBRACKET);
-
-    @KeyBind(
-            name = "Add Block To Route (Walk)",
-            description = "The Key to click to add the block player is standing on block to the route",
-            category = ROUTE_BUILDER
-    )
-    public static OneKeyBind routeBuilderWalkAddKeybind = new OneKeyBind(Keyboard.KEY_P);
-
-    @KeyBind(
-            name = "Add Block To Route (Etherwarp)",
-            description = "The Key to click to add the block player is standing on block to the route",
-            category = ROUTE_BUILDER
-    )
-    public static OneKeyBind routeBuilderEtherwarpAddKeybind = new OneKeyBind(Keyboard.KEY_I);
-
-    @KeyBind(
-            name = "Remove Block From Route",
-            description = "The Key To Remove the block player is standing on from the route",
-            category = ROUTE_BUILDER
-    )
-    public static OneKeyBind routeBuilderRemoveKeybind = new OneKeyBind(Keyboard.KEY_O);
-
-    @Color(
-            name = "Route Node Color",
-            description = "The Color of The Blocks On a Route",
-            category = ROUTE_BUILDER
-    )
-    public static OneColor routeBuilderNodeColor = new OneColor(0, 255, 255, 100);
-
-    @Color(
-            name = "Route Tracer Color",
-            description = "The Color of The Line Between Blocks On a Route",
-            category = ROUTE_BUILDER
-    )
-    public static OneColor routeBuilderTracerColor = new OneColor(0, 255, 255, 100);
-
-    @KeyBind(
-            name = "RouteBuilder Add UNIDI",
-            category = ROUTE_BUILDER, subcategory = "Graph"
-    )
-    public static OneKeyBind routeBuilderUnidi = new OneKeyBind(Keyboard.KEY_NUMPAD7);
-
-    @KeyBind(
-            name = "RouteBuilder Add BIDI",
-            category = ROUTE_BUILDER, subcategory = "Graph"
-    )
-    public static OneKeyBind routeBuilderBidi = new OneKeyBind(Keyboard.KEY_NUMPAD8);
-
-    @KeyBind(
-            name = "RouteBuilder Select",
-            category = ROUTE_BUILDER, subcategory = "Graph"
-    )
-    public static OneKeyBind routeBuilderSelect = new OneKeyBind(Keyboard.KEY_NUMPAD4);
-
-    @KeyBind(
-            name = "RouteBuilder Move",
-            category = ROUTE_BUILDER, subcategory = "Graph"
-    )
-    public static OneKeyBind routeBuilderMove = new OneKeyBind(Keyboard.KEY_NUMPAD5);
-
-    @KeyBind(
-            name = "RouteBuilder Delete",
-            category = ROUTE_BUILDER, subcategory = "Graph"
-    )
-    public static OneKeyBind routeBuilderDelete = new OneKeyBind(Keyboard.KEY_NUMPAD6);
 
     //</editor-fold>
 

@@ -6,7 +6,7 @@ import com.jelly.mightyminerv2.macro.impl.RouteMiner.RouteMinerMacro;
 import com.jelly.mightyminerv2.util.InventoryUtil;
 import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.helper.route.Route;
-import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
+import com.jelly.mightyminerv2.util.helper.route.WaypointType;
 
 /**
  * Moving State is responsible for navigating to the next waypoint
@@ -23,7 +23,7 @@ public class MovingState implements RouteMinerMacroState {
 
         int nextIndex = navigator.getCurrentIndex(PlayerUtil.getBlockStandingOn()) + 1;
 
-        if (route.get(nextIndex).getTransportMethod() == TransportMethod.ETHERWARP) {
+        if (route.get(nextIndex).getTransportMethod() == WaypointType.ETHERWARP) {
             InventoryUtil.holdItem("Aspect of the Void");
         }
 

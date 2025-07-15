@@ -1,7 +1,6 @@
 package com.jelly.mightyminerv2.util.helper.route;
 
-// Todo: Rename
-public enum TransportMethod {
+public enum WaypointType {
     AOTV,           // Right Click Aotv/Aote
     ETHERWARP,      // Shift + Right Click Aotv/Aote
     WALK,           // Walks Between Nodes (Add it after pathfinder)

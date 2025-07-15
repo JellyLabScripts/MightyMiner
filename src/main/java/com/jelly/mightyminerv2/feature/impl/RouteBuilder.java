@@ -6,8 +6,9 @@ import com.jelly.mightyminerv2.feature.AbstractFeature;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.PlayerUtil;
+import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
-import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
+import com.jelly.mightyminerv2.util.helper.route.WaypointType;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
@@ -57,29 +58,37 @@ public class RouteBuilder extends AbstractFeature {
         }
 
         if (MightyMinerConfig.routeBuilderWalkAddKeybind.isActive()) {
-            this.addToRoute(TransportMethod.WALK);
+            this.addToRoute(WaypointType.WALK);
             Logger.sendMessage("Added Walk");
         }
 
         if (MightyMinerConfig.routeBuilderEtherwarpAddKeybind.isActive()) {
-            this.addToRoute(TransportMethod.ETHERWARP);
+            this.addToRoute(WaypointType.ETHERWARP);
             Logger.sendMessage("Added Etherwarp");
         }
 
         if (MightyMinerConfig.routeBuilderRemoveKeybind.isActive()) {
-            this.removeFromRoute();
+            Route selectedRoute = RouteHandler.getInstance().getSelectedRoute();
+            RouteWaypoint closest = selectedRoute.getClosest(PlayerUtil.getBlockStandingOn()).get();
+            int index = selectedRoute.indexOf(closest);
+
+            if (index == -1) {
+                return;
+            }
+
+            this.removeFromRoute(index);
         }
     }
 
-    public void addToRoute(final TransportMethod method) {
+    public void addToRoute(final WaypointType method) {
         RouteHandler.getInstance().addToCurrentRoute(PlayerUtil.getBlockStandingOn(), method);
     }
 
-    public void removeFromRoute() {
-        RouteHandler.getInstance().removeFromCurrentRoute(PlayerUtil.getBlockStandingOn());
+    public void removeFromRoute(int index) {
+        RouteHandler.getInstance().removeFromCurrentRoute(index);
     }
 
     public void replaceNode(final int index) {
-        RouteHandler.getInstance().replaceInCurrentRoute(index, new RouteWaypoint(PlayerUtil.getBlockStandingOn(), TransportMethod.ETHERWARP));
+        RouteHandler.getInstance().replaceInCurrentRoute(index, new RouteWaypoint(PlayerUtil.getBlockStandingOn(), WaypointType.ETHERWARP));
     }
 }

@@ -138,6 +138,7 @@ public class MightyMiner {
         mc.gameSettings.gammaSetting = 1000;
         mc.gameSettings.pauseOnLostFocus = false;
 
+        RouteHandler.getInstance().selectRoute(MightyMinerConfig.selectedRoute);
         Display.setTitle(
                 "Mighty Miner 〔v" + VERSION + "〕 " + (MightyMinerConfig.debugMode ? "wazzadev!" : "Chilling huh?") + " ☛ " + mc.getSession().getUsername());
     }

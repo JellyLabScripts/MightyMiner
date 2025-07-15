@@ -32,23 +32,24 @@ public class GettingStatsState implements RouteMinerMacroState {
 
     @Override
     public RouteMinerMacroState onTick(RouteMinerMacro macro) {
-        if (!AutoGetStats.getInstance().hasFinishedAllTasks()) {
+        if (AutoGetStats.getInstance().hasFinishedAllTasks()) {
+            if (miningSpeedTask.getError() != null) {
+                macro.disable("Failed to get stats with the following error: " + miningSpeedTask.getError());
+                return null;
+            }
+
+            if (pickaxeAbilityTask.getError() != null) {
+                macro.disable("Failed to get pickaxe ability with the following error: " + pickaxeAbilityTask.getError());
+                return null;
+            }
+
+            macro.setMiningSpeed(miningSpeedTask.getResult());
+            macro.setPickaxeAbility(MightyMinerConfig.usePickaxeAbility ? pickaxeAbilityTask.getResult() : BlockMiner.PickaxeAbility.NONE);
+            return new MovingState();
+        } else {
             return this;
         }
 
-        if (miningSpeedTask.getError() != null) {
-            macro.disable("Failed to get stats with the following error: " + miningSpeedTask.getError());
-            return null;
-        }
-
-        if (pickaxeAbilityTask.getError() != null) {
-            macro.disable("Failed to get pickaxe ability with the following error: " + pickaxeAbilityTask.getError());
-            return null;
-        }
-
-        macro.setMiningSpeed(miningSpeedTask.getResult());
-        macro.setPickaxeAbility(MightyMinerConfig.usePickaxeAbility ? pickaxeAbilityTask.getResult() : BlockMiner.PickaxeAbility.NONE);
-        return new MiningState();
     }
 
     @Override

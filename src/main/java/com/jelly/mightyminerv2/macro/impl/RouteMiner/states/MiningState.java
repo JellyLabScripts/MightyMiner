@@ -24,6 +24,7 @@ public class MiningState implements RouteMinerMacroState {
     public RouteMinerMacroState onTick(RouteMinerMacro macro) {
         if (BlockMiner.getInstance().getError() == BlockMiner.BlockMinerError.NOT_ENOUGH_BLOCKS) {
             BlockMiner.getInstance().stop();
+            macro.setRouteIndex(macro.getRouteIndex() + 1);
             return new MovingState();
         }
 
@@ -34,7 +35,7 @@ public class MiningState implements RouteMinerMacroState {
         MineableBlock[] blocksToMine = macro.getBlocksToMine();
 
         if (blocksToMine.length == 0) {
-            log("No blocks to mine for current commissions.");
+            macro.disable("No targets provided in configuration.");
             return;
         }
 

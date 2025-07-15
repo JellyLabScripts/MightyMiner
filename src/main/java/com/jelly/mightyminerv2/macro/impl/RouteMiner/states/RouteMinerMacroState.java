@@ -2,6 +2,7 @@ package com.jelly.mightyminerv2.macro.impl.RouteMiner.states;
 
 import com.jelly.mightyminerv2.macro.impl.RouteMiner.RouteMinerMacro;
 import com.jelly.mightyminerv2.util.Logger;
+import net.minecraft.client.Minecraft;
 
 /**
  * Interface representing the state of the RouteMiner Macro.

@@ -107,7 +107,7 @@ public class MacroManager {
             return;
         }
 
-//    needed to remove for pause to work
+//      needed to remove for pause to work
         if (!currentMacro.isEnabled()) {
             this.disable();
             return;

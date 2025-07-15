@@ -4,6 +4,7 @@ import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.failsafe.impl.NameMentionFailsafe;
 import com.jelly.mightyminerv2.feature.FeatureManager;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
+import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.macro.AbstractMacro;
 import com.jelly.mightyminerv2.macro.MacroManager;
@@ -13,8 +14,11 @@ import com.jelly.mightyminerv2.macro.impl.GlacialMacro.states.NewLobbyState;
 import com.jelly.mightyminerv2.macro.impl.RouteMiner.states.GettingStatsState;
 import com.jelly.mightyminerv2.macro.impl.RouteMiner.states.RouteMinerMacroState;
 import com.jelly.mightyminerv2.macro.impl.RouteMiner.states.StartingState;
+import com.jelly.mightyminerv2.util.KeyBindUtil;
+import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.helper.MineableBlock;
 import com.jelly.mightyminerv2.util.helper.route.Route;
+import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -22,6 +26,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class RouteMinerMacro extends AbstractMacro {
 
@@ -40,6 +45,10 @@ public class RouteMinerMacro extends AbstractMacro {
     @Setter
     private BlockMiner.PickaxeAbility pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
 
+    @Getter
+    @Setter
+    private int routeIndex = 0;
+
     @Override
     public void onEnable() {
         Route route = RouteHandler.getInstance().getSelectedRoute();
@@ -50,7 +59,9 @@ public class RouteMinerMacro extends AbstractMacro {
             return;
         }
 
-        BlockMiner.getInstance().setWaitThreshold(500);
+        BlockMiner.getInstance().setWaitThreshold(50);
+        Optional<RouteWaypoint> waypoint = route.getClosest(PlayerUtil.getBlockStandingOn());
+        waypoint.ifPresent(routeWaypoint -> routeIndex = route.indexOf(routeWaypoint));
 
         this.miningSpeed = 0;
         this.pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
@@ -68,6 +79,8 @@ public class RouteMinerMacro extends AbstractMacro {
         this.miningSpeed = 0;
         currentState = null;
         log("Route Miner Macro disabled");
+        KeyBindUtil.releaseAllExcept();
+        RotationHandler.getInstance().stop();
         FeatureManager.getInstance().disableAll();
     }
 
@@ -156,10 +169,8 @@ public class RouteMinerMacro extends AbstractMacro {
     @Override
     public List<String> getNecessaryItems() {
         List<String> items = new ArrayList<>();
-
-        items.add(MightyMinerConfig.miningTool);
         items.add("Aspect of the Void");
-
+        items.add(MightyMinerConfig.miningTool);
         return items;
     }
 

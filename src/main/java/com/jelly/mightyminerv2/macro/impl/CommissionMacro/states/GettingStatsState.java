@@ -25,23 +25,20 @@ public class GettingStatsState implements CommissionMacroState{
     @Override
     public CommissionMacroState onTick(CommissionMacro macro) {
         if (!AutoGetStats.getInstance().hasFinishedAllTasks())
-            return this ;
+            return this;
 
         if (miningSpeedRetrievalTask.getError() != null) {
-            macro.disable("Failed to get stats with the following error: "
-                    + miningSpeedRetrievalTask.getError());
+            macro.disable("Failed to get stats with the following error: " + miningSpeedRetrievalTask.getError());
             return null;
         }
 
         if (pickaxeAbilityRetrievalTask.getError() != null) {
-            macro.disable("Failed to get pickaxe ability with the following error: "
-                    + pickaxeAbilityRetrievalTask.getError());
+            macro.disable("Failed to get pickaxe ability with the following error: " + pickaxeAbilityRetrievalTask.getError());
             return null;
         }
 
         macro.setMiningSpeed(miningSpeedRetrievalTask.getResult());
-        macro.setPickaxeAbility(MightyMinerConfig.usePickaxeAbility ?
-                pickaxeAbilityRetrievalTask.getResult() : BlockMiner.PickaxeAbility.NONE);
+        macro.setPickaxeAbility(MightyMinerConfig.usePickaxeAbility ? pickaxeAbilityRetrievalTask.getResult() : BlockMiner.PickaxeAbility.NONE);
         return new StartingState();
     }
 

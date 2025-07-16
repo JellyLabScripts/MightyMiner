@@ -211,10 +211,12 @@ public class Pathfinder extends AbstractFeature {
 
     @SubscribeEvent
     protected void onRender(RenderWorldLastEvent event) {
-        if (!this.enabled) {
+        // Path is already being rendered in RouteNavigator so there is no point rendering here.
+        if (!this.enabled || RouteNavigator.getInstance().isRunning()) {
             return;
         }
-//    this.pathExecutor.onRender();
+
+//      this.pathExecutor.onRender();
         Deque<Path> paths = new LinkedList<>(this.pathExecutor.getPathQueue());
         if (pathExecutor.getCurrentPath() != null) {
             paths.add(pathExecutor.getCurrentPath());

@@ -3,7 +3,7 @@ package com.jelly.mightyminerv2.util.helper.graph;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
-import com.jelly.mightyminerv2.util.helper.route.WaypointType;
+import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -45,7 +45,7 @@ public class GraphSerializer implements JsonSerializer<Graph<RouteWaypoint>>, Js
                 int x = Integer.parseInt(keyParts[0]);
                 int y = Integer.parseInt(keyParts[1]);
                 int z = Integer.parseInt(keyParts[2]);
-                WaypointType transportMethod = WaypointType.valueOf(keyParts[3]);
+                TransportMethod transportMethod = TransportMethod.valueOf(keyParts[3]);
                 RouteWaypoint key = new RouteWaypoint(x, y, z, transportMethod);
 
                 List<RouteWaypoint> value = context.deserialize(entry.getValue(), new TypeToken<List<RouteWaypoint>>() {

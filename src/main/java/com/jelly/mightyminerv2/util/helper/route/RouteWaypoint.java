@@ -17,18 +17,18 @@ public class RouteWaypoint {
     @Expose
     private int z;
     @Expose
-    private WaypointType transportMethod;
+    private TransportMethod transportMethod;
 
     public RouteWaypoint() {}
 
-    public RouteWaypoint(int x, int y, int z, WaypointType transportMethod) {
+    public RouteWaypoint(int x, int y, int z, TransportMethod transportMethod) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.transportMethod = transportMethod;
     }
 
-    public RouteWaypoint(BlockPos pos, WaypointType transportMethod) {
+    public RouteWaypoint(BlockPos pos, TransportMethod transportMethod) {
         this(pos.getX(), pos.getY(), pos.getZ(), transportMethod);
     }
 

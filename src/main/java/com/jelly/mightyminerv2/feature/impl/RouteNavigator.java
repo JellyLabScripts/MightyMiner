@@ -15,7 +15,7 @@ import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
 import com.jelly.mightyminerv2.util.helper.Target;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
-import com.jelly.mightyminerv2.util.helper.route.WaypointType;
+import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.init.Blocks;
@@ -161,7 +161,7 @@ public class RouteNavigator extends AbstractFeature {
     }
 
     public int getCurrentIndex(final BlockPos playerBlock) {
-        int index = this.routeToFollow.indexOf(new RouteWaypoint(playerBlock, WaypointType.ETHERWARP));
+        int index = this.routeToFollow.indexOf(new RouteWaypoint(playerBlock, TransportMethod.ETHERWARP));
         if (index != -1) {
             return index;
         }
@@ -194,7 +194,7 @@ public class RouteNavigator extends AbstractFeature {
                     this.swapState(State.END_VERIFY, 0);
                     return;
                 }
-                if (this.routeToFollow.get(this.currentRouteIndex).getTransportMethod() == WaypointType.WALK) {
+                if (this.routeToFollow.get(this.currentRouteIndex).getTransportMethod() == TransportMethod.WALK) {
                     this.swapState(State.WALK, 0);
                 } else {
                     this.swapState(State.ROTATION, 0);
@@ -206,7 +206,7 @@ public class RouteNavigator extends AbstractFeature {
             case ROTATION: {
                 RouteWaypoint nextPoint = this.routeToFollow.get(this.currentRouteIndex);
 
-                if (nextPoint.getTransportMethod() == WaypointType.ETHERWARP) {
+                if (nextPoint.getTransportMethod() == TransportMethod.ETHERWARP) {
                     BlockPos block = nextPoint.toBlockPos();
 
                     if (mc.theWorld.getBlockState(block).getBlock() == Blocks.snow_layer) {
@@ -243,7 +243,7 @@ public class RouteNavigator extends AbstractFeature {
                 int sneakTime = 0;
 
                 RouteWaypoint target = this.routeToFollow.get(this.currentRouteIndex);
-                if (target.getTransportMethod() == WaypointType.ETHERWARP && !mc.gameSettings.keyBindSneak.isKeyDown()) {
+                if (target.getTransportMethod() == TransportMethod.ETHERWARP && !mc.gameSettings.keyBindSneak.isKeyDown()) {
                     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, true);
                     sneakTime = 250;
                 }
@@ -256,7 +256,7 @@ public class RouteNavigator extends AbstractFeature {
                     return;
                 }
                 // Todo: test Etherwarp
-                if (this.routeToFollow.get(this.currentRouteIndex + 1).getTransportMethod() != WaypointType.ETHERWARP) {
+                if (this.routeToFollow.get(this.currentRouteIndex + 1).getTransportMethod() != TransportMethod.ETHERWARP) {
                     KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, false);
                 }
                 KeyBindUtil.rightClick();

@@ -10,7 +10,7 @@ import com.jelly.mightyminerv2.util.PlayerUtil;
 import com.jelly.mightyminerv2.util.RenderUtil;
 import com.jelly.mightyminerv2.util.helper.graph.Graph;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
-import com.jelly.mightyminerv2.util.helper.route.WaypointType;
+import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -84,7 +84,7 @@ public class GraphHandler {
         Graph<RouteWaypoint> graph = getActiveGraph();
         RouteWaypoint startWp = graph.map.keySet().stream()
                 .min(Comparator.comparing(wp -> start.distanceSq(wp.toBlockPos())))
-                .orElse(new RouteWaypoint(start, WaypointType.WALK));
+                .orElse(new RouteWaypoint(start, TransportMethod.WALK));
         if (!graph.map.containsKey(end)) return Collections.emptyList();
         return findPath(startWp, end);
     }
@@ -105,7 +105,7 @@ public class GraphHandler {
         if (graph == null) return Collections.emptyList();
         RouteWaypoint startWp = graph.map.keySet().stream()
                 .min(Comparator.comparing(wp -> start.distanceSq(wp.toBlockPos())))
-                .orElse(new RouteWaypoint(start, WaypointType.WALK));
+                .orElse(new RouteWaypoint(start, TransportMethod.WALK));
         if (!graph.map.containsKey(end)) return Collections.emptyList();
         return findPathFrom(graphName, startWp, end);
     }
@@ -141,7 +141,7 @@ public class GraphHandler {
     @SubscribeEvent
     public void onInput(InputEvent event) {
         if (!editing) return;
-        RouteWaypoint currentWaypoint = new RouteWaypoint(PlayerUtil.getBlockStandingOn(), WaypointType.WALK);
+        RouteWaypoint currentWaypoint = new RouteWaypoint(PlayerUtil.getBlockStandingOn(), TransportMethod.WALK);
         Graph<RouteWaypoint> graph = getActiveGraph();
         if (MightyMinerConfig.routeBuilderSelect.isActive()) {
             lastPos = currentWaypoint;

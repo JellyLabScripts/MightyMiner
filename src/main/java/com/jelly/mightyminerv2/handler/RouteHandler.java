@@ -1,22 +1,18 @@
 package com.jelly.mightyminerv2.handler;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.jelly.mightyminerv2.MightyMiner;
-import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.route.Route;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
-import com.jelly.mightyminerv2.util.helper.route.WaypointType;
+import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 import lombok.Getter;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -50,21 +46,19 @@ public class RouteHandler {
         this.markDirty();
     }
 
-    public void addToCurrentRoute(final BlockPos block, final WaypointType method) {
+    public void addToCurrentRoute(final BlockPos block, final TransportMethod method) {
         if (this.selectedRoute == this.routes.get("Default")) {
             Logger.sendError("Cannot Edit Default Route.");
             return;
         }
-
         final RouteWaypoint waypoint = new RouteWaypoint(block, method);
         if (this.selectedRoute.indexOf(waypoint) != -1) return;
-
         this.selectedRoute.insert(waypoint);
         this.markDirty();
     }
 
-    public void removeFromCurrentRoute(final int index) {
-        this.selectedRoute.remove(index);
+    public void removeFromCurrentRoute(final BlockPos block) {
+        this.selectedRoute.remove(new RouteWaypoint(block, TransportMethod.ETHERWARP));
         this.markDirty();
     }
 
@@ -73,12 +67,10 @@ public class RouteHandler {
         this.markDirty();
     }
 
-    public void deleteRoute(final String routeName) {
+    public void clearRoute(final String routeName) {
         if (this.selectedRoute == this.routes.remove(routeName)) {
             this.selectedRoute = this.getRoutes().get("Default");
-            MightyMinerConfig.selectedRoute = "";
         }
-
         this.markDirty();
     }
 
@@ -86,29 +78,12 @@ public class RouteHandler {
         this.dirty = true;
     }
 
-    public void loadData() {
-        if (!Files.exists(MightyMiner.routesFile)) {
-            return;
-        }
-
-        try (Reader reader = Files.newBufferedReader(MightyMiner.routesFile)) {
-            JsonObject jsonObject = MightyMiner.gson.fromJson(reader, JsonObject.class);
-            HashMap<String, Route> loadedRoutes = MightyMiner.gson.fromJson(jsonObject.get("routes"),
-                    new TypeToken<HashMap<String, Route>>() {}.getType());
-
-            routes.clear();
-            routes.putAll(loadedRoutes);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public synchronized void saveData() {
         while (RouteBuilder.getInstance().isRunning()) {
             try {
                 if (!this.dirty) continue;
                 String data = MightyMiner.gson.toJson(instance);
-                Files.write(MightyMiner.routesFile, data.getBytes(StandardCharsets.UTF_8));
+                Files.write(MightyMiner.routesDirectory, data.getBytes(StandardCharsets.UTF_8));
                 this.dirty = false;
             } catch (IOException e) {
                 System.out.println("Save Loop Crashed.");

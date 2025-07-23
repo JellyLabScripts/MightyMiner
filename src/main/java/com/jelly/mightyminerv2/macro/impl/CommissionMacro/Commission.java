@@ -4,7 +4,7 @@ import com.jelly.mightyminerv2.util.CommissionUtil;
 import com.jelly.mightyminerv2.util.Logger;
 import com.jelly.mightyminerv2.util.helper.location.SubLocation;
 import com.jelly.mightyminerv2.util.helper.route.RouteWaypoint;
-import com.jelly.mightyminerv2.util.helper.route.WaypointType;
+import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
 import lombok.Getter;
 import net.minecraft.util.Vec3;
 
@@ -45,29 +45,29 @@ public enum Commission {
 
         Map<SubLocation, RouteWaypoint[]> veinsMap = new EnumMap<SubLocation, RouteWaypoint[]>(SubLocation.class) {{
             put(SubLocation.FORGE_BASIN, new RouteWaypoint[]{
-                    new RouteWaypoint(-9, 144, -20, WaypointType.WALK)
+                    new RouteWaypoint(-9, 144, -20, TransportMethod.WALK)
             });
             put(SubLocation.THE_FORGE, new RouteWaypoint[]{
-                    new RouteWaypoint(44, 134, 21, WaypointType.WALK),
-                    new RouteWaypoint(58, 197, -11, WaypointType.WALK),
-                    new RouteWaypoint(171, 149, 33, WaypointType.WALK),
-                    new RouteWaypoint(-75, 152, -11, WaypointType.WALK),
-                    new RouteWaypoint(-131, 173, -52, WaypointType.WALK)
+                    new RouteWaypoint(44, 134, 21, TransportMethod.WALK),
+                    new RouteWaypoint(58, 197, -11, TransportMethod.WALK),
+                    new RouteWaypoint(171, 149, 33, TransportMethod.WALK),
+                    new RouteWaypoint(-75, 152, -11, TransportMethod.WALK),
+                    new RouteWaypoint(-131, 173, -52, TransportMethod.WALK)
             });
-            put(SubLocation.CLIFFSIDE_VEINS, new RouteWaypoint[]{new RouteWaypoint(93, 144, 51, WaypointType.WALK)});
-            put(SubLocation.ROYAL_MINES, new RouteWaypoint[]{new RouteWaypoint(115, 153, 83, WaypointType.WALK)});
-            put(SubLocation.GREAT_ICE_WALL, new RouteWaypoint[]{new RouteWaypoint(0, 127, 143, WaypointType.WALK)});
-            put(SubLocation.GOBLIN_BURROWS, new RouteWaypoint[]{new RouteWaypoint(-56, 134, 153, WaypointType.WALK)});
+            put(SubLocation.CLIFFSIDE_VEINS, new RouteWaypoint[]{new RouteWaypoint(93, 144, 51, TransportMethod.WALK)});
+            put(SubLocation.ROYAL_MINES, new RouteWaypoint[]{new RouteWaypoint(115, 153, 83, TransportMethod.WALK)});
+            put(SubLocation.GREAT_ICE_WALL, new RouteWaypoint[]{new RouteWaypoint(0, 127, 143, TransportMethod.WALK)});
+            put(SubLocation.GOBLIN_BURROWS, new RouteWaypoint[]{new RouteWaypoint(-56, 134, 153, TransportMethod.WALK)});
             put(SubLocation.RAMPARTS_QUARRY, new RouteWaypoint[]{
-                    new RouteWaypoint(-41, 138, -13, WaypointType.WALK),
-                    new RouteWaypoint(-58, 146, -18, WaypointType.WALK)
+                    new RouteWaypoint(-41, 138, -13, TransportMethod.WALK),
+                    new RouteWaypoint(-58, 146, -18, TransportMethod.WALK)
             });
             put(SubLocation.UPPER_MINES, new RouteWaypoint[]{
-                    new RouteWaypoint(-111, 166, -74, WaypointType.WALK),
-                    new RouteWaypoint(-145, 206, -30, WaypointType.WALK)
+                    new RouteWaypoint(-111, 166, -74, TransportMethod.WALK),
+                    new RouteWaypoint(-145, 206, -30, TransportMethod.WALK)
             });
-            put(SubLocation.TREASURE_HUNTER_CAMP, new RouteWaypoint[]{new RouteWaypoint(-115, 204, -53, WaypointType.WALK)});
-            put(SubLocation.LAVA_SPRINGS, new RouteWaypoint[]{new RouteWaypoint(53, 197, -24, WaypointType.WALK)});
+            put(SubLocation.TREASURE_HUNTER_CAMP, new RouteWaypoint[]{new RouteWaypoint(-115, 204, -53, TransportMethod.WALK)});
+            put(SubLocation.LAVA_SPRINGS, new RouteWaypoint[]{new RouteWaypoint(53, 197, -24, TransportMethod.WALK)});
         }};
         VEINS = Collections.unmodifiableMap(veinsMap);
     }

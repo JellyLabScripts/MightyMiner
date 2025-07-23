@@ -70,9 +70,8 @@ public class Route {
     public void drawRoute() {
         for (int i = 0; i < this.waypoints.size(); i++) {
             RouteWaypoint currWaypoint = this.get(i);
-            String name = currWaypoint.getTransportMethod().name();
             RenderUtil.drawBlock(currWaypoint.toBlockPos(), MightyMinerConfig.routeBuilderNodeColor.toJavaColor());
-            RenderUtil.drawText((i + 1) + ". " + name.charAt(0) + name.substring(1).toLowerCase(), currWaypoint.getX() + 0.5, currWaypoint.getY() + 1, currWaypoint.getZ() + 0.5, 0.8F);
+            RenderUtil.drawText(String.valueOf(i + 1), currWaypoint.getX() + 0.5, currWaypoint.getY() + 1, currWaypoint.getZ() + 0.5, 1);
             if (this.waypoints.size() == 1) {
                 continue;
             }

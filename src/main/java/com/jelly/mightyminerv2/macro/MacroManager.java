@@ -8,6 +8,7 @@ import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 import com.jelly.mightyminerv2.macro.impl.GlacialMacro.GlacialMacro;
 import com.jelly.mightyminerv2.macro.impl.MiningMacro.MiningMacro;
+import com.jelly.mightyminerv2.macro.impl.RouteMiner.RouteMinerMacro;
 import com.jelly.mightyminerv2.util.Logger;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -33,7 +34,7 @@ public class MacroManager {
         } else if (MightyMinerConfig.macroType == 2) {
             return MiningMacro.getInstance();
         } else {
-            return CommissionMacro.getInstance();
+            return RouteMinerMacro.getInstance();
         }
     }
 
@@ -106,7 +107,7 @@ public class MacroManager {
             return;
         }
 
-//    needed to remove for pause to work
+//      needed to remove for pause to work
         if (!currentMacro.isEnabled()) {
             this.disable();
             return;

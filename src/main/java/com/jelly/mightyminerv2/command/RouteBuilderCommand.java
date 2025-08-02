@@ -3,31 +3,28 @@ package com.jelly.mightyminerv2.command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.RouteBuilder;
-import com.jelly.mightyminerv2.feature.impl.RouteNavigator;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.util.Logger;
-import com.jelly.mightyminerv2.util.helper.RotationConfiguration.RotationType;
-import com.jelly.mightyminerv2.util.helper.route.Route;
-import com.jelly.mightyminerv2.util.helper.route.TransportMethod;
+import com.jelly.mightyminerv2.util.helper.route.WaypointType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 
 @Command(value = "rb", aliases = {"route", "routebuilder", "builder"})
 public class RouteBuilderCommand {
+
     @Main
     public void main() {
-        if (!RouteBuilder.getInstance().isRunning()) {
-            Logger.sendMessage("Enable RouteBuilder First.");
-            return;
-        }
+        if (isRouteBuilderNotRunning()) return;
+
         Logger.sendMessage("Use these commands to manage your routes.");
-        success("   1. /rb list -> List all available routes.");
-        success("   2. /rb select <route-name> -> Select the specified route name. A new route will be created if none exist.");
-        success("   3. /rb add -> Add the block player is standing on to selected route.");
-        success("   4. /rb remove -> Remove the block player is standing on from selected route.");
-        success("   5. /rb replace <index> -> Replaces Specified Index from the route with block player is standing on.");
-        success("   6. /rb clear <route-name> -> Deletes the route.");
+        info("   1. /rb list -> List all available routes.");
+        info("   2. /rb select <route-name> -> Select the specified route name. A new route will be created if none exist.");
+        info("   3. /rb add <walk|etherwarp|mine> -> Add the block player is standing on to selected route.");
+        info("   4. /rb remove <index> -> Remove the block player is standing on from selected route.");
+        info("   5. /rb replace <index> <walk|etherwarp|mine> -> Replaces Specified Index from the route with block player is standing on.");
+        info("   6. /rb delete <route-name> -> Deletes the route.");
     }
 
     @SubCommand
@@ -45,47 +42,79 @@ public class RouteBuilderCommand {
     }
 
     @SubCommand
+    public void reload() {
+        RouteHandler.getInstance().loadData();
+        Logger.sendMessage("Refreshed routes file.");
+    }
+
+    @SubCommand
     public void select(final String routeName) {
+        MightyMinerConfig.selectedRoute = routeName;
         RouteHandler.getInstance().selectRoute(routeName);
+        Logger.sendMessage("Selected route: " + routeName);
     }
 
     @SubCommand
     public void add(final String name) {
-        if (!RouteBuilder.getInstance().isRunning()) return;
-        RouteBuilder.getInstance().addToRoute(name.equalsIgnoreCase("aotv") ? TransportMethod.AOTV : TransportMethod.ETHERWARP);
-    }
+        if (isRouteBuilderNotRunning()) return;
+        WaypointType type = WaypointType.ETHERWARP;
 
-    @SubCommand
-    public void remove() {
-        if (!RouteBuilder.getInstance().isRunning()) return;
-        RouteBuilder.getInstance().removeFromRoute();
-    }
-
-    @SubCommand
-    public void clear(final String routeName) {
-        if (!RouteBuilder.getInstance().isRunning()) return;
-        RouteHandler.getInstance().clearRoute(routeName);
-    }
-
-    @SubCommand
-    public void replace(final int indexToReplace) {
-        if (!RouteBuilder.getInstance().isRunning()) return;
-        if (indexToReplace <= 0) return;
-        RouteBuilder.getInstance().replaceNode(indexToReplace - 1);
-    }
-
-    @SubCommand
-    public void follow(int rotation) {
-        Route route = RouteHandler.getInstance().getSelectedRoute();
-        if (route.isEmpty()) {
-            success("Route is empty.");
+        if (name.equalsIgnoreCase("walk")) {
+            type = WaypointType.WALK;
+        } else if (name.equalsIgnoreCase("mine")) {
+            type = WaypointType.MINE;
+        } else if (!name.equalsIgnoreCase("etherwarp")) {
+            Logger.sendError("You must specify a proper option. Run /rb for more information.");
             return;
         }
-        RouteNavigator.getInstance().setRotationType(rotation == 0 ? RotationType.CLIENT : RotationType.SERVER);
-        RouteNavigator.getInstance().start(route);
+
+        RouteBuilder.getInstance().addToRoute(type);
     }
 
-    private void success(final String message) {
-        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("§a" + message));
+    @SubCommand
+    public void remove(int index) {
+        if (isRouteBuilderNotRunning()) return;
+        RouteBuilder.getInstance().removeFromRoute(index - 1);
+        Logger.sendMessage("Removed point at index: " + index);
     }
+
+    @SubCommand
+    public void delete(final String routeName) {
+        if (isRouteBuilderNotRunning()) return;
+        RouteHandler.getInstance().deleteRoute(routeName);
+        Logger.sendMessage("Deleted Route: " + routeName);
+    }
+
+    @SubCommand
+    public void replace(final int indexToReplace, final String name) {
+        if (isRouteBuilderNotRunning()) return;
+        if (indexToReplace <= 0) return;
+        WaypointType type = WaypointType.ETHERWARP;
+
+        if (name.equalsIgnoreCase("walk")) {
+            type = WaypointType.WALK;
+        } else if (name.equalsIgnoreCase("mine")) {
+            type = WaypointType.MINE;
+        } else if (!name.equalsIgnoreCase("etherwarp")) {
+            Logger.sendError("You must specify a proper option. Run /rb for more information.");
+            return;
+        }
+
+        RouteBuilder.getInstance().replaceNode(indexToReplace - 1);
+        Logger.sendMessage("Replaced index " + indexToReplace + " with " + type.name().charAt(0) + type.name().substring(1).toLowerCase());
+    }
+
+    private boolean isRouteBuilderNotRunning() {
+        if (!RouteBuilder.getInstance().isRunning()) {
+            Logger.sendError("Route Builder is not enabled! Enable it by pressing the keybind configured in config.");
+            return true;
+        }
+
+        return false;
+    }
+
+    private void info(final String message) {
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("§e" + message));
+    }
+
 }

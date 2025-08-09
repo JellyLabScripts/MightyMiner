@@ -1,0 +1,61 @@
+name: Run Gradle Build
+on: [push]
+jobs:
+  gradle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Get Gradle version and check if it's pre release
+        run: |
+          VERSION=$(grep -Po '^version=.*' gradle.properties | cut -d= -f2)
+          VERSION=${VERSION#[[:space:]]}
+          SHOULD_RELEASE=$(grep -Po '^shouldRelease=.*' gradle.properties | cut -d= -f2)
+          SHOULD_RELEASE=${SHOULD_RELEASE#[[:space:]]}
+          echo "$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          if [[ $VERSION == *-pre* ]]
+          then
+            echo "Version is pre-release"
+            RELEASE_TYPE="pre-release"
+          else
+            echo "Version is full release"
+            RELEASE_TYPE="full"
+          fi
+          echo "Version is $VERSION and release type is $RELEASE_TYPE"
+          echo "RELEASE_TYPE=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          echo "shouldRelease=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
+        id: get_version
+      - name: Get short commit sha
+        id: short_sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - uses: actions/setup-java@v4
+        name: Setup Java
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v3
+        name: Setup Gradle
+      - name: Execute Gradle build
+        run: ./gradlew build
+      - uses: actions/upload-artifact@v4
+        name: Upload built mod JAR
+        with:
+          name: mod-jar
+          path: build/libs/*.jar
+      - name: Create release with files
+        uses: softprops/action-gh-release@v2
+        id: create_release
+        if: steps.get_version.outputs.shouldRelease == 'true'
+        with:
+          draft: false
+          prerelease: ${{ steps.get_version.outputs.RELEASE_TYPE == 'pre-release' }}
+          name: MightyMinerV2 ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ steps.get_version.outputs.VERSION }}.${{ steps.short_sha.outputs.sha_short }}
+          files: |
+            build/libs/*.jar
+          body: |
+            Changelog:
+            ${{ github.event.head_commit.message }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

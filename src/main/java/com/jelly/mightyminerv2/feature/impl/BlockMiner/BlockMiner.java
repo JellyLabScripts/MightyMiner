@@ -55,10 +55,15 @@ public class BlockMiner extends AbstractFeature {
     public enum PickaxeAbilityState {
         AVAILABLE, UNAVAILABLE,
     }
+
     @Getter
     @Setter
-    private PickaxeAbilityState pickaxeAbilityState;
-    
+    private PickaxeAbilityState pickaxeAbilityState = PickaxeAbilityState.AVAILABLE;
+
+    @Getter
+    @Setter
+    private long lastAbilityUse = System.currentTimeMillis();
+
     @Getter
     @Setter
     private BlockMinerError error = BlockMinerError.NONE;
@@ -151,7 +156,7 @@ public class BlockMiner extends AbstractFeature {
             error = BlockMinerError.NO_TARGET_BLOCKS;
             return;
         }
-        
+
         // Build priority mapping for block selection
         for (int i = 0; i < blocksToMine.length; i++) {
             for (int j : blocksToMine[i].stateIds) {
@@ -164,7 +169,6 @@ public class BlockMiner extends AbstractFeature {
         this.pickaxeAbility = pickaxeAbility;
         this.enabled = true;
         this.error = BlockMinerError.NONE;
-        this.pickaxeAbilityState = PickaxeAbilityState.AVAILABLE;
         this.retryActivatePickaxeAbility = 0;
         targetParticlePos = null;
         
@@ -176,11 +180,14 @@ public class BlockMiner extends AbstractFeature {
 
     @Override
     public void stop() {
-        if(currentState != null)
+        if (currentState != null)
             currentState.onEnd(this);
+
         super.stop();
         KeyBindUtil.releaseAllExcept();
 
+        // Clear the block priority to prevent issues when changing a route mining target
+        blockPriority.clear();
     }
 
     @SubscribeEvent

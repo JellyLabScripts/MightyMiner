@@ -12,6 +12,7 @@ import com.jelly.mightyminerv2.util.helper.route.WaypointType;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class RouteBuilder extends AbstractFeature {
@@ -69,8 +70,10 @@ public class RouteBuilder extends AbstractFeature {
 
         if (MightyMinerConfig.routeBuilderRemoveKeybind.isActive()) {
             Route selectedRoute = RouteHandler.getInstance().getSelectedRoute();
-            RouteWaypoint closest = selectedRoute.getClosest(PlayerUtil.getBlockStandingOn()).get();
-            int index = selectedRoute.indexOf(closest);
+            Optional<RouteWaypoint> closest = selectedRoute.getClosest(PlayerUtil.getBlockStandingOn());
+
+            if (!closest.isPresent()) return;
+            int index = selectedRoute.indexOf(closest.get());
 
             if (index == -1) {
                 return;

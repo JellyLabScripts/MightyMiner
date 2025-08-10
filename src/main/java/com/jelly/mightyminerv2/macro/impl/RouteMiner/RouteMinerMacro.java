@@ -128,6 +128,13 @@ public class RouteMinerMacro extends AbstractMacro {
     public MineableBlock[] getBlocksToMine() {
         List<MineableBlock> blocksList = new ArrayList<>();
 
+        if (MightyMinerConfig.routeMineDwarvenOre) {
+            blocksList.add(MineableBlock.GRAY_MITHRIL);
+            blocksList.add(MineableBlock.GREEN_MITHRIL);
+            blocksList.add(MineableBlock.BLUE_MITHRIL);
+            blocksList.add(MineableBlock.TITANIUM);
+        }
+
         if (MightyMinerConfig.routeMineGemstone) {
             blocksList.add(MineableBlock.AMBER);
             blocksList.add(MineableBlock.AMETHYST);

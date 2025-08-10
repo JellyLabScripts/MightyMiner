@@ -249,6 +249,7 @@ public class PathExecutor {
                 dynamicPitch.schedule(1000);
             }
 
+
             // TODO: Implement back route miner
             RotationHandler.getInstance().easeTo(
                     new RotationConfiguration(

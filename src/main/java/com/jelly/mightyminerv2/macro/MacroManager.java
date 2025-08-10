@@ -4,6 +4,7 @@ import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.event.PacketEvent;
 import com.jelly.mightyminerv2.event.UpdateTablistEvent;
 import com.jelly.mightyminerv2.feature.FeatureManager;
+import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.feature.impl.MouseUngrab;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 import com.jelly.mightyminerv2.macro.impl.GlacialMacro.GlacialMacro;
@@ -54,6 +55,8 @@ public class MacroManager {
         FeatureManager.getInstance().enableAll();
         this.currentMacro = this.getCurrentMacro();
         send(this.currentMacro.getName() + " Enabled");
+
+        BlockMiner.getInstance().setPickaxeAbilityState(BlockMiner.PickaxeAbilityState.AVAILABLE);
         this.currentMacro.enable();
     }
 

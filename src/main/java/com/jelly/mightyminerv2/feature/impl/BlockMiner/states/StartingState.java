@@ -1,7 +1,6 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner.states;
 
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
-import com.jelly.mightyminerv2.config.MightyMinerConfig;
 
 /**
  * StartingState
@@ -18,15 +17,20 @@ public class StartingState implements BlockMinerState {
 
     @Override
     public BlockMinerState onTick(BlockMiner miner) {
-        if (BlockMiner.getInstance().getPickaxeAbility() != BlockMiner.PickaxeAbility.NONE
-                && miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE) {
-            return new ApplyAbilityState();
-        } else
-            return new ChoosingBlockState();
+        return canUsePickaxeAbility(miner) ? new ApplyAbilityState() : new ChoosingBlockState();
+    }
+
+    private boolean canUsePickaxeAbility(BlockMiner miner) {
+        boolean hasAbility = miner.getPickaxeAbility() != BlockMiner.PickaxeAbility.NONE;
+        boolean isCooledDown = System.currentTimeMillis() - miner.getLastAbilityUse() > 60000;
+        boolean isAvailable = miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE;
+
+        return hasAbility && (isCooledDown || isAvailable);
     }
 
     @Override
     public void onEnd(BlockMiner miner) {
         log("Exiting Starting State");
     }
+
 }

@@ -443,6 +443,9 @@ public class MightyMinerConfig extends Config {
     @Switch(name = "Mine Topaz", category = ROUTE_MINER, subcategory = "Targets")
     public static boolean routeMineTopaz = false;
 
+    @Switch(name = "Mine Dwarven Ore", category = ROUTE_MINER, subcategory = "Targets")
+    public static boolean routeMineDwarvenOre = false;
+
     @Switch(name = "Mine Ore", category = ROUTE_MINER, subcategory = "Targets")
     public static boolean routeMineOre = false;
 

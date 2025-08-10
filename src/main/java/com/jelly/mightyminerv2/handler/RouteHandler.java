@@ -57,7 +57,7 @@ public class RouteHandler {
         }
 
         final RouteWaypoint waypoint = new RouteWaypoint(block, method);
-        if (this.selectedRoute.indexOf(waypoint) != -1) return;
+        if (this.selectedRoute.indexOf(waypoint) != -1 && method != WaypointType.MINE) return;
 
         this.selectedRoute.insert(waypoint);
         this.markDirty();

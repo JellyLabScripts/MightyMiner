@@ -50,7 +50,7 @@ public class ApplyAbilityState implements BlockMinerState {
         if (BlockMiner.getInstance().getPickaxeAbility() == BlockMiner.PickaxeAbility.PICKOBULUS) {
             final BlockPos blueWool = getFarthestBlueWool();
 
-            if(blueWool == null) {
+            if (blueWool == null) {
                 log("Cannot find blue wool. Skipping the rotation.");
                 return;
             }
@@ -62,11 +62,11 @@ public class ApplyAbilityState implements BlockMinerState {
                 blueWool.getZ() + 0.5
             );
 
-            if(!points.isEmpty()) {
+            if (!points.isEmpty()) {
                 targetPoint = points.get(0);
             }
 
-            if(targetPoint != null) {
+            if (targetPoint != null) {
                 log("Rotating to blue wool");
                 RotationHandler.getInstance().easeTo(new RotationConfiguration(
                         AngleUtil.getRotation(targetPoint),
@@ -77,19 +77,19 @@ public class ApplyAbilityState implements BlockMinerState {
         }
 
         // Release all keys to prepare for the right click
-        if(Minecraft.getMinecraft().currentScreen == null) {
+        if (Minecraft.getMinecraft().currentScreen == null) {
             KeyBindUtil.releaseAllExcept();
         }
     }
 
     @Override
     public BlockMinerState onTick(BlockMiner blockMiner) {
-
         // If the first timer has ended and the player is not rotating, press right-click
         if (timer1.isScheduled() && timer1.passed() && !RotationHandler.getInstance().isEnabled()) {
             timer1.reset();
             timer2.reset();
             timer2.schedule(COOLDOWN);
+            blockMiner.setLastAbilityUse(System.currentTimeMillis());
             KeyBindUtil.rightClick();
         }
 

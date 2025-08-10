@@ -59,7 +59,7 @@ public class RouteMinerMacro extends AbstractMacro {
             return;
         }
 
-        BlockMiner.getInstance().setWaitThreshold(50);
+        BlockMiner.getInstance().setWaitThreshold(0);
         Optional<RouteWaypoint> waypoint = route.getClosest(PlayerUtil.getBlockStandingOn());
         waypoint.ifPresent(routeWaypoint -> routeIndex = route.indexOf(routeWaypoint));
 

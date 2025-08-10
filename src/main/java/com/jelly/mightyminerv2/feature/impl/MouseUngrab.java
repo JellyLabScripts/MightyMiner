@@ -9,7 +9,6 @@ public class MouseUngrab extends AbstractFeature {
 
     private static volatile MouseUngrab instance;
     private MouseHelper oldMouseHelper;
-    private boolean oldPauseOnLostFocus;
     private boolean mouseUngrabbed = false;
 
     public static MouseUngrab getInstance() {
@@ -29,7 +28,6 @@ public class MouseUngrab extends AbstractFeature {
         }
 
         oldMouseHelper = mc.mouseHelper;
-        oldPauseOnLostFocus = mc.gameSettings.pauseOnLostFocus;
         mc.mouseHelper.ungrabMouseCursor();
 
         mc.mouseHelper = new MouseHelper() {
@@ -46,7 +44,6 @@ public class MouseUngrab extends AbstractFeature {
             }
         };
 
-        mc.gameSettings.pauseOnLostFocus = false;
         mouseUngrabbed = true;
         log("Mouse ungrabbed successfully.");
     }
@@ -65,7 +62,6 @@ public class MouseUngrab extends AbstractFeature {
             mc.mouseHelper.grabMouseCursor();
         }
 
-        mc.gameSettings.pauseOnLostFocus = oldPauseOnLostFocus;
         mouseUngrabbed = false;
         log("Mouse regrabbed successfully.");
     }

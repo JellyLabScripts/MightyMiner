@@ -21,6 +21,7 @@
     "client.MixinChunkProviderClient",
     "client.MixinEntityPlayerSP",
     "network.MixinNetHandlerPlayClient",
+    "render.MixinEntityRenderer",
     "render.MixinModelBiped"
   ]
 }

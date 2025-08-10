@@ -10,7 +10,7 @@ MightyMinerV2 is a cutting-edge mining macro designed specifically for Hypixel S
 - **Glacial Macro**: Experimental!
 - **Route Mining Macro**: Experimental!
 - **Powder Macro**: Re-release soon!
-
+ 
 ### Upcoming Features:
 Our dedicated development team is actively working on integrating more features, including but not limited to:
 - Advanced gemstone mining automation.

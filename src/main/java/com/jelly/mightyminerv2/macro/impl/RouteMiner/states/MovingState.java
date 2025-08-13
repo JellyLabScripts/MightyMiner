@@ -43,13 +43,6 @@ public class MovingState implements RouteMinerMacroState {
         if (routeTarget.getTransportMethod() == WaypointType.ETHERWARP) {
             InventoryUtil.holdItem("Aspect of the Void");
             KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, true);
-            Vec3 point = getPoint(routeTarget);
-
-            RotationHandler.getInstance().easeTo(new RotationConfiguration(
-                AngleUtil.getRotation(point),
-                MightyMinerConfig.delayAutoAotvEtherwarpLookDelay,
-                null
-            ));
         } else {
             KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSneak, false);
         }
@@ -60,22 +53,28 @@ public class MovingState implements RouteMinerMacroState {
         switch (routeTarget.getTransportMethod()) {
             case ETHERWARP:
                 if (rotating) {
-                    if (!RotationHandler.getInstance().isEnabled()) {
-                        rotating = false;
-                    }
+                    Vec3 point = getPoint(routeTarget);
 
+                    RotationHandler.getInstance().easeTo(new RotationConfiguration(
+                            AngleUtil.getRotation(point),
+                            MightyMinerConfig.delayAutoAotvEtherwarpLookDelay,
+                            null
+                    ));
+
+                    rotating = false;
                     return this;
                 }
 
-                if (!hasClicked) {
+                if (!RotationHandler.getInstance().isEnabled() && !hasClicked) {
                     lastPosition = mc.thePlayer.getPosition();
+                    Logger.sendError("RIGHT CLICKING");
                     KeyBindUtil.rightClick();
                     etherWarpDelay.schedule(250);
                     hasClicked = true;
                     return this;
                 }
 
-                if (lastPosition != null && etherWarpDelay.passed()) {
+                if (hasClicked && lastPosition != null && etherWarpDelay.passed()) {
                     Route route = RouteHandler.getInstance().getSelectedRoute();
                     RouteWaypoint nearestWaypoint = nearestWaypoint(route);
 
@@ -129,7 +128,7 @@ public class MovingState implements RouteMinerMacroState {
 
     private RouteWaypoint nearestWaypoint(Route route) {
         int size = route.size();
-        BlockPos playerPos = mc.thePlayer.getPosition();
+        BlockPos playerPos = PlayerUtil.getBlockStandingOn();
         RouteWaypoint closestWaypoint = route.get(0);
 
         for (int i = 1; i < size; i++) {

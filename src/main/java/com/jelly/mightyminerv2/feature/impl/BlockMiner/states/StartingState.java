@@ -1,5 +1,6 @@
 package com.jelly.mightyminerv2.feature.impl.BlockMiner.states;
 
+import com.jelly.mightyminerv2.config.MightyMinerConfig;
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 
 /**
@@ -21,11 +22,14 @@ public class StartingState implements BlockMinerState {
     }
 
     private boolean canUsePickaxeAbility(BlockMiner miner) {
+        if (System.currentTimeMillis() - miner.getLastAbilityUse() > 120000) {
+            miner.setPickaxeAbilityState(BlockMiner.PickaxeAbilityState.AVAILABLE);
+        }
+
         boolean hasAbility = miner.getPickaxeAbility() != BlockMiner.PickaxeAbility.NONE;
-        boolean isCooledDown = System.currentTimeMillis() - miner.getLastAbilityUse() > 60000;
         boolean isAvailable = miner.getPickaxeAbilityState() == BlockMiner.PickaxeAbilityState.AVAILABLE;
 
-        return hasAbility && (isCooledDown || isAvailable);
+        return MightyMinerConfig.usePickaxeAbility && hasAbility && isAvailable;
     }
 
     @Override

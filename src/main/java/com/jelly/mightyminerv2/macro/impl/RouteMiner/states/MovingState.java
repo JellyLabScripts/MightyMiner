@@ -28,6 +28,7 @@ public class MovingState implements RouteMinerMacroState {
     private RouteWaypoint routeTarget;
 
     private final Clock etherWarpDelay = new Clock();
+    private boolean rotating = true;
     private boolean hasClicked = false;
     private BlockPos lastPosition = null;
 
@@ -58,7 +59,11 @@ public class MovingState implements RouteMinerMacroState {
     public RouteMinerMacroState onTick(RouteMinerMacro macro) {
         switch (routeTarget.getTransportMethod()) {
             case ETHERWARP:
-                if (RotationHandler.getInstance().isEnabled()) {
+                if (rotating) {
+                    if (!RotationHandler.getInstance().isEnabled()) {
+                        rotating = false;
+                    }
+
                     return this;
                 }
 

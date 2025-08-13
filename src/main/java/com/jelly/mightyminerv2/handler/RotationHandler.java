@@ -26,6 +26,7 @@ public class RotationHandler {
     private final Minecraft mc = Minecraft.getMinecraft();
     private final Angle startRotation = new Angle(0f, 0f);
     private final Random random = new Random();
+    @Getter
     private boolean enabled;
     private long startTime;
     private long endTime;
@@ -40,6 +41,7 @@ public class RotationHandler {
     private int randomMultiplier1 = 1;
     private int randomMultiplier2 = 1;
 
+    @Getter
     private boolean followingTarget = false;
     private boolean stopRequested = false;
 
@@ -215,14 +217,6 @@ public class RotationHandler {
             return (long) (time * 1.1);
         }
         return (long) (time * 1.0);
-    }
-
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
-    public boolean isFollowingTarget() {
-        return this.followingTarget;
     }
 
     public void stopFollowingTarget() {

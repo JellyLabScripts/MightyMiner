@@ -7,11 +7,31 @@ import com.jelly.mightyminerv2.feature.impl.AutoGetStats.tasks.impl.PickaxeAbili
 import com.jelly.mightyminerv2.feature.impl.BlockMiner.BlockMiner;
 import com.jelly.mightyminerv2.macro.impl.CommissionMacro.CommissionMacro;
 
-public class GettingStatsState implements CommissionMacroState{
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class GettingStatsState implements CommissionMacroState {
 
     private final AutoGetStats autoInventory = AutoGetStats.getInstance();
     private MiningSpeedRetrievalTask miningSpeedRetrievalTask;
     private PickaxeAbilityRetrievalTask pickaxeAbilityRetrievalTask;
+
+    private static final int FALLBACK_MINING_SPEED = 1000;
+    private static final Pattern SPEED_RE = Pattern.compile("(?i)Mining\\s*Speed\\D*(\\d[\\d,\\.]*)");
+
+    private enum Phase { SEND_CMD, WAIT_MENU, CLICK_PROFILE, WAIT_PROFILE, CLICK_PICKAXE, WAIT_PICKAXE, SCAN_STATS, DONE }
+    private Phase phase = Phase.SEND_CMD;
+    private int ticksWaited = 0;
+
+    private int parsedMiningSpeed = FALLBACK_MINING_SPEED;
 
     @Override
     public void onStart(CommissionMacro macro) {
@@ -24,27 +44,158 @@ public class GettingStatsState implements CommissionMacroState{
 
     @Override
     public CommissionMacroState onTick(CommissionMacro macro) {
-        if (!AutoGetStats.getInstance().hasFinishedAllTasks())
-            return this;
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer == null) return this;
 
-        if (miningSpeedRetrievalTask.getError() != null) {
-            macro.disable("Failed to get stats with the following error: " + miningSpeedRetrievalTask.getError());
-            return null;
+        ticksWaited++;
+
+        switch (phase) {
+            case SEND_CMD:
+                mc.thePlayer.sendChatMessage("/sbmenu");
+                sendChat("Sent /sbmenu");
+                ticksWaited = 0;
+                phase = Phase.WAIT_MENU;
+                return this;
+
+            case WAIT_MENU:
+                if (isGuiOpen()) {
+                    clickItemByName(mc, "Your SkyBlock Profile");
+                    phase = Phase.WAIT_PROFILE;
+                    ticksWaited = 0;
+                }
+                return this;
+
+            case WAIT_PROFILE:
+                if (isGuiOpen()) {
+                    clickItemByName(mc, "Mining Stats");
+                    phase = Phase.WAIT_PICKAXE;
+                    ticksWaited = 0;
+                }
+                return this;
+
+            case WAIT_PICKAXE:
+                if (isGuiOpen()) {
+                    Integer parsed = readMiningSpeedFromOpenGui(mc);
+                    if (parsed != null) {
+                        parsedMiningSpeed = parsed;
+                        sendChat("Parsed mining speed: " + parsedMiningSpeed);
+                    } else {
+                        sendChat("Could not find mining speed, using fallback " + FALLBACK_MINING_SPEED);
+                        parsedMiningSpeed = FALLBACK_MINING_SPEED;
+                    }
+                    phase = Phase.DONE;
+                }
+                return this;
+
+            case DONE:
+                // Pickaxe ability (same fallback logic as before)
+                BlockMiner.PickaxeAbility pickaxeAbility;
+                if (pickaxeAbilityRetrievalTask.getError() != null) {
+                    log("Warning: Failed to get pickaxe ability, defaulting to NONE");
+                    pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
+                } else {
+                    pickaxeAbility = MightyMinerConfig.usePickaxeAbility
+                            ? pickaxeAbilityRetrievalTask.getResult()
+                            : BlockMiner.PickaxeAbility.NONE;
+                }
+
+                macro.setMiningSpeed(parsedMiningSpeed);
+                macro.setPickaxeAbility(pickaxeAbility);
+
+                sendChat("Your mining speed is " + parsedMiningSpeed);
+                return new StartingState();
         }
 
-        if (pickaxeAbilityRetrievalTask.getError() != null) {
-            macro.disable("Failed to get pickaxe ability with the following error: " + pickaxeAbilityRetrievalTask.getError());
-            return null;
-        }
-
-        macro.setMiningSpeed(miningSpeedRetrievalTask.getResult());
-        macro.setPickaxeAbility(MightyMinerConfig.usePickaxeAbility ? pickaxeAbilityRetrievalTask.getResult() : BlockMiner.PickaxeAbility.NONE);
-        return new StartingState();
+        return this;
     }
 
     @Override
     public void onEnd(CommissionMacro macro) {
         autoInventory.stop();
         log("Exiting getting stats state");
+    }
+
+    // --- helpers ---
+
+    private boolean isGuiOpen() {
+        Minecraft mc = Minecraft.getMinecraft();
+        return mc.currentScreen instanceof GuiContainer;
+    }
+
+    private void sendChat(String msg) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer != null) {
+            mc.thePlayer.addChatMessage(new ChatComponentText("§b[MightyMiner]§r " + msg));
+        }
+    }
+
+    private void clickItemByName(Minecraft mc, String nameFragment) {
+        if (!(mc.currentScreen instanceof GuiContainer)) return;
+
+        GuiContainer gui = (GuiContainer) mc.currentScreen;
+        Container container = gui.inventorySlots;
+
+        for (Object o : container.inventorySlots) {
+            Slot s = (Slot) o;
+            ItemStack st = s.getStack();
+            if (st == null) continue;
+
+            String name = stripColor(st.getDisplayName());
+            sendChat("Found slot " + s.slotNumber + ": " + name);
+
+            if (name != null && name.contains(nameFragment)) {
+                mc.playerController.windowClick(container.windowId, s.slotNumber, 0, 0, mc.thePlayer);
+                sendChat("Clicked " + nameFragment + " at slot " + s.slotNumber);
+                return;
+            }
+        }
+    }
+
+    private Integer readMiningSpeedFromOpenGui(Minecraft mc) {
+        if (!(mc.currentScreen instanceof GuiContainer)) {
+            sendChat("No GUI open to scan.");
+            return null;
+        }
+
+        GuiContainer gui = (GuiContainer) mc.currentScreen;
+        Container container = gui.inventorySlots;
+
+        int highest = -1;
+
+        for (Object o : container.inventorySlots) {
+            Slot s = (Slot) o;
+            ItemStack st = s.getStack();
+            if (st == null) continue;
+
+            List<String> lines;
+            try {
+                lines = st.getTooltip(mc.thePlayer, false);
+            } catch (Exception e) {
+                continue;
+            }
+
+            if (lines == null) continue;
+
+            for (String line : lines) {
+                String plain = stripColor(line);
+
+                Matcher m = SPEED_RE.matcher(plain);
+                if (m.find()) {
+                    String num = m.group(1).replace(",", "");
+                    try {
+                        int value = Integer.parseInt(num.split("\\.")[0]);
+                        if (value > highest) {
+                            highest = value;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+        }
+
+        return highest > 0 ? highest : null;
+    }
+
+    private String stripColor(String s) {
+        return s == null ? null : s.replaceAll("§.", "");
     }
 }

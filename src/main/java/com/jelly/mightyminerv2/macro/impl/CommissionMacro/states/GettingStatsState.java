@@ -35,7 +35,6 @@ public class GettingStatsState implements CommissionMacroState {
 
     @Override
     public void onStart(CommissionMacro macro) {
-        log("Entering getting stats state");
         miningSpeedRetrievalTask = new MiningSpeedRetrievalTask();
         pickaxeAbilityRetrievalTask = new PickaxeAbilityRetrievalTask();
         AutoGetStats.getInstance().startTask(miningSpeedRetrievalTask);
@@ -52,7 +51,6 @@ public class GettingStatsState implements CommissionMacroState {
         switch (phase) {
             case SEND_CMD:
                 mc.thePlayer.sendChatMessage("/sbmenu");
-                sendChat("Sent /sbmenu");
                 ticksWaited = 0;
                 phase = Phase.WAIT_MENU;
                 return this;
@@ -78,20 +76,17 @@ public class GettingStatsState implements CommissionMacroState {
                     Integer parsed = readMiningSpeedFromOpenGui(mc);
                     if (parsed != null) {
                         parsedMiningSpeed = parsed;
-                        sendChat("Parsed mining speed: " + parsedMiningSpeed);
                     } else {
-                        sendChat("Could not find mining speed, using fallback " + FALLBACK_MINING_SPEED);
                         parsedMiningSpeed = FALLBACK_MINING_SPEED;
                     }
+                    mc.thePlayer.closeScreen(); // close after retrieving
                     phase = Phase.DONE;
                 }
                 return this;
 
             case DONE:
-                // Pickaxe ability (same fallback logic as before)
                 BlockMiner.PickaxeAbility pickaxeAbility;
                 if (pickaxeAbilityRetrievalTask.getError() != null) {
-                    log("Warning: Failed to get pickaxe ability, defaulting to NONE");
                     pickaxeAbility = BlockMiner.PickaxeAbility.NONE;
                 } else {
                     pickaxeAbility = MightyMinerConfig.usePickaxeAbility
@@ -112,7 +107,6 @@ public class GettingStatsState implements CommissionMacroState {
     @Override
     public void onEnd(CommissionMacro macro) {
         autoInventory.stop();
-        log("Exiting getting stats state");
     }
 
     // --- helpers ---
@@ -141,11 +135,8 @@ public class GettingStatsState implements CommissionMacroState {
             if (st == null) continue;
 
             String name = stripColor(st.getDisplayName());
-            sendChat("Found slot " + s.slotNumber + ": " + name);
-
             if (name != null && name.contains(nameFragment)) {
                 mc.playerController.windowClick(container.windowId, s.slotNumber, 0, 0, mc.thePlayer);
-                sendChat("Clicked " + nameFragment + " at slot " + s.slotNumber);
                 return;
             }
         }
@@ -153,7 +144,6 @@ public class GettingStatsState implements CommissionMacroState {
 
     private Integer readMiningSpeedFromOpenGui(Minecraft mc) {
         if (!(mc.currentScreen instanceof GuiContainer)) {
-            sendChat("No GUI open to scan.");
             return null;
         }
 
@@ -178,7 +168,6 @@ public class GettingStatsState implements CommissionMacroState {
 
             for (String line : lines) {
                 String plain = stripColor(line);
-
                 Matcher m = SPEED_RE.matcher(plain);
                 if (m.find()) {
                     String num = m.group(1).replace(",", "");

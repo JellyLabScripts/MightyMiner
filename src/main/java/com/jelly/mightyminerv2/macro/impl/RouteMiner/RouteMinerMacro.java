@@ -129,6 +129,7 @@ public class RouteMinerMacro extends AbstractMacro {
         List<MineableBlock> blocksList = new ArrayList<>();
 
         if (MightyMinerConfig.routeMineGemstone) {
+            blocksList.add(MineableBlock.RUBY);
             blocksList.add(MineableBlock.AMBER);
             blocksList.add(MineableBlock.AMETHYST);
             blocksList.add(MineableBlock.JADE);

@@ -27,11 +27,12 @@ public class MiningSpeedRetrievalTask extends AbstractInventoryTask<Integer> {
 
         InventoryUtil.holdItem(MightyMinerConfig.miningTool);
 
-        if(!InventoryUtil.getInventoryName().equals("SkyBlock Menu")) {
+        if(!InventoryUtil.getInventoryName().equals("Your Equipment and Stats")) {
             if (mc.currentScreen != null) {
                 InventoryUtil.closeScreen();
             }
-            mc.thePlayer.sendChatMessage("/sbmenu");
+
+            mc.thePlayer.sendChatMessage("/stats");
         }
 
         timer.schedule(1000);
@@ -43,13 +44,13 @@ public class MiningSpeedRetrievalTask extends AbstractInventoryTask<Integer> {
             return;
         }
 
-        if (!InventoryUtil.getInventoryName().equals("SkyBlock Menu")) {
+        if (!InventoryUtil.getInventoryName().equals("Your Equipment and Stats")) {
             taskStatus = TaskStatus.FAILURE;
-            error = "Cannot open SkyBlock Menu";
+            error = "Cannot open Stats Menu";
             return;
         }
 
-        List<String> loreList = InventoryUtil.getItemLoreFromOpenContainer("Your SkyBlock Profile");
+        List<String> loreList = InventoryUtil.getItemLoreFromOpenContainer("Mining Stats");
         for (String lore : loreList) {
             Matcher matcher = MINING_SPEED_PATTERN.matcher(lore);
             if (matcher.find()) {
@@ -58,7 +59,7 @@ public class MiningSpeedRetrievalTask extends AbstractInventoryTask<Integer> {
                     String numberAsString = matcher.group(1);
                     String cleanNumberString = numberAsString.replace(",", "");
 
-                    // Mining speeds from the 'sbmenu' can be a decimal
+                    // Mining speeds from the 'stats menu' can be a decimal
                     double rawMiningSpeed = Double.parseDouble(cleanNumberString);
                     miningSpeed = (int) rawMiningSpeed;
 

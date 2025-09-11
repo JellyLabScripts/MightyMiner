@@ -374,6 +374,7 @@ public class MightyMinerConfig extends Config {
                     "Gold",
                     "Iron",
                     "Coal",
+                    "Quartz",
             }
     )
     public static int oreType = 0;

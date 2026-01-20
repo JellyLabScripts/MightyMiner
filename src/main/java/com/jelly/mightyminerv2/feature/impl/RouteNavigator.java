@@ -313,6 +313,18 @@ public class RouteNavigator extends AbstractFeature {
                     this.stop(NavError.PATHFIND_FAILED);
                     return;
                 }
+                
+                // Check for timeout - if pathfinding is taking too long, increase the timer
+                if (this.timer.isScheduled() && this.timer.passed()) {
+                    if (Pathfinder.getInstance().isRunning()) {
+                        log("Pathfinding still in progress, extending timer");
+                        this.timer.schedule(5000); // Extend by 5 more seconds
+                    } else {
+                        logError("Pathfinding timeout - pathfinder stopped without completion");
+                        this.stop(NavError.TIME_FAIL);
+                        return;
+                    }
+                }
 
                 break;
             case END_VERIFY: {

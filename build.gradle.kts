@@ -16,7 +16,10 @@ val modName: String by project
 
 // Toolchains:
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
 }
 
 blossom {

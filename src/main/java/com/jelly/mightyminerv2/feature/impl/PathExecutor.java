@@ -11,6 +11,7 @@ import kotlin.Pair;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -230,6 +231,10 @@ public class PathExecutor {
             this.interpolYawDiff = yaw - AngleUtil.get360RotationYaw();
         }
 
+        // Disable StrafeUtil for realistic client-side movement
+        StrafeUtil.enabled = false;
+        
+        // Rotate player to face target direction
         if (yawDiff > 3 && !RotationHandler.getInstance().isEnabled()) {
             float rotYaw = yaw;
 
@@ -258,29 +263,35 @@ public class PathExecutor {
             );
         }
 
-        float ipYaw = yaw;
-        if (onGround && horizontalDistToTarget >= 8 && this.allowInterpolation && !this.interpolated) {
-            float time = 200f;
-            long timePassed = Math.min((long) time, System.currentTimeMillis() - this.nodeChangeTime);
-            ipYaw -= this.interpolYawDiff * (1 - (timePassed / time));
-            if (timePassed == time) {
-                this.interpolated = true;
-            }
+        // Calculate which WASD keys to press based on current player rotation (not target direction)
+        // This makes movement purely client-side and realistic
+        Vec3 targetVec = new Vec3(targetX + 0.5, mc.thePlayer.posY, targetZ + 0.5);
+        List<KeyBinding> neededKeys = KeyBindUtil.getNeededKeyPresses(mc.thePlayer.getPositionVector(), targetVec);
+        List<KeyBinding> keyBindings = new ArrayList<>(neededKeys);
+        
+        // Preserve attack/use item state
+        if (mc.gameSettings.keyBindUseItem.isKeyDown()) {
+            keyBindings.add(mc.gameSettings.keyBindUseItem);
         }
-
-        StrafeUtil.enabled = yawDiff > 3;
-        StrafeUtil.yaw = ipYaw;
-
+        if (mc.gameSettings.keyBindAttack.isKeyDown()) {
+            keyBindings.add(mc.gameSettings.keyBindAttack);
+        }
+        
+        // Check if we need to jump based on path analysis
         Vec3 pos = new Vec3(mc.thePlayer.posX, playerPos.getY() + 0.5, mc.thePlayer.posZ);
-        Vec3 vec4Rot = AngleUtil.getVectorForRotation(yaw);
+        Vec3 vec4Rot = AngleUtil.getVectorForRotation(mc.thePlayer.rotationYaw);
         boolean shouldJump = BlockUtil.canWalkBetween(this.curr.getCtx(), pos, pos.addVector(vec4Rot.xCoord, 1, vec4Rot.zCoord));
-        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindForward, true);
-        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSprint, this.allowSprint && yawDiff < 40 && !shouldJump);
+        
         if (shouldJump && onGround) {
-            mc.thePlayer.jump();
+            keyBindings.add(mc.gameSettings.keyBindJump);
             this.state = State.JUMPING;
         }
-        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindJump, shouldJump);
+        
+        // Apply all the calculated key presses
+        KeyBindUtil.holdThese(keyBindings.toArray(new KeyBinding[0]));
+        
+        // Handle sprinting - only sprint when moving relatively straight
+        KeyBindUtil.setKeyBindState(mc.gameSettings.keyBindSprint, this.allowSprint && yawDiff < 40 && !shouldJump);
 
         return playerPos.distanceSqToCenter(target.getX(), target.getY(), target.getZ()) < 100;
     }

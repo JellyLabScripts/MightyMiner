@@ -1,5 +1,7 @@
 # MightyMinerV2
 
+2026 Update: Unfortunately, all good things come to an end. The project is discontinued and will not be updated. Interested developers please contact my discord (ID: integrallll). The best (paid) alternative is Nebula Client.
+
 MightyMinerV2 is a cutting-edge mining macro designed specifically for Hypixel Skyblock. This powerful tool enhances your gameplay experience by automating various mining-related tasks, allowing you to focus on progressing through the game. With a host of advanced features and many more under development, MightyMinerV2 is your ultimate companion for efficient mining.
 
 ## Features

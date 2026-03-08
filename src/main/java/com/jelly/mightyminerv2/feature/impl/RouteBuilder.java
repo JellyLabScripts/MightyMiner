@@ -69,6 +69,11 @@ public class RouteBuilder extends AbstractFeature {
 
         if (MightyMinerConfig.routeBuilderRemoveKeybind.isActive()) {
             Route selectedRoute = RouteHandler.getInstance().getSelectedRoute();
+            
+            if (selectedRoute.isEmpty()) {
+                return;
+            }
+            
             RouteWaypoint closest = selectedRoute.getClosest(PlayerUtil.getBlockStandingOn()).get();
             int index = selectedRoute.indexOf(closest);
 

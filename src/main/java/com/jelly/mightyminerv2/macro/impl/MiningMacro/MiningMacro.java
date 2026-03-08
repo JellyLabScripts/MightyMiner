@@ -189,6 +189,9 @@ public class MiningMacro extends AbstractMacro {
             case 7:
                 blocksToMine = new MineableBlock[]{MineableBlock.COAL};
                 break;
+            case 8:
+                blocksToMine = new MineableBlock[]{MineableBlock.QUARTZ};
+                break;
             default:
                 blocksToMine = new MineableBlock[]{};
                 log("Invalid ore type selected");
